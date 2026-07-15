@@ -43,12 +43,12 @@ export function SidebarNav() {
             }`}
           >
             {active && (
-              <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-brand to-[#f0698a]" />
+              <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-brand to-[#a78bfa]" />
             )}
             <Icon
               size={17}
               strokeWidth={2.2}
-              className={active ? "text-brand" : "text-sidebar-muted transition-colors group-hover:text-zinc-300"}
+              className={active ? "text-[#a78bfa]" : "text-sidebar-muted transition-colors group-hover:text-zinc-300"}
             />
             {item.label}
           </Link>

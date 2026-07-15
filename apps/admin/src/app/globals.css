@@ -2,9 +2,9 @@
 
 :root {
   /* SOFTRAXA brand tokens — same family as the Flutter app's design system */
-  --brand: #e0284a;
-  --brand-deep: #c21e3e;
-  --brand-tint: #fdeef1;
+  --brand: #7c3aed;
+  --brand-deep: #6d28d9;
+  --brand-tint: #f3e8fd;
   --ink: #17223b;
   --canvas: #f3f5fa;
   --sidebar: #14162b;

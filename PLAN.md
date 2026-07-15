@@ -175,6 +175,8 @@ Source of truth for requirements: [prd.md](prd.md)
   - Dashboard: `PageHeader`, icon stat cards, staggered grid. Blue link/filter accents swept to brand crimson across all pages (`sed`, semantic status badges kept blue where they mean "trial/info").
   - **Verification:** `tsc --noEmit` clean. `next build`/visual click-through not run here (Windows-native binaries in node_modules can't run in the Linux sandbox) — owner should run `npm run dev` and eyeball each page, especially the sidebar active states and login at mobile width.
 
+- **Admin brand color corrected to violet (2026-07-15):** the redesign above initially used crimson `#E0284A` from this file's older design-system note, but `theme.dart`'s current `AppColors.primary` is violet `#7C3AED` (dark `#6D28D9`, soft `#F3E8FD`) — the app was evidently re-themed after that note was written. Admin tokens swapped to match (`--brand`/`--brand-deep`/`--brand-tint` in globals.css), plus every hardcoded crimson companion: gradient stops (`#f0698a`→`#a78bfa`, `#8d1c33`→`#4c1d95`), button/logo shadows and the login radial glow (rgba 224,40,74 → 124,58,237). Sidebar active icon uses `#a78bfa` instead of raw brand for contrast on the dark navy. Lesson: `theme.dart` is the source of truth for brand color, not this file's historical entries.
+
 ## Repository layout
 
 ```

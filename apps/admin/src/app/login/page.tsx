@@ -47,11 +47,11 @@ export default function LoginPage() {
           className="pointer-events-none absolute inset-0 opacity-60"
           style={{
             background:
-              "radial-gradient(600px 400px at 20% 15%, rgba(224,40,74,0.28), transparent 65%), radial-gradient(500px 380px at 85% 90%, rgba(91,108,255,0.18), transparent 65%)",
+              "radial-gradient(600px 400px at 20% 15%, rgba(124,58,237,0.32), transparent 65%), radial-gradient(500px 380px at 85% 90%, rgba(91,108,255,0.18), transparent 65%)",
           }}
         />
         <div className="relative flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#8d1c33] text-lg font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(224,40,74,0.7)]">
+          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
             S
           </span>
           <p className="text-lg font-extrabold tracking-tight text-white">SOFTRAXA</p>
@@ -74,7 +74,7 @@ export default function LoginPage() {
       <section className="flex flex-1 items-center justify-center bg-canvas p-6">
         <div className="animate-rise w-full max-w-sm">
           <div className="mb-8 lg:hidden">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#8d1c33] text-lg font-extrabold text-white">
+            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white">
               S
             </span>
           </div>

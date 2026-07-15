@@ -25,7 +25,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-canvas">
       <aside className="fixed inset-y-0 z-20 flex w-60 flex-col bg-sidebar">
         <div className="flex items-center gap-3 px-5 py-5">
-          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#8d1c33] text-base font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(224,40,74,0.7)]">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-base font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
             S
           </span>
           <div>

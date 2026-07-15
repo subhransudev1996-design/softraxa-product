@@ -30,7 +30,7 @@ export function StatCard({
   return (
     <Card>
       <CardBody className="relative overflow-hidden">
-        <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand via-[#f0698a] to-transparent opacity-70" />
+        <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand via-[#a78bfa] to-transparent opacity-70" />
         <div className="flex items-start justify-between gap-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{label}</p>
           {icon && (
@@ -65,7 +65,7 @@ export function Button({
 }) {
   const styles = {
     primary:
-      "bg-brand text-white shadow-[0_4px_14px_-4px_rgba(224,40,74,0.5)] hover:bg-brand-deep focus-visible:ring-brand",
+      "bg-brand text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.5)] hover:bg-brand-deep focus-visible:ring-brand",
     outline:
       "border border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50 focus-visible:ring-zinc-400",
     danger:
