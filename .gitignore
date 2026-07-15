@@ -1,0 +1,31 @@
+# Env / secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Node / Next.js (apps/admin)
+node_modules/
+.next/
+out/
+next-env.d.ts
+
+# Flutter / Dart (apps/mobile)
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+android/.gradle/
+android/local.properties
+android/key.properties
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+
+# OS
+.DS_Store
+Thumbs.db

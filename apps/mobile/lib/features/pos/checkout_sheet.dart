@@ -1,0 +1,906 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../core/formatters.dart';
+import '../../core/supabase_providers.dart';
+import '../../core/widgets.dart';
+import '../customers/customer_picker.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../invoices/invoice_providers.dart';
+import '../offline/offline_service.dart';
+import '../pos/pos_providers.dart';
+import '../stock/piece_providers.dart';
+import 'billing_service.dart';
+import 'cart.dart';
+import '../../core/theme.dart';
+
+Future<void> showCheckoutSheet(BuildContext context) {
+  return showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: const _CheckoutSheet(),
+    ),
+  );
+}
+
+class _CheckoutSheet extends ConsumerStatefulWidget {
+  const _CheckoutSheet();
+
+  @override
+  ConsumerState<_CheckoutSheet> createState() => _CheckoutSheetState();
+}
+
+class _SplitEntry {
+  _SplitEntry({this.mode = 'cash', String amount = ''})
+    : amount = TextEditingController(text: amount);
+  String mode;
+  final TextEditingController amount;
+}
+
+class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
+  final _discount = TextEditingController();
+  bool _discountIsPercent = false;
+  final _paid = TextEditingController();
+  final _notes = TextEditingController();
+  String _paymentMode = 'cash';
+  late String _docType; // gst | non_gst | cash_memo | estimate
+  bool _busy = false;
+  bool _paidTouched = false;
+  bool _splitMode = false;
+  final List<_SplitEntry> _splits = [];
+
+  @override
+  void initState() {
+    super.initState();
+    final editing = ref.read(editingInvoiceProvider);
+    if (editing != null) {
+      _docType = editing.invoiceType;
+    } else {
+      final appContext = ref.read(appContextProvider).value;
+      _docType = (appContext?.gstEnabled ?? true) ? 'gst' : 'non_gst';
+    }
+    final cart = ref.read(cartProvider);
+    _discount.text = cart.billDiscount == 0
+        ? ''
+        : cart.billDiscount.toStringAsFixed(2);
+    _discountIsPercent = cart.billDiscountIsPercent;
+  }
+
+  List<(String mode, double amount)> get _splitEntries => [
+    for (final s in _splits) (s.mode, double.tryParse(s.amount.text) ?? 0),
+  ];
+
+  /// Amount actually collected so far, whichever payment UI is active. A
+  /// split row marked "Credit (Due)" isn't real money received — it's the
+  /// same as leaving that portion uncovered — so it's excluded here and
+  /// simply flows into `due` (cart.total - paid) like any other shortfall.
+  double _computePaid(CartState cart) {
+    if (_splitMode) {
+      final collected = resolveSplitPayments(_splitEntries).collected;
+      return collected > cart.total ? cart.total : collected;
+    }
+    return _paidTouched
+        ? (double.tryParse(_paid.text) ?? 0)
+        : (_paymentMode == 'credit' ? 0.0 : cart.total);
+  }
+
+  void _toggleSplit(double total) {
+    setState(() {
+      if (_splitMode) {
+        _splitMode = false;
+        _splits.clear();
+      } else {
+        _splitMode = true;
+        _splits
+          ..clear()
+          ..add(
+            _SplitEntry(
+              mode: _paymentMode == 'credit' ? 'cash' : _paymentMode,
+              amount: total.toStringAsFixed(2),
+            ),
+          );
+      }
+    });
+  }
+
+  void _addSplit(double total) {
+    final collected = _splits.fold<double>(
+      0,
+      (s, e) => s + (double.tryParse(e.amount.text) ?? 0),
+    );
+    final remaining = (total - collected).clamp(0, double.infinity);
+    setState(
+      () => _splits.add(
+        _SplitEntry(
+          mode: 'upi',
+          amount: remaining > 0 ? remaining.toStringAsFixed(2) : '',
+        ),
+      ),
+    );
+  }
+
+  Future<void> _createBill() async {
+    final cart = ref.read(cartProvider);
+    if (cart.lines.isEmpty) return;
+
+    final missingSerial = cart.lines.any(
+      (l) => l.trackSerial && l.serialNo.trim().isEmpty,
+    );
+    if (missingSerial && _docType != 'estimate') {
+      final proceed = await confirmDialog(
+        context,
+        title: 'Missing IMEI/serial',
+        message: 'Some items have no IMEI/serial number. Continue anyway?',
+        confirmText: 'Continue',
+      );
+      if (!proceed) return;
+    }
+    if (!mounted) return;
+
+    List<Map<String, dynamic>>? splitPayments;
+    String paymentModeToSend = _paymentMode;
+    if (_splitMode && _docType != 'estimate') {
+      final hasAnyEntry = _splitEntries.any((e) => e.$2 > 0);
+      if (!hasAnyEntry) {
+        showError(context, 'Enter an amount for at least one payment method');
+        return;
+      }
+      // Credit rows aren't real payments — they're excluded from what's
+      // sent as `payments` (invoice_payments only records money actually
+      // received); the amount still counts toward the bill via `due`
+      // (cart.total - paid), same as an ordinary uncovered shortfall.
+      final resolved = resolveSplitPayments(_splitEntries);
+      splitPayments = [
+        for (final e in resolved.realPayments) {'mode': e.$1, 'amount': e.$2},
+      ];
+      paymentModeToSend = resolved.mode;
+    }
+    final paid = _computePaid(cart);
+    if (!mounted) return;
+    if (paid < cart.total && cart.customer == null && _docType != 'estimate') {
+      showError(
+        context,
+        'Select a customer for credit/partial bills so the due can be tracked.',
+      );
+      return;
+    }
+
+    final newDue = (cart.total - paid).clamp(0, double.infinity);
+    final creditLimit = cart.customer?['credit_limit'] == null
+        ? null
+        : toDouble(cart.customer!['credit_limit']);
+    if (creditLimit != null && _docType != 'estimate') {
+      final projectedDue = toDouble(cart.customer?['due_amount']) + newDue;
+      if (projectedDue > creditLimit) {
+        final proceed = await confirmDialog(
+          context,
+          title: 'Credit limit exceeded',
+          message:
+              '${cart.customer?['name']}\'s due would become ${money(projectedDue)}, '
+              'above their credit limit of ${money(creditLimit)}. Continue anyway?',
+          confirmText: 'Continue',
+        );
+        if (!proceed) return;
+      }
+    }
+
+    setState(() => _busy = true);
+    try {
+      final result = await ref
+          .read(billingServiceProvider)
+          .createBill(
+            cart: cart,
+            invoiceType: _docType,
+            paidAmount: _docType == 'estimate' ? 0 : paid,
+            paymentMode: paymentModeToSend,
+            payments: _docType == 'estimate' ? null : splitPayments,
+            notes: _notes.text.trim(),
+          );
+      // Shorten the cut pieces these lines came from (rod/sheet stores) —
+      // strictly best-effort auxiliary bookkeeping: a failure here must
+      // never affect the bill, and offline bills skip it (no connection).
+      if (!result.offline && _docType != 'estimate') {
+        final cuts = [
+          for (final l in cart.lines)
+            if (l.pieceId != null) (l.pieceId!, l.qty),
+        ];
+        if (cuts.isNotEmpty) {
+          try {
+            await applyPieceCuts(ref.read(supabaseProvider), cuts);
+          } catch (_) {
+            /* pieces are an aid, never a blocker */
+          }
+        }
+      }
+      ref.read(cartProvider.notifier).clear();
+      ref.invalidate(posProductsProvider);
+      ref.invalidate(dashboardStatsProvider);
+      ref.invalidate(recentInvoicesProvider);
+      ref.invalidate(pendingBillCountProvider);
+      if (!mounted) return;
+      Navigator.pop(context); // close sheet
+
+      if (result.offline) {
+        showSuccess(
+          context,
+          'Saved offline as ${result.invoiceNo}. It will sync automatically.',
+        );
+      } else {
+        showSuccess(context, 'Bill ${result.invoiceNo} created');
+        context.push('/invoices/${result.invoiceId}?new=1');
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Saves edits to an existing invoice via `update_invoice` — payments
+  /// already recorded are left untouched, only items/discount/notes change.
+  Future<void> _saveEdit(EditingInvoice editing) async {
+    final cart = ref.read(cartProvider);
+    if (cart.lines.isEmpty) {
+      showError(context, 'Add at least one item to the bill');
+      return;
+    }
+    final missingSerial = cart.lines.any(
+      (l) => l.trackSerial && l.serialNo.trim().isEmpty,
+    );
+    if (missingSerial) {
+      final proceed = await confirmDialog(
+        context,
+        title: 'Missing IMEI/serial',
+        message: 'Some items have no IMEI/serial number. Continue anyway?',
+        confirmText: 'Continue',
+      );
+      if (!proceed) return;
+    }
+    if (!mounted) return;
+
+    setState(() => _busy = true);
+    try {
+      final result = await ref
+          .read(billingServiceProvider)
+          .updateBill(
+            invoiceId: editing.id,
+            cart: cart,
+            invoiceType: editing.invoiceType,
+            notes: _notes.text.trim(),
+          );
+      ref.read(cartProvider.notifier).clear();
+      ref.read(editingInvoiceProvider.notifier).set(null);
+      ref.invalidate(posProductsProvider);
+      ref.invalidate(invoiceDetailProvider(editing.id));
+      ref.invalidate(invoicesProvider);
+      ref.invalidate(dashboardStatsProvider);
+      ref.invalidate(recentInvoicesProvider);
+      if (!mounted) return;
+      showSuccess(context, 'Bill ${result.invoiceNo} updated');
+      Navigator.pop(context); // close sheet
+      if (context.mounted) context.pop(); // back to invoice detail
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = ref.watch(cartProvider);
+    final editing = ref.watch(editingInvoiceProvider);
+    final appContext = ref.watch(appContextProvider).value;
+    final paid = _computePaid(cart);
+    final due = (cart.total - paid).clamp(0, double.infinity);
+
+    return DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.85,
+      builder: (ctx, scrollController) => ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.all(16),
+        children: [
+          Text(
+            editing == null ? 'Checkout' : 'Save bill changes',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+          const SizedBox(height: 12),
+          // ---- document type ----
+          if (editing != null)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.indigo.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.edit_note,
+                    size: 18,
+                    color: AppColors.indigo,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'Editing ${editing.invoiceNo} — ${editing.invoiceType.toUpperCase()}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.indigo,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          else ...[
+            SegmentedButton<String>(
+              segments: [
+                if (appContext?.gstEnabled ?? true)
+                  const ButtonSegment(value: 'gst', label: Text('GST')),
+                const ButtonSegment(value: 'non_gst', label: Text('Non-GST')),
+                const ButtonSegment(
+                  value: 'cash_memo',
+                  label: Text('Cash memo'),
+                ),
+                const ButtonSegment(value: 'estimate', label: Text('Estimate')),
+              ],
+              selected: {_docType},
+              onSelectionChanged: (s) => setState(() => _docType = s.first),
+            ),
+            if (_docType == 'estimate')
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Estimates do not deduct stock or record payment.',
+                  style: TextStyle(fontSize: 12, color: AppColors.orange),
+                ),
+              ),
+          ],
+          const SectionLabel('Customer'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                children: [
+                  InitialsAvatar(
+                    (cart.customer?['name'] as String?)?.isNotEmpty == true
+                        ? cart.customer!['name'] as String
+                        : 'Walk-in Customer',
+                    radius: 20,
+                    icon: cart.customer == null ? Icons.person_outline : null,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          (cart.customer?['name'] as String?)?.isNotEmpty ==
+                                  true
+                              ? cart.customer!['name'] as String
+                              : 'Walk-in customer',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
+                        if (cart.customer != null) ...[
+                          if ((cart.customer!['phone'] as String? ?? '')
+                              .isNotEmpty)
+                            Text(
+                              cart.customer!['phone'] as String,
+                              style: const TextStyle(
+                                fontSize: 12.5,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                          if ((cart.customer!['address'] as String? ?? '')
+                              .isNotEmpty)
+                            Text(
+                              cart.customer!['address'] as String,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                          Builder(
+                            builder: (context) {
+                              final existingDue = toDouble(
+                                cart.customer?['due_amount'],
+                              );
+                              final creditLimit =
+                                  cart.customer?['credit_limit'] == null
+                                  ? null
+                                  : toDouble(cart.customer!['credit_limit']);
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Wrap(
+                                  spacing: 10,
+                                  runSpacing: 2,
+                                  children: [
+                                    Text(
+                                      'Current due: ${money(existingDue)}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: existingDue > 0
+                                            ? AppColors.red
+                                            : AppColors.green,
+                                      ),
+                                    ),
+                                    if (creditLimit != null)
+                                      Text(
+                                        'Credit limit: ${money(creditLimit)}',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.inkSoft,
+                                        ),
+                                      ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+                        ] else
+                          const Text(
+                            'No customer selected',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: AppColors.inkSoft,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Editing an existing bill never changes who it was
+                  // billed to (update_invoice doesn't touch customer_id).
+                  if (editing == null)
+                    Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () async {
+                            final picked = await showCustomerPicker(context);
+                            if (picked != null) {
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .setCustomer(picked);
+                            }
+                          },
+                          child: Text(
+                            cart.customer == null ? 'Select' : 'Change',
+                          ),
+                        ),
+                        if (cart.customer != null)
+                          TextButton(
+                            onPressed: () => ref
+                                .read(cartProvider.notifier)
+                                .setCustomer(null),
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.inkSoft,
+                            ),
+                            child: const Text('Remove'),
+                          ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          const SectionLabel('Bill summary'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                children: [
+                  _row('Items (${cart.itemCount})', money(cart.itemsGross)),
+                  if (_docType == 'gst' && cart.taxTotal > 0)
+                    _row('Included GST', money(cart.taxTotal), dim: true),
+                  const SizedBox(height: 4),
+                  const Text('Bill discount', style: TextStyle(fontSize: 13)),
+                  const SizedBox(height: 4),
+                  AmountOrPercentField(
+                    controller: _discount,
+                    isPercent: _discountIsPercent,
+                    onModeChanged: (v) => setState(() {
+                      _discountIsPercent = v;
+                      ref.read(cartProvider.notifier).setBillDiscountMode(v);
+                    }),
+                    onChanged: (v) => ref
+                        .read(cartProvider.notifier)
+                        .setBillDiscount(double.tryParse(v) ?? 0),
+                  ),
+                  if (cart.billDiscount > 0)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Align(
+                        alignment: Alignment.centerRight,
+                        child: Text(
+                          '− ${money(cart.billDiscountAmount)}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.inkSoft,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const Divider(height: 20),
+                  _row('Round off', money(cart.roundOff), dim: true),
+                  _row('Total', money(cart.total), bold: true),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          _ProfitBanner(profit: cart.estimatedProfit),
+          if (editing == null && _docType != 'estimate') ...[
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const SectionLabel('Payment'),
+                TextButton.icon(
+                  onPressed: () => _toggleSplit(cart.total),
+                  icon: Icon(
+                    _splitMode ? Icons.close : Icons.call_split,
+                    size: 16,
+                  ),
+                  label: Text(_splitMode ? 'Single method' : 'Split payment'),
+                ),
+              ],
+            ),
+            if (!_splitMode) ...[
+              Wrap(
+                spacing: 8,
+                children: [
+                  for (final mode in const [
+                    ('cash', 'Cash', Icons.payments_outlined),
+                    ('upi', 'UPI', Icons.qr_code),
+                    ('card', 'Card', Icons.credit_card),
+                    ('credit', 'Credit (Due)', Icons.schedule),
+                  ])
+                    ChoiceChip(
+                      avatar: Icon(mode.$3, size: 16),
+                      label: Text(mode.$2),
+                      selected: _paymentMode == mode.$1,
+                      onSelected: (_) => setState(() {
+                        _paymentMode = mode.$1;
+                        _paidTouched = false;
+                        _paid.text = mode.$1 == 'credit'
+                            ? '0'
+                            : cart.total.toStringAsFixed(2);
+                      }),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _paid,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'Paid amount ₹',
+                        hintText: cart.total.toStringAsFixed(2),
+                      ),
+                      onChanged: (_) => setState(() => _paidTouched = true),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Due',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.inkSoft,
+                          ),
+                        ),
+                        Text(
+                          money(due),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: due > 0 ? AppColors.red : AppColors.green,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ] else ...[
+              for (var i = 0; i < _splits.length; i++)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: DropdownButtonFormField<String>(
+                          initialValue: _splits[i].mode,
+                          decoration: const InputDecoration(labelText: 'Mode'),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'cash',
+                              child: Text('Cash'),
+                            ),
+                            DropdownMenuItem(value: 'upi', child: Text('UPI')),
+                            DropdownMenuItem(
+                              value: 'card',
+                              child: Text('Card'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'other',
+                              child: Text('Bank/Other'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'credit',
+                              child: Text('Credit (Due)'),
+                            ),
+                          ],
+                          onChanged: (v) =>
+                              setState(() => _splits[i].mode = v ?? 'cash'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        flex: 5,
+                        child: TextField(
+                          controller: _splits[i].amount,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          textAlign: TextAlign.right,
+                          decoration: const InputDecoration(
+                            labelText: 'Amount',
+                            prefixText: '₹ ',
+                          ),
+                          onChanged: (_) => setState(() {}),
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.remove_circle_outline,
+                          color: AppColors.red,
+                        ),
+                        onPressed: _splits.length > 1
+                            ? () => setState(() => _splits.removeAt(i))
+                            : null,
+                      ),
+                    ],
+                  ),
+                ),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: TextButton.icon(
+                  onPressed: () => _addSplit(cart.total),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Add payment method'),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Collected',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
+                      Text(
+                        money(paid),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        'Due',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
+                      Text(
+                        money(due),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: due > 0 ? AppColors.red : AppColors.green,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+            if (due > 0 && cart.customer == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text(
+                  'Select a customer on the bill to track this due.',
+                  style: TextStyle(fontSize: 12, color: AppColors.red),
+                ),
+              ),
+            if (due > 0 && cart.customer?['credit_limit'] != null)
+              Builder(
+                builder: (context) {
+                  final creditLimit = toDouble(cart.customer!['credit_limit']);
+                  final projectedDue =
+                      toDouble(cart.customer?['due_amount']) + due;
+                  if (projectedDue <= creditLimit) {
+                    return const SizedBox.shrink();
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.warning_amber,
+                          size: 16,
+                          color: AppColors.orange,
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'This bill exceeds the credit limit of ${money(creditLimit)} '
+                            '(due would be ${money(projectedDue)}).',
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: AppColors.orange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+          ] else if (editing != null) ...[
+            const SectionLabel('Payment'),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  children: [
+                    _row('Already paid', money(editing.paidAmount)),
+                    _row('New bill total', money(cart.total), bold: true),
+                    _row(
+                      'Due after changes',
+                      money(cart.total - editing.paidAmount),
+                      bold: true,
+                      color: (cart.total - editing.paidAmount) > 0
+                          ? AppColors.red
+                          : AppColors.green,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(top: 6),
+              child: Text(
+                'Payments already recorded on this bill are unaffected — only the items and total change.',
+                style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          TextField(
+            controller: _notes,
+            decoration: const InputDecoration(labelText: 'Note (optional)'),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: _busy
+                ? null
+                : editing != null
+                ? () => _saveEdit(editing)
+                : _createBill,
+            icon: _busy
+                ? const SizedBox(
+                    height: 18,
+                    width: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.check),
+            label: Text(
+              editing != null
+                  ? 'Save changes • ${money(cart.total)}'
+                  : _docType == 'estimate'
+                  ? 'Save estimate'
+                  : 'Create bill • ${money(cart.total)}',
+            ),
+          ),
+          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _row(
+    String label,
+    String value, {
+    bool bold = false,
+    bool dim = false,
+    Color? color,
+  }) {
+    final style = TextStyle(
+      fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+      fontSize: bold ? 16 : 14,
+      color: color ?? (dim ? AppColors.inkSoft : null),
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 3),
+      child: Row(
+        children: [
+          Expanded(child: Text(label, style: style)),
+          Text(value, style: style),
+        ],
+      ),
+    );
+  }
+}
+
+/// Owner-only estimated profit — after GST and every discount, minus cost of
+/// goods. Shown solely in this checkout sheet, never on a printed
+/// receipt/invoice PDF, since customers shouldn't see the shop's margin.
+class _ProfitBanner extends StatelessWidget {
+  const _ProfitBanner({required this.profit});
+
+  final double profit;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = profit >= 0 ? AppColors.green : AppColors.red;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            profit >= 0 ? Icons.trending_up : Icons.trending_down,
+            size: 18,
+            color: color,
+          ),
+          const SizedBox(width: 8),
+          const Expanded(
+            child: Text(
+              'Your profit (not shown to customer)',
+              style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+            ),
+          ),
+          Text(
+            money(profit),
+            style: TextStyle(fontWeight: FontWeight.bold, color: color),
+          ),
+        ],
+      ),
+    );
+  }
+}
