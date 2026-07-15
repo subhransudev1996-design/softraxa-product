@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardBody, Spinner, StatCard } from "@/components/ui";
 import { inr } from "@/lib/format";
@@ -17,16 +18,44 @@ type Dashboard = {
   open_tickets: number;
 };
 
+type LeadStats = {
+  open: number;
+  overdue: number;
+  convertedThisMonth: number;
+  convRate: number | null;
+};
+
 export default function AdminDashboardPage() {
   const [data, setData] = useState<Dashboard | null>(null);
+  const [leads, setLeads] = useState<LeadStats | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    createClient()
+    const supabase = createClient();
+    supabase
       .rpc("get_admin_dashboard")
       .then(({ data, error }) => {
         if (error) setError(error.message);
         else setData(data as Dashboard);
+      });
+    // Lead/pipeline stats (table may not exist until migration 0026 is run —
+    // in that case the query errors and the card simply doesn't render).
+    supabase
+      .from("leads")
+      .select("status, follow_up_date, converted_at")
+      .then(({ data: rows }) => {
+        if (!rows) return;
+        const today = new Date().toISOString().slice(0, 10);
+        const monthStart = today.slice(0, 8) + "01";
+        const open = rows.filter((r) => ["new", "contacted", "demo"].includes(r.status));
+        const converted = rows.filter((r) => r.status === "converted");
+        const closed = converted.length + rows.filter((r) => r.status === "lost").length;
+        setLeads({
+          open: open.length,
+          overdue: open.filter((r) => r.follow_up_date && r.follow_up_date < today).length,
+          convertedThisMonth: converted.filter((r) => (r.converted_at ?? "").slice(0, 10) >= monthStart).length,
+          convRate: closed ? Math.round((converted.length / closed) * 100) : null,
+        });
       });
   }, []);
 
@@ -45,6 +74,24 @@ export default function AdminDashboardPage() {
         <StatCard label="New clients this month" value={data.new_clients_this_month} />
         <StatCard label="Open support tickets" value={data.open_tickets} />
       </div>
+      {leads && (
+        <Card>
+          <CardBody>
+            <div className="mb-3 flex items-center justify-between">
+              <h2 className="text-sm font-semibold text-zinc-700">Sales pipeline</h2>
+              <Link href="/leads" className="text-sm font-medium text-blue-700 hover:underline">
+                Manage leads →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <StatCard label="Open leads" value={leads.open} />
+              <StatCard label="Follow-ups overdue" value={leads.overdue} />
+              <StatCard label="Converted this month" value={leads.convertedThisMonth} />
+              <StatCard label="Conversion rate" value={leads.convRate === null ? "—" : `${leads.convRate}%`} />
+            </div>
+          </CardBody>
+        </Card>
+      )}
       <Card>
         <CardBody>
           <h2 className="mb-3 text-sm font-semibold text-zinc-700">Clients by plan</h2>

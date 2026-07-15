@@ -10,6 +10,7 @@ export default function NewClientPage() {
   const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [leadId, setLeadId] = useState<string | null>(null);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -32,6 +33,22 @@ export default function NewClientPage() {
       .eq("is_active", true)
       .order("name")
       .then(({ data }) => setPlans(data ?? []));
+
+    // Prefill when arriving from a lead's "Convert to client" button.
+    // (window.location instead of useSearchParams — avoids the Suspense
+    // boundary Next.js requires around useSearchParams in client pages.)
+    const q = new URLSearchParams(window.location.search);
+    if (q.get("leadId")) {
+      setLeadId(q.get("leadId"));
+      setForm((f) => ({
+        ...f,
+        businessName: q.get("businessName") ?? f.businessName,
+        ownerName: q.get("ownerName") ?? f.ownerName,
+        phone: q.get("phone") ?? f.phone,
+        type: q.get("type") || f.type,
+        planId: q.get("planId") ?? f.planId,
+      }));
+    }
   }, []);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
@@ -66,12 +83,33 @@ export default function NewClientPage() {
       setBusy(false);
       return;
     }
+    // Came from a lead → mark it converted and link it to the new client.
+    if (leadId) {
+      const supabase = createClient();
+      await supabase.from("leads").update({
+        status: "converted",
+        converted_business_id: json.businessId,
+        converted_at: new Date().toISOString(),
+      }).eq("id", leadId);
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from("lead_activities").insert({
+        lead_id: leadId,
+        activity_type: "status_change",
+        note: `Converted to client "${form.businessName}"`,
+        created_by: user?.id ?? null,
+      });
+    }
     router.push(`/clients/${json.businessId}`);
   }
 
   return (
     <div className="max-w-2xl space-y-6">
       <h1 className="text-2xl font-bold text-zinc-900">Create client account</h1>
+      {leadId && (
+        <p className="rounded-lg bg-blue-50 px-4 py-2 text-sm text-blue-800">
+          Converting a lead — the lead will be marked as converted automatically after this account is created.
+        </p>
+      )}
       <Card>
         <CardBody>
           <form onSubmit={submit} className="space-y-4">

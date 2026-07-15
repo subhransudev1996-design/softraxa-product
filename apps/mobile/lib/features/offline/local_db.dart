@@ -1,6 +1,9 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path_provider/path_provider.dart';
+
+import '../../core/platform.dart';
 
 part 'local_db.g.dart';
 
@@ -46,7 +49,23 @@ class PendingBills extends Table {
 
 @DriftDatabase(tables: [CachedProducts, CachedCustomers, PendingBills])
 class LocalDb extends _$LocalDb {
-  LocalDb() : super(driftDatabase(name: 'softraxa_local'));
+  // drift_flutter's default location is the OS documents directory. On
+  // Windows that folder is often redirected/synced (OneDrive) or otherwise
+  // restricted, which caused SqliteException(14): "unable to open database
+  // file" on every desktop launch — offline cache never worked there.
+  // Desktop builds now use the per-app support directory instead
+  // (guaranteed writable, not cloud-synced). Mobile keeps the original
+  // documents-dir default so existing installs keep their cached data and
+  // any queued offline bills.
+  LocalDb()
+      : super(driftDatabase(
+          name: 'softraxa_local',
+          native: isDesktopPlatform
+              ? const DriftNativeOptions(
+                  databaseDirectory: getApplicationSupportDirectory,
+                )
+              : null,
+        ));
 
   @override
   int get schemaVersion => 1;
