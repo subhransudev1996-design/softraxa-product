@@ -52,7 +52,7 @@ export default function SupportPage() {
             {rows.map((t) => (
               <tr key={t.id} className="align-top hover:bg-zinc-50">
                 <td className="px-4 py-3">
-                  <Link href={`/clients/${t.businesses?.id}`} className="font-medium text-blue-700 hover:underline">
+                  <Link href={`/clients/${t.businesses?.id}`} className="font-medium text-brand hover:underline">
                     {t.businesses?.name ?? "—"}
                   </Link>
                 </td>

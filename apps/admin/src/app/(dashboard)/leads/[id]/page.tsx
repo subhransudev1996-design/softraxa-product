@@ -137,7 +137,7 @@ export default function LeadDetailPage() {
                 onClick={() => s !== lead.status && setStatus(s)}
                 className={`rounded-full px-4 py-1.5 text-sm font-medium capitalize transition ${
                   lead.status === s
-                    ? "bg-blue-700 text-white"
+                    ? "bg-brand text-white"
                     : "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
                 }`}
               >

@@ -68,7 +68,7 @@ export default function ClientsPage() {
                   </td>
                   <td className="px-4 py-3">{dateStr(sub?.expiry_date)}</td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/clients/${c.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+                    <Link href={`/clients/${c.id}`} className="text-sm font-medium text-brand hover:underline">
                       Manage
                     </Link>
                   </td>

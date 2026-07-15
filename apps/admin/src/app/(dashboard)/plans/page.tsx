@@ -114,7 +114,7 @@ export default function PlansPage() {
                 <Badge color={p.is_active ? "green" : "zinc"}>{p.is_active ? "active" : "hidden"}</Badge>
               </td>
               <td className="space-x-3 px-4 py-3 text-right">
-                <button className="text-sm font-medium text-blue-700 hover:underline" onClick={() => setEditing(p)}>Edit</button>
+                <button className="text-sm font-medium text-brand hover:underline" onClick={() => setEditing(p)}>Edit</button>
                 <button className="text-sm font-medium text-zinc-500 hover:underline" onClick={() => toggleActive(p)}>
                   {p.is_active ? "Hide" : "Show"}
                 </button>

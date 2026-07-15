@@ -111,9 +111,9 @@ export default function LeadsPage() {
           <div className="flex items-center gap-2">
             {funnel.map(([label, count], i) => (
               <div key={label} className="flex flex-1 items-center gap-2">
-                <div className="flex-1 rounded-lg bg-blue-50 px-3 py-2 text-center">
-                  <p className="text-lg font-bold text-blue-900">{count}</p>
-                  <p className="text-xs text-blue-700">{label}</p>
+                <div className="flex-1 rounded-xl bg-brand-tint px-3 py-2 text-center">
+                  <p className="text-lg font-extrabold tabular-nums text-ink">{count}</p>
+                  <p className="text-xs font-semibold text-brand">{label}</p>
                 </div>
                 {i < funnel.length - 1 && <span className="text-zinc-400">→</span>}
               </div>
@@ -201,7 +201,7 @@ export default function LeadsPage() {
             key={s}
             onClick={() => setStatusFilter(s)}
             className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition ${
-              statusFilter === s ? "bg-blue-700 text-white" : "bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-200"
+              statusFilter === s ? "bg-brand text-white" : "bg-white text-zinc-600 hover:bg-zinc-50 border border-zinc-200"
             }`}
           >
             {s}
@@ -234,7 +234,7 @@ export default function LeadsPage() {
                   <Badge color={leadStatusBadge(l.status)}>{l.status}</Badge>
                 </td>
                 <td className="px-4 py-3 text-right">
-                  <Link href={`/leads/${l.id}`} className="text-sm font-medium text-blue-700 hover:underline">
+                  <Link href={`/leads/${l.id}`} className="text-sm font-medium text-brand hover:underline">
                     Manage
                   </Link>
                 </td>

@@ -34,7 +34,7 @@ export default function PaymentsPage() {
             <tr key={p.id} className="hover:bg-zinc-50">
               <td className="px-4 py-3">{dateStr(p.payment_date)}</td>
               <td className="px-4 py-3">
-                <Link href={`/clients/${p.businesses?.id}`} className="font-medium text-blue-700 hover:underline">
+                <Link href={`/clients/${p.businesses?.id}`} className="font-medium text-brand hover:underline">
                   {p.businesses?.name ?? "—"}
                 </Link>
               </td>

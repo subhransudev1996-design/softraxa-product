@@ -1,17 +1,7 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { LogoutButton } from "./logout-button";
-
-const nav = [
-  { href: "/", label: "Dashboard" },
-  { href: "/clients", label: "Clients" },
-  { href: "/leads", label: "Leads" },
-  { href: "/plans", label: "Plans" },
-  { href: "/payments", label: "Payments" },
-  { href: "/support", label: "Support" },
-  { href: "/audit", label: "Audit logs" },
-];
+import { SidebarNav } from "./nav";
 
 export default async function DashboardLayout({
   children,
@@ -32,29 +22,37 @@ export default async function DashboardLayout({
   if (profile?.role !== "admin") redirect("/login");
 
   return (
-    <div className="flex min-h-screen bg-zinc-100">
-      <aside className="fixed inset-y-0 flex w-56 flex-col border-r border-zinc-200 bg-white">
-        <div className="border-b border-zinc-200 px-5 py-4">
-          <p className="text-base font-bold text-zinc-900">SOFTRAXA</p>
-          <p className="text-xs text-zinc-500">Admin panel</p>
+    <div className="flex min-h-screen bg-canvas">
+      <aside className="fixed inset-y-0 z-20 flex w-60 flex-col bg-sidebar">
+        <div className="flex items-center gap-3 px-5 py-5">
+          <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#8d1c33] text-base font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(224,40,74,0.7)]">
+            S
+          </span>
+          <div>
+            <p className="text-[15px] font-extrabold leading-5 tracking-tight text-white">
+              SOFTRAXA
+            </p>
+            <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-sidebar-muted">
+              Admin panel
+            </p>
+          </div>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="block rounded-lg px-3 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="border-t border-zinc-200 p-3">
-          <p className="truncate px-3 pb-2 text-xs text-zinc-500">{profile?.email}</p>
+        <div className="mx-4 h-px bg-white/[0.06]" />
+        <SidebarNav />
+        <div className="mx-4 h-px bg-white/[0.06]" />
+        <div className="p-3">
+          <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/[0.08] text-xs font-bold uppercase text-zinc-300">
+              {(profile?.full_name || profile?.email || "A").slice(0, 1)}
+            </span>
+            <p className="truncate text-xs font-medium text-sidebar-muted">{profile?.email}</p>
+          </div>
           <LogoutButton />
         </div>
       </aside>
-      <main className="ml-56 flex-1 p-8">{children}</main>
+      <main className="ml-60 flex-1 p-8">
+        <div className="animate-rise mx-auto max-w-6xl">{children}</div>
+      </main>
     </div>
   );
 }

@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Card, CardBody, Spinner, StatCard } from "@/components/ui";
+import { IndianRupee, LifeBuoy, Package, Sparkles, Store, Target, UserPlus, Users } from "lucide-react";
+import { Card, CardBody, PageHeader, Spinner, StatCard } from "@/components/ui";
 import { inr } from "@/lib/format";
 
 type Dashboard = {
@@ -64,27 +65,27 @@ export default function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-zinc-900">Dashboard</h1>
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Total clients" value={data.total_clients} />
-        <StatCard label="Active" value={data.active_clients} />
-        <StatCard label="Trial" value={data.trial_clients} />
-        <StatCard label="Expired" value={data.expired_clients} hint={`${data.suspended_clients} suspended`} />
-        <StatCard label="Revenue this month" value={inr(data.monthly_revenue)} />
-        <StatCard label="New clients this month" value={data.new_clients_this_month} />
-        <StatCard label="Open support tickets" value={data.open_tickets} />
+      <PageHeader title="Dashboard" subtitle="Business overview at a glance" />
+      <div className="stagger-rise grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <StatCard label="Total clients" value={data.total_clients} icon={<Store size={16} />} />
+        <StatCard label="Active" value={data.active_clients} icon={<Sparkles size={16} />} />
+        <StatCard label="Trial" value={data.trial_clients} icon={<Package size={16} />} />
+        <StatCard label="Expired" value={data.expired_clients} hint={`${data.suspended_clients} suspended`} icon={<Users size={16} />} />
+        <StatCard label="Revenue this month" value={inr(data.monthly_revenue)} icon={<IndianRupee size={16} />} />
+        <StatCard label="New clients this month" value={data.new_clients_this_month} icon={<UserPlus size={16} />} />
+        <StatCard label="Open support tickets" value={data.open_tickets} icon={<LifeBuoy size={16} />} />
       </div>
       {leads && (
         <Card>
           <CardBody>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-zinc-700">Sales pipeline</h2>
-              <Link href="/leads" className="text-sm font-medium text-blue-700 hover:underline">
+              <Link href="/leads" className="text-sm font-medium text-brand hover:underline">
                 Manage leads →
               </Link>
             </div>
             <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              <StatCard label="Open leads" value={leads.open} />
+              <StatCard label="Open leads" value={leads.open} icon={<Target size={16} />} />
               <StatCard label="Follow-ups overdue" value={leads.overdue} />
               <StatCard label="Converted this month" value={leads.convertedThisMonth} />
               <StatCard label="Conversion rate" value={leads.convRate === null ? "—" : `${leads.convRate}%`} />

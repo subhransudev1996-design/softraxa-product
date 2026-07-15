@@ -1,26 +1,90 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* SOFTRAXA brand tokens — same family as the Flutter app's design system */
+  --brand: #e0284a;
+  --brand-deep: #c21e3e;
+  --brand-tint: #fdeef1;
+  --ink: #17223b;
+  --canvas: #f3f5fa;
+  --sidebar: #14162b;
+  --sidebar-muted: #9a9fc0;
+  --teal: #0f9d8f;
+
+  --background: var(--canvas);
+  --foreground: var(--ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --color-brand: var(--brand);
+  --color-brand-deep: var(--brand-deep);
+  --color-brand-tint: var(--brand-tint);
+  --color-ink: var(--ink);
+  --color-canvas: var(--canvas);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --font-sans: var(--font-manrope);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- motion ---- */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-rise {
+  animation: rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* stagger direct children of a .stagger-rise container (first 8) */
+.stagger-rise > * {
+  animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.stagger-rise > *:nth-child(1) { animation-delay: 0.03s; }
+.stagger-rise > *:nth-child(2) { animation-delay: 0.08s; }
+.stagger-rise > *:nth-child(3) { animation-delay: 0.13s; }
+.stagger-rise > *:nth-child(4) { animation-delay: 0.18s; }
+.stagger-rise > *:nth-child(5) { animation-delay: 0.23s; }
+.stagger-rise > *:nth-child(6) { animation-delay: 0.28s; }
+.stagger-rise > *:nth-child(7) { animation-delay: 0.33s; }
+.stagger-rise > *:nth-child(8) { animation-delay: 0.38s; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-rise,
+  .stagger-rise > * {
+    animation: none;
+  }
+  * {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* subtle scrollbar to match the canvas */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #c9cfdd;
+  border-radius: 8px;
+  border: 2px solid var(--canvas);
+}
+::-webkit-scrollbar-track {
+  background: transparent;
 }
