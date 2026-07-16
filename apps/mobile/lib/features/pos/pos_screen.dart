@@ -533,8 +533,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         title: Text(
           editing == null ? 'New Bill' : 'Edit Bill — ${editing.invoiceNo}',
         ),
-        actions: const [GuideButton('pos')],
         actions: [
+          const GuideButton('pos'),
           if (!isOnline)
             const Padding(
               padding: EdgeInsets.only(right: 8),

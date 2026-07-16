@@ -199,8 +199,8 @@ class SaleReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: const Text('Sale returns'),
-        actions: const [GuideButton('sale_returns')],
         actions: [
+          const GuideButton('sale_returns'),
           IconButton(
             icon: const Icon(Icons.date_range),
             tooltip: 'Filter by date',
@@ -1210,8 +1210,8 @@ class PurchaseReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: const Text('Purchase returns'),
-        actions: const [GuideButton('purchase_returns')],
         actions: [
+          const GuideButton('purchase_returns'),
           IconButton(
             icon: const Icon(Icons.date_range),
             tooltip: 'Filter by date',
