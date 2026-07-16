@@ -5,6 +5,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/platform.dart';
+import 'core/desktop_titlebar.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 import 'core/theme_mode.dart';
@@ -23,7 +24,10 @@ Future<void> main() async {
       size: Size(1300, 820),
       minimumSize: Size(1040, 680),
       center: true,
-      title: 'SOFTRAXA Inventory',
+      title: 'SOFTRAXA Inventory', // taskbar / Alt-Tab label only
+      // Native caption bar is hidden — DesktopTitleBar (in MaterialApp's
+      // builder below) replaces it with in-app chrome.
+      titleBarStyle: TitleBarStyle.hidden,
     );
     windowManager.waitUntilReadyToShow(options, () async {
       await windowManager.show();
@@ -63,8 +67,18 @@ class _AppState extends ConsumerState<App> {
       // widget depends on them reactively — so a theme toggle must force
       // the whole tree to rebuild. Keying the subtree on the mode does
       // exactly that (route state lives in GoRouter and survives).
-      builder: (context, child) =>
-          KeyedSubtree(key: ValueKey(dark), child: child ?? const SizedBox()),
+      builder: (context, child) {
+        final content = child ?? const SizedBox();
+        return KeyedSubtree(
+          key: ValueKey(dark),
+          child: isDesktopPlatform
+              ? Column(children: [
+                  const DesktopTitleBar(),
+                  Expanded(child: content),
+                ])
+              : content,
+        );
+      },
     );
   }
 }
