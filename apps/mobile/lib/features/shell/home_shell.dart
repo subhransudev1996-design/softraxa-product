@@ -4,10 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
 import '../../core/platform.dart';
-import '../../core/theme_mode.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
-import '../../core/widgets.dart';
 
 /// App shell.
 ///
@@ -420,33 +418,6 @@ class AppSidebar extends ConsumerWidget {
               ),
             ],
           ),
-        ),
-        const Divider(height: 1, color: _sidebarDivider),
-        if (isDesktopPlatform)
-          _RailTile(
-            icon: ref.watch(darkModeProvider)
-                ? Icons.light_mode_outlined
-                : Icons.dark_mode_outlined,
-            label: ref.watch(darkModeProvider) ? 'Light mode' : 'Dark mode',
-            foregroundColor: _sidebarMuted,
-            selectedBackground: _sidebarActiveBg,
-            selectedForeground: Colors.white,
-            onTap: () => ref.read(darkModeProvider.notifier).toggle(),
-          ),
-        _RailTile(
-          icon: Icons.logout,
-          label: 'Logout',
-          color: const Color(0xFFF87171),
-          foregroundColor: _sidebarMuted,
-          selectedBackground: _sidebarActiveBg,
-          selectedForeground: Colors.white,
-          onTap: () async {
-            final ok = await confirmDialog(context,
-                title: 'Logout',
-                message: 'Are you sure you want to logout?',
-                confirmText: 'Logout');
-            if (ok) await ref.read(supabaseProvider).auth.signOut();
-          },
         ),
         const SizedBox(height: 8),
       ]),
