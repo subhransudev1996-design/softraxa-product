@@ -84,11 +84,16 @@ Page<void> _page(BuildContext context, GoRouterState state, Widget child) =>
         ? NoTransitionPage<void>(key: state.pageKey, child: child)
         : MaterialPage<void>(key: state.pageKey, child: child);
 
+/// Root navigator key — lets chrome that lives ABOVE the Navigator
+/// (the desktop title bar) open dialogs/sheets with a valid context.
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final routerProvider = Provider<GoRouter>((ref) {
   final notifier = _RouterNotifier(ref);
   ref.onDispose(notifier.dispose);
 
   return GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: notifier,
     redirect: (context, state) {
