@@ -209,10 +209,14 @@ final reportDataProvider = FutureProvider.autoDispose
           };
 
         case 'stock':
+          // Variant-aware, matching get_dashboard's stock_value formula:
+          // non-variant products at product cost; each variant at its own
+          // purchase_price, inheriting the product's when null.
           final rows = await client
               .from('products')
               .select(
-                'name, current_stock, purchase_price, selling_price, units(short_name)',
+                'name, current_stock, purchase_price, selling_price, has_variants, '
+                'units(short_name), product_variants(name, current_stock, purchase_price, is_active)',
               )
               .eq('is_active', true)
               .order('name')
@@ -221,19 +225,38 @@ final reportDataProvider = FutureProvider.autoDispose
           final table = <List<String>>[];
           final chart = <ChartPoint>[];
           for (final r in rows) {
-            final value =
-                toDouble(r['current_stock']) * toDouble(r['purchase_price']);
-            totalValue += value;
-            table.add([
-              r['name'] as String,
-              qtyUnit(
-                r['current_stock'] as num?,
-                (r['units'] as Map?)?['short_name'] as String?,
-              ),
-              money(r['purchase_price'] as num?),
-              money(value),
-            ]);
-            chart.add((r['name'] as String, value));
+            final unit = (r['units'] as Map?)?['short_name'] as String?;
+            final variants = [
+              for (final v
+                  in List<Map<String, dynamic>>.from(r['product_variants'] as List? ?? []))
+                if (v['is_active'] == true) v,
+            ];
+            if (r['has_variants'] == true && variants.isNotEmpty) {
+              for (final v in variants) {
+                final cost = v['purchase_price'] ?? r['purchase_price'];
+                final value = toDouble(v['current_stock']) * toDouble(cost);
+                totalValue += value;
+                final label = '${r['name']} — ${v['name']}';
+                table.add([
+                  label,
+                  qtyUnit(v['current_stock'] as num?, unit),
+                  money(cost as num?),
+                  money(value),
+                ]);
+                chart.add((label, value));
+              }
+            } else {
+              final value =
+                  toDouble(r['current_stock']) * toDouble(r['purchase_price']);
+              totalValue += value;
+              table.add([
+                r['name'] as String,
+                qtyUnit(r['current_stock'] as num?, unit),
+                money(r['purchase_price'] as num?),
+                money(value),
+              ]);
+              chart.add((r['name'] as String, value));
+            }
           }
           return {
             'summary': [
@@ -248,40 +271,62 @@ final reportDataProvider = FutureProvider.autoDispose
           };
 
         case 'low_stock':
+          // Variant-aware, matching get_dashboard's low_stock_count: for a
+          // variant the alert level is its own low_stock_qty, inheriting the
+          // product's when null; the parent row of a variant product is
+          // skipped (its stock is just the variants' aggregate).
           final rows = await client
               .from('products')
-              .select('name, current_stock, low_stock_qty, units(short_name)')
+              .select(
+                'name, current_stock, low_stock_qty, has_variants, units(short_name), '
+                'product_variants(name, current_stock, low_stock_qty, is_active)',
+              )
               .eq('is_active', true)
-              .gt('low_stock_qty', 0)
               .order('name')
               .limit(1000);
-          final low = [
-            for (final r in rows)
-              if (toDouble(r['current_stock']) <= toDouble(r['low_stock_qty']))
-                r,
-          ];
+          // (name, unit, stock, alert)
+          final low = <(String, String?, num?, num?)>[];
+          for (final r in rows) {
+            final unit = (r['units'] as Map?)?['short_name'] as String?;
+            final variants = [
+              for (final v
+                  in List<Map<String, dynamic>>.from(r['product_variants'] as List? ?? []))
+                if (v['is_active'] == true) v,
+            ];
+            if (r['has_variants'] == true && variants.isNotEmpty) {
+              for (final v in variants) {
+                final alert = v['low_stock_qty'] ?? r['low_stock_qty'];
+                if (toDouble(alert) > 0 &&
+                    toDouble(v['current_stock']) <= toDouble(alert)) {
+                  low.add((
+                    '${r['name']} — ${v['name']}',
+                    unit,
+                    v['current_stock'] as num?,
+                    alert as num?,
+                  ));
+                }
+              }
+            } else if (toDouble(r['low_stock_qty']) > 0 &&
+                toDouble(r['current_stock']) <= toDouble(r['low_stock_qty'])) {
+              low.add((
+                r['name'] as String,
+                unit,
+                r['current_stock'] as num?,
+                r['low_stock_qty'] as num?,
+              ));
+            }
+          }
           return {
             'summary': [('Products low/out', '${low.length}')],
             'table': {
               'headers': ['Product', 'Stock', 'Alert level'],
               'rows': [
                 for (final r in low)
-                  [
-                    r['name'] as String,
-                    qtyUnit(
-                      r['current_stock'] as num?,
-                      (r['units'] as Map?)?['short_name'] as String?,
-                    ),
-                    qty(r['low_stock_qty'] as num?),
-                  ],
+                  [r.$1, qtyUnit(r.$3, r.$2), qty(r.$4)],
               ],
             },
             'chart': <ChartPoint>[
-              for (final r in low)
-                (
-                  r['name'] as String,
-                  toDouble(r['low_stock_qty']) - toDouble(r['current_stock']),
-                ),
+              for (final r in low) (r.$1, toDouble(r.$4) - toDouble(r.$3)),
             ],
           };
 
