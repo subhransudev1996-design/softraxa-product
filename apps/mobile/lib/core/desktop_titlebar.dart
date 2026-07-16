@@ -104,18 +104,15 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
           ),
           _WinButton(
             icon: Icons.remove,
-            tooltip: 'Minimize',
             onTap: () => windowManager.minimize(),
           ),
           _WinButton(
             icon: _maximized ? Icons.filter_none : Icons.crop_square,
             iconSize: _maximized ? 13 : 16,
-            tooltip: _maximized ? 'Restore' : 'Maximize',
             onTap: _toggleMaximize,
           ),
           _WinButton(
             icon: Icons.close,
-            tooltip: 'Close',
             hoverColor: const Color(0xFFE81123),
             hoverForeground: Colors.white,
             onTap: () => windowManager.close(),
@@ -130,7 +127,6 @@ class _WinButton extends StatefulWidget {
   const _WinButton({
     required this.icon,
     required this.onTap,
-    required this.tooltip,
     this.iconSize = 16,
     this.hoverColor = const Color(0x14FFFFFF),
     this.hoverForeground,
@@ -138,7 +134,6 @@ class _WinButton extends StatefulWidget {
 
   final IconData icon;
   final VoidCallback onTap;
-  final String tooltip;
   final double iconSize;
   final Color hoverColor;
   final Color? hoverForeground;
@@ -152,23 +147,22 @@ class _WinButtonState extends State<_WinButton> {
 
   @override
   Widget build(BuildContext context) {
-    return Tooltip(
-      message: widget.tooltip,
-      waitDuration: const Duration(milliseconds: 600),
-      child: MouseRegion(
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          onTap: widget.onTap,
-          child: Container(
-            width: 46,
-            height: 40,
-            color: _hover ? widget.hoverColor : Colors.transparent,
-            child: Icon(
-              widget.icon,
-              size: widget.iconSize,
-              color: _hover ? (widget.hoverForeground ?? Colors.white) : _barFg,
-            ),
+    // No Tooltip here: this bar lives ABOVE the Navigator (mounted in
+    // MaterialApp.builder), so there is no Overlay ancestor — a Tooltip
+    // would throw "No Overlay widget found". Plain hover styling only.
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: GestureDetector(
+        onTap: widget.onTap,
+        child: Container(
+          width: 46,
+          height: 40,
+          color: _hover ? widget.hoverColor : Colors.transparent,
+          child: Icon(
+            widget.icon,
+            size: widget.iconSize,
+            color: _hover ? (widget.hoverForeground ?? Colors.white) : _barFg,
           ),
         ),
       ),
