@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -198,6 +199,7 @@ class SaleReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: const Text('Sale returns'),
+        actions: const [GuideButton('sale_returns')],
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),
@@ -1208,6 +1210,7 @@ class PurchaseReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         title: const Text('Purchase returns'),
+        actions: const [GuideButton('purchase_returns')],
         actions: [
           IconButton(
             icon: const Icon(Icons.date_range),

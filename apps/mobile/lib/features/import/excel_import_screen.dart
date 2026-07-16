@@ -1,4 +1,5 @@
 import 'dart:io';
+import '../../core/walkthrough.dart';
 
 import 'package:excel/excel.dart' hide Border;
 import 'package:file_picker/file_picker.dart';
@@ -414,7 +415,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Excel import')),
+      appBar: AppBar(title: const Text('Excel import'), actions: const [GuideButton('import')]),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
@@ -110,6 +111,18 @@ class MoreScreen extends ConsumerWidget {
               tile(Icons.sync_outlined, 'Pending offline bills', '/offline-bills',
                   color: AppColors.orange),
               const Divider(),
+              Card(
+                child: ListTile(
+                  leading: const IconChip(Icons.help_outline, color: AppColors.purple, size: 38),
+                  title: const Text('App walkthrough',
+                      style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                  subtitle: const Text('Replay the guided tour anytime',
+                      style: TextStyle(fontSize: 12)),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => showWalkthrough(context, 'home'),
+                ),
+              ),
+              const SizedBox(height: 10),
               tile(Icons.support_agent_outlined, 'Support', '/support',
                   color: AppColors.indigo),
               const Divider(),

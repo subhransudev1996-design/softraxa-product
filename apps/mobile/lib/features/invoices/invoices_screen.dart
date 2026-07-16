@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -42,6 +43,7 @@ class InvoicesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Invoices'),
         actions: [
+          const GuideButton('invoices'),
           IconButton(
             icon: const Icon(Icons.date_range),
             tooltip: 'Filter by date',

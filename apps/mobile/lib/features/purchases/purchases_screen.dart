@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -19,7 +20,7 @@ class PurchasesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Purchases')),
+      appBar: AppBar(title: const Text('Purchases'), actions: const [GuideButton('purchases')]),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => context.push('/purchases/new'),
         icon: const Icon(Icons.add),

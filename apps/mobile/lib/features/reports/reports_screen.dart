@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
@@ -90,7 +91,7 @@ class ReportsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Reports')),
+      appBar: AppBar(title: const Text('Reports'), actions: const [GuideButton('reports')]),
       body: !enabled
           ? const Center(child: Text('Reports are not enabled on your plan.'))
           : ListView.separated(

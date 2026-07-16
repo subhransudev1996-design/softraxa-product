@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -532,6 +533,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         title: Text(
           editing == null ? 'New Bill' : 'Edit Bill — ${editing.invoiceNo}',
         ),
+        actions: const [GuideButton('pos')],
         actions: [
           if (!isOnline)
             const Padding(

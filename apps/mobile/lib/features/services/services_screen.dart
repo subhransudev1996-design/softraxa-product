@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -153,7 +154,7 @@ class ServicesScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Service catalog')),
+      appBar: AppBar(title: const Text('Service catalog'), actions: const [GuideButton('services')]),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _addOrEdit(context, ref),
         icon: const Icon(Icons.add),

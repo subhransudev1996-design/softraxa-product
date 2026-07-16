@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/widgets.dart';
@@ -26,6 +27,7 @@ class OfflineBillsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Pending offline bills'),
         actions: [
+          const GuideButton('offline_bills'),
           IconButton(
             icon: const Icon(Icons.sync),
             tooltip: 'Sync now',

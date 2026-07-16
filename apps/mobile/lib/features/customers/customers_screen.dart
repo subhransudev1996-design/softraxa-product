@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -243,7 +244,7 @@ class CustomersScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Customers')),
+      appBar: AppBar(title: const Text('Customers'), actions: const [GuideButton('customers')]),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => showCustomerForm(context, ref),
         icon: const Icon(Icons.person_add),

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -22,6 +23,7 @@ class ProductsScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Products'),
         actions: [
+          const GuideButton('products'),
           IconButton(
             icon: const Icon(Icons.category_outlined),
             tooltip: 'Categories, brands & units',

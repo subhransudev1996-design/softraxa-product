@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -227,6 +228,7 @@ class _DesktopDashboard extends StatelessWidget {
                       spacing: 10,
                       runSpacing: 8,
                       children: [
+                        const GuideButton('home'),
                         OutlinedButton.icon(
                           onPressed: () => context.push('/products/new'),
                           icon: const Icon(Icons.add_box_outlined, size: 18),
@@ -467,6 +469,13 @@ class _MobileDashboard extends StatelessWidget {
                         tooltip: 'Scan barcode',
                         onTap: () => context.push('/scan'),
                       ),
+                    _HeaderIconButton(
+                      icon: Icons.help_outline,
+                      tooltip: 'App walkthrough',
+                      onTap: () => showWalkthrough(context, 'home'),
+                    ),
+                    // auto-opens the welcome tour on first launch
+                    const _WelcomeTourTrigger(),
                   ],
                 ),
                 const SizedBox(height: 22),
@@ -939,4 +948,25 @@ class _InvoiceTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Invisible: fires the one-time welcome tour after the first frame.
+class _WelcomeTourTrigger extends StatefulWidget {
+  const _WelcomeTourTrigger();
+
+  @override
+  State<_WelcomeTourTrigger> createState() => _WelcomeTourTriggerState();
+}
+
+class _WelcomeTourTriggerState extends State<_WelcomeTourTrigger> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) maybeShowWalkthrough(context, 'home');
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => const SizedBox.shrink();
 }

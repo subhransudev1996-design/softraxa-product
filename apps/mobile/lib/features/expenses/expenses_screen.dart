@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -375,6 +376,7 @@ class ExpensesScreen extends ConsumerWidget {
       appBar: AppBar(
         title: const Text('Expenses'),
         actions: [
+          const GuideButton('expenses'),
           IconButton(
             icon: const Icon(Icons.date_range),
             tooltip: 'Custom date range',
