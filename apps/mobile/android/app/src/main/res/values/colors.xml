@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- native launch background: same violet as the in-app splash so the
+         brand shows from frame zero (no white flash before Flutter loads) -->
+    <color name="splash_background">#7C3AED</color>
+</resources>

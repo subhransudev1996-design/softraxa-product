@@ -15,6 +15,8 @@ import '../features/jobcards/job_card_detail_screen.dart';
 import '../features/jobcards/job_card_form_screen.dart';
 import '../features/jobcards/job_cards_screen.dart';
 import '../features/offline/offline_bills_screen.dart';
+import 'splash_screen.dart';
+import 'theme.dart';
 import '../features/onboarding/business_setup_screen.dart';
 import '../features/pos/pos_screen.dart';
 import '../features/pos/scan_screen.dart';
@@ -52,25 +54,33 @@ class _SplashScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ctx = ref.watch(appContextProvider);
-    return Scaffold(
-      body: Center(
-        child: ctx.hasError
-            ? Column(mainAxisSize: MainAxisSize.min, children: [
-                const Icon(Icons.wifi_off, size: 48, color: Colors.grey),
-                const SizedBox(height: 12),
-                const Text('Could not load your account.'),
+    return BrandSplash(
+      trailing: !ctx.hasError
+          ? null
+          : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.wifi_off, size: 40, color: Colors.white70),
+                const SizedBox(height: 10),
+                const Text('Could not load your account.',
+                    style: TextStyle(color: Colors.white)),
                 const SizedBox(height: 12),
                 FilledButton(
-                  onPressed: () => ref.read(appContextProvider.notifier).refresh(),
+                  style: FilledButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: AppColors.primaryDark,
+                      minimumSize: const Size(160, 46)),
+                  onPressed: () =>
+                      ref.read(appContextProvider.notifier).refresh(),
                   child: const Text('Retry'),
                 ),
                 TextButton(
                   onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-                  child: const Text('Logout'),
+                  child: const Text('Logout',
+                      style: TextStyle(color: Colors.white70)),
                 ),
-              ])
-            : const CircularProgressIndicator(),
-      ),
+              ],
+            ),
     );
   }
 }
@@ -81,8 +91,8 @@ class _SplashScreen extends ConsumerWidget {
 /// the standard Material page transition.
 Page<void> _page(BuildContext context, GoRouterState state, Widget child) =>
     MediaQuery.sizeOf(context).width >= kDesktopBreakpoint
-        ? NoTransitionPage<void>(key: state.pageKey, child: child)
-        : MaterialPage<void>(key: state.pageKey, child: child);
+    ? NoTransitionPage<void>(key: state.pageKey, child: child)
+    : MaterialPage<void>(key: state.pageKey, child: child);
 
 /// Root navigator key — lets chrome that lives ABOVE the Navigator
 /// (the desktop title bar) open dialogs/sheets with a valid context.
@@ -127,21 +137,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state, shell) =>
             _page(context, state, HomeShell(navigationShell: shell)),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/home', builder: (_, _) => const DashboardScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/pos', builder: (_, _) => const PosScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/products', builder: (_, _) => const ProductsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/reports', builder: (_, _) => const ReportsScreen()),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(path: '/more', builder: (_, _) => const MoreScreen()),
-          ]),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (_, _) => const DashboardScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/pos', builder: (_, _) => const PosScreen()),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/products',
+                builder: (_, _) => const ProductsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/reports',
+                builder: (_, _) => const ReportsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(path: '/more', builder: (_, _) => const MoreScreen()),
+            ],
+          ),
         ],
       ),
 
@@ -159,12 +188,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       // pass-through, so they push full-screen exactly as before. ----
       ShellRoute(
         pageBuilder: (context, state, child) => _page(
-            context, state, withDesktopSidebar(context, state.uri.path, child)),
+          context,
+          state,
+          withDesktopSidebar(context, state.uri.path, child),
+        ),
         routes: [
           GoRoute(
             path: '/products/new',
-            pageBuilder: (context, state) => _page(context, state,
-                ProductFormScreen(initialBarcode: state.uri.queryParameters['barcode'])),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              ProductFormScreen(
+                initialBarcode: state.uri.queryParameters['barcode'],
+              ),
+            ),
           ),
           GoRoute(
             path: '/products/master-data',
@@ -173,13 +210,19 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/products/:id/edit',
-            pageBuilder: (context, state) => _page(context, state,
-                ProductFormScreen(existing: state.extra as Map<String, dynamic>?)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              ProductFormScreen(existing: state.extra as Map<String, dynamic>?),
+            ),
           ),
           GoRoute(
             path: '/products/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                ProductDetailScreen(productId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              ProductDetailScreen(productId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/invoices',
@@ -199,12 +242,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/invoices/:id',
             pageBuilder: (context, state) => _page(
-                context,
-                state,
-                InvoiceDetailScreen(
-                  invoiceId: state.pathParameters['id']!,
-                  justCreated: state.uri.queryParameters['new'] == '1',
-                )),
+              context,
+              state,
+              InvoiceDetailScreen(
+                invoiceId: state.pathParameters['id']!,
+                justCreated: state.uri.queryParameters['new'] == '1',
+              ),
+            ),
           ),
           GoRoute(
             path: '/customers',
@@ -213,8 +257,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/customers/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                CustomerDetailScreen(customerId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              CustomerDetailScreen(customerId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/suppliers',
@@ -223,8 +270,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/suppliers/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                SupplierDetailScreen(supplierId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              SupplierDetailScreen(supplierId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/purchases',
@@ -234,20 +284,30 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/purchases/new',
             pageBuilder: (context, state) => _page(
-                context,
-                state,
-                PurchaseFormScreen(
-                    initialSupplierId: state.uri.queryParameters['supplier'])),
+              context,
+              state,
+              PurchaseFormScreen(
+                initialSupplierId: state.uri.queryParameters['supplier'],
+              ),
+            ),
           ),
           GoRoute(
             path: '/purchases/:id/return',
-            pageBuilder: (context, state) => _page(context, state,
-                PurchaseReturnFormScreen(purchase: state.extra as Map<String, dynamic>)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              PurchaseReturnFormScreen(
+                purchase: state.extra as Map<String, dynamic>,
+              ),
+            ),
           ),
           GoRoute(
             path: '/purchases/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                PurchaseDetailScreen(purchaseId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              PurchaseDetailScreen(purchaseId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/purchase-returns',
@@ -256,8 +316,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/purchase-returns/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                PurchaseReturnDetailScreen(returnId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              PurchaseReturnDetailScreen(returnId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/sale-returns',
@@ -266,23 +329,39 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/sale-returns/new',
-            pageBuilder: (context, state) => _page(context, state,
-                SaleReturnFormScreen(invoice: state.extra as Map<String, dynamic>)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              SaleReturnFormScreen(
+                invoice: state.extra as Map<String, dynamic>,
+              ),
+            ),
           ),
           GoRoute(
             path: '/sale-returns/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                SaleReturnDetailScreen(returnId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              SaleReturnDetailScreen(returnId: state.pathParameters['id']!),
+            ),
           ),
           GoRoute(
             path: '/stock',
-            pageBuilder: (context, state) => _page(context, state,
-                StockScreen(initialFilter: state.uri.queryParameters['filter'])),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              StockScreen(initialFilter: state.uri.queryParameters['filter']),
+            ),
           ),
           GoRoute(
             path: '/stock/movements/:productId',
-            pageBuilder: (context, state) => _page(context, state,
-                StockMovementsScreen(productId: state.pathParameters['productId']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              StockMovementsScreen(
+                productId: state.pathParameters['productId']!,
+              ),
+            ),
           ),
           GoRoute(
             path: '/expenses',
@@ -307,17 +386,22 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/settings/business',
             pageBuilder: (context, state) => _page(
-                context,
-                state,
-                Consumer(
-                  builder: (context, ref, _) => BusinessSetupScreen(
-                      existing: ref.watch(appContextProvider).value?.business),
-                )),
+              context,
+              state,
+              Consumer(
+                builder: (context, ref, _) => BusinessSetupScreen(
+                  existing: ref.watch(appContextProvider).value?.business,
+                ),
+              ),
+            ),
           ),
           GoRoute(
             path: '/reports/:type',
-            pageBuilder: (context, state) => _page(context, state,
-                ReportDetailScreen(type: state.pathParameters['type']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              ReportDetailScreen(type: state.pathParameters['type']!),
+            ),
           ),
           GoRoute(
             path: '/services',
@@ -336,8 +420,11 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/job-cards/:id',
-            pageBuilder: (context, state) => _page(context, state,
-                JobCardDetailScreen(jobId: state.pathParameters['id']!)),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              JobCardDetailScreen(jobId: state.pathParameters['id']!),
+            ),
           ),
         ],
       ),
