@@ -110,7 +110,11 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
           if (businessName.isNotEmpty) ...[
             _ActionButton(
               icon: Icons.help_outline,
-              onTap: () {
+              onTap: () async {
+                // The welcome tour spotlights dashboard widgets — go there
+                // first so the anchors are the visible ones.
+                ref.read(routerProvider).go('/home');
+                await Future<void>.delayed(const Duration(milliseconds: 250));
                 final ctx = rootNavigatorKey.currentContext;
                 if (ctx != null) showWalkthrough(ctx, 'home');
               },

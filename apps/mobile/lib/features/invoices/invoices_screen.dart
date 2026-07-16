@@ -60,14 +60,14 @@ class InvoicesScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: SearchField(
+            child: CoachTarget(page: 'invoices', id: 'search', child: SearchField(
               hint: 'Search invoice no, customer, phone',
               onChanged: (v) => ref
                   .read(invoiceFilterProvider.notifier)
                   .set(filter.copyWith(search: v)),
-            ),
+            )),
           ),
-          SingleChildScrollView(
+          CoachTarget(page: 'invoices', id: 'filters', child: SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
@@ -121,9 +121,9 @@ class InvoicesScreen extends ConsumerWidget {
                   ),
               ],
             ),
-          ),
+          )),
           Expanded(
-            child: RefreshIndicator(
+            child: CoachTarget(page: 'invoices', id: 'list', child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(invoicesProvider),
               child: AsyncView(
                 value: invoices,
@@ -174,7 +174,7 @@ class InvoicesScreen extends ConsumerWidget {
                       ),
               ),
             ),
-          ),
+          )),
         ],
       ),
     );

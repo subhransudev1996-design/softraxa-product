@@ -119,7 +119,12 @@ class MoreScreen extends ConsumerWidget {
                   subtitle: const Text('Replay the guided tour anytime',
                       style: TextStyle(fontSize: 12)),
                   trailing: const Icon(Icons.chevron_right, size: 20),
-                  onTap: () => showWalkthrough(context, 'home'),
+                  onTap: () async {
+                    // Welcome tour anchors live on the dashboard tab.
+                    context.go('/home');
+                    await Future<void>.delayed(const Duration(milliseconds: 250));
+                    if (context.mounted) showWalkthrough(context, 'home');
+                  },
                 ),
               ),
               const SizedBox(height: 10),

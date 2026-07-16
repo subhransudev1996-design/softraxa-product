@@ -358,11 +358,11 @@ class SuppliersScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(title: const Text('Suppliers'), actions: const [GuideButton('suppliers')]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'suppliers', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => showSupplierForm(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('Add supplier'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
@@ -398,7 +398,7 @@ class SuppliersScreen extends ConsumerWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(suppliersProvider),
-              child: AsyncView(
+              child: CoachTarget(page: 'suppliers', id: 'list', child: AsyncView(
                 value: suppliers,
                 onRetry: () => ref.invalidate(suppliersProvider),
                 builder: (rows) => rows.isEmpty
@@ -455,7 +455,7 @@ class SuppliersScreen extends ConsumerWidget {
                         itemBuilder: (context, i) =>
                             _SupplierTile(supplier: rows[i]),
                       ),
-              ),
+              )),
             ),
           ),
         ],

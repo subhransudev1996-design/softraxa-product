@@ -208,11 +208,11 @@ class SaleReturnsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'sale_returns', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => _newReturn(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('New return'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
@@ -1219,11 +1219,11 @@ class PurchaseReturnsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'purchase_returns', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => _newReturn(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('New return'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(

@@ -1,17 +1,34 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'theme.dart';
 
-/// Lightweight per-page walkthrough system (no external packages).
+/// Spotlight walkthrough system (no external packages).
 ///
-/// - First visit to a page auto-opens its guide once (tracked per page in
-///   SharedPreferences).
-/// - Every page shows a `?` [GuideButton] in its AppBar so anyone can
-///   replay the guide anytime.
-/// - "App walkthrough" in More replays the welcome tour.
-class WalkthroughStep {
-  const WalkthroughStep(this.icon, this.title, this.body);
+/// Real widgets are marked with [CoachTarget]; each page's guide steps
+/// reference target ids. Running a guide dims the screen, cuts a bright
+/// spotlight around the current step's actual widget (auto-scrolling to
+/// it when needed) and shows an explainer card beside it. Steps whose
+/// target isn't on screen (other layout, empty list) render as a
+/// centered card instead, so a tour never breaks.
+///
+/// - First visit to a page auto-runs its tour once (SharedPreferences).
+/// - The `?` [GuideButton] on every page replays it anytime.
+
+// ============================ model ============================
+
+class CoachStep {
+  const CoachStep({
+    this.id,
+    required this.icon,
+    required this.title,
+    required this.body,
+  });
+
+  /// [CoachTarget] id to spotlight; null = centered informational step.
+  final String? id;
   final IconData icon;
   final String title;
   final String body;
@@ -20,171 +37,400 @@ class WalkthroughStep {
 class PageGuide {
   const PageGuide(this.title, this.steps);
   final String title;
-  final List<WalkthroughStep> steps;
+  final List<CoachStep> steps;
 }
 
-const Map<String, PageGuide> pageGuides = {
-  'home': PageGuide('Welcome to SOFTRAXA Inventory', [
-    WalkthroughStep(Icons.storefront_outlined, 'Your shop, in one app',
-        'Billing, stock, purchases, customers, dues, expenses and reports — everything your shop needs, together in one place.'),
-    WalkthroughStep(Icons.dashboard_outlined, "Today at a glance",
-        "The dashboard shows today's sales and profit, your stock value, low-stock alerts, and how much customers owe you / you owe suppliers."),
-    WalkthroughStep(Icons.receipt_long_outlined, 'Make a bill in seconds',
-        'Tap "New Bill" to open billing. Search or scan a barcode, take payment (cash, UPI, card, credit or split), and print or share the invoice.'),
-    WalkthroughStep(Icons.inventory_2_outlined, 'Stock updates itself',
-        'Every sale, purchase and return moves stock automatically. You only adjust it by hand for damage or corrections.'),
-    WalkthroughStep(Icons.help_outline, 'Help on every page',
-        'See the ? icon at the top of each page? Tap it anytime to replay that page\'s guide. You can also replay this tour from More → App walkthrough.'),
-  ]),
-  'pos': PageGuide('Billing (POS)', [
-    WalkthroughStep(Icons.search, 'Add items',
-        'Type a product name in the search box, or scan a barcode with the camera / a USB scanner. Tap a result to add it to the bill.'),
-    WalkthroughStep(Icons.exposure, 'Change qty, price or discount',
-        'Tap a line in the cart to edit its quantity, price or discount. Loose quantities (like 500 g or ₹50 worth) are supported for weighable items.'),
-    WalkthroughStep(Icons.person_add_alt, 'Attach a customer',
-        'Select a customer to track credit (due) sales and see their balance. Walk-in sales work without one.'),
-    WalkthroughStep(Icons.payments_outlined, 'Take payment',
-        'At checkout choose cash, UPI, card or credit — or split one bill across several modes. Any unpaid part becomes the customer\'s due automatically.'),
-    WalkthroughStep(Icons.print_outlined, 'Print or share',
-        'After saving, print to a thermal printer, save an A4 PDF, or share the invoice on WhatsApp.'),
-  ]),
-  'products': PageGuide('Products', [
-    WalkthroughStep(Icons.add_box_outlined, 'Add your items',
-        'Use + to add a product: name, prices, GST, barcode, opening stock and a low-stock alert level.'),
-    WalkthroughStep(Icons.category_outlined, 'Organise with master data',
-        'Categories, brands and units live under the list icon in the top bar. Units control whether an item can be sold in fractions (kg, metre…).'),
-    WalkthroughStep(Icons.style_outlined, 'Variants',
-        'One product can have variants (size / colour / model / storage), each with its own price, barcode and stock.'),
-    WalkthroughStep(Icons.qr_code_2_outlined, 'Barcodes',
-        'Attach a barcode per product or variant — type it or scan it. Billing then finds the item instantly.'),
-  ]),
-  'invoices': PageGuide('Invoices', [
-    WalkthroughStep(Icons.filter_list, 'Find any bill',
-        'Search by number or customer, and filter by paid / partial / credit status or date.'),
-    WalkthroughStep(Icons.receipt_long_outlined, 'Open a bill',
-        'Tap an invoice to see its items and payments, print or share it again, record a due payment, edit it, or cancel it (stock is restored).'),
-    WalkthroughStep(Icons.assignment_return_outlined, 'Returns',
-        'Customer brought something back? Open the invoice and create a sale return — stock and dues update automatically.'),
-  ]),
-  'purchases': PageGuide('Purchases', [
-    WalkthroughStep(Icons.add_shopping_cart, 'Record what you buy',
-        'Tap + to enter a supplier bill: items, quantities, cost prices, GST and any extra charges.'),
-    WalkthroughStep(Icons.account_balance_wallet_outlined, 'Pay now or later',
-        'Mark the purchase paid, partial or unpaid. Unpaid amounts are tracked as what you owe that supplier.'),
-    WalkthroughStep(Icons.trending_up, 'Stock goes up automatically',
-        'Saving a purchase adds the quantities to stock — no separate stock entry needed.'),
-  ]),
-  'customers': PageGuide('Customers', [
-    WalkthroughStep(Icons.person_add_alt, 'Save your customers',
-        'Add name, phone and address. Set an optional credit limit to get warned before a customer\'s due grows too big.'),
-    WalkthroughStep(Icons.currency_rupee, 'Track dues',
-        'Every credit sale adds to the customer\'s due. Tap a customer to see their full ledger — bills, payments and returns.'),
-    WalkthroughStep(Icons.payments_outlined, 'Receive payments',
-        'Use "Receive payment" to record money received. It settles the oldest unpaid bills first.'),
-  ]),
-  'suppliers': PageGuide('Suppliers', [
-    WalkthroughStep(Icons.local_shipping_outlined, 'Your suppliers',
-        'Save the people you buy from. Their balance shows how much you still owe them.'),
-    WalkthroughStep(Icons.receipt_outlined, 'Ledger',
-        'Tap a supplier to see every purchase, payment and return with a running balance.'),
-    WalkthroughStep(Icons.payments_outlined, 'Pay suppliers',
-        '"Pay supplier" records a payment and settles your oldest unpaid purchases first.'),
-  ]),
-  'stock': PageGuide('Stock', [
-    WalkthroughStep(Icons.inventory_2_outlined, 'Everything in one list',
-        'Current stock for every product, with its value. Use the filters to see only low-stock or out-of-stock items.'),
-    WalkthroughStep(Icons.tune, 'Adjust when needed',
-        'Use adjust stock for corrections, and damaged/lost for breakage — each change is recorded with a reason.'),
-    WalkthroughStep(Icons.history, 'Full history',
-        'Open a product\'s movement history to see every in/out with date and source (sale, purchase, return, adjustment…).'),
-  ]),
-  'expenses': PageGuide('Expenses', [
-    WalkthroughStep(Icons.add_card, 'Note daily expenses',
-        'Rent, electricity, transport, chai — add an amount, pick a category, done.'),
-    WalkthroughStep(Icons.event_outlined, 'See any period',
-        'Use the quick chips (Today / This week / This month / Last month) or pick your own dates. The total updates instantly.'),
-    WalkthroughStep(Icons.pie_chart_outline, 'Where money goes',
-        'The expense report shows a category-wise breakdown so you know exactly where cash is going.'),
-  ]),
-  'reports': PageGuide('Reports', [
-    WalkthroughStep(Icons.query_stats, 'Pick a report',
-        'Sales, profit, stock, GST, dues, purchases, expenses and more — each opens with a chart and a detailed table.'),
-    WalkthroughStep(Icons.date_range, 'Choose the period',
-        'Most reports have a date filter at the top. Change it and everything recalculates.'),
-    WalkthroughStep(Icons.picture_as_pdf_outlined, 'Export as PDF',
-        'Every report can be saved or shared as a PDF — handy for your accountant or GST filing.'),
-  ]),
-  'import': PageGuide('Excel import', [
-    WalkthroughStep(Icons.download_outlined, '1. Download the template',
-        'Get the sample Excel file first — its columns are exactly what the import expects.'),
-    WalkthroughStep(Icons.edit_note, '2. Fill in your products',
-        'One row per product: name, prices, GST %, barcode, opening stock. Don\'t reorder the columns.'),
-    WalkthroughStep(Icons.upload_file_outlined, '3. Upload and check',
-        'Upload the file — every row is validated and duplicates are caught. Fix any red rows and import again; already-imported rows won\'t duplicate.'),
-  ]),
-  'job_cards': PageGuide('Job cards (repairs & services)', [
-    WalkthroughStep(Icons.build_outlined, 'Take in a job',
-        'Customer brings something to repair or wants on-site work? Create a job card with the item, problem, estimate, advance and location.'),
-    WalkthroughStep(Icons.flag_outlined, 'Track the status',
-        'Move the job through statuses — received, in progress, waiting for parts, ready, delivered — the customer history is kept.'),
-    WalkthroughStep(Icons.handyman_outlined, 'Add parts and labour',
-        'Spare parts come straight from your stock (and reduce it); labour charges come from your service catalog or free-typed.'),
-    WalkthroughStep(Icons.receipt_long_outlined, 'Close with one bill',
-        'When done, close the job — parts + labour become one invoice, the advance is deducted, and warranty can be set.'),
-  ]),
-  'services': PageGuide('Service catalog', [
-    WalkthroughStep(Icons.home_repair_service_outlined, 'Your service menu',
-        'List the services you offer — display replacement, stitching, installation — with price, GST and warranty.'),
-    WalkthroughStep(Icons.bolt_outlined, 'Used in job cards',
-        'When adding labour to a job card you can pick from this catalog instead of typing charges every time.'),
-  ]),
-  'sale_returns': PageGuide('Sale returns', [
-    WalkthroughStep(Icons.assignment_return_outlined, 'Take items back',
-        'Pick the original invoice, choose which items and how many are coming back — you can never return more than was sold.'),
-    WalkthroughStep(Icons.currency_rupee, 'Refund or adjust',
-        'The amount can be refunded, or adjusted against the customer\'s due. Stock goes back automatically.'),
-  ]),
-  'purchase_returns': PageGuide('Purchase returns', [
-    WalkthroughStep(Icons.assignment_return_outlined, 'Return to supplier',
-        'Pick the purchase, choose items and quantities to send back. You can only return what is still in stock.'),
-    WalkthroughStep(Icons.account_balance_wallet_outlined, 'Settlement',
-        'The return reduces stock and adjusts what you owe the supplier.'),
-  ]),
-  'offline_bills': PageGuide('Offline bills', [
-    WalkthroughStep(Icons.wifi_off_outlined, 'No internet? Keep billing',
-        'When the connection drops, bills are saved here with a temporary number. Products and customers come from the local cache.'),
-    WalkthroughStep(Icons.sync, 'They sync themselves',
-        'As soon as internet returns, pending bills upload and get real invoice numbers. Failed ones can be retried from this list.'),
-  ]),
-};
+// ====================== target registry ======================
 
-bool _sheetOpen = false;
+class CoachRegistry {
+  static final Map<String, List<State>> _targets = {};
 
-/// Auto-show a page's guide the first time that page is seen.
+  static String _key(String page, String id) => '$page::$id';
+
+  static void register(String page, String id, State state) {
+    _targets.putIfAbsent(_key(page, id), () => []).add(state);
+  }
+
+  static void unregister(String page, String id, State state) {
+    _targets[_key(page, id)]?.remove(state);
+  }
+
+  /// The build context of a currently-mounted target, if any.
+  static BuildContext? contextOf(String page, String id) {
+    final list = _targets[_key(page, id)];
+    if (list == null) return null;
+    for (final s in list.reversed) {
+      if (s.mounted) return s.context;
+    }
+    return null;
+  }
+
+  static bool has(String page, String id) => contextOf(page, id) != null;
+}
+
+/// Wrap any widget to make it spotlight-able as (page, id).
+class CoachTarget extends StatefulWidget {
+  const CoachTarget({
+    super.key,
+    required this.page,
+    required this.id,
+    required this.child,
+  });
+
+  final String page;
+  final String id;
+  final Widget child;
+
+  @override
+  State<CoachTarget> createState() => _CoachTargetState();
+}
+
+class _CoachTargetState extends State<CoachTarget> {
+  @override
+  void initState() {
+    super.initState();
+    CoachRegistry.register(widget.page, widget.id, this);
+  }
+
+  @override
+  void dispose() {
+    CoachRegistry.unregister(widget.page, widget.id, this);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+// ========================= run logic =========================
+
+bool _running = false;
+
+/// Auto-run a page's tour the first time that page is seen.
 Future<void> maybeShowWalkthrough(BuildContext context, String pageKey) async {
-  if (_sheetOpen || !pageGuides.containsKey(pageKey)) return;
+  if (_running || !pageGuides.containsKey(pageKey)) return;
   final prefs = await SharedPreferences.getInstance();
   if (prefs.getBool('walkthrough_seen_$pageKey') ?? false) return;
-  if (_sheetOpen) return; // re-check after the await
+  if (_running) return; // re-check after the await
   await prefs.setBool('walkthrough_seen_$pageKey', true);
   if (context.mounted) await showWalkthrough(context, pageKey);
 }
 
-/// Show a page's guide (used by the ? button — works anytime).
+/// Run a page's tour (used by the ? buttons — works anytime).
 Future<void> showWalkthrough(BuildContext context, String pageKey) async {
   final guide = pageGuides[pageKey];
-  if (guide == null || _sheetOpen) return;
-  _sheetOpen = true;
+  if (guide == null || _running) return;
+  _running = true;
   try {
-    await showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      constraints: const BoxConstraints(maxWidth: 560),
-      builder: (context) => _WalkthroughSheet(guide: guide),
+    // Give slow-loading pages a moment to build their anchored widgets
+    // (data lists, async cards) before deciding whether anything is
+    // anchorable at all.
+    final ids = guide.steps.map((s) => s.id).whereType<String>().toList();
+    var waited = 0;
+    while (waited < 2500 && !ids.any((id) => CoachRegistry.has(pageKey, id))) {
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      waited += 250;
+      if (!context.mounted) return;
+    }
+    if (!context.mounted) return;
+
+    final overlay = Overlay.maybeOf(context, rootOverlay: true);
+    if (overlay == null || !ids.any((id) => CoachRegistry.has(pageKey, id))) {
+      // Nothing anchorable (empty page / unexpected layout): plain
+      // carousel fallback keeps the tour available.
+      await _showCarouselSheet(context, guide);
+      return;
+    }
+
+    final done = Completer<void>();
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (_) => _CoachOverlay(
+        pageKey: pageKey,
+        guide: guide,
+        onDone: () {
+          entry.remove();
+          done.complete();
+        },
+      ),
     );
+    overlay.insert(entry);
+    await done.future;
   } finally {
-    _sheetOpen = false;
+    _running = false;
   }
+}
+
+// ===================== spotlight overlay =====================
+
+class _CoachOverlay extends StatefulWidget {
+  const _CoachOverlay({
+    required this.pageKey,
+    required this.guide,
+    required this.onDone,
+  });
+
+  final String pageKey;
+  final PageGuide guide;
+  final VoidCallback onDone;
+
+  @override
+  State<_CoachOverlay> createState() => _CoachOverlayState();
+}
+
+class _CoachOverlayState extends State<_CoachOverlay> {
+  late final List<CoachStep> _steps;
+  int _index = 0;
+  Rect? _rect; // spotlight rect (null = centered step)
+  bool _measuring = true;
+
+  @override
+  void initState() {
+    super.initState();
+    // Only keep steps that are anchored right now or deliberately
+    // unanchored (id == null); drop steps whose target is absent.
+    _steps = [
+      for (final s in widget.guide.steps)
+        if (s.id == null || CoachRegistry.has(widget.pageKey, s.id!)) s,
+    ];
+    WidgetsBinding.instance.addPostFrameCallback((_) => _goTo(0));
+  }
+
+  Future<void> _goTo(int i) async {
+    if (i < 0 || i >= _steps.length) {
+      widget.onDone();
+      return;
+    }
+    setState(() {
+      _index = i;
+      _measuring = true;
+    });
+    final step = _steps[i];
+    Rect? rect;
+    if (step.id != null) {
+      final targetCtx = CoachRegistry.contextOf(widget.pageKey, step.id!);
+      if (targetCtx != null && targetCtx.mounted) {
+        try {
+          await Scrollable.ensureVisible(
+            targetCtx,
+            alignment: 0.45,
+            duration: const Duration(milliseconds: 250),
+          );
+        } catch (_) {}
+        await Future<void>.delayed(const Duration(milliseconds: 60));
+        if (!mounted) return;
+        final ro = targetCtx.findRenderObject();
+        if (ro is RenderBox && ro.attached && ro.hasSize) {
+          final topLeft = ro.localToGlobal(Offset.zero);
+          rect = topLeft & ro.size;
+        }
+      }
+    }
+    if (!mounted) return;
+    setState(() {
+      _rect = rect;
+      _measuring = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final step = _steps[_index];
+    final spot = _rect?.inflate(6);
+    final last = _index == _steps.length - 1;
+
+    // Card placement: below the spotlight when there's room, else above;
+    // centered when the step has no anchor.
+    const cardWidth = 330.0;
+    const cardMargin = 14.0;
+    double? cardTop, cardLeft;
+    if (spot != null) {
+      final below = spot.bottom + cardMargin;
+      cardTop = below + 240 < size.height
+          ? below
+          : (spot.top - cardMargin - 230).clamp(12.0, size.height - 250);
+      cardLeft = (spot.center.dx - cardWidth / 2)
+          .clamp(12.0, size.width - cardWidth - 12);
+    }
+
+    return Stack(children: [
+      // dim + cutout; tap anywhere advances
+      Positioned.fill(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _goTo(_index + 1),
+          child: AnimatedOpacity(
+            opacity: _measuring ? 0 : 1,
+            duration: const Duration(milliseconds: 180),
+            child: CustomPaint(
+              painter: _SpotlightPainter(spot),
+              size: size,
+            ),
+          ),
+        ),
+      ),
+      if (!_measuring)
+        AnimatedPositioned(
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+          top: cardTop ?? (size.height / 2 - 130),
+          left: cardLeft ?? (size.width / 2 - cardWidth / 2),
+          width: cardWidth,
+          child: _CoachCard(
+            guideTitle: widget.guide.title,
+            step: step,
+            index: _index,
+            total: _steps.length,
+            onBack: _index > 0 ? () => _goTo(_index - 1) : null,
+            onNext: () => _goTo(_index + 1),
+            onSkip: widget.onDone,
+            isLast: last,
+          ),
+        ),
+    ]);
+  }
+}
+
+class _SpotlightPainter extends CustomPainter {
+  _SpotlightPainter(this.spot);
+  final Rect? spot;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final dim = Path()..addRect(Offset.zero & size);
+    final paint = Paint()..color = Colors.black.withValues(alpha: 0.62);
+    if (spot == null) {
+      canvas.drawPath(dim, paint);
+      return;
+    }
+    final hole = Path()
+      ..addRRect(RRect.fromRectAndRadius(spot!, const Radius.circular(14)));
+    canvas.drawPath(Path.combine(PathOperation.difference, dim, hole), paint);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(spot!, const Radius.circular(14)),
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5
+        ..color = AppColors.primary,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_SpotlightPainter old) => old.spot != spot;
+}
+
+class _CoachCard extends StatelessWidget {
+  const _CoachCard({
+    required this.guideTitle,
+    required this.step,
+    required this.index,
+    required this.total,
+    required this.onBack,
+    required this.onNext,
+    required this.onSkip,
+    required this.isLast,
+  });
+
+  final String guideTitle;
+  final CoachStep step;
+  final int index;
+  final int total;
+  final VoidCallback? onBack;
+  final VoidCallback onNext;
+  final VoidCallback onSkip;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.line),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.3),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(children: [
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: AppColors.primarySoft,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(step.icon, size: 18, color: AppColors.primary),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(step.title,
+                    style: const TextStyle(
+                        fontSize: 14.5, fontWeight: FontWeight.w800)),
+              ),
+              Text('${index + 1}/$total',
+                  style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft)),
+            ]),
+            const SizedBox(height: 8),
+            Text(step.body,
+                style: TextStyle(
+                    fontSize: 13, height: 1.45, color: AppColors.inkSoft)),
+            const SizedBox(height: 12),
+            Row(children: [
+              InkWell(
+                onTap: onSkip,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Text('Skip tour',
+                      style:
+                          TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+                ),
+              ),
+              const Spacer(),
+              if (onBack != null)
+                OutlinedButton(
+                  onPressed: onBack,
+                  style: OutlinedButton.styleFrom(
+                      minimumSize: const Size(0, 38),
+                      padding: const EdgeInsets.symmetric(horizontal: 14)),
+                  child: const Text('Back'),
+                ),
+              const SizedBox(width: 8),
+              FilledButton(
+                onPressed: onNext,
+                style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 38),
+                    padding: const EdgeInsets.symmetric(horizontal: 18)),
+                child: Text(isLast ? 'Done' : 'Next'),
+              ),
+            ]),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ================== carousel fallback (no anchors) ==================
+
+Future<void> _showCarouselSheet(BuildContext context, PageGuide guide) {
+  return showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    constraints: const BoxConstraints(maxWidth: 560),
+    builder: (context) => _WalkthroughSheet(guide: guide),
+  );
 }
 
 class _WalkthroughSheet extends StatefulWidget {
@@ -349,3 +595,264 @@ class _GuideButtonState extends State<GuideButton> {
     );
   }
 }
+
+// ========================= page guides =========================
+// Step `id`s reference CoachTarget wraps in the screens; a step whose
+// target isn't mounted is skipped (or shown centered when id is null).
+
+const Map<String, PageGuide> pageGuides = {
+  'home': PageGuide('Welcome to SOFTRAXA Inventory', [
+    CoachStep(
+        icon: Icons.storefront_outlined,
+        title: 'Your shop, in one app',
+        body:
+            'Billing, stock, purchases, customers, dues, expenses and reports — everything your shop needs, together in one place. Let\'s take a quick look around.'),
+    CoachStep(
+        id: 'stats',
+        icon: Icons.dashboard_outlined,
+        title: 'Today at a glance',
+        body:
+            "These tiles show today's sales and profit, your total stock value, low-stock alerts and dues — they update live as you bill."),
+    CoachStep(
+        id: 'new_bill',
+        icon: Icons.receipt_long_outlined,
+        title: 'Start billing here',
+        body:
+            'This button opens the billing screen. Search or scan a product, take payment, print or share the invoice — all in seconds.'),
+    CoachStep(
+        id: 'quick_actions',
+        icon: Icons.bolt_outlined,
+        title: 'Quick actions',
+        body:
+            'Shortcuts for the things you do most — new bill, add product, new purchase and barcode scan.'),
+    CoachStep(
+        id: 'recent',
+        icon: Icons.history,
+        title: 'Recent invoices',
+        body:
+            'Your latest bills with payment status. Tap any of them to reprint, edit, record a payment or make a return.'),
+    CoachStep(
+        icon: Icons.help_outline,
+        title: 'Help on every page',
+        body:
+            'Every page has a ? icon at the top — tap it anytime to replay that page\'s tour. This welcome tour is always available from More → App walkthrough.'),
+  ]),
+  'pos': PageGuide('Billing (POS)', [
+    CoachStep(
+        id: 'search',
+        icon: Icons.search,
+        title: 'Find products here',
+        body:
+            'Type a name, SKU or barcode — or scan with a USB scanner straight into this box. Matching products appear below; tap one to add it to the bill.'),
+    CoachStep(
+        id: 'scan',
+        icon: Icons.qr_code_scanner,
+        title: 'Camera scanning',
+        body:
+            'Tap to scan barcodes with the camera — keep scanning item after item and they\'re added automatically.'),
+    CoachStep(
+        id: 'customer',
+        icon: Icons.person_add_alt,
+        title: 'Who is this bill for?',
+        body:
+            'Attach a customer to track credit (due) sales — or leave as walk-in. You can also add a brand-new customer from here.'),
+    CoachStep(
+        id: 'cart',
+        icon: Icons.shopping_cart_outlined,
+        title: 'The bill lives here',
+        body:
+            'Every added item shows here. Tap a line to change quantity, price or give a line discount; swipe or use the buttons to remove.'),
+    CoachStep(
+        id: 'charge',
+        icon: Icons.payments_outlined,
+        title: 'Take payment',
+        body:
+            'When the bill is ready, tap here: choose cash, UPI, card or credit — or split across several. Then print or share the invoice.'),
+  ]),
+  'products': PageGuide('Products', [
+    CoachStep(
+        id: 'search',
+        icon: Icons.search,
+        title: 'Search your catalog',
+        body: 'Find any product by name, SKU or barcode as you type.'),
+    CoachStep(
+        id: 'master',
+        icon: Icons.category_outlined,
+        title: 'Categories, brands & units',
+        body:
+            'Manage the master lists here. Units decide whether an item can sell in fractions (kg, metre, litre).'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.add_box_outlined,
+        title: 'Add a product',
+        body:
+            'Name, prices, GST, barcode, opening stock, low-stock alert — and variants (size/colour/model) if one product comes in versions.'),
+    CoachStep(
+        id: 'list',
+        icon: Icons.inventory_2_outlined,
+        title: 'Your products',
+        body:
+            'Tap any product to see its detail — stock, variants, barcode, history — or to edit it.'),
+  ]),
+  'invoices': PageGuide('Invoices', [
+    CoachStep(
+        id: 'search',
+        icon: Icons.search,
+        title: 'Find any bill',
+        body: 'Search by invoice number or customer name.'),
+    CoachStep(
+        id: 'filters',
+        icon: Icons.filter_list,
+        title: 'Filter by payment',
+        body:
+            'One tap to see only Paid, Partial or Credit bills — great for chasing dues.'),
+    CoachStep(
+        id: 'list',
+        icon: Icons.receipt_long_outlined,
+        title: 'Open a bill',
+        body:
+            'Tap an invoice to reprint/share it, record a due payment, edit it, make a return, or cancel it (stock is restored).'),
+  ]),
+  'purchases': PageGuide('Purchases', [
+    CoachStep(
+        id: 'presets',
+        icon: Icons.event_outlined,
+        title: 'Quick date filters',
+        body: 'Jump between today, this week, this month — one tap.'),
+    CoachStep(
+        id: 'status',
+        icon: Icons.account_balance_wallet_outlined,
+        title: 'Paid / Partial / Credit',
+        body: 'Filter purchases by how much you\'ve paid the supplier.'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.add_shopping_cart,
+        title: 'Record a purchase',
+        body:
+            'Enter a supplier bill — items, quantities, cost prices, GST. Stock goes up automatically when you save.'),
+  ]),
+  'customers': PageGuide('Customers', [
+    CoachStep(
+        id: 'list',
+        icon: Icons.people_outline,
+        title: 'Your customers',
+        body:
+            'Each entry shows the due balance. Tap one for the full ledger — bills, payments and returns.'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.person_add_alt,
+        title: 'Add a customer',
+        body:
+            'Save name, phone and address; set an optional credit limit to get warned before dues grow too big.'),
+  ]),
+  'suppliers': PageGuide('Suppliers', [
+    CoachStep(
+        id: 'list',
+        icon: Icons.local_shipping_outlined,
+        title: 'Who you buy from',
+        body:
+            'Each supplier shows how much you still owe. Tap for the full ledger of purchases and payments.'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.add,
+        title: 'Add a supplier',
+        body: 'Save their contact details, then record purchases against them.'),
+  ]),
+  'stock': PageGuide('Stock', [
+    CoachStep(
+        id: 'filters',
+        icon: Icons.tune,
+        title: 'Low & out of stock',
+        body:
+            'These filters instantly show what needs restocking — the same alerts as the dashboard tiles.'),
+    CoachStep(
+        id: 'list',
+        icon: Icons.inventory_2_outlined,
+        title: 'Every product\'s stock',
+        body:
+            'Tap a product to adjust stock, record damage, or see its full in/out movement history.'),
+  ]),
+  'expenses': PageGuide('Expenses', [
+    CoachStep(
+        id: 'presets',
+        icon: Icons.event_outlined,
+        title: 'Pick a period',
+        body: 'Today, this week, this month, last month — or use the calendar for any range.'),
+    CoachStep(
+        id: 'total',
+        icon: Icons.summarize_outlined,
+        title: 'Total for the period',
+        body: 'The sum updates instantly as you change filters or add expenses.'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.add_card,
+        title: 'Add an expense',
+        body: 'Amount + category + note. Rent, electricity, transport, chai — everything counts.'),
+  ]),
+  'reports': PageGuide('Reports', [
+    CoachStep(
+        id: 'list',
+        icon: Icons.query_stats,
+        title: 'Pick any report',
+        body:
+            'Sales, profit, stock, GST, dues, purchases, expenses — each opens with a chart, a table, a date filter and PDF export.'),
+  ]),
+  'import': PageGuide('Excel import', [
+    CoachStep(
+        id: 'template',
+        icon: Icons.download_outlined,
+        title: '1. Download the template',
+        body: 'Start here — the sample file has exactly the columns the import expects.'),
+    CoachStep(
+        id: 'upload',
+        icon: Icons.upload_file_outlined,
+        title: '2. Upload your file',
+        body:
+            'Every row is checked and duplicates are caught before anything is saved. Fix red rows and import again safely.'),
+  ]),
+  'job_cards': PageGuide('Job cards (repairs & services)', [
+    CoachStep(
+        id: 'filters',
+        icon: Icons.flag_outlined,
+        title: 'Track by status',
+        body:
+            'Filter jobs by stage — received, in progress, waiting for parts, ready, delivered.'),
+    CoachStep(
+        id: 'add',
+        icon: Icons.build_outlined,
+        title: 'Take in a new job',
+        body:
+            'Repair or on-site work? Record the item, problem, estimate, advance and service location. Parts + labour become one invoice at closing.'),
+  ]),
+  'services': PageGuide('Service catalog', [
+    CoachStep(
+        id: 'add',
+        icon: Icons.home_repair_service_outlined,
+        title: 'Your service menu',
+        body:
+            'Add the services you offer — repairs, stitching, installation — with price, GST and warranty. Job cards pick labour charges from this list.'),
+  ]),
+  'sale_returns': PageGuide('Sale returns', [
+    CoachStep(
+        id: 'add',
+        icon: Icons.assignment_return_outlined,
+        title: 'Take items back',
+        body:
+            'Pick the original invoice and choose what\'s coming back — you can never return more than was sold. Refund or adjust against dues.'),
+  ]),
+  'purchase_returns': PageGuide('Purchase returns', [
+    CoachStep(
+        id: 'add',
+        icon: Icons.assignment_return_outlined,
+        title: 'Return to supplier',
+        body:
+            'Pick the purchase and choose items to send back — only what\'s still in stock can be returned. Your supplier balance adjusts.'),
+  ]),
+  'offline_bills': PageGuide('Offline bills', [
+    CoachStep(
+        icon: Icons.wifi_off_outlined,
+        title: 'No internet? Keep billing',
+        body:
+            'When the connection drops, bills are saved here with temporary numbers and sync automatically when internet returns. Failed ones can be retried from this list.'),
+  ]),
+};

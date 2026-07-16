@@ -245,11 +245,11 @@ class CustomersScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(title: const Text('Customers'), actions: const [GuideButton('customers')]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'customers', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => showCustomerForm(context, ref),
         icon: const Icon(Icons.person_add),
         label: const Text('Add customer'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
@@ -285,7 +285,7 @@ class CustomersScreen extends ConsumerWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(customersProvider),
-              child: AsyncView(
+              child: CoachTarget(page: 'customers', id: 'list', child: AsyncView(
                 value: customers,
                 onRetry: () => ref.invalidate(customersProvider),
                 builder: (rows) => rows.isEmpty
@@ -341,7 +341,7 @@ class CustomersScreen extends ConsumerWidget {
                         itemBuilder: (context, i) =>
                             _CustomerTile(customer: rows[i]),
                       ),
-              ),
+              )),
             ),
           ),
         ],

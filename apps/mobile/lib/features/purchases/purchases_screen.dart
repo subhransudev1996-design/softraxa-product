@@ -21,11 +21,11 @@ class PurchasesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(title: const Text('Purchases'), actions: const [GuideButton('purchases')]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'purchases', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => context.push('/purchases/new'),
         icon: const Icon(Icons.add),
         label: const Text('Add purchase'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
@@ -40,7 +40,7 @@ class PurchasesScreen extends ConsumerWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
+            child: CoachTarget(page: 'purchases', id: 'presets', child: Row(
               children: [
                 for (final p in const [
                   ('all', 'All'),
@@ -60,12 +60,12 @@ class PurchasesScreen extends ConsumerWidget {
                     ),
                   ),
               ],
-            ),
+            )),
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: Row(
+            child: CoachTarget(page: 'purchases', id: 'status', child: Row(
               children: [
                 for (final s in const [
                   (null, 'All'),
@@ -86,7 +86,7 @@ class PurchasesScreen extends ConsumerWidget {
                     ),
                   ),
               ],
-            ),
+            )),
           ),
           const SizedBox(height: 4),
           Expanded(

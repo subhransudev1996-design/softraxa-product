@@ -573,7 +573,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: SearchField(
+                  child: CoachTarget(page: 'pos', id: 'search', child: SearchField(
                     controller: _searchController,
                     focusNode: _searchFocus,
                     hint: 'Search or scan barcode…',
@@ -586,11 +586,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                             onPressed: _clearSearch,
                           )
                         : null,
-                  ),
+                  )),
                 ),
                 if (!isDesktopPlatform) ...[
                   const SizedBox(width: 8),
-                  Material(
+                  CoachTarget(page: 'pos', id: 'scan', child: Material(
                     color: AppColors.primary,
                     borderRadius: BorderRadius.circular(14),
                     child: InkWell(
@@ -605,7 +605,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         ),
                       ),
                     ),
-                  ),
+                  )),
                 ],
               ],
             ),
@@ -613,7 +613,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           // customer row
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-            child: Material(
+            child: CoachTarget(page: 'pos', id: 'customer', child: Material(
               color: AppColors.card,
               borderRadius: BorderRadius.circular(14),
               child: InkWell(
@@ -688,7 +688,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   ),
                 ),
               ),
-            ),
+            )),
           ),
           Expanded(
             child: search.isNotEmpty
@@ -753,7 +753,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     message:
                         'Bill is empty.\nSearch or scan products to add them.',
                   )
-                : ListView.separated(
+                : CoachTarget(page: 'pos', id: 'cart', child: ListView.separated(
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
                     itemCount: cart.lines.length,
                     separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -846,13 +846,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         ),
                       );
                     },
-                  ),
+                  )),
           ),
           // ---- bottom bar ----
           if (cart.lines.isNotEmpty)
             SafeArea(
               top: false,
-              child: Container(
+              child: CoachTarget(page: 'pos', id: 'charge', child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                 decoration: BoxDecoration(
                   color: AppColors.card,
@@ -904,7 +904,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     ),
                   ],
                 ),
-              ),
+              )),
             ),
         ],
       ),

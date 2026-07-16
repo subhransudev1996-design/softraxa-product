@@ -94,7 +94,7 @@ class ReportsScreen extends ConsumerWidget {
       appBar: AppBar(title: const Text('Reports'), actions: const [GuideButton('reports')]),
       body: !enabled
           ? const Center(child: Text('Reports are not enabled on your plan.'))
-          : ListView.separated(
+          : CoachTarget(page: 'reports', id: 'list', child: ListView.separated(
               padding: const EdgeInsets.all(16),
               itemCount: _reports.length,
               separatorBuilder: (_, _) => const SizedBox(height: 8),
@@ -122,7 +122,7 @@ class ReportsScreen extends ConsumerWidget {
                   ),
                 );
               },
-            ),
+            )),
     );
   }
 }

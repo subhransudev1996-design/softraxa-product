@@ -29,29 +29,29 @@ class ProductsScreen extends ConsumerWidget {
             tooltip: 'Categories, brands & units',
             onPressed: () => context.push('/products/master-data'),
           ),
-          IconButton(
+          CoachTarget(page: 'products', id: 'master', child: IconButton(
             icon: const Icon(Icons.upload_file_outlined),
             tooltip: 'Excel import',
             onPressed: () => context.push('/import'),
-          ),
+          )),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'products', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => context.push('/products/new'),
         icon: const Icon(Icons.add),
         label: const Text('Add product'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: SearchField(
+            child: CoachTarget(page: 'products', id: 'search', child: SearchField(
               hint: 'Search name, SKU or barcode',
               onChanged: (v) => ref.read(productSearchProvider.notifier).set(v),
-            ),
+            )),
           ),
           Expanded(
-            child: RefreshIndicator(
+            child: CoachTarget(page: 'products', id: 'list', child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(productsProvider),
               child: AsyncView(
                 value: products,
@@ -102,7 +102,7 @@ class ProductsScreen extends ConsumerWidget {
                             itemBuilder: (context, i) => _ProductTile(product: rows[i]),
                           ),
               ),
-            ),
+            )),
           ),
         ],
       ),

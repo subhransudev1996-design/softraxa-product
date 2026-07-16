@@ -384,16 +384,16 @@ class ExpensesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'expenses', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => _addOrEdit(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('Add expense'),
-      ),
+      )),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: Row(
+            child: CoachTarget(page: 'expenses', id: 'presets', child: Row(
               children: [
                 for (final p in kExpensePresets)
                   Padding(
@@ -405,7 +405,7 @@ class ExpensesScreen extends ConsumerWidget {
                     ),
                   ),
               ],
-            ),
+            )),
           ),
           Expanded(
             child: AsyncView(
@@ -420,7 +420,7 @@ class ExpensesScreen extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: Card(
+                      child: CoachTarget(page: 'expenses', id: 'total', child: Card(
                         child: ListTile(
                           title: Text(
                             '${dateStr(range.from)} → ${dateStr(range.to)}',
@@ -435,7 +435,7 @@ class ExpensesScreen extends ConsumerWidget {
                             ),
                           ),
                         ),
-                      ),
+                      )),
                     ),
                     Expanded(
                       child: rows.isEmpty

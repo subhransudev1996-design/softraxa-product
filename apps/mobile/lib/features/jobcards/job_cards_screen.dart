@@ -22,11 +22,11 @@ class JobCardsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(title: const Text('Job cards'), actions: const [GuideButton('job_cards')]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'job_cards', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => context.push('/job-cards/new'),
         icon: const Icon(Icons.add),
         label: const Text('New job card'),
-      ),
+      )),
       body: Column(children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
@@ -39,7 +39,7 @@ class JobCardsScreen extends ConsumerWidget {
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(children: [
+          child: CoachTarget(page: 'job_cards', id: 'filters', child: Row(children: [
             for (final s in [null, ...jobStatuses])
               Padding(
                 padding: const EdgeInsets.only(right: 8),
@@ -50,7 +50,7 @@ class JobCardsScreen extends ConsumerWidget {
                       ref.read(jobCardFilterProvider.notifier).set(filter.copyWith(status: s)),
                 ),
               ),
-          ]),
+          ])),
         ),
         const SizedBox(height: 4),
         Expanded(

@@ -155,11 +155,11 @@ class ServicesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(title: const Text('Service catalog'), actions: const [GuideButton('services')]),
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: CoachTarget(page: 'services', id: 'add', child: FloatingActionButton.extended(
         onPressed: () => _addOrEdit(context, ref),
         icon: const Icon(Icons.add),
         label: const Text('Add service'),
-      ),
+      )),
       body: AsyncView(
         value: services,
         onRetry: () => ref.invalidate(servicesProvider),

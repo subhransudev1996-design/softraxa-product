@@ -248,14 +248,14 @@ class _DesktopDashboard extends StatelessWidget {
                             minimumSize: const Size(0, 44),
                           ),
                         ),
-                        FilledButton.icon(
+                        CoachTarget(page: 'home', id: 'new_bill', child: FilledButton.icon(
                           onPressed: () => context.go('/pos'),
                           icon: const Icon(Icons.receipt_long, size: 18),
                           label: const Text('New Bill'),
                           style: FilledButton.styleFrom(
                             minimumSize: const Size(0, 44),
                           ),
-                        ),
+                        )),
                       ],
                     ),
                   ),
@@ -290,7 +290,7 @@ class _DesktopDashboard extends StatelessWidget {
                         ),
                       ),
                     )
-                  : _statGrid(maxColumns: 6, [
+                  : CoachTarget(page: 'home', id: 'stats', child: _statGrid(maxColumns: 6, [
                       _StatCard(
                         title: "Today's Sale",
                         value: s == null
@@ -345,7 +345,7 @@ class _DesktopDashboard extends StatelessWidget {
                         color: AppColors.red,
                         onTap: () => context.push('/suppliers'),
                       ),
-                    ]),
+                    ])),
 
               const SizedBox(height: 24),
 
@@ -363,11 +363,11 @@ class _DesktopDashboard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 8),
-              _recentInvoicesCard(
+              CoachTarget(page: 'home', id: 'recent', child: _recentInvoicesCard(
                 context,
                 invoices: invoices,
                 onRetry: onRetryInvoices,
-              ),
+              )),
             ],
           ),
         ),
@@ -563,7 +563,7 @@ class _MobileDashboard extends StatelessWidget {
         // ============ quick actions ============
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 18, 16, 0),
-          child: Container(
+          child: CoachTarget(page: 'home', id: 'quick_actions', child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
               color: AppColors.card,
@@ -599,7 +599,7 @@ class _MobileDashboard extends StatelessWidget {
                   ),
               ],
             ),
-          ),
+          )),
         ),
 
         // ============ stat grid ============
@@ -624,7 +624,7 @@ class _MobileDashboard extends StatelessWidget {
                     ),
                   ),
                 )
-              : _statGrid([
+              : CoachTarget(page: 'home', id: 'stats', child: _statGrid([
                   _StatCard(
                     title: 'Stock Value',
                     value: s == null
@@ -661,7 +661,7 @@ class _MobileDashboard extends StatelessWidget {
                     color: AppColors.red,
                     onTap: () => context.push('/suppliers'),
                   ),
-                ]),
+                ])),
         ),
 
         // ============ recent invoices ============
@@ -683,11 +683,11 @@ class _MobileDashboard extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-          child: _recentInvoicesCard(
+          child: CoachTarget(page: 'home', id: 'recent', child: _recentInvoicesCard(
             context,
             invoices: invoices,
             onRetry: onRetryInvoices,
-          ),
+          )),
         ),
       ],
     );

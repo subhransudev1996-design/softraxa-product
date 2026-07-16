@@ -90,7 +90,7 @@ class StockScreen extends ConsumerWidget {
         ),
         Padding(
           padding: const EdgeInsets.all(12),
-          child: SegmentedButton<String>(
+          child: CoachTarget(page: 'stock', id: 'filters', child: SegmentedButton<String>(
             segments: const [
               ButtonSegment(value: 'all', label: Text('All')),
               ButtonSegment(value: 'low', label: Text('Low stock')),
@@ -99,12 +99,12 @@ class StockScreen extends ConsumerWidget {
             selected: {filter},
             onSelectionChanged: (s) =>
                 ref.read(stockFilterProvider.notifier).set(s.first),
-          ),
+          )),
         ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: () async => ref.invalidate(stockListProvider),
-            child: AsyncView(
+            child: CoachTarget(page: 'stock', id: 'list', child: AsyncView(
               value: list,
               onRetry: () => ref.invalidate(stockListProvider),
               builder: (rows) => rows.isEmpty
@@ -135,7 +135,7 @@ class StockScreen extends ConsumerWidget {
                           separatorBuilder: (_, _) => const SizedBox(height: 8),
                           itemBuilder: (context, i) => _StockTile(product: rows[i]),
                         ),
-            ),
+            )),
           ),
         ),
       ]),

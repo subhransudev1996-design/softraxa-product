@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/walkthrough.dart';
 
 import '../../core/platform.dart';
 import '../../core/theme_mode.dart';
@@ -68,7 +69,7 @@ class _MobileShell extends StatelessWidget {
       floatingActionButton: SizedBox(
         width: 64,
         height: 64,
-        child: FloatingActionButton(
+        child: CoachTarget(page: 'home', id: 'new_bill', child: FloatingActionButton(
           heroTag: 'new_bill_fab',
           onPressed: () => _go(1),
           tooltip: 'New Bill',
@@ -87,7 +88,7 @@ class _MobileShell extends StatelessWidget {
             ),
             child: const Icon(Icons.receipt_long, size: 28, color: Colors.white),
           ),
-        ),
+        )),
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(color: AppColors.card, boxShadow: softShadow(20)),
@@ -304,14 +305,14 @@ class AppSidebar extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: SizedBox(
             width: double.infinity,
-            child: FilledButton.icon(
+            child: CoachTarget(page: 'home', id: 'new_bill', child: FilledButton.icon(
               onPressed: () => context.go('/pos'),
               icon: const Icon(Icons.receipt_long, size: 18),
               label: const Text('New Bill'),
               style: FilledButton.styleFrom(
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-            ),
+            )),
           ),
         ),
         const SizedBox(height: 8),

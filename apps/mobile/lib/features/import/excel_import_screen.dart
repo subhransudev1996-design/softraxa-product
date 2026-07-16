@@ -441,19 +441,19 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: OutlinedButton.icon(
+                        child: CoachTarget(page: 'import', id: 'template', child: OutlinedButton.icon(
                           onPressed: _downloadSample,
                           icon: const Icon(Icons.download),
                           label: const Text('Sample file'),
-                        ),
+                        )),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: FilledButton.icon(
+                        child: CoachTarget(page: 'import', id: 'upload', child: FilledButton.icon(
                           onPressed: _parsing ? null : _pickFile,
                           icon: const Icon(Icons.upload_file),
                           label: Text(_parsing ? 'Reading…' : 'Choose file'),
-                        ),
+                        )),
                       ),
                     ],
                   ),
