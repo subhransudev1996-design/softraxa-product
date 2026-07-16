@@ -382,6 +382,17 @@ class JobCardDetailScreen extends ConsumerWidget {
                                 : 'Walk-in customer',
                             style: const TextStyle(fontSize: 13)),
                       ]),
+                      if ((j['service_location'] as String? ?? '').isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          const Icon(Icons.place_outlined, size: 16, color: AppColors.inkSoft),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(j['service_location'] as String,
+                                style: const TextStyle(fontSize: 13)),
+                          ),
+                        ]),
+                      ],
                       if ((j['technician_name'] as String? ?? '').isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Row(children: [

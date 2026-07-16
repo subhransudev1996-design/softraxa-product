@@ -76,7 +76,7 @@ final jobCardsProvider =
   if (filter.search.trim().isNotEmpty) {
     final s = filter.search.trim();
     query = query.or('job_no.ilike.%$s%,customer_name.ilike.%$s%,item_name.ilike.%$s%,'
-        'serial_no.ilike.%$s%,brand.ilike.%$s%,model.ilike.%$s%');
+        'serial_no.ilike.%$s%,brand.ilike.%$s%,model.ilike.%$s%,service_location.ilike.%$s%');
   }
   if (filter.status != null) query = query.eq('status', filter.status!);
   final rows =

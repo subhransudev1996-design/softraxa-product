@@ -29,6 +29,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   final _condition = TextEditingController();
   final _accessories = TextEditingController();
   final _technician = TextEditingController();
+  final _location = TextEditingController();
   final _estimatedCost = TextEditingController();
   final _advanceAmount = TextEditingController();
   final _customerNote = TextEditingController();
@@ -61,6 +62,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
         'item_condition': _condition.text.trim(),
         'accessories_received': _accessories.text.trim(),
         'technician_name': _technician.text.trim(),
+        'service_location': _location.text.trim(),
         'estimated_cost': double.tryParse(_estimatedCost.text) ?? 0,
         'advance_amount': double.tryParse(_advanceAmount.text) ?? 0,
         'advance_mode': _advanceMode,
@@ -185,6 +187,16 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               onChanged: (v) => setState(() => _advanceMode = v ?? 'cash'),
             ),
             const SectionLabel('Delivery & technician'),
+            TextFormField(
+              controller: _location,
+              textCapitalization: TextCapitalization.sentences,
+              decoration: const InputDecoration(
+                labelText: 'Service / installation location (optional)',
+                hintText: 'e.g. Patia, Bhubaneswar — 2nd floor, near water tank',
+                prefixIcon: Icon(Icons.place_outlined),
+              ),
+            ),
+            const SizedBox(height: 12),
             InkWell(
               onTap: () async {
                 final picked = await showDatePicker(
