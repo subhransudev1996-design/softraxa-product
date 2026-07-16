@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -21,36 +22,54 @@ class ProductFormScreen extends ConsumerStatefulWidget {
 
 class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final _name = TextEditingController(text: widget.existing?['name'] ?? '');
+  late final _name = TextEditingController(
+    text: widget.existing?['name'] ?? '',
+  );
   late final _sku = TextEditingController(text: widget.existing?['sku'] ?? '');
   late final _barcode = TextEditingController(
-      text: widget.existing?['barcode'] ?? widget.initialBarcode ?? '');
-  late final _hsn = TextEditingController(text: widget.existing?['hsn_code'] ?? '');
-  late final _purchase =
-      TextEditingController(text: _num(widget.existing?['purchase_price']));
-  late final _selling =
-      TextEditingController(text: _num(widget.existing?['selling_price']));
+    text: widget.existing?['barcode'] ?? widget.initialBarcode ?? '',
+  );
+  late final _hsn = TextEditingController(
+    text: widget.existing?['hsn_code'] ?? '',
+  );
+  late final _purchase = TextEditingController(
+    text: _num(widget.existing?['purchase_price']),
+  );
+  late final _selling = TextEditingController(
+    text: _num(widget.existing?['selling_price']),
+  );
   late final _mrp = TextEditingController(text: _num(widget.existing?['mrp']));
-  late final _wholesale =
-      TextEditingController(text: _num(widget.existing?['wholesale_price']));
-  late final _wholesaleMinQty =
-      TextEditingController(text: _num(widget.existing?['wholesale_min_qty']));
+  late final _wholesale = TextEditingController(
+    text: _num(widget.existing?['wholesale_price']),
+  );
+  late final _wholesaleMinQty = TextEditingController(
+    text: _num(widget.existing?['wholesale_min_qty']),
+  );
   late final _opening = TextEditingController();
-  late final _lowStock =
-      TextEditingController(text: _num(widget.existing?['low_stock_qty']));
-  late final _warranty =
-      TextEditingController(text: _num(widget.existing?['warranty_months']));
-  late final _description =
-      TextEditingController(text: widget.existing?['description'] ?? '');
+  late final _lowStock = TextEditingController(
+    text: _num(widget.existing?['low_stock_qty']),
+  );
+  late final _warranty = TextEditingController(
+    text: _num(widget.existing?['warranty_months']),
+  );
+  late final _description = TextEditingController(
+    text: widget.existing?['description'] ?? '',
+  );
   late final _secondaryUnitName = TextEditingController(
-      text: widget.existing?['secondary_unit_name'] as String? ?? '');
-  late final _conversionFactor =
-      TextEditingController(text: _num(widget.existing?['conversion_factor']));
+    text: widget.existing?['secondary_unit_name'] as String? ?? '',
+  );
+  late final _conversionFactor = TextEditingController(
+    text: _num(widget.existing?['conversion_factor']),
+  );
 
   String? _categoryId;
   String? _brandId;
   String? _unitId;
-  late double _gstRate = (widget.existing?['gst_rate'] as num?)?.toDouble() ?? 18;
+  late DateTime? _expiryDate = widget.existing?['expiry_date'] == null
+      ? null
+      : DateTime.tryParse(widget.existing!['expiry_date'] as String);
+  late double _gstRate =
+      (widget.existing?['gst_rate'] as num?)?.toDouble() ?? 18;
   late bool _hasVariants = widget.existing?['has_variants'] == true;
   late bool _trackSerial = widget.existing?['track_serial'] == true;
   late bool _trackPieces = widget.existing?['track_pieces'] == true;
@@ -70,7 +89,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _unitId = widget.existing?['unit_id'] as String?;
   }
 
-  Future<void> _quickAddMaster(String table, {required void Function(String id) onAdded}) async {
+  Future<void> _quickAddMaster(
+    String table, {
+    required void Function(String id) onAdded,
+  }) async {
     final name = TextEditingController();
     final shortName = TextEditingController();
     final label = switch (table) {
@@ -83,24 +105,35 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text('Add $label'),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(
-            controller: name,
-            autofocus: true,
-            textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Name'),
-          ),
-          if (table == 'units') ...[
-            const SizedBox(height: 12),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
             TextField(
-              controller: shortName,
-              decoration: const InputDecoration(labelText: 'Short name (pcs, kg…)'),
+              controller: name,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              decoration: const InputDecoration(labelText: 'Name'),
             ),
+            if (table == 'units') ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: shortName,
+                decoration: const InputDecoration(
+                  labelText: 'Short name (pcs, kg…)',
+                ),
+              ),
+            ],
           ],
-        ]),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
@@ -114,7 +147,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'name': name.text.trim(),
         if (table == 'units') 'short_name': shortName.text.trim(),
       };
-      final inserted = await client.from(table).insert(row).select('id').single();
+      final inserted = await client
+          .from(table)
+          .insert(row)
+          .select('id')
+          .single();
       switch (table) {
         case 'categories':
           ref.invalidate(categoriesProvider);
@@ -147,8 +184,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     }
     if (_secondaryUnitName.text.trim().isNotEmpty &&
         (double.tryParse(_conversionFactor.text) ?? 0) <= 0) {
-      showError(context,
-          'Enter how many base units make one ${_secondaryUnitName.text.trim()} (e.g. 1 Bag = 50 kg)');
+      showError(
+        context,
+        'Enter how many base units make one ${_secondaryUnitName.text.trim()} (e.g. 1 Bag = 50 kg)',
+      );
       return;
     }
     setState(() => _busy = true);
@@ -176,6 +215,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'has_variants': _hasVariants,
         'track_serial': _trackSerial,
         'track_pieces': _trackPieces,
+        'expiry_date': _expiryDate == null ? null : ymd(_expiryDate!),
         // Secondary (bulk) unit is display/entry-only; stock stays in the
         // base unit. Only saved when both label and a valid factor are set.
         'secondary_unit_name': _secondaryUnitName.text.trim().isEmpty
@@ -192,8 +232,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             .update(row)
             .eq('id', widget.existing!['id'] as String);
       } else {
-        final inserted =
-            await client.from('products').insert(row).select('id').single();
+        final inserted = await client
+            .from('products')
+            .insert(row)
+            .select('id')
+            .single();
         final productId = inserted['id'] as String;
 
         if (_hasVariants) {
@@ -204,21 +247,27 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 .select('id')
                 .single();
             if (draft.openingStock > 0) {
-              await client.rpc('add_opening_stock', params: {
-                'p_product_id': productId,
-                'p_variant_id': vRow['id'],
-                'p_quantity': draft.openingStock,
-              });
+              await client.rpc(
+                'add_opening_stock',
+                params: {
+                  'p_product_id': productId,
+                  'p_variant_id': vRow['id'],
+                  'p_quantity': draft.openingStock,
+                },
+              );
             }
           }
         } else {
           final opening = double.tryParse(_opening.text) ?? 0;
           if (opening > 0) {
-            await client.rpc('add_opening_stock', params: {
-              'p_product_id': productId,
-              'p_variant_id': null,
-              'p_quantity': opening,
-            });
+            await client.rpc(
+              'add_opening_stock',
+              params: {
+                'p_product_id': productId,
+                'p_variant_id': null,
+                'p_quantity': opening,
+              },
+            );
           }
         }
       }
@@ -241,11 +290,16 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     final brands = ref.watch(brandsProvider).value ?? [];
     final units = ref.watch(unitsProvider).value ?? [];
     final businessType =
-        ref.watch(appContextProvider).value?.business?['business_type'] as String? ?? 'other';
+        ref.watch(appContextProvider).value?.business?['business_type']
+            as String? ??
+        'other';
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text(isEdit ? 'Edit product' : 'Add product')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: Text(isEdit ? 'Edit product' : 'Add product'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -255,97 +309,130 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               controller: _name,
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(labelText: 'Product name *'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SectionLabel('Classification'),
-            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _categoryId,
-                  decoration: const InputDecoration(labelText: 'Category'),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('—')),
-                    for (final c in categories)
-                      DropdownMenuItem(value: c['id'] as String, child: Text(c['name'] as String)),
-                  ],
-                  onChanged: (v) => setState(() => _categoryId = v),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    // isExpanded: a dropdown sizes itself to its WIDEST menu
+                    // item, so one long name overflows the half-width field.
+                    isExpanded: true,
+                    initialValue: _categoryId,
+                    decoration: const InputDecoration(labelText: 'Category'),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('—')),
+                      for (final c in categories)
+                        DropdownMenuItem(
+                          value: c['id'] as String,
+                          child: Text(c['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _categoryId = v),
+                  ),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Add category',
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () => _quickAddMaster('categories',
-                    onAdded: (id) => setState(() => _categoryId = id)),
-              ),
-              const SizedBox(width: 4),
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _brandId,
-                  decoration: const InputDecoration(labelText: 'Brand'),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('—')),
-                    for (final b in brands)
-                      DropdownMenuItem(value: b['id'] as String, child: Text(b['name'] as String)),
-                  ],
-                  onChanged: (v) => setState(() => _brandId = v),
+                IconButton(
+                  tooltip: 'Add category',
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: () => _quickAddMaster(
+                    'categories',
+                    onAdded: (id) => setState(() => _categoryId = id),
+                  ),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Add brand',
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () => _quickAddMaster('brands',
-                    onAdded: (id) => setState(() => _brandId = id)),
-              ),
-            ]),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _brandId,
+                    decoration: const InputDecoration(labelText: 'Brand'),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('—')),
+                      for (final b in brands)
+                        DropdownMenuItem(
+                          value: b['id'] as String,
+                          child: Text(b['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _brandId = v),
+                  ),
+                ),
+                IconButton(
+                  tooltip: 'Add brand',
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: () => _quickAddMaster(
+                    'brands',
+                    onAdded: (id) => setState(() => _brandId = id),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
-            Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-              Expanded(
-                child: DropdownButtonFormField<String>(
-                  initialValue: _unitId,
-                  decoration: const InputDecoration(labelText: 'Unit'),
-                  items: [
-                    const DropdownMenuItem(value: null, child: Text('—')),
-                    for (final u in units)
-                      DropdownMenuItem(
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: DropdownButtonFormField<String>(
+                    isExpanded: true,
+                    initialValue: _unitId,
+                    decoration: const InputDecoration(labelText: 'Unit'),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text('—')),
+                      for (final u in units)
+                        DropdownMenuItem(
                           value: u['id'] as String,
-                          child: Text('${u['name']} (${u['short_name']})')),
-                  ],
-                  onChanged: (v) => setState(() => _unitId = v),
+                          child: Text('${u['name']} (${u['short_name']})', maxLines: 1, overflow: TextOverflow.ellipsis),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _unitId = v),
+                  ),
                 ),
-              ),
-              IconButton(
-                tooltip: 'Add unit',
-                icon: const Icon(Icons.add_circle_outline),
-                onPressed: () =>
-                    _quickAddMaster('units', onAdded: (id) => setState(() => _unitId = id)),
-              ),
-            ]),
+                IconButton(
+                  tooltip: 'Add unit',
+                  icon: const Icon(Icons.add_circle_outline),
+                  onPressed: () => _quickAddMaster(
+                    'units',
+                    onAdded: (id) => setState(() => _unitId = id),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
-            Row(children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _secondaryUnitName,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _secondaryUnitName,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
                       labelText: 'Bulk unit (optional)',
-                      helperText: 'e.g. Bag, Box, Rod'),
+                      helperText: 'e.g. Bag, Box, Rod',
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: _conversionFactor,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _conversionFactor,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
                       labelText: '= how many units?',
-                      helperText: '1 Bag = 50 kg → 50'),
+                      helperText: '1 Bag = 50 kg → 50',
+                    ),
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             const SectionLabel('Codes'),
             TextFormField(
               controller: _sku,
-              decoration: const InputDecoration(labelText: 'SKU / product code'),
+              decoration: const InputDecoration(
+                labelText: 'SKU / product code',
+              ),
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -361,36 +448,52 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _hsn,
-              decoration: const InputDecoration(labelText: 'HSN code (for GST invoice)'),
+              decoration: const InputDecoration(
+                labelText: 'HSN code (for GST invoice)',
+              ),
             ),
             const SectionLabel('Pricing'),
-            Row(children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _purchase,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Purchase price ₹'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _purchase,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Purchase price ₹',
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: _selling,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Selling price ₹ *'),
-                  validator: (v) =>
-                      !_hasVariants && (double.tryParse(v ?? '') == null) ? 'Required' : null,
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _selling,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Selling price ₹ *',
+                    ),
+                    validator: (v) =>
+                        !_hasVariants && (double.tryParse(v ?? '') == null)
+                        ? 'Required'
+                        : null,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: _mrp,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'MRP ₹'),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _mrp,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(labelText: 'MRP ₹'),
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<double>(
               initialValue: _gstRate,
@@ -407,44 +510,93 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             ),
             if (businessType == 'hardware') ...[
               const SectionLabel('Bulk pricing (optional)'),
-              Row(children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _wholesale,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Wholesale price ₹'),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _wholesale,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Wholesale price ₹',
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _wholesaleMinQty,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Min qty for wholesale'),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _wholesaleMinQty,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Min qty for wholesale',
+                      ),
+                    ),
                   ),
-                ),
-              ]),
+                ],
+              ),
             ],
             const SectionLabel('Stock'),
-            Row(children: [
-              if (!isEdit && !_hasVariants) ...[
+            Row(
+              children: [
+                if (!isEdit && !_hasVariants) ...[
+                  Expanded(
+                    child: TextFormField(
+                      controller: _opening,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Opening stock',
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                ],
                 Expanded(
                   child: TextFormField(
-                    controller: _opening,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Opening stock'),
+                    controller: _lowStock,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Low stock alert qty',
+                    ),
                   ),
                 ),
-                const SizedBox(width: 12),
               ],
-              Expanded(
-                child: TextFormField(
-                  controller: _lowStock,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Low stock alert qty'),
+            ),
+            const SizedBox(height: 12),
+            // Optional expiry — drives the bell's expired/near-expiry alerts.
+            InkWell(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _expiryDate ?? DateTime.now(),
+                  firstDate: DateTime(2020),
+                  lastDate: DateTime(2100),
+                );
+                if (picked != null && mounted) {
+                  setState(() => _expiryDate = picked);
+                }
+              },
+              child: InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Expiry date (optional)',
+                  helperText: 'Alerts appear when expired or within 30 days',
+                  suffixIcon: _expiryDate == null
+                      ? const Icon(Icons.event_outlined)
+                      : IconButton(
+                          tooltip: 'Clear expiry date',
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () => setState(() => _expiryDate = null),
+                        ),
                 ),
+                child: Text(_expiryDate == null ? '—' : dateStr(_expiryDate)),
               ),
-            ]),
+            ),
             const SectionLabel('Options'),
             SwitchListTile(
               value: _trackSerial,
@@ -466,7 +618,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 child: TextFormField(
                   controller: _warranty,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'Warranty (months)'),
+                  decoration: const InputDecoration(
+                    labelText: 'Warranty (months)',
+                  ),
                 ),
               ),
             if (!isEdit)
@@ -485,22 +639,33 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   child: ListTile(
                     title: Text(_variants[i].name),
                     subtitle: Text(
-                        'Stock: ${_variants[i].openingStock}  •  ₹${_variants[i].sellingPrice ?? _selling.text}'),
+                      'Stock: ${_variants[i].openingStock}  •  ₹${_variants[i].sellingPrice ?? _selling.text}',
+                    ),
                     trailing: IconButton(
-                      icon: const Icon(Icons.delete_outline, color: AppColors.red),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                        color: AppColors.red,
+                      ),
                       onPressed: () => setState(() => _variants.removeAt(i)),
                     ),
                     onTap: () async {
-                      final updated = await showVariantSheet(context,
-                          businessType: businessType, existing: _variants[i]);
-                      if (updated != null) setState(() => _variants[i] = updated);
+                      final updated = await showVariantSheet(
+                        context,
+                        businessType: businessType,
+                        existing: _variants[i],
+                      );
+                      if (updated != null) {
+                        setState(() => _variants[i] = updated);
+                      }
                     },
                   ),
                 ),
               OutlinedButton.icon(
                 onPressed: () async {
-                  final draft =
-                      await showVariantSheet(context, businessType: businessType);
+                  final draft = await showVariantSheet(
+                    context,
+                    businessType: businessType,
+                  );
                   if (draft != null) setState(() => _variants.add(draft));
                 },
                 icon: const Icon(Icons.add),
@@ -511,14 +676,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             TextFormField(
               controller: _description,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Description (optional)'),
+              decoration: const InputDecoration(
+                labelText: 'Description (optional)',
+              ),
             ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _busy ? null : _save,
               child: _busy
                   ? const SizedBox(
-                      height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : Text(isEdit ? 'Save changes' : 'Add product'),
             ),
             const SizedBox(height: 24),

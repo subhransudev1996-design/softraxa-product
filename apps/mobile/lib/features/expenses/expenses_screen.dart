@@ -206,6 +206,7 @@ class ExpensesScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
+                        isExpanded: true,
                         initialValue: categoryId,
                         decoration: const InputDecoration(
                           labelText: 'Category',
@@ -215,7 +216,7 @@ class ExpensesScreen extends ConsumerWidget {
                           for (final c in categories)
                             DropdownMenuItem(
                               value: c['id'] as String,
-                              child: Text(c['name'] as String),
+                              child: Text(c['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
                             ),
                         ],
                         onChanged: (v) => setState(() => categoryId = v),
@@ -374,6 +375,7 @@ class ExpensesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Expenses'),
         actions: [
           const GuideButton('expenses'),
@@ -384,28 +386,36 @@ class ExpensesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: CoachTarget(page: 'expenses', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => _addOrEdit(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add expense'),
-      )),
+      floatingActionButton: CoachTarget(
+        page: 'expenses',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => _addOrEdit(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('Add expense'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-            child: CoachTarget(page: 'expenses', id: 'presets', child: Row(
-              children: [
-                for (final p in kExpensePresets)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(p.$2),
-                      selected: preset == p.$1,
-                      onSelected: (_) => _applyPreset(ref, p.$1),
+            child: CoachTarget(
+              page: 'expenses',
+              id: 'presets',
+              child: Row(
+                children: [
+                  for (final p in kExpensePresets)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(p.$2),
+                        selected: preset == p.$1,
+                        onSelected: (_) => _applyPreset(ref, p.$1),
+                      ),
                     ),
-                  ),
-              ],
-            )),
+                ],
+              ),
+            ),
           ),
           Expanded(
             child: AsyncView(
@@ -420,22 +430,26 @@ class ExpensesScreen extends ConsumerWidget {
                   children: [
                     Padding(
                       padding: const EdgeInsets.all(16),
-                      child: CoachTarget(page: 'expenses', id: 'total', child: Card(
-                        child: ListTile(
-                          title: Text(
-                            '${dateStr(range.from)} → ${dateStr(range.to)}',
-                          ),
-                          subtitle: Text('${rows.length} entries'),
-                          trailing: Text(
-                            money(total),
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.red,
+                      child: CoachTarget(
+                        page: 'expenses',
+                        id: 'total',
+                        child: Card(
+                          child: ListTile(
+                            title: Text(
+                              '${dateStr(range.from)} → ${dateStr(range.to)}',
+                            ),
+                            subtitle: Text('${rows.length} entries'),
+                            trailing: Text(
+                              money(total),
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.red,
+                              ),
                             ),
                           ),
                         ),
-                      )),
+                      ),
                     ),
                     Expanded(
                       child: rows.isEmpty
@@ -630,10 +644,7 @@ class _ExpenseCard extends StatelessWidget {
                 children: [
                   Text(
                     'Paid via ${(e['payment_mode'] as String? ?? 'cash').toUpperCase()}',
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.inkSoft,
-                    ),
+                    style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                   ),
                   Text(
                     money(e['amount'] as num?),
@@ -651,10 +662,7 @@ class _ExpenseCard extends StatelessWidget {
                   note,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12.5,
-                    color: AppColors.inkSoft,
-                  ),
+                  style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
               ],
             ],
