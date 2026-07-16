@@ -150,7 +150,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
           const SizedBox(height: 4),
           Text(
             '${money(widget.rate)} / ${widget.unitName.isEmpty ? 'unit' : widget.unitName}',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.inkSoft,
               fontWeight: FontWeight.w600,
             ),

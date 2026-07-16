@@ -501,7 +501,7 @@ class _SupplierTile extends StatelessWidget {
                     ),
                     Text(
                       s['phone'] as String? ?? '',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppColors.inkSoft,
                       ),
@@ -659,7 +659,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Credit limit',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -668,7 +668,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                               ),
                               Text(
                                 money(creditLimit),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.inkSoft,
                                 ),

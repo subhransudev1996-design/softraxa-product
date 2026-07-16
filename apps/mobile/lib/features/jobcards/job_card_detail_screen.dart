@@ -252,7 +252,7 @@ class JobCardDetailScreen extends ConsumerWidget {
           content: SingleChildScrollView(
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               Text('Total: ${money(total)}  •  Advance already collected: ${money(advance)}',
-                  style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+                  style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
               const SizedBox(height: 12),
               SegmentedButton<String>(
                 segments: const [
@@ -358,7 +358,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                       ]),
                       const SizedBox(height: 4),
                       Text(dateStr(j['created_at']),
-                          style: const TextStyle(color: AppColors.inkSoft, fontSize: 12.5)),
+                          style: TextStyle(color: AppColors.inkSoft, fontSize: 12.5)),
                       const Divider(height: 20),
                       Text(
                           '${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : 'Item'}'
@@ -367,14 +367,14 @@ class JobCardDetailScreen extends ConsumerWidget {
                           style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
                       if ((j['serial_no'] as String? ?? '').isNotEmpty)
                         Text('IMEI/Serial: ${j['serial_no']}',
-                            style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+                            style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
                       if ((j['issue_description'] as String? ?? '').isNotEmpty) ...[
                         const SizedBox(height: 6),
                         Text(j['issue_description'] as String, style: const TextStyle(fontSize: 13)),
                       ],
                       const SizedBox(height: 10),
                       Row(children: [
-                        const Icon(Icons.person_outline, size: 16, color: AppColors.inkSoft),
+                        Icon(Icons.person_outline, size: 16, color: AppColors.inkSoft),
                         const SizedBox(width: 6),
                         Text(
                             (j['customer_name'] as String?)?.isNotEmpty == true
@@ -385,7 +385,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                       if ((j['service_location'] as String? ?? '').isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                          const Icon(Icons.place_outlined, size: 16, color: AppColors.inkSoft),
+                          Icon(Icons.place_outlined, size: 16, color: AppColors.inkSoft),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(j['service_location'] as String,
@@ -396,7 +396,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                       if ((j['technician_name'] as String? ?? '').isNotEmpty) ...[
                         const SizedBox(height: 4),
                         Row(children: [
-                          const Icon(Icons.engineering_outlined, size: 16, color: AppColors.inkSoft),
+                          Icon(Icons.engineering_outlined, size: 16, color: AppColors.inkSoft),
                           const SizedBox(width: 6),
                           Text(j['technician_name'] as String, style: const TextStyle(fontSize: 13)),
                         ]),
@@ -404,7 +404,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                       if (j['expected_delivery'] != null) ...[
                         const SizedBox(height: 4),
                         Row(children: [
-                          const Icon(Icons.event_outlined, size: 16, color: AppColors.inkSoft),
+                          Icon(Icons.event_outlined, size: 16, color: AppColors.inkSoft),
                           const SizedBox(width: 6),
                           Text('Expected: ${dateStr(j['expected_delivery'])}',
                               style: const TextStyle(fontSize: 13)),
@@ -456,7 +456,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                               style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13.5)),
                           subtitle: Text(
                               'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
-                              style: const TextStyle(fontSize: 12, color: AppColors.inkSoft)),
+                              style: TextStyle(fontSize: 12, color: AppColors.inkSoft)),
                           trailing: Row(mainAxisSize: MainAxisSize.min, children: [
                             Text(money(items[i]['line_total'] as num?),
                                 style: const TextStyle(fontWeight: FontWeight.w800)),
@@ -513,7 +513,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                     label: const Text('Close job & generate invoice'),
                   )
                 else
-                  const Padding(
+                  Padding(
                     padding: EdgeInsets.symmetric(vertical: 4),
                     child: Text('This job has been closed and billed.',
                         style: TextStyle(color: AppColors.inkSoft, fontSize: 12.5)),

@@ -192,7 +192,7 @@ class _PurchaseRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 dateStr(p['purchase_date']),
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
             Expanded(
@@ -265,7 +265,7 @@ class _PurchaseTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       dateStr(p['purchase_date']),
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12,
                       ),

@@ -183,11 +183,11 @@ class _StockRow extends StatelessWidget {
                       ].join(' • '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft))
+                      style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft))
                   : Text('Value: ${money(stock * toDouble(p['purchase_price']))}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+                      style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             ),
           ),
           Expanded(
@@ -263,9 +263,9 @@ class _StockTile extends StatelessWidget {
                           ].join(' • '),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 12, color: AppColors.inkSoft))
+                          style: TextStyle(fontSize: 12, color: AppColors.inkSoft))
                       : Text('Value: ${money(stock * toDouble(p['purchase_price']))}',
-                          style: const TextStyle(fontSize: 12, color: AppColors.inkSoft)),
+                          style: TextStyle(fontSize: 12, color: AppColors.inkSoft)),
                 ],
               ),
             ),
@@ -310,7 +310,7 @@ class StockMovementsScreen extends ConsumerWidget {
 
   final String productId;
 
-  static const _labels = {
+  static final _labels = {
     'opening': ('Opening stock', Icons.flag_outlined, AppColors.inkSoft),
     'purchase': ('Purchase', Icons.shopping_cart_outlined, AppColors.green),
     'sale': ('Sale', Icons.receipt_long_outlined, AppColors.indigo),
@@ -350,7 +350,7 @@ class StockMovementsScreen extends ConsumerWidget {
                     subtitle: Text(
                         '${dateTimeStr(m['created_at'])}'
                         '${(m['note'] as String? ?? '').isNotEmpty ? '\n${m['note']}' : ''}',
-                        style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                        style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
                     trailing: Text('${q > 0 ? '+' : ''}${qty(q)}',
                         style: TextStyle(
                             fontSize: 16,

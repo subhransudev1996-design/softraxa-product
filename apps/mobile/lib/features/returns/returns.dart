@@ -341,7 +341,7 @@ class _SaleReturnRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 dateStr(r['return_date']),
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
             Expanded(
@@ -355,7 +355,7 @@ class _SaleReturnRow extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(
+            SizedBox(
               width: 90,
               child: Align(
                 alignment: Alignment.centerRight,
@@ -415,7 +415,7 @@ class _SaleReturnTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Against ${(r['invoices'] as Map?)?['invoice_no'] ?? '—'} • ${dateStr(r['return_date'])}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12,
                       ),
@@ -433,7 +433,7 @@ class _SaleReturnTile extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 2),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
                     size: 18,
                     color: AppColors.inkSoft,
@@ -599,7 +599,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           dateStr(r['return_date']),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.inkSoft,
                             fontSize: 12.5,
                           ),
@@ -662,7 +662,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                           subtitle: Text(
                             'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}'
                             '${(items[i]['serial_no'] as String? ?? '').isNotEmpty ? '\nIMEI/Serial: ${items[i]['serial_no']}' : ''}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: AppColors.inkSoft,
                             ),
@@ -930,7 +930,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 ),
                               ),
                               if (_loadingReturned)
-                                const Text(
+                                Text(
                                   'Checking earlier returns…',
                                   style: TextStyle(
                                     fontSize: 12,
@@ -1368,7 +1368,7 @@ class _PurchaseReturnRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 dateStr(r['return_date']),
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
             Expanded(
@@ -1382,7 +1382,7 @@ class _PurchaseReturnRow extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(
+            SizedBox(
               width: 90,
               child: Align(
                 alignment: Alignment.centerRight,
@@ -1444,7 +1444,7 @@ class _PurchaseReturnTile extends StatelessWidget {
                       'Against ${(r['purchases'] as Map?)?['purchase_no'] ?? '—'}'
                       '${(r['suppliers'] as Map?)?['name'] != null ? ' • ${(r['suppliers'] as Map)['name']}' : ''}'
                       ' • ${dateStr(r['return_date'])}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12,
                       ),
@@ -1462,7 +1462,7 @@ class _PurchaseReturnTile extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 2),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right,
                     size: 18,
                     color: AppColors.inkSoft,
@@ -1537,7 +1537,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                         const SizedBox(height: 4),
                         Text(
                           dateStr(r['return_date']),
-                          style: const TextStyle(
+                          style: TextStyle(
                             color: AppColors.inkSoft,
                             fontSize: 12.5,
                           ),
@@ -1599,7 +1599,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                           ),
                           subtitle: Text(
                             'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               color: AppColors.inkSoft,
                             ),

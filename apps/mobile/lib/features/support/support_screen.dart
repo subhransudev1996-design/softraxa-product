@@ -96,7 +96,7 @@ class SupportScreen extends ConsumerWidget {
                             '${t['message'] ?? ''}\n${dateTimeStr(t['created_at'])}',
                             maxLines: 3,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                            style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
                         trailing: StatusChip(
                           (t['status'] as String).replaceAll('_', ' '),
                           color: switch (t['status']) {

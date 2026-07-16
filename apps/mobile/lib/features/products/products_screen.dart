@@ -181,7 +181,7 @@ class _ProductRow extends StatelessWidget {
                     Text(sku,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11.5, color: AppColors.inkSoft)),
+                        style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft)),
                 ],
               ),
             ),
@@ -222,7 +222,7 @@ class _ProductRow extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerRight,
               child: inactive
-                  ? const StatusChip('inactive', color: AppColors.inkSoft)
+                  ? StatusChip('inactive', color: AppColors.inkSoft)
                   : isOut
                       ? const StatusChip('out of stock', color: AppColors.red)
                       : isLow
@@ -292,7 +292,7 @@ class _ProductTile extends ConsumerWidget {
                   const SizedBox(height: 2),
                   Row(children: [
                     Text(money(product['selling_price'] as num?),
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 12.5)),
                     const SizedBox(width: 8),
                     if ((product['brands'] as Map?)?['name'] != null)
@@ -300,7 +300,7 @@ class _ProductTile extends ConsumerWidget {
                           child: Text((product['brands'] as Map)['name'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 12, color: AppColors.inkSoft))),
+                              style: TextStyle(fontSize: 12, color: AppColors.inkSoft))),
                   ]),
                 ],
               ),
@@ -317,7 +317,7 @@ class _ProductTile extends ConsumerWidget {
                         color: isOut ? AppColors.red : (isLow ? AppColors.orange : AppColors.green))),
                 const SizedBox(height: 2),
                 if (inactive)
-                  const StatusChip('inactive', color: AppColors.inkSoft)
+                  StatusChip('inactive', color: AppColors.inkSoft)
                 else if (isOut)
                   const StatusChip('out of stock', color: AppColors.red)
                 else if (isLow)

@@ -119,7 +119,7 @@ Widget _recentInvoicesCard(
           )
         : Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(18),
               boxShadow: softShadow(),
             ),
@@ -203,7 +203,7 @@ class _DesktopDashboard extends StatelessWidget {
                           appContext?.businessName ?? 'My Shop',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.w800,
                             color: AppColors.ink,
@@ -211,7 +211,7 @@ class _DesktopDashboard extends StatelessWidget {
                         ),
                         Text(
                           dateStr(DateTime.now()),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12.5,
                             color: AppColors.inkSoft,
                           ),
@@ -557,7 +557,7 @@ class _MobileDashboard extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(vertical: 14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(18),
               boxShadow: softShadow(),
             ),
@@ -771,7 +771,7 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.card,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
@@ -806,7 +806,7 @@ class _StatCard extends StatelessWidget {
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                         color: AppColors.inkSoft,
@@ -906,7 +906,7 @@ class _InvoiceTile extends StatelessWidget {
                     '${invoice['invoice_no']}  •  ${dateTimeStr(invoice['invoice_date'])}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 11.5,
                       color: AppColors.inkSoft,
                     ),

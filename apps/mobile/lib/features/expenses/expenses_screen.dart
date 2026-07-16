@@ -492,7 +492,7 @@ class ExpensesScreen extends ConsumerWidget {
                                       '${(e['note'] as String? ?? '').isNotEmpty ? ' • ${e['note']}' : ''}',
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         color: AppColors.inkSoft,
                                         fontSize: 12,
                                       ),
@@ -555,7 +555,7 @@ class _ExpenseCard extends StatelessWidget {
     final e = expense;
     final note = e['note'] as String? ?? '';
     return Material(
-      color: Colors.white,
+      color: AppColors.card,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -596,7 +596,7 @@ class _ExpenseCard extends StatelessWidget {
                         ),
                         Text(
                           dateStr(e['expense_date']),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12.5,
                             color: AppColors.inkSoft,
                           ),
@@ -628,7 +628,7 @@ class _ExpenseCard extends StatelessWidget {
                 children: [
                   Text(
                     'Paid via ${(e['payment_mode'] as String? ?? 'cash').toUpperCase()}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       color: AppColors.inkSoft,
                     ),
@@ -649,7 +649,7 @@ class _ExpenseCard extends StatelessWidget {
                   note,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12.5,
                     color: AppColors.inkSoft,
                   ),

@@ -217,7 +217,7 @@ class _InvoiceRow extends StatelessWidget {
                     ),
                   ),
                   if (inv['invoice_type'] == 'estimate')
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(left: 6),
                       child: StatusChip('estimate', color: AppColors.inkSoft),
                     ),
@@ -246,7 +246,7 @@ class _InvoiceRow extends StatelessWidget {
               flex: 2,
               child: Text(
                 dateTimeStr(inv['invoice_date']),
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
             Expanded(
@@ -321,7 +321,7 @@ class _InvoiceTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         if (inv['invoice_type'] == 'estimate')
-                          const StatusChip(
+                          StatusChip(
                             'estimate',
                             color: AppColors.inkSoft,
                           ),
@@ -342,7 +342,7 @@ class _InvoiceTile extends StatelessWidget {
                       ' • ${dateTimeStr(inv['invoice_date'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12,
                       ),

@@ -234,7 +234,7 @@ class _ServiceRow extends StatelessWidget {
                 (s['category'] as String? ?? '').isNotEmpty ? s['category'] as String : 'Service',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft)),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft)),
           ),
           Expanded(
             flex: 2,
@@ -295,7 +295,7 @@ class _ServiceTile extends StatelessWidget {
                       (s['category'] as String? ?? '').isNotEmpty
                           ? s['category'] as String
                           : 'Service',
-                      style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
                 ],
               ),
             ),

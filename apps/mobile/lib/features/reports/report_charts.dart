@@ -97,7 +97,7 @@ class ReportBarChart extends StatelessWidget {
                     drawVerticalLine: false,
                     horizontalInterval: maxV / 4,
                     getDrawingHorizontalLine: (_) =>
-                        const FlLine(color: AppColors.line, strokeWidth: 1),
+                        FlLine(color: AppColors.line, strokeWidth: 1),
                   ),
                   borderData: FlBorderData(show: false),
                   titlesData: FlTitlesData(
@@ -126,7 +126,7 @@ class ReportBarChart extends StatelessWidget {
                               label.length > 10
                                   ? '${label.substring(0, 9)}…'
                                   : label,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 10,
                                 color: AppColors.inkSoft,
                               ),
@@ -200,7 +200,7 @@ class ReportBarChart extends StatelessWidget {
       const SizedBox(width: 6),
       Text(
         label,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 12,
           color: AppColors.inkSoft,
           fontWeight: FontWeight.w600,
@@ -308,7 +308,7 @@ class _ReportPieChartState extends State<ReportPieChart> {
                       ),
                       Text(
                         '${(points[i].$2 / total * 100).toStringAsFixed(0)}%',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           color: AppColors.inkSoft,
                           fontWeight: FontWeight.w700,

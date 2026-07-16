@@ -387,7 +387,7 @@ class _CustomerTile extends StatelessWidget {
                     ),
                     Text(
                       c['phone'] as String? ?? '',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppColors.inkSoft,
                       ),

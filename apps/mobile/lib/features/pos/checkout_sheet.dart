@@ -394,7 +394,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               .isNotEmpty)
                             Text(
                               cart.customer!['phone'] as String,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12.5,
                                 color: AppColors.inkSoft,
                               ),
@@ -405,7 +405,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               cart.customer!['address'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.inkSoft,
                               ),
@@ -438,7 +438,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                     if (creditLimit != null)
                                       Text(
                                         'Credit limit: ${money(creditLimit)}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           color: AppColors.inkSoft,
                                         ),
@@ -449,7 +449,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             },
                           ),
                         ] else
-                          const Text(
+                          Text(
                             'No customer selected',
                             style: TextStyle(
                               fontSize: 12,
@@ -524,7 +524,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         alignment: Alignment.centerRight,
                         child: Text(
                           '− ${money(cart.billDiscountAmount)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
                             color: AppColors.inkSoft,
                           ),
@@ -889,7 +889,7 @@ class _ProfitBanner extends StatelessWidget {
             color: color,
           ),
           const SizedBox(width: 8),
-          const Expanded(
+          Expanded(
             child: Text(
               'Your profit (not shown to customer)',
               style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),

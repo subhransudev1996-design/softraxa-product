@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 import 'core/platform.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
+import 'core/theme_mode.dart';
 import 'features/offline/offline_service.dart';
 
 Future<void> main() async {
@@ -29,6 +30,7 @@ Future<void> main() async {
       await windowManager.focus();
     });
   }
+  await loadSavedThemeMode(); // desktop-only; no-op on phones
   runApp(const ProviderScope(child: App()));
 }
 
@@ -51,11 +53,18 @@ class _AppState extends ConsumerState<App> {
   @override
   Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
+    final dark = ref.watch(darkModeProvider);
     return MaterialApp.router(
       title: 'SOFTRAXA Inventory',
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
+      theme: buildTheme(dark: dark),
       routerConfig: router,
+      // AppColors' mode-dependent neutrals are plain static fields — no
+      // widget depends on them reactively — so a theme toggle must force
+      // the whole tree to rebuild. Keying the subtree on the mode does
+      // exactly that (route state lives in GoRouter and survives).
+      builder: (context, child) =>
+          KeyedSubtree(key: ValueKey(dark), child: child ?? const SizedBox()),
     );
   }
 }

@@ -138,7 +138,7 @@ class _JobCardRow extends StatelessWidget {
           Expanded(
             flex: 2,
             child: Text(dateStr(j['created_at']),
-                style: const TextStyle(fontSize: 13, color: AppColors.inkSoft)),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft)),
           ),
           Expanded(
             flex: 2,
@@ -197,7 +197,7 @@ class _JobCardTile extends StatelessWidget {
                       ' • ${dateStr(j['created_at'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
                 ],
               ),
             ),
@@ -209,7 +209,7 @@ class _JobCardTile extends StatelessWidget {
                 StatusChip(jobStatusLabel(status), color: jobStatusColors[status] ?? AppColors.inkSoft),
                 const SizedBox(height: 4),
                 Text(money(j['estimated_cost'] as num?),
-                    style: const TextStyle(fontSize: 12, color: AppColors.inkSoft)),
+                    style: TextStyle(fontSize: 12, color: AppColors.inkSoft)),
               ],
             ),
           ]),

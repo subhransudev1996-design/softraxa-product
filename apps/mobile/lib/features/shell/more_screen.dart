@@ -46,7 +46,7 @@ class MoreScreen extends ConsumerWidget {
               title: Text(appContext?.businessName ?? '',
                   style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 15)),
               subtitle: Text(appContext?.business?['phone'] as String? ?? '',
-                  style: const TextStyle(color: AppColors.inkSoft, fontSize: 12.5)),
+                  style: TextStyle(color: AppColors.inkSoft, fontSize: 12.5)),
               trailing: const Icon(Icons.edit_outlined, size: 20),
               onTap: () => context.push('/settings/business'),
             ),

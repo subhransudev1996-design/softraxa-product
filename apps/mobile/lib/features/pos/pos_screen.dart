@@ -612,7 +612,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
             child: Material(
-              color: Colors.white,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(14),
               child: InkWell(
                 borderRadius: BorderRadius.circular(14),
@@ -677,7 +677,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               ref.read(cartProvider.notifier).setCustomer(null),
                         )
                       else
-                        const Icon(
+                        Icon(
                           Icons.chevron_right,
                           color: AppColors.inkSoft,
                           size: 20,
@@ -790,7 +790,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                       const SizedBox(height: 2),
                                       Text(
                                         '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           fontSize: 12,
                                           color: AppColors.inkSoft,
                                         ),
@@ -853,7 +853,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               child: Container(
                 padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.card,
                   boxShadow: softShadow(20),
                 ),
                 child: Row(
@@ -864,7 +864,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         children: [
                           Text(
                             '${cart.itemCount} items • Qty ${qty(cart.totalQty)}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11.5,
                               color: AppColors.inkSoft,
                               fontWeight: FontWeight.w600,
@@ -881,7 +881,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           if (cart.taxTotal > 0)
                             Text(
                               'incl. GST ${money(cart.taxTotal)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11,
                                 color: AppColors.inkSoft,
                               ),

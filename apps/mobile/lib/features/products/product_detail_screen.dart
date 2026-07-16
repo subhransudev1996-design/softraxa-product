@@ -319,7 +319,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                           color: AppColors.teal,
                                         ),
                                       if (p['is_active'] != true)
-                                        const StatusChip(
+                                        StatusChip(
                                           'inactive',
                                           color: AppColors.inkSoft,
                                         ),
@@ -400,7 +400,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                           ),
                                           child: Text(
                                             '1 ${p['secondary_unit_name']} = ${qty(toDouble(p['conversion_factor']))} $unit',
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontSize: 12,
                                               color: AppColors.inkSoft,
                                             ),
@@ -444,7 +444,7 @@ class ProductDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             subtitle: variants.isNotEmpty
-                                ? const Text(
+                                ? Text(
                                     'Choose a variant to adjust',
                                     style: TextStyle(
                                       fontSize: 11.5,
@@ -518,7 +518,7 @@ class ProductDetailScreen extends ConsumerWidget {
                           Text(
                             'Variants',
                             style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(color: Colors.grey.shade700),
+                                ?.copyWith(color: AppColors.inkSoft),
                           ),
                           TextButton.icon(
                             onPressed: () => _addVariant(context, ref, p),
@@ -549,7 +549,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                 subtitle: Text(
                                   '₹${v['selling_price'] ?? p['selling_price']}'
                                   '${(v['barcode'] as String? ?? '').isNotEmpty ? '  •  ${v['barcode']}' : ''}',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     color: AppColors.inkSoft,
                                     fontSize: 12,
                                   ),

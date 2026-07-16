@@ -129,12 +129,12 @@ class EmptyState extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 56, color: Colors.grey.shade400),
+            Icon(icon, size: 56, color: AppColors.hint),
             const SizedBox(height: 12),
             Text(
               message,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600),
+              style: TextStyle(color: AppColors.inkSoft),
             ),
             if (action != null) ...[const SizedBox(height: 16), action!],
           ],
@@ -243,7 +243,7 @@ class SectionLabel extends StatelessWidget {
       text,
       style: Theme.of(
         context,
-      ).textTheme.titleSmall?.copyWith(color: Colors.grey.shade700),
+      ).textTheme.titleSmall?.copyWith(color: AppColors.inkSoft),
     ),
   );
 }
@@ -409,7 +409,7 @@ class _DesktopTableState<T> extends State<DesktopTable<T>> {
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: AppColors.card,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.line),
             ),
@@ -421,7 +421,7 @@ class _DesktopTableState<T> extends State<DesktopTable<T>> {
                   child: ListView.separated(
                     itemCount: sortedRows.length,
                     separatorBuilder: (_, _) =>
-                        const Divider(height: 1, color: AppColors.line),
+                        Divider(height: 1, color: AppColors.line),
                     itemBuilder: (context, i) =>
                         widget.rowBuilder(context, sortedRows[i]),
                   ),
@@ -436,7 +436,7 @@ class _DesktopTableState<T> extends State<DesktopTable<T>> {
 
   Widget _buildHeader() {
     return Container(
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: AppColors.canvas,
         border: Border(bottom: BorderSide(color: AppColors.line)),
       ),
@@ -623,7 +623,7 @@ class PartyCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: Colors.white,
+      color: AppColors.card,
       borderRadius: BorderRadius.circular(18),
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
@@ -659,7 +659,7 @@ class PartyCard extends StatelessWidget {
                         if (phone.isNotEmpty)
                           Text(
                             phone,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12.5,
                               color: AppColors.inkSoft,
                             ),
@@ -685,7 +685,7 @@ class PartyCard extends StatelessWidget {
                 children: [
                   Text(
                     dueLabel,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12.5,
                       color: AppColors.inkSoft,
                     ),
@@ -705,7 +705,7 @@ class PartyCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Credit limit',
                       style: TextStyle(
                         fontSize: 11.5,
@@ -714,7 +714,7 @@ class PartyCard extends StatelessWidget {
                     ),
                     Text(
                       money(creditLimit),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11.5,
                         color: AppColors.inkSoft,
                       ),

@@ -87,7 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
-                    const Text(
+                    Text(
                       'Billing • Stock • GST',
                       textAlign: TextAlign.center,
                       style: TextStyle(

@@ -111,7 +111,7 @@ class ReportsScreen extends ConsumerWidget {
                     ),
                     subtitle: Text(
                       r.$3,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         color: AppColors.inkSoft,
                       ),

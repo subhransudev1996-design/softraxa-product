@@ -194,7 +194,7 @@ class PiecesCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (rows.isEmpty)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.fromLTRB(0, 4, 8, 4),
                       child: Text(
                           'No pieces recorded. Add them so billing can pick '

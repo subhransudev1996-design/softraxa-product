@@ -118,7 +118,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
+                              Text(
                                 'Credit limit',
                                 style: TextStyle(
                                   fontSize: 12,
@@ -127,7 +127,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                               ),
                               Text(
                                 money(creditLimit),
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.inkSoft,
                                 ),

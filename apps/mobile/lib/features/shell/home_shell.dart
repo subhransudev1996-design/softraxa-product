@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/platform.dart';
+import '../../core/theme_mode.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -89,9 +90,9 @@ class _MobileShell extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: Colors.white, boxShadow: softShadow(20)),
+        decoration: BoxDecoration(color: AppColors.card, boxShadow: softShadow(20)),
         child: BottomAppBar(
-          color: Colors.white,
+          color: AppColors.card,
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           height: 66,
@@ -420,6 +421,17 @@ class AppSidebar extends ConsumerWidget {
           ),
         ),
         const Divider(height: 1, color: _sidebarDivider),
+        if (isDesktopPlatform)
+          _RailTile(
+            icon: ref.watch(darkModeProvider)
+                ? Icons.light_mode_outlined
+                : Icons.dark_mode_outlined,
+            label: ref.watch(darkModeProvider) ? 'Light mode' : 'Dark mode',
+            foregroundColor: _sidebarMuted,
+            selectedBackground: _sidebarActiveBg,
+            selectedForeground: Colors.white,
+            onTap: () => ref.read(darkModeProvider.notifier).toggle(),
+          ),
         _RailTile(
           icon: Icons.logout,
           label: 'Logout',
@@ -461,16 +473,16 @@ class _SidebarSectionLabel extends StatelessWidget {
 }
 
 class _RailTile extends StatelessWidget {
-  const _RailTile({
+  _RailTile({
     required this.icon,
     required this.label,
     required this.onTap,
     this.activeIcon,
     this.selected = false,
     this.color,
-    this.foregroundColor = AppColors.ink,
-    this.selectedBackground = AppColors.primarySoft,
-    this.selectedForeground = AppColors.primary,
+    this.foregroundColor,
+    this.selectedBackground,
+    this.selectedForeground,
   });
 
   final IconData icon;
@@ -478,18 +490,22 @@ class _RailTile extends StatelessWidget {
   final String label;
   final bool selected;
   final Color? color;
-  final Color foregroundColor;
-  final Color selectedBackground;
-  final Color selectedForeground;
+  // Nullable because their fallbacks are the mode-dependent (non-const)
+  // AppColors neutrals, which can't be default parameter values.
+  final Color? foregroundColor;
+  final Color? selectedBackground;
+  final Color? selectedForeground;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final fg = color ?? (selected ? selectedForeground : foregroundColor);
+    final selFg = selectedForeground ?? AppColors.primary;
+    final baseFg = foregroundColor ?? AppColors.ink;
+    final fg = color ?? (selected ? selFg : baseFg);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Material(
-        color: selected ? selectedBackground : Colors.transparent,
+        color: selected ? (selectedBackground ?? AppColors.primarySoft) : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),

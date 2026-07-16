@@ -76,7 +76,7 @@ class OfflineBillsScreen extends ConsumerWidget {
                               '${dateTimeStr(b.createdAt)}'
                               '${failed ? '\nFailed: ${b.error}' : ''}',
                               maxLines: 3,
-                              style: const TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                              style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
                           trailing: failed
                               ? IconButton(
                                   icon: const Icon(Icons.delete_outline, color: AppColors.red),

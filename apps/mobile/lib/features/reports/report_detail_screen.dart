@@ -631,7 +631,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   'Showing top ${shown.length} of ${points.length} — see full list below.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11.5,
                     color: AppColors.inkSoft,
                   ),
