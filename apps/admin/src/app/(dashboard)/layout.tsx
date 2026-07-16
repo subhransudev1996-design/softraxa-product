@@ -30,7 +30,7 @@ export default async function DashboardLayout({
           </span>
           <div>
             <p className="text-[15px] font-extrabold leading-5 tracking-tight text-white">
-              SOFTRAXA
+              Dukania
             </p>
             <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-sidebar-muted">
               Admin panel

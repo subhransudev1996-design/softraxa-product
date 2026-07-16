@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "SOFTRAXA Admin",
-  description: "Client, plan and subscription management for SOFTRAXA Inventory",
+  title: "Dukania Admin",
+  description: "Client, plan and subscription management for Dukania",
 };
 
 export default function RootLayout({

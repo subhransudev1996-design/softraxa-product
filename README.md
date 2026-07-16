@@ -1,4 +1,4 @@
-# SOFTRAXA Inventory — GST Billing & Stock Management
+# Dukania (by SOFTRAXA) — GST Billing & Stock Management
 
 A mobile-first inventory, billing, and stock management system for local Indian shops (mobile, garment, hardware). See [prd.md](prd.md) for full requirements and [PLAN.md](PLAN.md) for the implementation plan and progress.
 

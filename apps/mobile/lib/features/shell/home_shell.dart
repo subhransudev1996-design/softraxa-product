@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/branding.dart';
 import '../../core/walkthrough.dart';
 
 import '../../core/platform.dart';
@@ -33,13 +34,19 @@ class HomeShell extends StatelessWidget {
 /// visible there too, instead of disappearing the moment you navigate off
 /// one of the 5 tab roots. No-op on phone widths. Applied centrally in
 /// `router.dart` rather than inside each individual screen.
-Widget withDesktopSidebar(BuildContext context, String currentPath, Widget child) {
+Widget withDesktopSidebar(
+  BuildContext context,
+  String currentPath,
+  Widget child,
+) {
   if (MediaQuery.sizeOf(context).width < kDesktopBreakpoint) return child;
   return Scaffold(
-    body: Row(children: [
-      AppSidebar(currentPath: currentPath),
-      Expanded(child: child),
-    ]),
+    body: Row(
+      children: [
+        AppSidebar(currentPath: currentPath),
+        Expanded(child: child),
+      ],
+    ),
   );
 }
 
@@ -52,9 +59,9 @@ class _MobileShell extends StatelessWidget {
 
   // branch indexes: 0 home, 1 pos, 2 products, 3 reports, 4 more
   void _go(int branch) => navigationShell.goBranch(
-        branch,
-        initialLocation: branch == navigationShell.currentIndex,
-      );
+    branch,
+    initialLocation: branch == navigationShell.currentIndex,
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -67,29 +74,40 @@ class _MobileShell extends StatelessWidget {
       floatingActionButton: SizedBox(
         width: 64,
         height: 64,
-        child: CoachTarget(page: 'home', id: 'new_bill', child: FloatingActionButton(
-          heroTag: 'new_bill_fab',
-          onPressed: () => _go(1),
-          tooltip: 'New Bill',
-          elevation: current == 1 ? 1 : 4,
-          shape: const CircleBorder(),
-          child: Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [AppColors.primary, AppColors.primaryDark],
+        child: CoachTarget(
+          page: 'home',
+          id: 'new_bill',
+          child: FloatingActionButton(
+            heroTag: 'new_bill_fab',
+            onPressed: () => _go(1),
+            tooltip: 'New Bill',
+            elevation: current == 1 ? 1 : 4,
+            shape: const CircleBorder(),
+            child: Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.primary, AppColors.primaryDark],
+                ),
+              ),
+              child: const Icon(
+                Icons.receipt_long,
+                size: 28,
+                color: Colors.white,
               ),
             ),
-            child: const Icon(Icons.receipt_long, size: 28, color: Colors.white),
           ),
-        )),
+        ),
       ),
       bottomNavigationBar: Container(
-        decoration: BoxDecoration(color: AppColors.card, boxShadow: softShadow(20)),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          boxShadow: softShadow(20),
+        ),
         child: BottomAppBar(
           color: AppColors.card,
           surfaceTintColor: Colors.transparent,
@@ -98,50 +116,52 @@ class _MobileShell extends StatelessWidget {
           padding: EdgeInsets.zero,
           shape: const CircularNotchedRectangle(),
           notchMargin: 8,
-          child: Row(children: [
-            _NavItem(
-              icon: Icons.home_outlined,
-              activeIcon: Icons.home,
-              label: 'Home',
-              selected: current == 0,
-              onTap: () => _go(0),
-            ),
-            _NavItem(
-              icon: Icons.inventory_2_outlined,
-              activeIcon: Icons.inventory_2,
-              label: 'Products',
-              selected: current == 2,
-              onTap: () => _go(2),
-            ),
-            const Expanded(
-              child: Padding(
-                padding: EdgeInsets.only(top: 38),
-                child: Text(
-                  'New Bill',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.primary,
+          child: Row(
+            children: [
+              _NavItem(
+                icon: Icons.home_outlined,
+                activeIcon: Icons.home,
+                label: 'Home',
+                selected: current == 0,
+                onTap: () => _go(0),
+              ),
+              _NavItem(
+                icon: Icons.inventory_2_outlined,
+                activeIcon: Icons.inventory_2,
+                label: 'Products',
+                selected: current == 2,
+                onTap: () => _go(2),
+              ),
+              const Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(top: 38),
+                  child: Text(
+                    'New Bill',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primary,
+                    ),
                   ),
                 ),
               ),
-            ),
-            _NavItem(
-              icon: Icons.bar_chart_outlined,
-              activeIcon: Icons.bar_chart,
-              label: 'Reports',
-              selected: current == 3,
-              onTap: () => _go(3),
-            ),
-            _NavItem(
-              icon: Icons.widgets_outlined,
-              activeIcon: Icons.widgets,
-              label: 'More',
-              selected: current == 4,
-              onTap: () => _go(4),
-            ),
-          ]),
+              _NavItem(
+                icon: Icons.bar_chart_outlined,
+                activeIcon: Icons.bar_chart,
+                label: 'Reports',
+                selected: current == 3,
+                onTap: () => _go(3),
+              ),
+              _NavItem(
+                icon: Icons.widgets_outlined,
+                activeIcon: Icons.widgets,
+                label: 'More',
+                selected: current == 4,
+                onTap: () => _go(4),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -184,12 +204,14 @@ class _NavItem extends StatelessWidget {
               child: Icon(selected ? activeIcon : icon, color: color, size: 23),
             ),
             const SizedBox(height: 2),
-            Text(label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                  color: color,
-                )),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                color: color,
+              ),
+            ),
           ],
         ),
       ),
@@ -225,10 +247,12 @@ class _DesktopShell extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentPath = GoRouterState.of(context).uri.path;
     return Scaffold(
-      body: Row(children: [
-        AppSidebar(currentPath: currentPath),
-        Expanded(child: navigationShell),
-      ]),
+      body: Row(
+        children: [
+          AppSidebar(currentPath: currentPath),
+          Expanded(child: navigationShell),
+        ],
+      ),
     );
   }
 }
@@ -270,157 +294,172 @@ class AppSidebar extends ConsumerWidget {
     return Container(
       width: 264,
       color: _sidebarBg,
-      child: Column(children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-          child: Row(children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+            child: Row(
+              children: [
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [AppColors.primary, AppColors.primaryDark],
+                    ),
+                  ),
+                  child: const Icon(
+                    Icons.storefront,
+                    color: Colors.white,
+                    size: 22,
+                  ),
                 ),
-              ),
-              child: const Icon(Icons.storefront, color: Colors.white, size: 22),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                appContext?.businessName ?? 'SOFTRAXA',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                    fontWeight: FontWeight.w800, fontSize: 15, color: Colors.white),
-              ),
-            ),
-          ]),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: SizedBox(
-            width: double.infinity,
-            child: CoachTarget(page: 'home', id: 'new_bill', child: FilledButton.icon(
-              onPressed: () => context.go('/pos'),
-              icon: const Icon(Icons.receipt_long, size: 18),
-              label: const Text('New Bill'),
-              style: FilledButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 14),
-              ),
-            )),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-            children: [
-              railTile(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: 'Dashboard',
-                route: '/home',
-              ),
-              railTile(
-                icon: Icons.inventory_2_outlined,
-                activeIcon: Icons.inventory_2,
-                label: 'Products',
-                route: '/products',
-              ),
-              railTile(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart,
-                label: 'Reports',
-                route: '/reports',
-              ),
-              const _SidebarSectionLabel('Sales'),
-              railTile(
-                icon: Icons.receipt_long_outlined,
-                label: 'All invoices',
-                route: '/invoices',
-              ),
-              railTile(
-                icon: Icons.assignment_return_outlined,
-                label: 'Sale returns',
-                route: '/sale-returns',
-              ),
-              railTile(
-                icon: Icons.people_outline,
-                label: 'Customers',
-                route: '/customers',
-              ),
-              const _SidebarSectionLabel('Inventory'),
-              railTile(
-                icon: Icons.warehouse_outlined,
-                label: 'Stock',
-                route: '/stock',
-              ),
-              railTile(
-                icon: Icons.shopping_cart_outlined,
-                label: 'Purchases',
-                route: '/purchases',
-              ),
-              railTile(
-                icon: Icons.assignment_return_outlined,
-                label: 'Purchase returns',
-                route: '/purchase-returns',
-              ),
-              railTile(
-                icon: Icons.local_shipping_outlined,
-                label: 'Suppliers',
-                route: '/suppliers',
-              ),
-              if (features?.featureOn('excel_import') ?? true)
-                railTile(
-                  icon: Icons.upload_file_outlined,
-                  label: 'Import products',
-                  route: '/import',
-                ),
-              if (features?.featureOn('service_module') ?? true) ...[
-                const _SidebarSectionLabel('Services'),
-                railTile(
-                  icon: Icons.build_outlined,
-                  label: 'Service catalog',
-                  route: '/services',
-                ),
-                railTile(
-                  icon: Icons.assignment_outlined,
-                  label: 'Job cards',
-                  route: '/job-cards',
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    appContext?.businessName ?? kAppName,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ],
-              if (features?.featureOn('expense_module') ?? true) ...[
-                const _SidebarSectionLabel('Money'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SizedBox(
+              width: double.infinity,
+              child: CoachTarget(
+                page: 'home',
+                id: 'new_bill',
+                child: FilledButton.icon(
+                  onPressed: () => context.go('/pos'),
+                  icon: const Icon(Icons.receipt_long, size: 18),
+                  label: const Text('New Bill'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              children: [
                 railTile(
-                  icon: Icons.payments_outlined,
-                  label: 'Expenses',
-                  route: '/expenses',
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: 'Dashboard',
+                  route: '/home',
+                ),
+                railTile(
+                  icon: Icons.inventory_2_outlined,
+                  activeIcon: Icons.inventory_2,
+                  label: 'Products',
+                  route: '/products',
+                ),
+                railTile(
+                  icon: Icons.bar_chart_outlined,
+                  activeIcon: Icons.bar_chart,
+                  label: 'Reports',
+                  route: '/reports',
+                ),
+                const _SidebarSectionLabel('Sales'),
+                railTile(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'All invoices',
+                  route: '/invoices',
+                ),
+                railTile(
+                  icon: Icons.assignment_return_outlined,
+                  label: 'Sale returns',
+                  route: '/sale-returns',
+                ),
+                railTile(
+                  icon: Icons.people_outline,
+                  label: 'Customers',
+                  route: '/customers',
+                ),
+                const _SidebarSectionLabel('Inventory'),
+                railTile(
+                  icon: Icons.warehouse_outlined,
+                  label: 'Stock',
+                  route: '/stock',
+                ),
+                railTile(
+                  icon: Icons.shopping_cart_outlined,
+                  label: 'Purchases',
+                  route: '/purchases',
+                ),
+                railTile(
+                  icon: Icons.assignment_return_outlined,
+                  label: 'Purchase returns',
+                  route: '/purchase-returns',
+                ),
+                railTile(
+                  icon: Icons.local_shipping_outlined,
+                  label: 'Suppliers',
+                  route: '/suppliers',
+                ),
+                if (features?.featureOn('excel_import') ?? true)
+                  railTile(
+                    icon: Icons.upload_file_outlined,
+                    label: 'Import products',
+                    route: '/import',
+                  ),
+                if (features?.featureOn('service_module') ?? true) ...[
+                  const _SidebarSectionLabel('Services'),
+                  railTile(
+                    icon: Icons.build_outlined,
+                    label: 'Service catalog',
+                    route: '/services',
+                  ),
+                  railTile(
+                    icon: Icons.assignment_outlined,
+                    label: 'Job cards',
+                    route: '/job-cards',
+                  ),
+                ],
+                if (features?.featureOn('expense_module') ?? true) ...[
+                  const _SidebarSectionLabel('Money'),
+                  railTile(
+                    icon: Icons.payments_outlined,
+                    label: 'Expenses',
+                    route: '/expenses',
+                  ),
+                ],
+                const _SidebarSectionLabel('Other'),
+                railTile(
+                  icon: Icons.sync_outlined,
+                  label: 'Pending offline bills',
+                  route: '/offline-bills',
+                ),
+                railTile(
+                  icon: Icons.support_agent_outlined,
+                  label: 'Support',
+                  route: '/support',
+                ),
+                railTile(
+                  icon: Icons.settings_outlined,
+                  label: 'Business settings',
+                  route: '/settings/business',
                 ),
               ],
-              const _SidebarSectionLabel('Other'),
-              railTile(
-                icon: Icons.sync_outlined,
-                label: 'Pending offline bills',
-                route: '/offline-bills',
-              ),
-              railTile(
-                icon: Icons.support_agent_outlined,
-                label: 'Support',
-                route: '/support',
-              ),
-              railTile(
-                icon: Icons.settings_outlined,
-                label: 'Business settings',
-                route: '/settings/business',
-              ),
-            ],
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-      ]),
+          const SizedBox(height: 8),
+        ],
+      ),
     );
   }
 }
@@ -434,12 +473,15 @@ class _SidebarSectionLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(12, 18, 12, 6),
-      child: Text(label,
-          style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 0.4,
-              color: _sidebarMuted)),
+      child: Text(
+        label,
+        style: const TextStyle(
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          letterSpacing: 0.4,
+          color: _sidebarMuted,
+        ),
+      ),
     );
   }
 }
@@ -477,22 +519,33 @@ class _RailTile extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       child: Material(
-        color: selected ? (selectedBackground ?? AppColors.primarySoft) : Colors.transparent,
+        color: selected
+            ? (selectedBackground ?? AppColors.primarySoft)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(10),
         child: InkWell(
           borderRadius: BorderRadius.circular(10),
           onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
-            child: Row(children: [
-              Icon(selected ? (activeIcon ?? icon) : icon, size: 20, color: fg),
-              const SizedBox(width: 14),
-              Text(label,
+            child: Row(
+              children: [
+                Icon(
+                  selected ? (activeIcon ?? icon) : icon,
+                  size: 20,
+                  color: fg,
+                ),
+                const SizedBox(width: 14),
+                Text(
+                  label,
                   style: TextStyle(
-                      fontSize: 13.5,
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
-                      color: fg)),
-            ]),
+                    fontSize: 13.5,
+                    fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
+                    color: fg,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

@@ -2,7 +2,7 @@
 ; Compile with: ISCC windows\installer\softraxa_inventory.iss
 ; (run from apps\mobile, after `flutter build windows --release`)
 
-#define MyAppName "SOFTRAXA Inventory"
+#define MyAppName "Dukania"
 #define MyAppVersion "1.0.0"
 #define MyAppPublisher "SOFTRAXA"
 #define MyAppExeName "softraxa_inventory.exe"
@@ -17,7 +17,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 UninstallDisplayIcon={app}\{#MyAppExeName}
 OutputDir=..\..\build\installer_output
-OutputBaseFilename=SOFTRAXA-Inventory-Setup-{#MyAppVersion}
+OutputBaseFilename=Dukania-Setup-{#MyAppVersion}
 Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern

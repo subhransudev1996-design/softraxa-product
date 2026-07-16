@@ -5,7 +5,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'core/platform.dart';
+import 'core/branding.dart';
 import 'core/desktop_titlebar.dart';
+import 'core/push_service.dart';
 import 'core/router.dart';
 import 'core/theme.dart';
 import 'core/theme_mode.dart';
@@ -24,7 +26,7 @@ Future<void> main() async {
       size: Size(1300, 820),
       minimumSize: Size(1040, 680),
       center: true,
-      title: 'SOFTRAXA Inventory', // taskbar / Alt-Tab label only
+      title: kAppName, // taskbar / Alt-Tab label only
       // Native caption bar is hidden — DesktopTitleBar (in MaterialApp's
       // builder below) replaces it with in-app chrome.
       titleBarStyle: TitleBarStyle.hidden,
@@ -56,10 +58,13 @@ class _AppState extends ConsumerState<App> {
 
   @override
   Widget build(BuildContext context) {
+    // Registers this device's FCM token once login + business context are
+    // ready (no-op on desktop or when FIREBASE_* env keys are absent).
+    ref.watch(pushRegistrationProvider);
     final router = ref.watch(routerProvider);
     final dark = ref.watch(darkModeProvider);
     return MaterialApp.router(
-      title: 'SOFTRAXA Inventory',
+      title: kAppName,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(dark: dark),
       routerConfig: router,
@@ -72,10 +77,12 @@ class _AppState extends ConsumerState<App> {
         return KeyedSubtree(
           key: ValueKey(dark),
           child: isDesktopPlatform
-              ? Column(children: [
-                  const DesktopTitleBar(),
-                  Expanded(child: content),
-                ])
+              ? Column(
+                  children: [
+                    const DesktopTitleBar(),
+                    Expanded(child: content),
+                  ],
+                )
               : content,
         );
       },

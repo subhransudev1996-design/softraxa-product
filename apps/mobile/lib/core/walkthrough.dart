@@ -250,45 +250,46 @@ class _CoachOverlayState extends State<_CoachOverlay> {
       cardTop = below + 240 < size.height
           ? below
           : (spot.top - cardMargin - 230).clamp(12.0, size.height - 250);
-      cardLeft = (spot.center.dx - cardWidth / 2)
-          .clamp(12.0, size.width - cardWidth - 12);
+      cardLeft = (spot.center.dx - cardWidth / 2).clamp(
+        12.0,
+        size.width - cardWidth - 12,
+      );
     }
 
-    return Stack(children: [
-      // dim + cutout; tap anywhere advances
-      Positioned.fill(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _goTo(_index + 1),
-          child: AnimatedOpacity(
-            opacity: _measuring ? 0 : 1,
-            duration: const Duration(milliseconds: 180),
-            child: CustomPaint(
-              painter: _SpotlightPainter(spot),
-              size: size,
+    return Stack(
+      children: [
+        // dim + cutout; tap anywhere advances
+        Positioned.fill(
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _goTo(_index + 1),
+            child: AnimatedOpacity(
+              opacity: _measuring ? 0 : 1,
+              duration: const Duration(milliseconds: 180),
+              child: CustomPaint(painter: _SpotlightPainter(spot), size: size),
             ),
           ),
         ),
-      ),
-      if (!_measuring)
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 200),
-          curve: Curves.easeOut,
-          top: cardTop ?? (size.height / 2 - 130),
-          left: cardLeft ?? (size.width / 2 - cardWidth / 2),
-          width: cardWidth,
-          child: _CoachCard(
-            guideTitle: widget.guide.title,
-            step: step,
-            index: _index,
-            total: _steps.length,
-            onBack: _index > 0 ? () => _goTo(_index - 1) : null,
-            onNext: () => _goTo(_index + 1),
-            onSkip: widget.onDone,
-            isLast: last,
+        if (!_measuring)
+          AnimatedPositioned(
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+            top: cardTop ?? (size.height / 2 - 130),
+            left: cardLeft ?? (size.width / 2 - cardWidth / 2),
+            width: cardWidth,
+            child: _CoachCard(
+              guideTitle: widget.guide.title,
+              step: step,
+              index: _index,
+              total: _steps.length,
+              onBack: _index > 0 ? () => _goTo(_index - 1) : null,
+              onNext: () => _goTo(_index + 1),
+              onSkip: widget.onDone,
+              isLast: last,
+            ),
           ),
-        ),
-    ]);
+      ],
+    );
   }
 }
 
@@ -363,58 +364,79 @@ class _CoachCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(10),
+            Row(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(step.icon, size: 18, color: AppColors.primary),
                 ),
-                child: Icon(step.icon, size: 18, color: AppColors.primary),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(step.title,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    step.title,
                     style: const TextStyle(
-                        fontSize: 14.5, fontWeight: FontWeight.w800)),
-              ),
-              Text('${index + 1}/$total',
-                  style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft)),
-            ]),
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+                Text(
+                  '${index + 1}/$total',
+                  style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
-            Text(step.body,
-                style: TextStyle(
-                    fontSize: 13, height: 1.45, color: AppColors.inkSoft)),
+            Text(
+              step.body,
+              style: TextStyle(
+                fontSize: 13,
+                height: 1.45,
+                color: AppColors.inkSoft,
+              ),
+            ),
             const SizedBox(height: 12),
-            Row(children: [
-              InkWell(
-                onTap: onSkip,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 6),
-                  child: Text('Skip tour',
-                      style:
-                          TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+            Row(
+              children: [
+                InkWell(
+                  onTap: onSkip,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 6),
+                    child: Text(
+                      'Skip tour',
+                      style: TextStyle(
+                        fontSize: 12.5,
+                        color: AppColors.inkSoft,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-              const Spacer(),
-              if (onBack != null)
-                OutlinedButton(
-                  onPressed: onBack,
-                  style: OutlinedButton.styleFrom(
+                const Spacer(),
+                if (onBack != null)
+                  OutlinedButton(
+                    onPressed: onBack,
+                    style: OutlinedButton.styleFrom(
                       minimumSize: const Size(0, 38),
-                      padding: const EdgeInsets.symmetric(horizontal: 14)),
-                  child: const Text('Back'),
-                ),
-              const SizedBox(width: 8),
-              FilledButton(
-                onPressed: onNext,
-                style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                    ),
+                    child: const Text('Back'),
+                  ),
+                const SizedBox(width: 8),
+                FilledButton(
+                  onPressed: onNext,
+                  style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 38),
-                    padding: const EdgeInsets.symmetric(horizontal: 18)),
-                child: Text(isLast ? 'Done' : 'Next'),
-              ),
-            ]),
+                    padding: const EdgeInsets.symmetric(horizontal: 18),
+                  ),
+                  child: Text(isLast ? 'Done' : 'Next'),
+                ),
+              ],
+            ),
           ],
         ),
       ),
@@ -461,23 +483,32 @@ class _WalkthroughSheetState extends State<_WalkthroughSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Row(children: [
-            Expanded(
-              child: Text(widget.guide.title,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
-            ),
-            Text('${_page + 1}/${steps.length}',
-                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
-            const SizedBox(width: 8),
-            InkWell(
-              borderRadius: BorderRadius.circular(20),
-              onTap: () => Navigator.pop(context),
-              child: Padding(
-                padding: const EdgeInsets.all(4),
-                child: Icon(Icons.close, size: 20, color: AppColors.inkSoft),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.guide.title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
               ),
-            ),
-          ]),
+              Text(
+                '${_page + 1}/${steps.length}',
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => Navigator.pop(context),
+                child: Padding(
+                  padding: const EdgeInsets.all(4),
+                  child: Icon(Icons.close, size: 20, color: AppColors.inkSoft),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 12),
           SizedBox(
             height: 210,
@@ -487,30 +518,42 @@ class _WalkthroughSheetState extends State<_WalkthroughSheet> {
               onPageChanged: (i) => setState(() => _page = i),
               itemBuilder: (context, i) {
                 final s = steps[i];
-                return Column(children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySoft,
-                      borderRadius: BorderRadius.circular(20),
+                return Column(
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      decoration: BoxDecoration(
+                        color: AppColors.primarySoft,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Icon(s.icon, size: 32, color: AppColors.primary),
                     ),
-                    child: Icon(s.icon, size: 32, color: AppColors.primary),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(s.title,
+                    const SizedBox(height: 14),
+                    Text(
+                      s.title,
                       textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 15.5, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Text(s.body,
+                      style: const TextStyle(
+                        fontSize: 15.5,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Text(
+                          s.body,
                           textAlign: TextAlign.center,
                           style: TextStyle(
-                              fontSize: 13.5, height: 1.45, color: AppColors.inkSoft)),
+                            fontSize: 13.5,
+                            height: 1.45,
+                            color: AppColors.inkSoft,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
-                ]);
+                  ],
+                );
               },
             ),
           ),
@@ -532,34 +575,41 @@ class _WalkthroughSheetState extends State<_WalkthroughSheet> {
             ],
           ),
           const SizedBox(height: 14),
-          Row(children: [
-            if (_page > 0)
-              OutlinedButton(
-                onPressed: () => _controller.previousPage(
-                    duration: const Duration(milliseconds: 250), curve: Curves.easeOut),
-                child: const Text('Back'),
-              )
-            else
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Skip'),
-              ),
-            const Spacer(),
-            FilledButton(
-              style: FilledButton.styleFrom(
+          Row(
+            children: [
+              if (_page > 0)
+                OutlinedButton(
+                  onPressed: () => _controller.previousPage(
+                    duration: const Duration(milliseconds: 250),
+                    curve: Curves.easeOut,
+                  ),
+                  child: const Text('Back'),
+                )
+              else
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Skip'),
+                ),
+              const Spacer(),
+              FilledButton(
+                style: FilledButton.styleFrom(
                   minimumSize: const Size(120, 46),
-                  padding: const EdgeInsets.symmetric(horizontal: 24)),
-              onPressed: () {
-                if (last) {
-                  Navigator.pop(context);
-                } else {
-                  _controller.nextPage(
-                      duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
-                }
-              },
-              child: Text(last ? 'Done' : 'Next'),
-            ),
-          ]),
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                ),
+                onPressed: () {
+                  if (last) {
+                    Navigator.pop(context);
+                  } else {
+                    _controller.nextPage(
+                      duration: const Duration(milliseconds: 250),
+                      curve: Curves.easeOut,
+                    );
+                  }
+                },
+                child: Text(last ? 'Done' : 'Next'),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -601,258 +651,300 @@ class _GuideButtonState extends State<GuideButton> {
 // target isn't mounted is skipped (or shown centered when id is null).
 
 const Map<String, PageGuide> pageGuides = {
-  'home': PageGuide('Welcome to SOFTRAXA Inventory', [
+  'home': PageGuide('Welcome to Dukania', [
     CoachStep(
-        icon: Icons.storefront_outlined,
-        title: 'Your shop, in one app',
-        body:
-            'Billing, stock, purchases, customers, dues, expenses and reports — everything your shop needs, together in one place. Let\'s take a quick look around.'),
+      icon: Icons.storefront_outlined,
+      title: 'Your shop, in one app',
+      body:
+          'Billing, stock, purchases, customers, dues, expenses and reports — everything your shop needs, together in one place. Let\'s take a quick look around.',
+    ),
     CoachStep(
-        id: 'stats',
-        icon: Icons.dashboard_outlined,
-        title: 'Today at a glance',
-        body:
-            "These tiles show today's sales and profit, your total stock value, low-stock alerts and dues — they update live as you bill."),
+      id: 'stats',
+      icon: Icons.dashboard_outlined,
+      title: 'Today at a glance',
+      body:
+          "These tiles show today's sales and profit, your total stock value, low-stock alerts and dues — they update live as you bill.",
+    ),
     CoachStep(
-        id: 'new_bill',
-        icon: Icons.receipt_long_outlined,
-        title: 'Start billing here',
-        body:
-            'This button opens the billing screen. Search or scan a product, take payment, print or share the invoice — all in seconds.'),
+      id: 'new_bill',
+      icon: Icons.receipt_long_outlined,
+      title: 'Start billing here',
+      body:
+          'This button opens the billing screen. Search or scan a product, take payment, print or share the invoice — all in seconds.',
+    ),
     CoachStep(
-        id: 'quick_actions',
-        icon: Icons.bolt_outlined,
-        title: 'Quick actions',
-        body:
-            'Shortcuts for the things you do most — new bill, add product, new purchase and barcode scan.'),
+      id: 'quick_actions',
+      icon: Icons.bolt_outlined,
+      title: 'Quick actions',
+      body:
+          'Shortcuts for the things you do most — new bill, add product, new purchase and barcode scan.',
+    ),
     CoachStep(
-        id: 'recent',
-        icon: Icons.history,
-        title: 'Recent invoices',
-        body:
-            'Your latest bills with payment status. Tap any of them to reprint, edit, record a payment or make a return.'),
+      id: 'recent',
+      icon: Icons.history,
+      title: 'Recent invoices',
+      body:
+          'Your latest bills with payment status. Tap any of them to reprint, edit, record a payment or make a return.',
+    ),
     CoachStep(
-        icon: Icons.help_outline,
-        title: 'Help on every page',
-        body:
-            'Every page has a ? icon at the top — tap it anytime to replay that page\'s tour. This welcome tour is always available from More → App walkthrough.'),
+      icon: Icons.help_outline,
+      title: 'Help on every page',
+      body:
+          'Every page has a ? icon at the top — tap it anytime to replay that page\'s tour. This welcome tour is always available from More → App walkthrough.',
+    ),
   ]),
   'pos': PageGuide('Billing (POS)', [
     CoachStep(
-        id: 'search',
-        icon: Icons.search,
-        title: 'Find products here',
-        body:
-            'Type a name, SKU or barcode — or scan with a USB scanner straight into this box. Matching products appear below; tap one to add it to the bill.'),
+      id: 'search',
+      icon: Icons.search,
+      title: 'Find products here',
+      body:
+          'Type a name, SKU or barcode — or scan with a USB scanner straight into this box. Matching products appear below; tap one to add it to the bill.',
+    ),
     CoachStep(
-        id: 'scan',
-        icon: Icons.qr_code_scanner,
-        title: 'Camera scanning',
-        body:
-            'Tap to scan barcodes with the camera — keep scanning item after item and they\'re added automatically.'),
+      id: 'scan',
+      icon: Icons.qr_code_scanner,
+      title: 'Camera scanning',
+      body:
+          'Tap to scan barcodes with the camera — keep scanning item after item and they\'re added automatically.',
+    ),
     CoachStep(
-        id: 'customer',
-        icon: Icons.person_add_alt,
-        title: 'Who is this bill for?',
-        body:
-            'Attach a customer to track credit (due) sales — or leave as walk-in. You can also add a brand-new customer from here.'),
+      id: 'customer',
+      icon: Icons.person_add_alt,
+      title: 'Who is this bill for?',
+      body:
+          'Attach a customer to track credit (due) sales — or leave as walk-in. You can also add a brand-new customer from here.',
+    ),
     CoachStep(
-        id: 'cart',
-        icon: Icons.shopping_cart_outlined,
-        title: 'The bill lives here',
-        body:
-            'Every added item shows here. Tap a line to change quantity, price or give a line discount; swipe or use the buttons to remove.'),
+      id: 'cart',
+      icon: Icons.shopping_cart_outlined,
+      title: 'The bill lives here',
+      body:
+          'Every added item shows here. Tap a line to change quantity, price or give a line discount; swipe or use the buttons to remove.',
+    ),
     CoachStep(
-        id: 'charge',
-        icon: Icons.payments_outlined,
-        title: 'Take payment',
-        body:
-            'When the bill is ready, tap here: choose cash, UPI, card or credit — or split across several. Then print or share the invoice.'),
+      id: 'charge',
+      icon: Icons.payments_outlined,
+      title: 'Take payment',
+      body:
+          'When the bill is ready, tap here: choose cash, UPI, card or credit — or split across several. Then print or share the invoice.',
+    ),
   ]),
   'products': PageGuide('Products', [
     CoachStep(
-        id: 'search',
-        icon: Icons.search,
-        title: 'Search your catalog',
-        body: 'Find any product by name, SKU or barcode as you type.'),
+      id: 'search',
+      icon: Icons.search,
+      title: 'Search your catalog',
+      body: 'Find any product by name, SKU or barcode as you type.',
+    ),
     CoachStep(
-        id: 'master',
-        icon: Icons.category_outlined,
-        title: 'Categories, brands & units',
-        body:
-            'Manage the master lists here. Units decide whether an item can sell in fractions (kg, metre, litre).'),
+      id: 'master',
+      icon: Icons.category_outlined,
+      title: 'Categories, brands & units',
+      body:
+          'Manage the master lists here. Units decide whether an item can sell in fractions (kg, metre, litre).',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.add_box_outlined,
-        title: 'Add a product',
-        body:
-            'Name, prices, GST, barcode, opening stock, low-stock alert — and variants (size/colour/model) if one product comes in versions.'),
+      id: 'add',
+      icon: Icons.add_box_outlined,
+      title: 'Add a product',
+      body:
+          'Name, prices, GST, barcode, opening stock, low-stock alert — and variants (size/colour/model) if one product comes in versions.',
+    ),
     CoachStep(
-        id: 'list',
-        icon: Icons.inventory_2_outlined,
-        title: 'Your products',
-        body:
-            'Tap any product to see its detail — stock, variants, barcode, history — or to edit it.'),
+      id: 'list',
+      icon: Icons.inventory_2_outlined,
+      title: 'Your products',
+      body:
+          'Tap any product to see its detail — stock, variants, barcode, history — or to edit it.',
+    ),
   ]),
   'invoices': PageGuide('Invoices', [
     CoachStep(
-        id: 'search',
-        icon: Icons.search,
-        title: 'Find any bill',
-        body: 'Search by invoice number or customer name.'),
+      id: 'search',
+      icon: Icons.search,
+      title: 'Find any bill',
+      body: 'Search by invoice number or customer name.',
+    ),
     CoachStep(
-        id: 'filters',
-        icon: Icons.filter_list,
-        title: 'Filter by payment',
-        body:
-            'One tap to see only Paid, Partial or Credit bills — great for chasing dues.'),
+      id: 'filters',
+      icon: Icons.filter_list,
+      title: 'Filter by payment',
+      body:
+          'One tap to see only Paid, Partial or Credit bills — great for chasing dues.',
+    ),
     CoachStep(
-        id: 'list',
-        icon: Icons.receipt_long_outlined,
-        title: 'Open a bill',
-        body:
-            'Tap an invoice to reprint/share it, record a due payment, edit it, make a return, or cancel it (stock is restored).'),
+      id: 'list',
+      icon: Icons.receipt_long_outlined,
+      title: 'Open a bill',
+      body:
+          'Tap an invoice to reprint/share it, record a due payment, edit it, make a return, or cancel it (stock is restored).',
+    ),
   ]),
   'purchases': PageGuide('Purchases', [
     CoachStep(
-        id: 'presets',
-        icon: Icons.event_outlined,
-        title: 'Quick date filters',
-        body: 'Jump between today, this week, this month — one tap.'),
+      id: 'presets',
+      icon: Icons.event_outlined,
+      title: 'Quick date filters',
+      body: 'Jump between today, this week, this month — one tap.',
+    ),
     CoachStep(
-        id: 'status',
-        icon: Icons.account_balance_wallet_outlined,
-        title: 'Paid / Partial / Credit',
-        body: 'Filter purchases by how much you\'ve paid the supplier.'),
+      id: 'status',
+      icon: Icons.account_balance_wallet_outlined,
+      title: 'Paid / Partial / Credit',
+      body: 'Filter purchases by how much you\'ve paid the supplier.',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.add_shopping_cart,
-        title: 'Record a purchase',
-        body:
-            'Enter a supplier bill — items, quantities, cost prices, GST. Stock goes up automatically when you save.'),
+      id: 'add',
+      icon: Icons.add_shopping_cart,
+      title: 'Record a purchase',
+      body:
+          'Enter a supplier bill — items, quantities, cost prices, GST. Stock goes up automatically when you save.',
+    ),
   ]),
   'customers': PageGuide('Customers', [
     CoachStep(
-        id: 'list',
-        icon: Icons.people_outline,
-        title: 'Your customers',
-        body:
-            'Each entry shows the due balance. Tap one for the full ledger — bills, payments and returns.'),
+      id: 'list',
+      icon: Icons.people_outline,
+      title: 'Your customers',
+      body:
+          'Each entry shows the due balance. Tap one for the full ledger — bills, payments and returns.',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.person_add_alt,
-        title: 'Add a customer',
-        body:
-            'Save name, phone and address; set an optional credit limit to get warned before dues grow too big.'),
+      id: 'add',
+      icon: Icons.person_add_alt,
+      title: 'Add a customer',
+      body:
+          'Save name, phone and address; set an optional credit limit to get warned before dues grow too big.',
+    ),
   ]),
   'suppliers': PageGuide('Suppliers', [
     CoachStep(
-        id: 'list',
-        icon: Icons.local_shipping_outlined,
-        title: 'Who you buy from',
-        body:
-            'Each supplier shows how much you still owe. Tap for the full ledger of purchases and payments.'),
+      id: 'list',
+      icon: Icons.local_shipping_outlined,
+      title: 'Who you buy from',
+      body:
+          'Each supplier shows how much you still owe. Tap for the full ledger of purchases and payments.',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.add,
-        title: 'Add a supplier',
-        body: 'Save their contact details, then record purchases against them.'),
+      id: 'add',
+      icon: Icons.add,
+      title: 'Add a supplier',
+      body: 'Save their contact details, then record purchases against them.',
+    ),
   ]),
   'stock': PageGuide('Stock', [
     CoachStep(
-        id: 'filters',
-        icon: Icons.tune,
-        title: 'Low & out of stock',
-        body:
-            'These filters instantly show what needs restocking — the same alerts as the dashboard tiles.'),
+      id: 'filters',
+      icon: Icons.tune,
+      title: 'Low & out of stock',
+      body:
+          'These filters instantly show what needs restocking — the same alerts as the dashboard tiles.',
+    ),
     CoachStep(
-        id: 'list',
-        icon: Icons.inventory_2_outlined,
-        title: 'Every product\'s stock',
-        body:
-            'Tap a product to adjust stock, record damage, or see its full in/out movement history.'),
+      id: 'list',
+      icon: Icons.inventory_2_outlined,
+      title: 'Every product\'s stock',
+      body:
+          'Tap a product to adjust stock, record damage, or see its full in/out movement history.',
+    ),
   ]),
   'expenses': PageGuide('Expenses', [
     CoachStep(
-        id: 'presets',
-        icon: Icons.event_outlined,
-        title: 'Pick a period',
-        body: 'Today, this week, this month, last month — or use the calendar for any range.'),
+      id: 'presets',
+      icon: Icons.event_outlined,
+      title: 'Pick a period',
+      body:
+          'Today, this week, this month, last month — or use the calendar for any range.',
+    ),
     CoachStep(
-        id: 'total',
-        icon: Icons.summarize_outlined,
-        title: 'Total for the period',
-        body: 'The sum updates instantly as you change filters or add expenses.'),
+      id: 'total',
+      icon: Icons.summarize_outlined,
+      title: 'Total for the period',
+      body: 'The sum updates instantly as you change filters or add expenses.',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.add_card,
-        title: 'Add an expense',
-        body: 'Amount + category + note. Rent, electricity, transport, chai — everything counts.'),
+      id: 'add',
+      icon: Icons.add_card,
+      title: 'Add an expense',
+      body:
+          'Amount + category + note. Rent, electricity, transport, chai — everything counts.',
+    ),
   ]),
   'reports': PageGuide('Reports', [
     CoachStep(
-        id: 'list',
-        icon: Icons.query_stats,
-        title: 'Pick any report',
-        body:
-            'Sales, profit, stock, GST, dues, purchases, expenses — each opens with a chart, a table, a date filter and PDF export.'),
+      id: 'list',
+      icon: Icons.query_stats,
+      title: 'Pick any report',
+      body:
+          'Sales, profit, stock, GST, dues, purchases, expenses — each opens with a chart, a table, a date filter and PDF export.',
+    ),
   ]),
   'import': PageGuide('Excel import', [
     CoachStep(
-        id: 'template',
-        icon: Icons.download_outlined,
-        title: '1. Download the template',
-        body: 'Start here — the sample file has exactly the columns the import expects.'),
+      id: 'template',
+      icon: Icons.download_outlined,
+      title: '1. Download the template',
+      body:
+          'Start here — the sample file has exactly the columns the import expects.',
+    ),
     CoachStep(
-        id: 'upload',
-        icon: Icons.upload_file_outlined,
-        title: '2. Upload your file',
-        body:
-            'Every row is checked and duplicates are caught before anything is saved. Fix red rows and import again safely.'),
+      id: 'upload',
+      icon: Icons.upload_file_outlined,
+      title: '2. Upload your file',
+      body:
+          'Every row is checked and duplicates are caught before anything is saved. Fix red rows and import again safely.',
+    ),
   ]),
   'job_cards': PageGuide('Job cards (repairs & services)', [
     CoachStep(
-        id: 'filters',
-        icon: Icons.flag_outlined,
-        title: 'Track by status',
-        body:
-            'Filter jobs by stage — received, in progress, waiting for parts, ready, delivered.'),
+      id: 'filters',
+      icon: Icons.flag_outlined,
+      title: 'Track by status',
+      body:
+          'Filter jobs by stage — received, in progress, waiting for parts, ready, delivered.',
+    ),
     CoachStep(
-        id: 'add',
-        icon: Icons.build_outlined,
-        title: 'Take in a new job',
-        body:
-            'Repair or on-site work? Record the item, problem, estimate, advance and service location. Parts + labour become one invoice at closing.'),
+      id: 'add',
+      icon: Icons.build_outlined,
+      title: 'Take in a new job',
+      body:
+          'Repair or on-site work? Record the item, problem, estimate, advance and service location. Parts + labour become one invoice at closing.',
+    ),
   ]),
   'services': PageGuide('Service catalog', [
     CoachStep(
-        id: 'add',
-        icon: Icons.home_repair_service_outlined,
-        title: 'Your service menu',
-        body:
-            'Add the services you offer — repairs, stitching, installation — with price, GST and warranty. Job cards pick labour charges from this list.'),
+      id: 'add',
+      icon: Icons.home_repair_service_outlined,
+      title: 'Your service menu',
+      body:
+          'Add the services you offer — repairs, stitching, installation — with price, GST and warranty. Job cards pick labour charges from this list.',
+    ),
   ]),
   'sale_returns': PageGuide('Sale returns', [
     CoachStep(
-        id: 'add',
-        icon: Icons.assignment_return_outlined,
-        title: 'Take items back',
-        body:
-            'Pick the original invoice and choose what\'s coming back — you can never return more than was sold. Refund or adjust against dues.'),
+      id: 'add',
+      icon: Icons.assignment_return_outlined,
+      title: 'Take items back',
+      body:
+          'Pick the original invoice and choose what\'s coming back — you can never return more than was sold. Refund or adjust against dues.',
+    ),
   ]),
   'purchase_returns': PageGuide('Purchase returns', [
     CoachStep(
-        id: 'add',
-        icon: Icons.assignment_return_outlined,
-        title: 'Return to supplier',
-        body:
-            'Pick the purchase and choose items to send back — only what\'s still in stock can be returned. Your supplier balance adjusts.'),
+      id: 'add',
+      icon: Icons.assignment_return_outlined,
+      title: 'Return to supplier',
+      body:
+          'Pick the purchase and choose items to send back — only what\'s still in stock can be returned. Your supplier balance adjusts.',
+    ),
   ]),
   'offline_bills': PageGuide('Offline bills', [
     CoachStep(
-        icon: Icons.wifi_off_outlined,
-        title: 'No internet? Keep billing',
-        body:
-            'When the connection drops, bills are saved here with temporary numbers and sync automatically when internet returns. Failed ones can be retried from this list.'),
+      icon: Icons.wifi_off_outlined,
+      title: 'No internet? Keep billing',
+      body:
+          'When the connection drops, bills are saved here with temporary numbers and sync automatically when internet returns. Failed ones can be retried from this list.',
+    ),
   ]),
 };

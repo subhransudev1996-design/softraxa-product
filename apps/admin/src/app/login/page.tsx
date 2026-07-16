@@ -54,7 +54,7 @@ export default function LoginPage() {
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
             S
           </span>
-          <p className="text-lg font-extrabold tracking-tight text-white">SOFTRAXA</p>
+          <p className="text-lg font-extrabold tracking-tight text-white">Dukania</p>
         </div>
         <div className="relative max-w-md">
           <h2 className="text-[34px] font-extrabold leading-tight tracking-tight text-white">
@@ -62,7 +62,7 @@ export default function LoginPage() {
           </h2>
           <p className="mt-4 text-sm leading-6 text-sidebar-muted">
             Clients, plans, subscriptions, leads, payments and support — the control
-            room for SOFTRAXA Inventory.
+            room for Dukania.
           </p>
         </div>
         <p className="relative text-xs text-sidebar-muted">
