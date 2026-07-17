@@ -215,6 +215,7 @@ Future<void> showRecordCustomerPayment(
     ref.invalidate(customersProvider);
     ref.invalidate(dashboardStatsProvider);
     ref.invalidate(invoicesProvider);
+    ref.invalidate(recentInvoicesProvider);
     if (context.mounted) showSuccess(context, 'Payment recorded');
   } catch (e) {
     if (context.mounted) showError(context, e);
@@ -244,12 +245,20 @@ class CustomersScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Customers'), actions: const [GuideButton('customers')]),
-      floatingActionButton: CoachTarget(page: 'customers', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => showCustomerForm(context, ref),
-        icon: const Icon(Icons.person_add),
-        label: const Text('Add customer'),
-      )),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Customers'),
+        actions: const [GuideButton('customers')],
+      ),
+      floatingActionButton: CoachTarget(
+        page: 'customers',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => showCustomerForm(context, ref),
+          icon: const Icon(Icons.person_add),
+          label: const Text('Add customer'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -285,63 +294,68 @@ class CustomersScreen extends ConsumerWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(customersProvider),
-              child: CoachTarget(page: 'customers', id: 'list', child: AsyncView(
-                value: customers,
-                onRetry: () => ref.invalidate(customersProvider),
-                builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.people_outline,
-                        message: 'No customers yet',
-                      )
-                    : isDesktop
-                    ? Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1400),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(16),
-                            child: responsiveCardWrap([
-                              for (final c in rows)
-                                PartyCard(
-                                  name: c['name'] as String? ?? '',
-                                  phone: c['phone'] as String? ?? '',
-                                  due: toDouble(c['due_amount']),
-                                  dueLabel: 'Due',
-                                  dueColor: AppColors.red,
-                                  creditLimit: c['credit_limit'] == null
-                                      ? null
-                                      : toDouble(c['credit_limit']),
-                                  overLimit:
-                                      c['credit_limit'] != null &&
-                                      toDouble(c['due_amount']) >
-                                          toDouble(c['credit_limit']),
-                                  onTap: () =>
-                                      context.push('/customers/${c['id']}'),
-                                  onCall: (c['phone'] as String? ?? '').isEmpty
-                                      ? null
-                                      : () => _callPhone(
-                                          context,
-                                          c['phone'] as String,
-                                        ),
-                                  onPay: () => showRecordCustomerPayment(
-                                    context,
-                                    ref,
-                                    customerId: c['id'] as String,
+              child: CoachTarget(
+                page: 'customers',
+                id: 'list',
+                child: AsyncView(
+                  value: customers,
+                  onRetry: () => ref.invalidate(customersProvider),
+                  builder: (rows) => rows.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.people_outline,
+                          message: 'No customers yet',
+                        )
+                      : isDesktop
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1400),
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: responsiveCardWrap([
+                                for (final c in rows)
+                                  PartyCard(
+                                    name: c['name'] as String? ?? '',
+                                    phone: c['phone'] as String? ?? '',
                                     due: toDouble(c['due_amount']),
+                                    dueLabel: 'Due',
+                                    dueColor: AppColors.red,
+                                    creditLimit: c['credit_limit'] == null
+                                        ? null
+                                        : toDouble(c['credit_limit']),
+                                    overLimit:
+                                        c['credit_limit'] != null &&
+                                        toDouble(c['due_amount']) >
+                                            toDouble(c['credit_limit']),
+                                    onTap: () =>
+                                        context.push('/customers/${c['id']}'),
+                                    onCall:
+                                        (c['phone'] as String? ?? '').isEmpty
+                                        ? null
+                                        : () => _callPhone(
+                                            context,
+                                            c['phone'] as String,
+                                          ),
+                                    onPay: () => showRecordCustomerPayment(
+                                      context,
+                                      ref,
+                                      customerId: c['id'] as String,
+                                      due: toDouble(c['due_amount']),
+                                    ),
                                   ),
-                                ),
-                            ]),
+                              ]),
+                            ),
                           ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+                          itemCount: rows.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, i) =>
+                              _CustomerTile(customer: rows[i]),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-                        itemCount: rows.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, i) =>
-                            _CustomerTile(customer: rows[i]),
-                      ),
-              )),
+                ),
+              ),
             ),
           ),
         ],
@@ -388,10 +402,7 @@ class _CustomerTile extends StatelessWidget {
                     ),
                     Text(
                       c['phone'] as String? ?? '',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.inkSoft,
-                      ),
+                      style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
                     ),
                   ],
                 ),

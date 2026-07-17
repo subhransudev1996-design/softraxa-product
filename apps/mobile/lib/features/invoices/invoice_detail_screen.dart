@@ -130,6 +130,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(invoicesProvider);
       ref.invalidate(customersProvider);
       ref.invalidate(dashboardStatsProvider);
+      ref.invalidate(recentInvoicesProvider);
       if (context.mounted) showSuccess(context, 'Payment recorded');
     } catch (e) {
       if (context.mounted) showError(context, e);

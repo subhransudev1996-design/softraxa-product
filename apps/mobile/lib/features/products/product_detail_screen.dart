@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
@@ -29,7 +30,7 @@ class ProductDetailScreen extends ConsumerWidget {
           .update({'is_active': !(product['is_active'] as bool? ?? true)})
           .eq('id', productId);
       ref.invalidate(productDetailProvider(productId));
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref); // active flag drives POS/stock visibility
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -47,7 +48,7 @@ class ProductDetailScreen extends ConsumerWidget {
     final client = ref.read(supabaseProvider);
     try {
       await client.from('products').delete().eq('id', productId);
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref);
       if (context.mounted) {
         showSuccess(context, 'Product deleted');
         context.pop();
@@ -98,7 +99,7 @@ class ProductDetailScreen extends ConsumerWidget {
             .eq('id', productId);
       }
       ref.invalidate(productDetailProvider(productId));
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref); // variant stock/price/barcode feed POS + stock
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -196,6 +197,7 @@ class ProductDetailScreen extends ConsumerWidget {
           })
           .eq('id', variant['id'] as String);
       ref.invalidate(productDetailProvider(productId));
+      invalidateStockData(ref);
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -208,6 +210,7 @@ class ProductDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Product'),
         actions: [
           if (detail.hasValue) ...[

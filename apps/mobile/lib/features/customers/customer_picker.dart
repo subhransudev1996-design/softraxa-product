@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'customer_providers.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
@@ -119,6 +120,7 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
           })
           .select('id, name, phone, address, due_amount, credit_limit')
           .single();
+      ref.invalidate(customersProvider);
       if (mounted) Navigator.pop(context, Map<String, dynamic>.from(row));
     } catch (e) {
       if (mounted) showError(context, e);

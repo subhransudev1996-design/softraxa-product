@@ -1,5 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import '../invoices/invoice_providers.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../products/product_providers.dart';
+import '../stock/stock_screens.dart';
+import '../pos/pos_providers.dart';
+import '../customers/customer_providers.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:drift/drift.dart';
@@ -10,7 +16,9 @@ import 'local_db.dart';
 
 /// true when the device reports an active network.
 final isOnlineProvider = StreamProvider<bool>((ref) async* {
-  yield !(await Connectivity().checkConnectivity()).contains(ConnectivityResult.none);
+  yield !(await Connectivity().checkConnectivity()).contains(
+    ConnectivityResult.none,
+  );
   await for (final results in Connectivity().onConnectivityChanged) {
     yield !results.contains(ConnectivityResult.none);
   }
@@ -83,25 +91,30 @@ class OfflineService {
       ..orderBy([(t) => OrderingTerm.asc(t.name)])
       ..limit(100);
     if (q.isNotEmpty) {
-      query.where((t) =>
-          t.name.contains(q) | t.barcode.contains(q) | t.sku.contains(q));
+      query.where(
+        (t) => t.name.contains(q) | t.barcode.contains(q) | t.sku.contains(q),
+      );
     }
     final rows = await query.get();
     return [
-      for (final r in rows) Map<String, dynamic>.from(jsonDecode(r.data) as Map)
+      for (final r in rows)
+        Map<String, dynamic>.from(jsonDecode(r.data) as Map),
     ];
   }
 
   Future<Map<String, dynamic>?> findCachedByBarcode(String code) async {
-    final rows = await (_db.select(_db.cachedProducts)
-          ..where((t) => t.barcode.equals(code))
-          ..limit(1))
-        .get();
+    final rows =
+        await (_db.select(_db.cachedProducts)
+              ..where((t) => t.barcode.equals(code))
+              ..limit(1))
+            .get();
     if (rows.isEmpty) return null;
     return Map<String, dynamic>.from(jsonDecode(rows.first.data) as Map);
   }
 
-  Future<List<Map<String, dynamic>>> searchCachedCustomers(String search) async {
+  Future<List<Map<String, dynamic>>> searchCachedCustomers(
+    String search,
+  ) async {
     final q = search.trim().toLowerCase();
     final query = _db.select(_db.cachedCustomers)
       ..orderBy([(t) => OrderingTerm.asc(t.name)])
@@ -111,7 +124,8 @@ class OfflineService {
     }
     final rows = await query.get();
     return [
-      for (final r in rows) Map<String, dynamic>.from(jsonDecode(r.data) as Map)
+      for (final r in rows)
+        Map<String, dynamic>.from(jsonDecode(r.data) as Map),
     ];
   }
 
@@ -124,20 +138,23 @@ class OfflineService {
     required double total,
     required String customerName,
   }) async {
-    await _db.into(_db.pendingBills).insert(PendingBillsCompanion.insert(
-          localId: localId,
-          payload: jsonEncode(payload),
-          displayNo: displayNo,
-          total: total,
-          customerName: Value(customerName),
-          createdAt: DateTime.now(),
-        ));
+    await _db
+        .into(_db.pendingBills)
+        .insert(
+          PendingBillsCompanion.insert(
+            localId: localId,
+            payload: jsonEncode(payload),
+            displayNo: displayNo,
+            total: total,
+            customerName: Value(customerName),
+            createdAt: DateTime.now(),
+          ),
+        );
   }
 
-  Future<List<PendingBill>> pendingBills() =>
-      (_db.select(_db.pendingBills)
-            ..orderBy([(t) => OrderingTerm.desc(t.createdAt)]))
-          .get();
+  Future<List<PendingBill>> pendingBills() => (_db.select(
+    _db.pendingBills,
+  )..orderBy([(t) => OrderingTerm.desc(t.createdAt)])).get();
 
   Future<int> pendingCount() async =>
       (await _db.select(_db.pendingBills).get()).length;
@@ -151,26 +168,47 @@ class OfflineService {
       final client = _ref.read(supabaseProvider);
       if (client.auth.currentUser == null) return;
       final bills = await pendingBills();
+      var synced = 0;
       for (final bill in bills) {
         try {
-          await client.rpc('create_invoice', params: {
-            'payload': jsonDecode(bill.payload),
-          });
-          await (_db.delete(_db.pendingBills)
-                ..where((t) => t.localId.equals(bill.localId)))
-              .go();
+          await client.rpc(
+            'create_invoice',
+            params: {'payload': jsonDecode(bill.payload)},
+          );
+          await (_db.delete(
+            _db.pendingBills,
+          )..where((t) => t.localId.equals(bill.localId))).go();
+          synced++;
         } catch (e) {
           final msg = e.toString();
-          final isNetwork = msg.contains('SocketException') ||
+          final isNetwork =
+              msg.contains('SocketException') ||
               msg.contains('Failed host lookup') ||
               msg.contains('Connection');
           if (isNetwork) break; // still offline — try again later
           // Server rejected the bill: keep it, mark failed for review.
-          await (_db.update(_db.pendingBills)
-                ..where((t) => t.localId.equals(bill.localId)))
-              .write(PendingBillsCompanion(
-                  status: const Value('failed'), error: Value(msg)));
+          await (_db.update(
+            _db.pendingBills,
+          )..where((t) => t.localId.equals(bill.localId))).write(
+            PendingBillsCompanion(
+              status: const Value('failed'),
+              error: Value(msg),
+            ),
+          );
         }
+      }
+      // Replayed bills changed invoices, stock, dues and the pending badge
+      // on the server — refresh every screen that shows them (kept-alive
+      // tabs never refetch on their own).
+      if (synced > 0) {
+        _ref.invalidate(invoicesProvider);
+        _ref.invalidate(recentInvoicesProvider);
+        _ref.invalidate(dashboardStatsProvider);
+        _ref.invalidate(productsProvider);
+        _ref.invalidate(stockListProvider);
+        _ref.invalidate(posProductsProvider);
+        _ref.invalidate(customersProvider);
+        _ref.invalidate(pendingBillCountProvider);
       }
     } finally {
       _syncing = false;
@@ -178,7 +216,9 @@ class OfflineService {
   }
 
   Future<void> deletePendingBill(String localId) async {
-    await (_db.delete(_db.pendingBills)..where((t) => t.localId.equals(localId))).go();
+    await (_db.delete(
+      _db.pendingBills,
+    )..where((t) => t.localId.equals(localId))).go();
   }
 }
 

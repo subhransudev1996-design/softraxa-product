@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -272,7 +273,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         }
       }
 
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref); // new/edited product: POS, stock, dashboard
       if (mounted) {
         showSuccess(context, isEdit ? 'Product updated' : 'Product added');
         context.pop();

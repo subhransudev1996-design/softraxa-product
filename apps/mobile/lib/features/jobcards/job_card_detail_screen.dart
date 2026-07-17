@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/data_refresh.dart';
+import '../invoices/invoice_providers.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../customers/customer_providers.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
@@ -435,6 +438,10 @@ class JobCardDetailScreen extends ConsumerWidget {
               as Map<String, dynamic>;
       ref.invalidate(jobCardDetailProvider(jobId));
       ref.invalidate(jobCardsProvider);
+      ref.invalidate(invoicesProvider);
+      ref.invalidate(recentInvoicesProvider);
+      ref.invalidate(dashboardStatsProvider);
+      ref.invalidate(customersProvider);
       if (context.mounted) {
         showSuccess(context, 'Invoice ${res['invoice_no']} generated');
         context.push('/invoices/${res['invoice_id']}?new=1');
