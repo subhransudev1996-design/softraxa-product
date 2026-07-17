@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
-import '../dashboard/dashboard_screen.dart';
 import '../pos/cart.dart' show toBaseQty, roundOffFor;
-import '../pos/pos_providers.dart';
 import '../products/product_providers.dart';
 import '../suppliers/suppliers.dart';
 import 'purchase_providers.dart';
@@ -413,10 +412,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                   .rpc('create_purchase', params: {'payload': payload})
               as Map<String, dynamic>;
       ref.invalidate(purchasesProvider);
-      ref.invalidate(productsProvider);
-      ref.invalidate(posProductsProvider);
+      invalidateStockData(ref);
       ref.invalidate(suppliersProvider);
-      ref.invalidate(dashboardStatsProvider);
       if (mounted) {
         showSuccess(context, 'Purchase ${res['purchase_no']} saved');
         context.pop();
@@ -434,7 +431,10 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Add purchase')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Add purchase'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
@@ -9,7 +10,6 @@ import '../customers/customer_picker.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../invoices/invoice_providers.dart';
 import '../offline/offline_service.dart';
-import '../pos/pos_providers.dart';
 import '../stock/piece_providers.dart';
 import 'billing_service.dart';
 import 'cart.dart';
@@ -216,8 +216,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         }
       }
       ref.read(cartProvider.notifier).clear();
-      ref.invalidate(posProductsProvider);
-      ref.invalidate(dashboardStatsProvider);
+      invalidateStockData(ref); // products/stock/POS/dashboard quantities
+      ref.invalidate(invoicesProvider);
       ref.invalidate(recentInvoicesProvider);
       ref.invalidate(pendingBillCountProvider);
       if (!mounted) return;
@@ -273,10 +273,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
           );
       ref.read(cartProvider.notifier).clear();
       ref.read(editingInvoiceProvider.notifier).set(null);
-      ref.invalidate(posProductsProvider);
+      invalidateStockData(ref);
       ref.invalidate(invoiceDetailProvider(editing.id));
       ref.invalidate(invoicesProvider);
-      ref.invalidate(dashboardStatsProvider);
       ref.invalidate(recentInvoicesProvider);
       if (!mounted) return;
       showSuccess(context, 'Bill ${result.invoiceNo} updated');

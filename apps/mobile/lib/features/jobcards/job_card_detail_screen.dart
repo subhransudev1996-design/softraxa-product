@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
 import '../pos/pos_providers.dart';
-import '../products/product_providers.dart';
 import '../services/service_providers.dart';
 import 'job_card_providers.dart';
 
@@ -185,7 +185,7 @@ class JobCardDetailScreen extends ConsumerWidget {
             },
           );
       ref.invalidate(jobCardDetailProvider(jobId));
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref);
       if (context.mounted) showSuccess(context, 'Part added — stock deducted');
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -324,7 +324,7 @@ class JobCardDetailScreen extends ConsumerWidget {
           .read(supabaseProvider)
           .rpc('remove_job_card_item', params: {'p_item_id': item['id']});
       ref.invalidate(jobCardDetailProvider(jobId));
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref);
     } catch (e) {
       if (context.mounted) showError(context, e);
     }

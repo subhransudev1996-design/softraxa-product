@@ -1,5 +1,6 @@
 import 'dart:io';
 import '../../core/walkthrough.dart';
+import '../../core/data_refresh.dart';
 
 import 'package:excel/excel.dart' hide Border;
 import 'package:file_picker/file_picker.dart';
@@ -10,8 +11,6 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
-import '../pos/pos_providers.dart';
-import '../products/product_providers.dart';
 import '../../core/theme.dart';
 
 const _headers = [
@@ -389,8 +388,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
         }
       }
 
-      ref.invalidate(productsProvider);
-      ref.invalidate(posProductsProvider);
+      invalidateStockData(ref);
       if (mounted) {
         if (failCount == 0) {
           showSuccess(context, '$count products imported');
@@ -415,7 +413,11 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Excel import'), actions: const [GuideButton('import')]),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Excel import'),
+        actions: const [GuideButton('import')],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -441,19 +443,27 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: CoachTarget(page: 'import', id: 'template', child: OutlinedButton.icon(
-                          onPressed: _downloadSample,
-                          icon: const Icon(Icons.download),
-                          label: const Text('Sample file'),
-                        )),
+                        child: CoachTarget(
+                          page: 'import',
+                          id: 'template',
+                          child: OutlinedButton.icon(
+                            onPressed: _downloadSample,
+                            icon: const Icon(Icons.download),
+                            label: const Text('Sample file'),
+                          ),
+                        ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: CoachTarget(page: 'import', id: 'upload', child: FilledButton.icon(
-                          onPressed: _parsing ? null : _pickFile,
-                          icon: const Icon(Icons.upload_file),
-                          label: Text(_parsing ? 'Reading…' : 'Choose file'),
-                        )),
+                        child: CoachTarget(
+                          page: 'import',
+                          id: 'upload',
+                          child: FilledButton.icon(
+                            onPressed: _parsing ? null : _pickFile,
+                            icon: const Icon(Icons.upload_file),
+                            label: Text(_parsing ? 'Reading…' : 'Choose file'),
+                          ),
+                        ),
                       ),
                     ],
                   ),

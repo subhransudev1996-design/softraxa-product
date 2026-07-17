@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
@@ -50,20 +51,30 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
     }
     // Whole-unit products (allow_decimal off) can't be adjusted by fractions.
     // Callers that pass a minimal product map without unit info skip this.
-    final allowDecimal = (widget.product['units'] as Map?)?['allow_decimal'] as bool?;
+    final allowDecimal =
+        (widget.product['units'] as Map?)?['allow_decimal'] as bool?;
     if (allowDecimal == false && q % 1 != 0) {
-      showError(context, 'This product is stocked in whole units — enter a whole number');
+      showError(
+        context,
+        'This product is stocked in whole units — enter a whole number',
+      );
       return;
     }
     setState(() => _busy = true);
     try {
-      await ref.read(supabaseProvider).rpc('adjust_stock', params: {
-        'p_product_id': widget.product['id'],
-        'p_variant_id': widget.variant?['id'],
-        'p_quantity': _mode == 'add' ? q : -q,
-        'p_type': _mode == 'damage' ? 'damage' : 'adjustment',
-        'p_note': _note.text.trim(),
-      });
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'adjust_stock',
+            params: {
+              'p_product_id': widget.product['id'],
+              'p_variant_id': widget.variant?['id'],
+              'p_quantity': _mode == 'add' ? q : -q,
+              'p_type': _mode == 'damage' ? 'damage' : 'adjustment',
+              'p_note': _note.text.trim(),
+            },
+          );
+      invalidateStockData(ref);
       if (mounted) {
         showSuccess(context, 'Stock updated');
         Navigator.pop(context, true);
@@ -93,9 +104,21 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
           const SizedBox(height: 16),
           SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'add', label: Text('Add'), icon: Icon(Icons.add)),
-              ButtonSegment(value: 'remove', label: Text('Remove'), icon: Icon(Icons.remove)),
-              ButtonSegment(value: 'damage', label: Text('Damaged/Lost'), icon: Icon(Icons.dangerous_outlined)),
+              ButtonSegment(
+                value: 'add',
+                label: Text('Add'),
+                icon: Icon(Icons.add),
+              ),
+              ButtonSegment(
+                value: 'remove',
+                label: Text('Remove'),
+                icon: Icon(Icons.remove),
+              ),
+              ButtonSegment(
+                value: 'damage',
+                label: Text('Damaged/Lost'),
+                icon: Icon(Icons.dangerous_outlined),
+              ),
             ],
             selected: {_mode},
             onSelectionChanged: (s) => setState(() => _mode = s.first),
@@ -110,13 +133,19 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
           const SizedBox(height: 12),
           TextField(
             controller: _note,
-            decoration: const InputDecoration(labelText: 'Note / reason (optional)'),
+            decoration: const InputDecoration(
+              labelText: 'Note / reason (optional)',
+            ),
           ),
           const SizedBox(height: 16),
           FilledButton(
             onPressed: _busy ? null : _save,
             child: _busy
-                ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
                 : const Text('Save adjustment'),
           ),
           const SizedBox(height: 24),

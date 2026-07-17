@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
-import '../dashboard/dashboard_screen.dart';
-import '../products/product_providers.dart';
 import '../purchases/purchase_providers.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
@@ -198,6 +197,7 @@ class SaleReturnsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Sale returns'),
         actions: [
           const GuideButton('sale_returns'),
@@ -208,11 +208,15 @@ class SaleReturnsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: CoachTarget(page: 'sale_returns', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => _newReturn(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New return'),
-      )),
+      floatingActionButton: CoachTarget(
+        page: 'sale_returns',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => _newReturn(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('New return'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -417,10 +421,7 @@ class _SaleReturnTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Against ${(r['invoices'] as Map?)?['invoice_no'] ?? '—'} • ${dateStr(r['return_date'])}',
-                      style: TextStyle(
-                        color: AppColors.inkSoft,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
                     ),
                   ],
                 ),
@@ -435,11 +436,7 @@ class _SaleReturnTile extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 2),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: AppColors.inkSoft,
-                  ),
+                  Icon(Icons.chevron_right, size: 18, color: AppColors.inkSoft),
                 ],
               ),
             ],
@@ -554,7 +551,10 @@ class SaleReturnDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Sale return')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Sale return'),
+      ),
       body: AsyncView(
         value: data,
         onRetry: () => ref.invalidate(saleReturnDetailProvider(returnId)),
@@ -873,8 +873,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                   .rpc('create_sale_return', params: {'payload': payload})
               as Map<String, dynamic>;
       ref.invalidate(saleReturnsProvider);
-      ref.invalidate(productsProvider);
-      ref.invalidate(dashboardStatsProvider);
+      invalidateStockData(ref);
       if (mounted) {
         showSuccess(context, 'Return ${res['return_no']} recorded');
         context.pop();
@@ -890,7 +889,10 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text('Return — ${widget.invoice['invoice_no']}')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: Text('Return — ${widget.invoice['invoice_no']}'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -1209,6 +1211,7 @@ class PurchaseReturnsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Purchase returns'),
         actions: [
           const GuideButton('purchase_returns'),
@@ -1219,11 +1222,15 @@ class PurchaseReturnsScreen extends ConsumerWidget {
           ),
         ],
       ),
-      floatingActionButton: CoachTarget(page: 'purchase_returns', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => _newReturn(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New return'),
-      )),
+      floatingActionButton: CoachTarget(
+        page: 'purchase_returns',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => _newReturn(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('New return'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -1447,10 +1454,7 @@ class _PurchaseReturnTile extends StatelessWidget {
                       'Against ${(r['purchases'] as Map?)?['purchase_no'] ?? '—'}'
                       '${(r['suppliers'] as Map?)?['name'] != null ? ' • ${(r['suppliers'] as Map)['name']}' : ''}'
                       ' • ${dateStr(r['return_date'])}',
-                      style: TextStyle(
-                        color: AppColors.inkSoft,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
                     ),
                   ],
                 ),
@@ -1465,11 +1469,7 @@ class _PurchaseReturnTile extends StatelessWidget {
                     style: const TextStyle(fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 2),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: AppColors.inkSoft,
-                  ),
+                  Icon(Icons.chevron_right, size: 18, color: AppColors.inkSoft),
                 ],
               ),
             ],
@@ -1492,7 +1492,10 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Purchase return')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Purchase return'),
+      ),
       body: AsyncView(
         value: data,
         onRetry: () => ref.invalidate(purchaseReturnDetailProvider(returnId)),
@@ -1923,9 +1926,9 @@ class _PurchaseReturnFormScreenState
                   .rpc('create_purchase_return', params: {'payload': payload})
               as Map<String, dynamic>;
       ref.invalidate(purchasesProvider);
-      ref.invalidate(productsProvider);
+      invalidateStockData(ref);
       ref.invalidate(suppliersProvider);
-      ref.invalidate(dashboardStatsProvider);
+      ref.invalidate(purchaseReturnsProvider);
       if (mounted) {
         showSuccess(context, 'Return ${res['return_no']} recorded');
         context.pop();
@@ -1941,7 +1944,10 @@ class _PurchaseReturnFormScreenState
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text('Return — ${widget.purchase['purchase_no']}')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: Text('Return — ${widget.purchase['purchase_no']}'),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [

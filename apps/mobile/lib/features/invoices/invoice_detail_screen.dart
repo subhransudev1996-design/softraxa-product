@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
+import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -150,7 +151,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
           .rpc('cancel_invoice', params: {'p_invoice_id': invoiceId});
       ref.invalidate(invoiceDetailProvider(invoiceId));
       ref.invalidate(invoicesProvider);
-      ref.invalidate(dashboardStatsProvider);
+      invalidateStockData(ref); // cancel restores stock
       ref.invalidate(recentInvoicesProvider);
       if (context.mounted) showSuccess(context, 'Invoice cancelled');
     } catch (e) {
@@ -238,6 +239,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: Text(detail.value?['invoice_no'] as String? ?? 'Invoice'),
         actions: [
           if (detail.hasValue && detail.value!['is_cancelled'] != true)
