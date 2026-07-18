@@ -7,7 +7,7 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../pos/cart.dart' show toBaseQty, roundOffFor;
-import '../products/product_providers.dart';
+import '../pos/pos_providers.dart' show posProductColumns;
 import '../suppliers/suppliers.dart';
 import 'purchase_providers.dart';
 import '../../core/theme.dart';

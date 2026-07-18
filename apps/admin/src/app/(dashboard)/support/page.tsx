@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Card, Select, Spinner, Table } from "@/components/ui";
+import { Card, Select, Spinner, Table } from "@/components/ui";
 import { dateTimeStr } from "@/lib/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */

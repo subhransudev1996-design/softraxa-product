@@ -20,12 +20,20 @@ class PurchasesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Purchases'), actions: const [GuideButton('purchases')]),
-      floatingActionButton: CoachTarget(page: 'purchases', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => context.push('/purchases/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add purchase'),
-      )),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Purchases'),
+        actions: const [GuideButton('purchases')],
+      ),
+      floatingActionButton: CoachTarget(
+        page: 'purchases',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/purchases/new'),
+          icon: const Icon(Icons.add),
+          label: const Text('Add purchase'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -40,53 +48,61 @@ class PurchasesScreen extends ConsumerWidget {
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: CoachTarget(page: 'purchases', id: 'presets', child: Row(
-              children: [
-                for (final p in const [
-                  ('all', 'All'),
-                  ('today', 'Today'),
-                  ('yesterday', 'Yesterday'),
-                  ('week', 'This week'),
-                  ('month', 'This month'),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(p.$2),
-                      selected: filter.preset == p.$1,
-                      onSelected: (_) => ref
-                          .read(purchaseFilterProvider.notifier)
-                          .set(filter.copyWith(preset: p.$1)),
+            child: CoachTarget(
+              page: 'purchases',
+              id: 'presets',
+              child: Row(
+                children: [
+                  for (final p in const [
+                    ('all', 'All'),
+                    ('today', 'Today'),
+                    ('yesterday', 'Yesterday'),
+                    ('week', 'This week'),
+                    ('month', 'This month'),
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(p.$2),
+                        selected: filter.preset == p.$1,
+                        onSelected: (_) => ref
+                            .read(purchaseFilterProvider.notifier)
+                            .set(filter.copyWith(preset: p.$1)),
+                      ),
                     ),
-                  ),
-              ],
-            )),
+                ],
+              ),
+            ),
           ),
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: CoachTarget(page: 'purchases', id: 'status', child: Row(
-              children: [
-                for (final s in const [
-                  (null, 'All'),
-                  ('paid', 'Paid'),
-                  ('partial', 'Partial'),
-                  // DB value is still 'unpaid' — labeled "Credit" to match the
-                  // "Credit (Due)" terminology used at checkout/sales.
-                  ('unpaid', 'Credit'),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(s.$2),
-                      selected: filter.status == s.$1,
-                      onSelected: (_) => ref
-                          .read(purchaseFilterProvider.notifier)
-                          .set(filter.copyWith(status: s.$1)),
+            child: CoachTarget(
+              page: 'purchases',
+              id: 'status',
+              child: Row(
+                children: [
+                  for (final s in const [
+                    (null, 'All'),
+                    ('paid', 'Paid'),
+                    ('partial', 'Partial'),
+                    // DB value is still 'unpaid' — labeled "Credit" to match the
+                    // "Credit (Due)" terminology used at checkout/sales.
+                    ('unpaid', 'Credit'),
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(s.$2),
+                        selected: filter.status == s.$1,
+                        onSelected: (_) => ref
+                            .read(purchaseFilterProvider.notifier)
+                            .set(filter.copyWith(status: s.$1)),
+                      ),
                     ),
-                  ),
-              ],
-            )),
+                ],
+              ),
+            ),
           ),
           const SizedBox(height: 4),
           Expanded(
@@ -266,10 +282,7 @@ class _PurchaseTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       dateStr(p['purchase_date']),
-                      style: TextStyle(
-                        color: AppColors.inkSoft,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
                     ),
                   ],
                 ),
@@ -307,6 +320,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: Text(detail.value?['purchase_no'] as String? ?? 'Purchase'),
       ),
       body: AsyncView(

@@ -41,6 +41,7 @@ class InvoicesScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Invoices'),
         actions: [
           const GuideButton('invoices'),
@@ -60,121 +61,135 @@ class InvoicesScreen extends ConsumerWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: CoachTarget(page: 'invoices', id: 'search', child: SearchField(
-              hint: 'Search invoice no, customer, phone',
-              onChanged: (v) => ref
-                  .read(invoiceFilterProvider.notifier)
-                  .set(filter.copyWith(search: v)),
-            )),
-          ),
-          CoachTarget(page: 'invoices', id: 'filters', child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Row(
-              children: [
-                for (final s in const [
-                  (null, 'All'),
-                  ('paid', 'Paid'),
-                  ('partial', 'Partial'),
-                  // DB value is still 'unpaid' — labeled "Credit" to match
-                  // the "Credit (Due)" terminology used at checkout.
-                  ('unpaid', 'Credit'),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: ChoiceChip(
-                      label: Text(s.$2),
-                      selected: filter.status == s.$1,
-                      onSelected: (_) => ref
-                          .read(invoiceFilterProvider.notifier)
-                          .set(filter.copyWith(status: s.$1)),
-                    ),
-                  ),
-                const SizedBox(width: 8),
-                for (final t in const [
-                  ('estimate', 'Estimates'),
-                  ('cash_memo', 'Cash memos'),
-                ])
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: FilterChip(
-                      label: Text(t.$2),
-                      selected: filter.type == t.$1,
-                      onSelected: (sel) => ref
-                          .read(invoiceFilterProvider.notifier)
-                          .set(filter.copyWith(type: sel ? t.$1 : null)),
-                    ),
-                  ),
-                if (filter.from != null && filter.to != null)
-                  Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: InputChip(
-                      avatar: const Icon(Icons.date_range, size: 16),
-                      label: Text(
-                        '${dateStr(filter.from)} → ${dateStr(filter.to)}',
-                      ),
-                      onPressed: () => _pickRange(context, ref, filter),
-                      onDeleted: () => ref
-                          .read(invoiceFilterProvider.notifier)
-                          .set(filter.copyWith(from: null, to: null)),
-                    ),
-                  ),
-              ],
-            ),
-          )),
-          Expanded(
-            child: CoachTarget(page: 'invoices', id: 'list', child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(invoicesProvider),
-              child: AsyncView(
-                value: invoices,
-                onRetry: () => ref.invalidate(invoicesProvider),
-                builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.receipt_long,
-                        message: 'No invoices found',
-                      )
-                    : isDesktop
-                    ? DesktopTable<Map<String, dynamic>>(
-                        rows: rows,
-                        trailingWidth: 110,
-                        columns: [
-                          DesktopTableColumn(
-                            label: 'Invoice #',
-                            flex: 2,
-                            comparable: (r) => r['invoice_no'] as String? ?? '',
-                          ),
-                          DesktopTableColumn(
-                            label: 'Customer',
-                            flex: 3,
-                            comparable: (r) =>
-                                (r['customer_name'] as String? ?? '')
-                                    .toLowerCase(),
-                          ),
-                          DesktopTableColumn(
-                            label: 'Date',
-                            flex: 2,
-                            comparable: (r) =>
-                                r['invoice_date'] as String? ?? '',
-                          ),
-                          DesktopTableColumn(
-                            label: 'Amount',
-                            flex: 2,
-                            alignEnd: true,
-                            comparable: (r) => toDouble(r['total']),
-                          ),
-                        ],
-                        rowBuilder: (context, inv) => _InvoiceRow(invoice: inv),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
-                        itemCount: rows.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, i) =>
-                            _InvoiceTile(invoice: rows[i]),
-                      ),
+            child: CoachTarget(
+              page: 'invoices',
+              id: 'search',
+              child: SearchField(
+                hint: 'Search invoice no, customer, phone',
+                onChanged: (v) => ref
+                    .read(invoiceFilterProvider.notifier)
+                    .set(filter.copyWith(search: v)),
               ),
             ),
-          )),
+          ),
+          CoachTarget(
+            page: 'invoices',
+            id: 'filters',
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  for (final s in const [
+                    (null, 'All'),
+                    ('paid', 'Paid'),
+                    ('partial', 'Partial'),
+                    // DB value is still 'unpaid' — labeled "Credit" to match
+                    // the "Credit (Due)" terminology used at checkout.
+                    ('unpaid', 'Credit'),
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(s.$2),
+                        selected: filter.status == s.$1,
+                        onSelected: (_) => ref
+                            .read(invoiceFilterProvider.notifier)
+                            .set(filter.copyWith(status: s.$1)),
+                      ),
+                    ),
+                  const SizedBox(width: 8),
+                  for (final t in const [
+                    ('estimate', 'Estimates'),
+                    ('cash_memo', 'Cash memos'),
+                  ])
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: FilterChip(
+                        label: Text(t.$2),
+                        selected: filter.type == t.$1,
+                        onSelected: (sel) => ref
+                            .read(invoiceFilterProvider.notifier)
+                            .set(filter.copyWith(type: sel ? t.$1 : null)),
+                      ),
+                    ),
+                  if (filter.from != null && filter.to != null)
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: InputChip(
+                        avatar: const Icon(Icons.date_range, size: 16),
+                        label: Text(
+                          '${dateStr(filter.from)} → ${dateStr(filter.to)}',
+                        ),
+                        onPressed: () => _pickRange(context, ref, filter),
+                        onDeleted: () => ref
+                            .read(invoiceFilterProvider.notifier)
+                            .set(filter.copyWith(from: null, to: null)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Expanded(
+            child: CoachTarget(
+              page: 'invoices',
+              id: 'list',
+              child: RefreshIndicator(
+                onRefresh: () async => ref.invalidate(invoicesProvider),
+                child: AsyncView(
+                  value: invoices,
+                  onRetry: () => ref.invalidate(invoicesProvider),
+                  builder: (rows) => rows.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.receipt_long,
+                          message: 'No invoices found',
+                        )
+                      : isDesktop
+                      ? DesktopTable<Map<String, dynamic>>(
+                          rows: rows,
+                          trailingWidth: 110,
+                          columns: [
+                            DesktopTableColumn(
+                              label: 'Invoice #',
+                              flex: 2,
+                              comparable: (r) =>
+                                  r['invoice_no'] as String? ?? '',
+                            ),
+                            DesktopTableColumn(
+                              label: 'Customer',
+                              flex: 3,
+                              comparable: (r) =>
+                                  (r['customer_name'] as String? ?? '')
+                                      .toLowerCase(),
+                            ),
+                            DesktopTableColumn(
+                              label: 'Date',
+                              flex: 2,
+                              comparable: (r) =>
+                                  r['invoice_date'] as String? ?? '',
+                            ),
+                            DesktopTableColumn(
+                              label: 'Amount',
+                              flex: 2,
+                              alignEnd: true,
+                              comparable: (r) => toDouble(r['total']),
+                            ),
+                          ],
+                          rowBuilder: (context, inv) =>
+                              _InvoiceRow(invoice: inv),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
+                          itemCount: rows.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, i) =>
+                              _InvoiceTile(invoice: rows[i]),
+                        ),
+                ),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -323,10 +338,7 @@ class _InvoiceTile extends StatelessWidget {
                         ),
                         const SizedBox(width: 6),
                         if (inv['invoice_type'] == 'estimate')
-                          StatusChip(
-                            'estimate',
-                            color: AppColors.inkSoft,
-                          ),
+                          StatusChip('estimate', color: AppColors.inkSoft),
                         if (inv['offline_created'] == true)
                           const Padding(
                             padding: EdgeInsets.only(left: 4),
@@ -344,10 +356,7 @@ class _InvoiceTile extends StatelessWidget {
                       ' • ${dateTimeStr(inv['invoice_date'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: AppColors.inkSoft,
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
                     ),
                   ],
                 ),

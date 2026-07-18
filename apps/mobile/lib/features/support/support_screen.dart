@@ -6,8 +6,9 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
 
-final ticketsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+final ticketsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final rows = await ref
       .watch(supabaseProvider)
       .from('support_tickets')
@@ -27,20 +28,33 @@ class SupportScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('New support request'),
-        content: Column(mainAxisSize: MainAxisSize.min, children: [
-          TextField(
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
               controller: subject,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Subject *')),
-          const SizedBox(height: 12),
-          TextField(
+              decoration: const InputDecoration(labelText: 'Subject *'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
               controller: message,
               maxLines: 4,
-              decoration: const InputDecoration(labelText: 'Describe the issue')),
-        ]),
+              decoration: const InputDecoration(
+                labelText: 'Describe the issue',
+              ),
+            ),
+          ],
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Send')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Send'),
+          ),
         ],
       ),
     );
@@ -53,7 +67,9 @@ class SupportScreen extends ConsumerWidget {
         'message': message.text.trim(),
       });
       ref.invalidate(ticketsProvider);
-      if (context.mounted) showSuccess(context, 'Request sent. We will contact you soon.');
+      if (context.mounted) {
+        showSuccess(context, 'Request sent. We will contact you soon.');
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -65,7 +81,10 @@ class SupportScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Support')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Support'),
+      ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _newTicket(context, ref),
         icon: const Icon(Icons.add),
@@ -79,7 +98,9 @@ class SupportScreen extends ConsumerWidget {
           builder: (rows) => rows.isEmpty
               ? const EmptyState(
                   icon: Icons.support_agent_outlined,
-                  message: 'No support requests yet.\nFacing a problem? Tap "New request".')
+                  message:
+                      'No support requests yet.\nFacing a problem? Tap "New request".',
+                )
               : ListView.separated(
                   padding: const EdgeInsets.fromLTRB(16, 8, 16, 88),
                   itemCount: rows.length,
@@ -88,15 +109,27 @@ class SupportScreen extends ConsumerWidget {
                     final t = rows[i];
                     return Card(
                       child: ListTile(
-                        leading: const IconChip(Icons.support_agent_outlined,
-                            color: AppColors.indigo, size: 40),
-                        title: Text(t['subject'] as String,
-                            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                        leading: const IconChip(
+                          Icons.support_agent_outlined,
+                          color: AppColors.indigo,
+                          size: 40,
+                        ),
+                        title: Text(
+                          t['subject'] as String,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 14,
+                          ),
+                        ),
                         subtitle: Text(
-                            '${t['message'] ?? ''}\n${dateTimeStr(t['created_at'])}',
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                          '${t['message'] ?? ''}\n${dateTimeStr(t['created_at'])}',
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: AppColors.inkSoft,
+                            fontSize: 12,
+                          ),
+                        ),
                         trailing: StatusChip(
                           (t['status'] as String).replaceAll('_', ' '),
                           color: switch (t['status']) {

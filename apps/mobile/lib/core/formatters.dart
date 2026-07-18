@@ -1,7 +1,15 @@
 import 'package:intl/intl.dart';
 
-final _money = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 2);
-final _moneyCompact = NumberFormat.currency(locale: 'en_IN', symbol: '₹', decimalDigits: 0);
+final _money = NumberFormat.currency(
+  locale: 'en_IN',
+  symbol: '₹',
+  decimalDigits: 2,
+);
+final _moneyCompact = NumberFormat.currency(
+  locale: 'en_IN',
+  symbol: '₹',
+  decimalDigits: 0,
+);
 final _qty = NumberFormat('#,##0.###', 'en_IN');
 final _date = DateFormat('dd MMM yyyy');
 final _dateTime = DateFormat('dd MMM yyyy, hh:mm a');

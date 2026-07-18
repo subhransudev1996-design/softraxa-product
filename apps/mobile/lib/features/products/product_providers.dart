@@ -13,17 +13,23 @@ class ProductSearchNotifier extends Notifier<String> {
   void set(String v) => state = v;
 }
 
-final productsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+final productsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final client = ref.watch(supabaseProvider);
   final search = ref.watch(productSearchProvider).trim();
 
-  var query = client.from('products').select(
-      'id, name, sku, barcode, selling_price, mrp, purchase_price, gst_rate, '
-      'current_stock, low_stock_qty, image_url, has_variants, track_serial, is_active, '
-      'categories(name), brands(name), units(name, short_name)');
+  var query = client
+      .from('products')
+      .select(
+        'id, name, sku, barcode, selling_price, mrp, purchase_price, gst_rate, '
+        'current_stock, low_stock_qty, image_url, has_variants, track_serial, is_active, '
+        'categories(name), brands(name), units(name, short_name)',
+      );
   if (search.isNotEmpty) {
-    query = query.or('name.ilike.%$search%,sku.ilike.%$search%,barcode.ilike.%$search%');
+    query = query.or(
+      'name.ilike.%$search%,sku.ilike.%$search%,barcode.ilike.%$search%',
+    );
   }
   final rows = await query.order('name').limit(200);
   return List<Map<String, dynamic>>.from(rows);
@@ -31,12 +37,17 @@ final productsProvider =
 
 final productDetailProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, id) async {
-  final client = ref.watch(supabaseProvider);
-  final row = await client.from('products').select(
-      '*, categories(name), brands(name), units(name, short_name, allow_decimal), '
-      'product_variants(*)').eq('id', id).single();
-  return Map<String, dynamic>.from(row);
-});
+      final client = ref.watch(supabaseProvider);
+      final row = await client
+          .from('products')
+          .select(
+            '*, categories(name), brands(name), units(name, short_name, allow_decimal), '
+            'product_variants(*)',
+          )
+          .eq('id', id)
+          .single();
+      return Map<String, dynamic>.from(row);
+    });
 
 /// Weighted (scale-label) barcode — EAN-13 in the in-store '2' prefix range,
 /// the format label-printing weighing scales emit for loose goods:
@@ -63,7 +74,10 @@ Future<Map<String, dynamic>?> findByBarcode(dynamic client, String code) async {
       .eq('is_active', true)
       .limit(1);
   if ((products as List).isNotEmpty) {
-    return {'product': Map<String, dynamic>.from(products.first), 'variant': null};
+    return {
+      'product': Map<String, dynamic>.from(products.first),
+      'variant': null,
+    };
   }
   final variants = await client
       .from('product_variants')
@@ -101,17 +115,18 @@ Future<Map<String, dynamic>?> findByBarcode(dynamic client, String code) async {
 // ---------- Master data (categories / brands / units) ----------
 final categoriesProvider =
     FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final rows = await ref
-      .watch(supabaseProvider)
-      .from('categories')
-      .select()
-      .eq('is_active', true)
-      .order('name');
-  return List<Map<String, dynamic>>.from(rows);
-});
+      final rows = await ref
+          .watch(supabaseProvider)
+          .from('categories')
+          .select()
+          .eq('is_active', true)
+          .order('name');
+      return List<Map<String, dynamic>>.from(rows);
+    });
 
-final brandsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+final brandsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
+  ref,
+) async {
   final rows = await ref
       .watch(supabaseProvider)
       .from('brands')
@@ -121,9 +136,13 @@ final brandsProvider =
   return List<Map<String, dynamic>>.from(rows);
 });
 
-final unitsProvider =
-    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final rows =
-      await ref.watch(supabaseProvider).from('units').select().order('name');
+final unitsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
+  ref,
+) async {
+  final rows = await ref
+      .watch(supabaseProvider)
+      .from('units')
+      .select()
+      .order('name');
   return List<Map<String, dynamic>>.from(rows);
 });

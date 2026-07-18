@@ -39,7 +39,8 @@ class PendingBills extends Table {
   TextColumn get displayNo => text()(); // provisional number shown to user
   RealColumn get total => real()();
   TextColumn get customerName => text().withDefault(const Constant(''))();
-  TextColumn get status => text().withDefault(const Constant('pending'))(); // pending | failed
+  TextColumn get status =>
+      text().withDefault(const Constant('pending'))(); // pending | failed
   TextColumn get error => text().withDefault(const Constant(''))();
   DateTimeColumn get createdAt => dateTime()();
 
@@ -58,14 +59,16 @@ class LocalDb extends _$LocalDb {
   // documents-dir default so existing installs keep their cached data and
   // any queued offline bills.
   LocalDb()
-      : super(driftDatabase(
+    : super(
+        driftDatabase(
           name: 'softraxa_local',
           native: isDesktopPlatform
               ? const DriftNativeOptions(
                   databaseDirectory: getApplicationSupportDirectory,
                 )
               : null,
-        ));
+        ),
+      );
 
   @override
   int get schemaVersion => 1;

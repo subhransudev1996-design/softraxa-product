@@ -22,8 +22,11 @@ class BlockedScreen extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(suspended ? Icons.block : Icons.timer_off_outlined,
-                  size: 64, color: AppColors.red),
+              Icon(
+                suspended ? Icons.block : Icons.timer_off_outlined,
+                size: 64,
+                color: AppColors.red,
+              ),
               const SizedBox(height: 16),
               Text(
                 suspended ? 'Account suspended' : 'Subscription expired',
@@ -39,7 +42,8 @@ class BlockedScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 24),
               OutlinedButton(
-                onPressed: () => ref.read(appContextProvider.notifier).refresh(),
+                onPressed: () =>
+                    ref.read(appContextProvider.notifier).refresh(),
                 child: const Text('Check again'),
               ),
               TextButton(

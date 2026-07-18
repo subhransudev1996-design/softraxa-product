@@ -91,38 +91,45 @@ class ReportsScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Reports'), actions: const [GuideButton('reports')]),
+      appBar: AppBar(
+        title: const Text('Reports'),
+        actions: const [GuideButton('reports')],
+      ),
       body: !enabled
           ? const Center(child: Text('Reports are not enabled on your plan.'))
-          : CoachTarget(page: 'reports', id: 'list', child: ListView.separated(
-              padding: const EdgeInsets.all(16),
-              itemCount: _reports.length,
-              separatorBuilder: (_, _) => const SizedBox(height: 8),
-              itemBuilder: (context, i) {
-                final r = _reports[i];
-                return Card(
-                  child: ListTile(
-                    leading: IconChip(r.$4, color: r.$5, size: 40),
-                    title: Text(
-                      r.$2,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
+          : CoachTarget(
+              page: 'reports',
+              id: 'list',
+              child: ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: _reports.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final r = _reports[i];
+                  return Card(
+                    child: ListTile(
+                      leading: IconChip(r.$4, color: r.$5, size: 40),
+                      title: Text(
+                        r.$2,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    subtitle: Text(
-                      r.$3,
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.inkSoft,
+                      subtitle: Text(
+                        r.$3,
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
                       ),
+                      trailing: const Icon(Icons.chevron_right, size: 20),
+                      onTap: () => context.push('/reports/${r.$1}'),
                     ),
-                    trailing: const Icon(Icons.chevron_right, size: 20),
-                    onTap: () => context.push('/reports/${r.$1}'),
-                  ),
-                );
-              },
-            )),
+                  );
+                },
+              ),
+            ),
     );
   }
 }

@@ -37,18 +37,25 @@ export default function NewClientPage() {
     // Prefill when arriving from a lead's "Convert to client" button.
     // (window.location instead of useSearchParams — avoids the Suspense
     // boundary Next.js requires around useSearchParams in client pages.)
+    // Deferred out of the synchronous effect body so these state updates
+    // don't run during the effect (react-hooks/set-state-in-effect).
+    let active = true;
     const q = new URLSearchParams(window.location.search);
     if (q.get("leadId")) {
-      setLeadId(q.get("leadId"));
-      setForm((f) => ({
-        ...f,
-        businessName: q.get("businessName") ?? f.businessName,
-        ownerName: q.get("ownerName") ?? f.ownerName,
-        phone: q.get("phone") ?? f.phone,
-        type: q.get("type") || f.type,
-        planId: q.get("planId") ?? f.planId,
-      }));
+      Promise.resolve().then(() => {
+        if (!active) return;
+        setLeadId(q.get("leadId"));
+        setForm((f) => ({
+          ...f,
+          businessName: q.get("businessName") ?? f.businessName,
+          ownerName: q.get("ownerName") ?? f.ownerName,
+          phone: q.get("phone") ?? f.phone,
+          type: q.get("type") || f.type,
+          planId: q.get("planId") ?? f.planId,
+        }));
+      });
     }
+    return () => { active = false; };
   }, []);
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));

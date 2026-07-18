@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-final supabaseProvider = Provider<SupabaseClient>((ref) => Supabase.instance.client);
+final supabaseProvider = Provider<SupabaseClient>(
+  (ref) => Supabase.instance.client,
+);
 
 /// Emits on every auth state change (login, logout, token refresh).
 final authStateProvider = StreamProvider<AuthState>((ref) {
@@ -35,7 +37,8 @@ class AppContext {
   String get businessName => (business?['name'] as String?) ?? '';
   String get invoicePrefix => (business?['invoice_prefix'] as String?) ?? 'INV';
   bool get gstEnabled =>
-      (business?['tax_preference'] ?? 'gst') == 'gst' && featureOn('gst_billing');
+      (business?['tax_preference'] ?? 'gst') == 'gst' &&
+      featureOn('gst_billing');
 
   bool featureOn(String key) => (features?[key] as bool?) ?? true;
 
@@ -58,9 +61,10 @@ class AppContext {
       subscriptionState == 'expired' || subscriptionState == 'suspended';
 }
 
-final appContextProvider = AsyncNotifierProvider<AppContextNotifier, AppContext>(
-  AppContextNotifier.new,
-);
+final appContextProvider =
+    AsyncNotifierProvider<AppContextNotifier, AppContext>(
+      AppContextNotifier.new,
+    );
 
 class AppContextNotifier extends AsyncNotifier<AppContext> {
   @override
@@ -69,7 +73,12 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
     ref.watch(authStateProvider);
     final client = ref.watch(supabaseProvider);
     if (client.auth.currentUser == null) {
-      return AppContext(profile: null, business: null, features: null, subscription: null);
+      return AppContext(
+        profile: null,
+        business: null,
+        features: null,
+        subscription: null,
+      );
     }
     final data = await client.rpc('get_my_context') as Map<String, dynamic>;
     return AppContext(

@@ -9,8 +9,9 @@ const _kThemePrefKey = 'desktop_theme_mode'; // 'light' | 'dark'
 /// Whether dark mode is on. Desktop-only feature — on phones this is
 /// always false and [DarkModeNotifier.set] is a no-op, so the mobile
 /// app keeps its light theme unconditionally.
-final darkModeProvider =
-    NotifierProvider<DarkModeNotifier, bool>(DarkModeNotifier.new);
+final darkModeProvider = NotifierProvider<DarkModeNotifier, bool>(
+  DarkModeNotifier.new,
+);
 
 class DarkModeNotifier extends Notifier<bool> {
   @override

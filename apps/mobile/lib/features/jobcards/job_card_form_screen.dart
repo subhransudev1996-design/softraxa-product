@@ -66,13 +66,17 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
         'estimated_cost': double.tryParse(_estimatedCost.text) ?? 0,
         'advance_amount': double.tryParse(_advanceAmount.text) ?? 0,
         'advance_mode': _advanceMode,
-        'expected_delivery': _expectedDelivery != null ? ymd(_expectedDelivery!) : null,
+        'expected_delivery': _expectedDelivery != null
+            ? ymd(_expectedDelivery!)
+            : null,
         'customer_note': _customerNote.text.trim(),
         'internal_note': _internalNote.text.trim(),
       };
-      final res = await ref
-          .read(supabaseProvider)
-          .rpc('create_job_card', params: {'payload': payload}) as Map<String, dynamic>;
+      final res =
+          await ref
+                  .read(supabaseProvider)
+                  .rpc('create_job_card', params: {'payload': payload})
+              as Map<String, dynamic>;
       ref.invalidate(jobCardsProvider);
       if (mounted) {
         showSuccess(context, 'Job card ${res['job_no']} created');
@@ -89,7 +93,10 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('New job card')),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('New job card'),
+      ),
       body: Form(
         key: _formKey,
         child: ListView(
@@ -99,10 +106,18 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             Card(
               child: ListTile(
                 leading: _customer == null
-                    ? const IconChip(Icons.person_outline, color: AppColors.indigo, size: 40)
+                    ? const IconChip(
+                        Icons.person_outline,
+                        color: AppColors.indigo,
+                        size: 40,
+                      )
                     : InitialsAvatar(_customer!['name'] as String? ?? ''),
-                title: Text(_customer?['name'] as String? ?? 'Walk-in customer'),
-                subtitle: _customer?['phone'] != null && (_customer!['phone'] as String).isNotEmpty
+                title: Text(
+                  _customer?['name'] as String? ?? 'Walk-in customer',
+                ),
+                subtitle:
+                    _customer?['phone'] != null &&
+                        (_customer!['phone'] as String).isNotEmpty
                     ? Text(_customer!['phone'] as String)
                     : const Text('Optional, needed for due tracking'),
                 trailing: const Icon(Icons.chevron_right),
@@ -117,68 +132,98 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               controller: _itemName,
               textCapitalization: TextCapitalization.words,
               decoration: const InputDecoration(labelText: 'Item name *'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
-            Row(children: [
-              Expanded(
+            Row(
+              children: [
+                Expanded(
                   child: TextFormField(
-                      controller: _brand,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Brand'))),
-              const SizedBox(width: 12),
-              Expanded(
+                    controller: _brand,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(labelText: 'Brand'),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: TextFormField(
-                      controller: _model,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Model'))),
-            ]),
+                    controller: _model,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(labelText: 'Model'),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _serialNo,
               decoration: InputDecoration(
                 labelText: 'IMEI / serial number (optional)',
                 suffixIcon: IconButton(
-                    icon: const Icon(Icons.qr_code_scanner), onPressed: _scanSerial),
+                  icon: const Icon(Icons.qr_code_scanner),
+                  onPressed: _scanSerial,
+                ),
               ),
             ),
             const SectionLabel('Issue'),
             TextFormField(
               controller: _issue,
               maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Problem / issue description *'),
-              validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+              decoration: const InputDecoration(
+                labelText: 'Problem / issue description *',
+              ),
+              validator: (v) =>
+                  v == null || v.trim().isEmpty ? 'Required' : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
-                controller: _condition,
-                decoration: const InputDecoration(labelText: 'Item condition at receiving (optional)')),
+              controller: _condition,
+              decoration: const InputDecoration(
+                labelText: 'Item condition at receiving (optional)',
+              ),
+            ),
             const SizedBox(height: 12),
             TextFormField(
-                controller: _accessories,
-                decoration: const InputDecoration(labelText: 'Accessories received (optional)')),
+              controller: _accessories,
+              decoration: const InputDecoration(
+                labelText: 'Accessories received (optional)',
+              ),
+            ),
             const SectionLabel('Estimate & advance'),
-            Row(children: [
-              Expanded(
-                child: TextFormField(
-                  controller: _estimatedCost,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Estimated cost ₹'),
+            Row(
+              children: [
+                Expanded(
+                  child: TextFormField(
+                    controller: _estimatedCost,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Estimated cost ₹',
+                    ),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextFormField(
-                  controller: _advanceAmount,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Advance paid ₹'),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextFormField(
+                    controller: _advanceAmount,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Advance paid ₹',
+                    ),
+                  ),
                 ),
-              ),
-            ]),
+              ],
+            ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _advanceMode,
-              decoration: const InputDecoration(labelText: 'Advance payment mode'),
+              decoration: const InputDecoration(
+                labelText: 'Advance payment mode',
+              ),
               items: const [
                 DropdownMenuItem(value: 'cash', child: Text('Cash')),
                 DropdownMenuItem(value: 'upi', child: Text('UPI')),
@@ -192,7 +237,8 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               textCapitalization: TextCapitalization.sentences,
               decoration: const InputDecoration(
                 labelText: 'Service / installation location (optional)',
-                hintText: 'e.g. Patia, Bhubaneswar — 2nd floor, near water tank',
+                hintText:
+                    'e.g. Patia, Bhubaneswar — 2nd floor, near water tank',
                 prefixIcon: Icon(Icons.place_outlined),
               ),
             ),
@@ -208,28 +254,46 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 if (picked != null) setState(() => _expectedDelivery = picked);
               },
               child: InputDecorator(
-                decoration: const InputDecoration(labelText: 'Expected delivery date'),
-                child: Text(_expectedDelivery == null ? 'Not set' : dateStr(_expectedDelivery)),
+                decoration: const InputDecoration(
+                  labelText: 'Expected delivery date',
+                ),
+                child: Text(
+                  _expectedDelivery == null
+                      ? 'Not set'
+                      : dateStr(_expectedDelivery),
+                ),
               ),
             ),
             const SizedBox(height: 12),
             TextFormField(
-                controller: _technician,
-                decoration: const InputDecoration(labelText: 'Technician name (optional)')),
+              controller: _technician,
+              decoration: const InputDecoration(
+                labelText: 'Technician name (optional)',
+              ),
+            ),
             const SectionLabel('Notes'),
             TextFormField(
-                controller: _customerNote,
-                decoration: const InputDecoration(labelText: 'Customer-visible note (optional)')),
+              controller: _customerNote,
+              decoration: const InputDecoration(
+                labelText: 'Customer-visible note (optional)',
+              ),
+            ),
             const SizedBox(height: 12),
             TextFormField(
-                controller: _internalNote,
-                decoration: const InputDecoration(labelText: 'Internal note (optional)')),
+              controller: _internalNote,
+              decoration: const InputDecoration(
+                labelText: 'Internal note (optional)',
+              ),
+            ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _busy ? null : _save,
               child: _busy
                   ? const SizedBox(
-                      height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
                   : const Text('Create job card'),
             ),
             const SizedBox(height: 24),

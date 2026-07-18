@@ -67,101 +67,110 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
       color: _barBg,
       child: SizedBox(
         height: 40,
-        child: Row(children: [
-          // drag area (logo + shop name)
-          Expanded(
-            child: GestureDetector(
-              behavior: HitTestBehavior.translucent,
-              onPanStart: (_) => windowManager.startDragging(),
-              onDoubleTap: _toggleMaximize,
-              child: Row(children: [
-                const SizedBox(width: 14),
-                Container(
-                  width: 22,
-                  height: 22,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6),
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primary, AppColors.primaryDark],
-                    ),
-                  ),
-                  child: const Icon(Icons.storefront,
-                      color: Colors.white, size: 14),
-                ),
-                const SizedBox(width: 10),
-                if (businessName.isNotEmpty)
-                  Expanded(
-                    child: Text(
-                      businessName,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+        child: Row(
+          children: [
+            // drag area (logo + shop name)
+            Expanded(
+              child: GestureDetector(
+                behavior: HitTestBehavior.translucent,
+                onPanStart: (_) => windowManager.startDragging(),
+                onDoubleTap: _toggleMaximize,
+                child: Row(
+                  children: [
+                    const SizedBox(width: 14),
+                    Container(
+                      width: 22,
+                      height: 22,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.storefront,
                         color: Colors.white,
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w700,
+                        size: 14,
                       ),
                     ),
-                  ),
-              ]),
+                    const SizedBox(width: 10),
+                    if (businessName.isNotEmpty)
+                      Expanded(
+                        child: Text(
+                          businessName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ),
-          ),
-          if (businessName.isNotEmpty) ...[
-            _ActionButton(
-              icon: Icons.help_outline,
-              onTap: () async {
-                // The welcome tour spotlights dashboard widgets — go there
-                // first so the anchors are the visible ones.
-                ref.read(routerProvider).go('/home');
-                await Future<void>.delayed(const Duration(milliseconds: 250));
-                final ctx = rootNavigatorKey.currentContext;
-                if (ctx != null) showWalkthrough(ctx, 'home');
-              },
-            ),
-            const _NotificationBell(),
-            _ActionButton(
-              icon: ref.watch(darkModeProvider)
-                  ? Icons.light_mode_outlined
-                  : Icons.dark_mode_outlined,
-              onTap: () => ref.read(darkModeProvider.notifier).toggle(),
-            ),
-            _ActionButton(
-              icon: Icons.logout,
-              hoverForeground: Color(0xFFF87171),
-              onTap: () async {
-                final ctx = rootNavigatorKey.currentContext;
-                if (ctx == null) return;
-                final ok = await confirmDialog(ctx,
+            if (businessName.isNotEmpty) ...[
+              _ActionButton(
+                icon: Icons.help_outline,
+                onTap: () async {
+                  // The welcome tour spotlights dashboard widgets — go there
+                  // first so the anchors are the visible ones.
+                  ref.read(routerProvider).go('/home');
+                  await Future<void>.delayed(const Duration(milliseconds: 250));
+                  final ctx = rootNavigatorKey.currentContext;
+                  if (ctx != null) showWalkthrough(ctx, 'home');
+                },
+              ),
+              const _NotificationBell(),
+              _ActionButton(
+                icon: ref.watch(darkModeProvider)
+                    ? Icons.light_mode_outlined
+                    : Icons.dark_mode_outlined,
+                onTap: () => ref.read(darkModeProvider.notifier).toggle(),
+              ),
+              _ActionButton(
+                icon: Icons.logout,
+                hoverForeground: Color(0xFFF87171),
+                onTap: () async {
+                  final ctx = rootNavigatorKey.currentContext;
+                  if (ctx == null) return;
+                  final ok = await confirmDialog(
+                    ctx,
                     title: 'Logout',
                     message: 'Are you sure you want to logout?',
-                    confirmText: 'Logout');
-                if (ok) await ref.read(supabaseProvider).auth.signOut();
-              },
+                    confirmText: 'Logout',
+                  );
+                  if (ok) await ref.read(supabaseProvider).auth.signOut();
+                },
+              ),
+              Container(
+                width: 1,
+                height: 18,
+                margin: const EdgeInsets.symmetric(horizontal: 6),
+                color: Colors.white.withValues(alpha: 0.12),
+              ),
+            ],
+            _WinButton(
+              icon: Icons.remove,
+              onTap: () => windowManager.minimize(),
             ),
-            Container(
-              width: 1,
-              height: 18,
-              margin: const EdgeInsets.symmetric(horizontal: 6),
-              color: Colors.white.withValues(alpha: 0.12),
+            _WinButton(
+              icon: _maximized ? Icons.filter_none : Icons.crop_square,
+              iconSize: _maximized ? 13 : 16,
+              onTap: _toggleMaximize,
+            ),
+            _WinButton(
+              icon: Icons.close,
+              hoverColor: const Color(0xFFE81123),
+              hoverForeground: Colors.white,
+              onTap: () => windowManager.close(),
             ),
           ],
-          _WinButton(
-            icon: Icons.remove,
-            onTap: () => windowManager.minimize(),
-          ),
-          _WinButton(
-            icon: _maximized ? Icons.filter_none : Icons.crop_square,
-            iconSize: _maximized ? 13 : 16,
-            onTap: _toggleMaximize,
-          ),
-          _WinButton(
-            icon: Icons.close,
-            hoverColor: const Color(0xFFE81123),
-            hoverForeground: Colors.white,
-            onTap: () => windowManager.close(),
-          ),
-        ]),
+        ),
       ),
     );
   }
@@ -248,36 +257,44 @@ class _ActionButtonState extends State<_ActionButton> {
           width: 42,
           height: 40,
           color: _hover ? const Color(0x14FFFFFF) : Colors.transparent,
-          child: Stack(alignment: Alignment.center, children: [
-            Icon(
-              widget.icon,
-              size: 17,
-              color: _hover ? (widget.hoverForeground ?? Colors.white) : _barFg,
-            ),
-            if (badge > 0)
-              Positioned(
-                top: 7,
-                right: 7,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                  decoration: BoxDecoration(
-                    color: AppColors.red,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  constraints: const BoxConstraints(minWidth: 15),
-                  child: Text(
-                    badge > 9 ? '9+' : '$badge',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                      height: 1.2,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(
+                widget.icon,
+                size: 17,
+                color: _hover
+                    ? (widget.hoverForeground ?? Colors.white)
+                    : _barFg,
+              ),
+              if (badge > 0)
+                Positioned(
+                  top: 7,
+                  right: 7,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 1,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.red,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    constraints: const BoxConstraints(minWidth: 15),
+                    child: Text(
+                      badge > 9 ? '9+' : '$badge',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                        height: 1.2,
+                      ),
                     ),
                   ),
                 ),
-              ),
-          ]),
+            ],
+          ),
         ),
       ),
     );
@@ -296,64 +313,10 @@ class _NotificationBell extends ConsumerWidget {
       onTap: () {
         final ctx = rootNavigatorKey.currentContext;
         if (ctx == null) return;
-        ref.invalidate(notificationsProvider);
-        showDialog<void>(
-          context: ctx,
-          builder: (dialogCtx) => Consumer(builder: (c, r, _) {
-            final async = r.watch(notificationsProvider);
-            return AlertDialog(
-              title: const Text('Notifications'),
-              contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
-              content: SizedBox(
-                width: 380,
-                child: async.when(
-                  loading: () => const Padding(
-                    padding: EdgeInsets.all(24),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                  error: (e, _) => Padding(
-                    padding: const EdgeInsets.all(24),
-                    child: Text('Could not load notifications: $e'),
-                  ),
-                  data: (items) => items.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(24),
-                          child: Column(mainAxisSize: MainAxisSize.min, children: [
-                            Icon(Icons.check_circle_outline,
-                                size: 40, color: AppColors.green),
-                            const SizedBox(height: 10),
-                            const Text("All caught up — nothing needs your attention."),
-                          ]),
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            for (final n in items)
-                              ListTile(
-                                leading: IconChip(n.icon, color: n.color, size: 38),
-                                title: Text(n.title,
-                                    style: const TextStyle(
-                                        fontWeight: FontWeight.w700, fontSize: 14)),
-                                subtitle: Text(n.subtitle,
-                                    style: const TextStyle(fontSize: 12.5)),
-                                trailing: const Icon(Icons.chevron_right, size: 18),
-                                onTap: () {
-                                  Navigator.pop(dialogCtx);
-                                  r.read(routerProvider).go(n.route);
-                                },
-                              ),
-                          ],
-                        ),
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.pop(dialogCtx),
-                  child: const Text('Close'),
-                ),
-              ],
-            );
-          }),
+        showNotificationsDialog(
+          ctx,
+          ref,
+          navigate: (route) => ref.read(routerProvider).go(route),
         );
       },
     );

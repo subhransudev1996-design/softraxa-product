@@ -106,408 +106,408 @@ class ReportQuery {
 
 /// Loads report data. Result shape:
 /// { 'summary': [(label, value)], 'table': {'headers': [...], 'rows': [[...]]} }
-final reportDataProvider = FutureProvider.autoDispose
-    .family<Map<String, dynamic>, ReportQuery>((ref, q) async {
-      final client = ref.watch(supabaseProvider);
-      final from = ymd(q.from);
-      final to = ymd(q.to);
+final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic>, ReportQuery>((
+  ref,
+  q,
+) async {
+  final client = ref.watch(supabaseProvider);
+  final from = ymd(q.from);
+  final to = ymd(q.to);
 
-      switch (q.type) {
-        case 'sales':
-          final d =
-              await client.rpc(
-                    'get_sales_report',
-                    params: {'p_from': from, 'p_to': to},
-                  )
-                  as Map<String, dynamic>;
-          return {
-            'summary': [
-              ('Total sales', money(d['total_sales'] as num?)),
-              ('Invoices', '${d['invoice_count']}'),
-              ('Collected', money(d['total_paid'] as num?)),
-              ('Outstanding', money(d['total_due'] as num?)),
-              ('GST collected', money(d['total_tax'] as num?)),
-            ],
-            'table': {
-              'headers': ['Date', 'Invoices', 'Sales'],
-              'rows': [
-                for (final r in (d['by_day'] as List? ?? []))
-                  [
-                    dateStr(r['day']),
-                    '${r['invoices']}',
-                    money(r['sales'] as num?),
-                  ],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in (d['by_day'] as List? ?? []))
-                (dateStr(r['day']), toDouble(r['sales'])),
-            ],
-          };
-
-        case 'products':
-          final rows =
-              await client.rpc(
-                    'get_product_sales_report',
-                    params: {'p_from': from, 'p_to': to},
-                  )
-                  as List;
-          return {
-            'summary': [('Products sold', '${rows.length}')],
-            'table': {
-              'headers': ['Product', 'Qty', 'Revenue', 'Profit'],
-              'rows': [
-                for (final r in rows)
-                  [
-                    '${r['product_name']}${(r['variant_name'] as String? ?? '').isNotEmpty ? ' (${r['variant_name']})' : ''}',
-                    qty(r['qty_sold'] as num?),
-                    money(r['revenue'] as num?),
-                    money(r['profit'] as num?),
-                  ],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in rows)
-                ('${r['product_name']}', toDouble(r['revenue'])),
-            ],
-          };
-
-        case 'profit':
-          final d =
-              await client.rpc(
-                    'get_profit_report',
-                    params: {'p_from': from, 'p_to': to},
-                  )
-                  as Map<String, dynamic>;
-          final netProfit = toDouble(d['net_profit']);
-          return {
-            'summary': [
-              ('Sales', money(d['sales'] as num?)),
-              ('Sale returns', '- ${money(d['sale_returns'] as num?)}'),
-              ('Cost of goods', '- ${money(d['cogs'] as num?)}'),
-              ('Gross profit', money(d['gross_profit'] as num?)),
-              ('Expenses', '- ${money(d['expenses'] as num?)}'),
-              ('Net profit', money(d['net_profit'] as num?)),
-            ],
-            'table': null,
-            'chart': <ChartPoint>[
-              ('Sales', toDouble(d['sales'])),
-              ('Returns', toDouble(d['sale_returns'])),
-              ('COGS', toDouble(d['cogs'])),
-              ('Gross profit', toDouble(d['gross_profit'])),
-              ('Expenses', toDouble(d['expenses'])),
-              ('Net profit', netProfit),
-            ],
-            'chartColors': <Color>[
-              AppColors.teal,
-              AppColors.red,
-              AppColors.orange,
-              AppColors.green,
-              AppColors.red,
-              netProfit >= 0 ? AppColors.green : AppColors.red,
-            ],
-          };
-
-        case 'stock':
-          // Variant-aware, matching get_dashboard's stock_value formula:
-          // non-variant products at product cost; each variant at its own
-          // purchase_price, inheriting the product's when null.
-          final rows = await client
-              .from('products')
-              .select(
-                'name, current_stock, purchase_price, selling_price, has_variants, '
-                'units(short_name), product_variants(name, current_stock, purchase_price, is_active)',
+  switch (q.type) {
+    case 'sales':
+      final d =
+          await client.rpc(
+                'get_sales_report',
+                params: {'p_from': from, 'p_to': to},
               )
-              .eq('is_active', true)
-              .order('name')
-              .limit(1000);
-          double totalValue = 0;
-          final table = <List<String>>[];
-          final chart = <ChartPoint>[];
-          for (final r in rows) {
-            final unit = (r['units'] as Map?)?['short_name'] as String?;
-            final variants = [
-              for (final v
-                  in List<Map<String, dynamic>>.from(r['product_variants'] as List? ?? []))
-                if (v['is_active'] == true) v,
-            ];
-            if (r['has_variants'] == true && variants.isNotEmpty) {
-              for (final v in variants) {
-                final cost = v['purchase_price'] ?? r['purchase_price'];
-                final value = toDouble(v['current_stock']) * toDouble(cost);
-                totalValue += value;
-                final label = '${r['name']} — ${v['name']}';
-                table.add([
-                  label,
-                  qtyUnit(v['current_stock'] as num?, unit),
-                  money(cost as num?),
-                  money(value),
-                ]);
-                chart.add((label, value));
-              }
-            } else {
-              final value =
-                  toDouble(r['current_stock']) * toDouble(r['purchase_price']);
-              totalValue += value;
-              table.add([
-                r['name'] as String,
-                qtyUnit(r['current_stock'] as num?, unit),
-                money(r['purchase_price'] as num?),
-                money(value),
-              ]);
-              chart.add((r['name'] as String, value));
-            }
+              as Map<String, dynamic>;
+      return {
+        'summary': [
+          ('Total sales', money(d['total_sales'] as num?)),
+          ('Invoices', '${d['invoice_count']}'),
+          ('Collected', money(d['total_paid'] as num?)),
+          ('Outstanding', money(d['total_due'] as num?)),
+          ('GST collected', money(d['total_tax'] as num?)),
+        ],
+        'table': {
+          'headers': ['Date', 'Invoices', 'Sales'],
+          'rows': [
+            for (final r in (d['by_day'] as List? ?? []))
+              [
+                dateStr(r['day']),
+                '${r['invoices']}',
+                money(r['sales'] as num?),
+              ],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in (d['by_day'] as List? ?? []))
+            (dateStr(r['day']), toDouble(r['sales'])),
+        ],
+      };
+
+    case 'products':
+      final rows =
+          await client.rpc(
+                'get_product_sales_report',
+                params: {'p_from': from, 'p_to': to},
+              )
+              as List;
+      return {
+        'summary': [('Products sold', '${rows.length}')],
+        'table': {
+          'headers': ['Product', 'Qty', 'Revenue', 'Profit'],
+          'rows': [
+            for (final r in rows)
+              [
+                '${r['product_name']}${(r['variant_name'] as String? ?? '').isNotEmpty ? ' (${r['variant_name']})' : ''}',
+                qty(r['qty_sold'] as num?),
+                money(r['revenue'] as num?),
+                money(r['profit'] as num?),
+              ],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in rows)
+            ('${r['product_name']}', toDouble(r['revenue'])),
+        ],
+      };
+
+    case 'profit':
+      final d =
+          await client.rpc(
+                'get_profit_report',
+                params: {'p_from': from, 'p_to': to},
+              )
+              as Map<String, dynamic>;
+      final netProfit = toDouble(d['net_profit']);
+      return {
+        'summary': [
+          ('Sales', money(d['sales'] as num?)),
+          ('Sale returns', '- ${money(d['sale_returns'] as num?)}'),
+          ('Cost of goods', '- ${money(d['cogs'] as num?)}'),
+          ('Gross profit', money(d['gross_profit'] as num?)),
+          ('Expenses', '- ${money(d['expenses'] as num?)}'),
+          ('Net profit', money(d['net_profit'] as num?)),
+        ],
+        'table': null,
+        'chart': <ChartPoint>[
+          ('Sales', toDouble(d['sales'])),
+          ('Returns', toDouble(d['sale_returns'])),
+          ('COGS', toDouble(d['cogs'])),
+          ('Gross profit', toDouble(d['gross_profit'])),
+          ('Expenses', toDouble(d['expenses'])),
+          ('Net profit', netProfit),
+        ],
+        'chartColors': <Color>[
+          AppColors.teal,
+          AppColors.red,
+          AppColors.orange,
+          AppColors.green,
+          AppColors.red,
+          netProfit >= 0 ? AppColors.green : AppColors.red,
+        ],
+      };
+
+    case 'stock':
+      // Variant-aware, matching get_dashboard's stock_value formula:
+      // non-variant products at product cost; each variant at its own
+      // purchase_price, inheriting the product's when null.
+      final rows = await client
+          .from('products')
+          .select(
+            'name, current_stock, purchase_price, selling_price, has_variants, '
+            'units(short_name), product_variants(name, current_stock, purchase_price, is_active)',
+          )
+          .eq('is_active', true)
+          .order('name')
+          .limit(1000);
+      double totalValue = 0;
+      final table = <List<String>>[];
+      final chart = <ChartPoint>[];
+      for (final r in rows) {
+        final unit = (r['units'] as Map?)?['short_name'] as String?;
+        final variants = [
+          for (final v in List<Map<String, dynamic>>.from(
+            r['product_variants'] as List? ?? [],
+          ))
+            if (v['is_active'] == true) v,
+        ];
+        if (r['has_variants'] == true && variants.isNotEmpty) {
+          for (final v in variants) {
+            final cost = v['purchase_price'] ?? r['purchase_price'];
+            final value = toDouble(v['current_stock']) * toDouble(cost);
+            totalValue += value;
+            final label = '${r['name']} — ${v['name']}';
+            table.add([
+              label,
+              qtyUnit(v['current_stock'] as num?, unit),
+              money(cost as num?),
+              money(value),
+            ]);
+            chart.add((label, value));
           }
-          return {
-            'summary': [
-              ('Products', '${rows.length}'),
-              ('Total stock value', money(totalValue)),
-            ],
-            'table': {
-              'headers': ['Product', 'Stock', 'Cost', 'Value'],
-              'rows': table,
-            },
-            'chart': chart,
-          };
+        } else {
+          final value =
+              toDouble(r['current_stock']) * toDouble(r['purchase_price']);
+          totalValue += value;
+          table.add([
+            r['name'] as String,
+            qtyUnit(r['current_stock'] as num?, unit),
+            money(r['purchase_price'] as num?),
+            money(value),
+          ]);
+          chart.add((r['name'] as String, value));
+        }
+      }
+      return {
+        'summary': [
+          ('Products', '${rows.length}'),
+          ('Total stock value', money(totalValue)),
+        ],
+        'table': {
+          'headers': ['Product', 'Stock', 'Cost', 'Value'],
+          'rows': table,
+        },
+        'chart': chart,
+      };
 
-        case 'low_stock':
-          // Variant-aware, matching get_dashboard's low_stock_count: for a
-          // variant the alert level is its own low_stock_qty, inheriting the
-          // product's when null; the parent row of a variant product is
-          // skipped (its stock is just the variants' aggregate).
-          final rows = await client
-              .from('products')
-              .select(
-                'name, current_stock, low_stock_qty, has_variants, units(short_name), '
-                'product_variants(name, current_stock, low_stock_qty, is_active)',
-              )
-              .eq('is_active', true)
-              .order('name')
-              .limit(1000);
-          // (name, unit, stock, alert)
-          final low = <(String, String?, num?, num?)>[];
-          for (final r in rows) {
-            final unit = (r['units'] as Map?)?['short_name'] as String?;
-            final variants = [
-              for (final v
-                  in List<Map<String, dynamic>>.from(r['product_variants'] as List? ?? []))
-                if (v['is_active'] == true) v,
-            ];
-            if (r['has_variants'] == true && variants.isNotEmpty) {
-              for (final v in variants) {
-                final alert = v['low_stock_qty'] ?? r['low_stock_qty'];
-                if (toDouble(alert) > 0 &&
-                    toDouble(v['current_stock']) <= toDouble(alert)) {
-                  low.add((
-                    '${r['name']} — ${v['name']}',
-                    unit,
-                    v['current_stock'] as num?,
-                    alert as num?,
-                  ));
-                }
-              }
-            } else if (toDouble(r['low_stock_qty']) > 0 &&
-                toDouble(r['current_stock']) <= toDouble(r['low_stock_qty'])) {
+    case 'low_stock':
+      // Variant-aware, matching get_dashboard's low_stock_count: for a
+      // variant the alert level is its own low_stock_qty, inheriting the
+      // product's when null; the parent row of a variant product is
+      // skipped (its stock is just the variants' aggregate).
+      final rows = await client
+          .from('products')
+          .select(
+            'name, current_stock, low_stock_qty, has_variants, units(short_name), '
+            'product_variants(name, current_stock, low_stock_qty, is_active)',
+          )
+          .eq('is_active', true)
+          .order('name')
+          .limit(1000);
+      // (name, unit, stock, alert)
+      final low = <(String, String?, num?, num?)>[];
+      for (final r in rows) {
+        final unit = (r['units'] as Map?)?['short_name'] as String?;
+        final variants = [
+          for (final v in List<Map<String, dynamic>>.from(
+            r['product_variants'] as List? ?? [],
+          ))
+            if (v['is_active'] == true) v,
+        ];
+        if (r['has_variants'] == true && variants.isNotEmpty) {
+          for (final v in variants) {
+            final alert = v['low_stock_qty'] ?? r['low_stock_qty'];
+            if (toDouble(alert) > 0 &&
+                toDouble(v['current_stock']) <= toDouble(alert)) {
               low.add((
-                r['name'] as String,
+                '${r['name']} — ${v['name']}',
                 unit,
-                r['current_stock'] as num?,
-                r['low_stock_qty'] as num?,
+                v['current_stock'] as num?,
+                alert as num?,
               ));
             }
           }
-          return {
-            'summary': [('Products low/out', '${low.length}')],
-            'table': {
-              'headers': ['Product', 'Stock', 'Alert level'],
-              'rows': [
-                for (final r in low)
-                  [r.$1, qtyUnit(r.$3, r.$2), qty(r.$4)],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in low) (r.$1, toDouble(r.$4) - toDouble(r.$3)),
-            ],
-          };
-
-        case 'customer_due':
-          final rows = await client
-              .from('customers')
-              .select('name, phone, due_amount')
-              .gt('due_amount', 0)
-              .order('due_amount', ascending: false)
-              .limit(1000);
-          final total = rows.fold<double>(
-            0,
-            (s, r) => s + toDouble(r['due_amount']),
-          );
-          return {
-            'summary': [
-              ('Customers with due', '${rows.length}'),
-              ('Total due', money(total)),
-            ],
-            'table': {
-              'headers': ['Customer', 'Phone', 'Due'],
-              'rows': [
-                for (final r in rows)
-                  [
-                    r['name'] as String,
-                    r['phone'] as String? ?? '',
-                    money(r['due_amount'] as num?),
-                  ],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in rows)
-                (r['name'] as String, toDouble(r['due_amount'])),
-            ],
-          };
-
-        case 'supplier_due':
-          final rows = await client
-              .from('suppliers')
-              .select('name, phone, due_amount')
-              .gt('due_amount', 0)
-              .order('due_amount', ascending: false)
-              .limit(1000);
-          final total = rows.fold<double>(
-            0,
-            (s, r) => s + toDouble(r['due_amount']),
-          );
-          return {
-            'summary': [
-              ('Suppliers to pay', '${rows.length}'),
-              ('Total payable', money(total)),
-            ],
-            'table': {
-              'headers': ['Supplier', 'Phone', 'Payable'],
-              'rows': [
-                for (final r in rows)
-                  [
-                    r['name'] as String,
-                    r['phone'] as String? ?? '',
-                    money(r['due_amount'] as num?),
-                  ],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in rows)
-                (r['name'] as String, toDouble(r['due_amount'])),
-            ],
-          };
-
-        case 'purchases':
-          final rows = await client
-              .from('purchases')
-              .select(
-                'purchase_no, supplier_name, purchase_date, total, paid_amount, payment_status',
-              )
-              .gte('purchase_date', from)
-              .lte('purchase_date', to)
-              .order('purchase_date', ascending: false)
-              .limit(1000);
-          final total = rows.fold<double>(
-            0,
-            (s, r) => s + toDouble(r['total']),
-          );
-          return {
-            'summary': [
-              ('Purchases', '${rows.length}'),
-              ('Total amount', money(total)),
-            ],
-            'table': {
-              'headers': ['No.', 'Supplier', 'Date', 'Total', 'Status'],
-              'rows': [
-                for (final r in rows)
-                  [
-                    r['purchase_no'] as String,
-                    r['supplier_name'] as String? ?? '',
-                    dateStr(r['purchase_date']),
-                    money(r['total'] as num?),
-                    r['payment_status'] as String? ?? '',
-                  ],
-              ],
-            },
-            'chart': purchasesByDay(rows),
-          };
-
-        case 'expenses':
-          final d =
-              await client.rpc(
-                    'get_expense_report',
-                    params: {'p_from': from, 'p_to': to},
-                  )
-                  as Map<String, dynamic>;
-          return {
-            'summary': [('Total expenses', money(d['total'] as num?))],
-            'table': {
-              'headers': ['Category', 'Entries', 'Amount'],
-              'rows': [
-                for (final r in (d['by_category'] as List? ?? []))
-                  [
-                    r['category'] as String,
-                    '${r['entries']}',
-                    money(r['amount'] as num?),
-                  ],
-              ],
-            },
-            'chart': <ChartPoint>[
-              for (final r in (d['by_category'] as List? ?? []))
-                (r['category'] as String, toDouble(r['amount'])),
-            ],
-          };
-
-        case 'gst':
-          final d =
-              await client.rpc(
-                    'get_gst_report',
-                    params: {'p_from': from, 'p_to': to},
-                  )
-                  as Map<String, dynamic>;
-          final output = d['output_tax'] as List? ?? [];
-          final input = d['input_tax'] as List? ?? [];
-          final outTotal = output.fold<double>(
-            0,
-            (s, r) => s + toDouble(r['tax_amount']),
-          );
-          final inTotal = input.fold<double>(
-            0,
-            (s, r) => s + toDouble(r['tax_amount']),
-          );
-          final byRate = gstByRate(output, input);
-          return {
-            'summary': [
-              ('Output tax (sales)', money(outTotal)),
-              ('Input tax (purchases)', money(inTotal)),
-              ('Net GST payable', money(outTotal - inTotal)),
-            ],
-            'table': {
-              'headers': ['Type', 'Rate', 'Taxable value', 'Tax'],
-              'rows': [
-                for (final r in output)
-                  [
-                    'Sales',
-                    '${qty(r['gst_rate'] as num?)}%',
-                    money(r['taxable_value'] as num?),
-                    money(r['tax_amount'] as num?),
-                  ],
-                for (final r in input)
-                  [
-                    'Purchase',
-                    '${qty(r['gst_rate'] as num?)}%',
-                    money(r['taxable_value'] as num?),
-                    money(r['tax_amount'] as num?),
-                  ],
-              ],
-            },
-            'chart': byRate.output,
-            'chart2': byRate.input,
-          };
-
-        default:
-          throw Exception('Unknown report: ${q.type}');
+        } else if (toDouble(r['low_stock_qty']) > 0 &&
+            toDouble(r['current_stock']) <= toDouble(r['low_stock_qty'])) {
+          low.add((
+            r['name'] as String,
+            unit,
+            r['current_stock'] as num?,
+            r['low_stock_qty'] as num?,
+          ));
+        }
       }
-    });
+      return {
+        'summary': [('Products low/out', '${low.length}')],
+        'table': {
+          'headers': ['Product', 'Stock', 'Alert level'],
+          'rows': [
+            for (final r in low) [r.$1, qtyUnit(r.$3, r.$2), qty(r.$4)],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in low) (r.$1, toDouble(r.$4) - toDouble(r.$3)),
+        ],
+      };
+
+    case 'customer_due':
+      final rows = await client
+          .from('customers')
+          .select('name, phone, due_amount')
+          .gt('due_amount', 0)
+          .order('due_amount', ascending: false)
+          .limit(1000);
+      final total = rows.fold<double>(
+        0,
+        (s, r) => s + toDouble(r['due_amount']),
+      );
+      return {
+        'summary': [
+          ('Customers with due', '${rows.length}'),
+          ('Total due', money(total)),
+        ],
+        'table': {
+          'headers': ['Customer', 'Phone', 'Due'],
+          'rows': [
+            for (final r in rows)
+              [
+                r['name'] as String,
+                r['phone'] as String? ?? '',
+                money(r['due_amount'] as num?),
+              ],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in rows)
+            (r['name'] as String, toDouble(r['due_amount'])),
+        ],
+      };
+
+    case 'supplier_due':
+      final rows = await client
+          .from('suppliers')
+          .select('name, phone, due_amount')
+          .gt('due_amount', 0)
+          .order('due_amount', ascending: false)
+          .limit(1000);
+      final total = rows.fold<double>(
+        0,
+        (s, r) => s + toDouble(r['due_amount']),
+      );
+      return {
+        'summary': [
+          ('Suppliers to pay', '${rows.length}'),
+          ('Total payable', money(total)),
+        ],
+        'table': {
+          'headers': ['Supplier', 'Phone', 'Payable'],
+          'rows': [
+            for (final r in rows)
+              [
+                r['name'] as String,
+                r['phone'] as String? ?? '',
+                money(r['due_amount'] as num?),
+              ],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in rows)
+            (r['name'] as String, toDouble(r['due_amount'])),
+        ],
+      };
+
+    case 'purchases':
+      final rows = await client
+          .from('purchases')
+          .select(
+            'purchase_no, supplier_name, purchase_date, total, paid_amount, payment_status',
+          )
+          .gte('purchase_date', from)
+          .lte('purchase_date', to)
+          .order('purchase_date', ascending: false)
+          .limit(1000);
+      final total = rows.fold<double>(0, (s, r) => s + toDouble(r['total']));
+      return {
+        'summary': [
+          ('Purchases', '${rows.length}'),
+          ('Total amount', money(total)),
+        ],
+        'table': {
+          'headers': ['No.', 'Supplier', 'Date', 'Total', 'Status'],
+          'rows': [
+            for (final r in rows)
+              [
+                r['purchase_no'] as String,
+                r['supplier_name'] as String? ?? '',
+                dateStr(r['purchase_date']),
+                money(r['total'] as num?),
+                r['payment_status'] as String? ?? '',
+              ],
+          ],
+        },
+        'chart': purchasesByDay(rows),
+      };
+
+    case 'expenses':
+      final d =
+          await client.rpc(
+                'get_expense_report',
+                params: {'p_from': from, 'p_to': to},
+              )
+              as Map<String, dynamic>;
+      return {
+        'summary': [('Total expenses', money(d['total'] as num?))],
+        'table': {
+          'headers': ['Category', 'Entries', 'Amount'],
+          'rows': [
+            for (final r in (d['by_category'] as List? ?? []))
+              [
+                r['category'] as String,
+                '${r['entries']}',
+                money(r['amount'] as num?),
+              ],
+          ],
+        },
+        'chart': <ChartPoint>[
+          for (final r in (d['by_category'] as List? ?? []))
+            (r['category'] as String, toDouble(r['amount'])),
+        ],
+      };
+
+    case 'gst':
+      final d =
+          await client.rpc(
+                'get_gst_report',
+                params: {'p_from': from, 'p_to': to},
+              )
+              as Map<String, dynamic>;
+      final output = d['output_tax'] as List? ?? [];
+      final input = d['input_tax'] as List? ?? [];
+      final outTotal = output.fold<double>(
+        0,
+        (s, r) => s + toDouble(r['tax_amount']),
+      );
+      final inTotal = input.fold<double>(
+        0,
+        (s, r) => s + toDouble(r['tax_amount']),
+      );
+      final byRate = gstByRate(output, input);
+      return {
+        'summary': [
+          ('Output tax (sales)', money(outTotal)),
+          ('Input tax (purchases)', money(inTotal)),
+          ('Net GST payable', money(outTotal - inTotal)),
+        ],
+        'table': {
+          'headers': ['Type', 'Rate', 'Taxable value', 'Tax'],
+          'rows': [
+            for (final r in output)
+              [
+                'Sales',
+                '${qty(r['gst_rate'] as num?)}%',
+                money(r['taxable_value'] as num?),
+                money(r['tax_amount'] as num?),
+              ],
+            for (final r in input)
+              [
+                'Purchase',
+                '${qty(r['gst_rate'] as num?)}%',
+                money(r['taxable_value'] as num?),
+                money(r['tax_amount'] as num?),
+              ],
+          ],
+        },
+        'chart': byRate.output,
+        'chart2': byRate.input,
+      };
+
+    default:
+      throw Exception('Unknown report: ${q.type}');
+  }
+});
 
 class ReportDetailScreen extends ConsumerStatefulWidget {
   const ReportDetailScreen({super.key, required this.type});
@@ -631,10 +631,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   'Showing top ${shown.length} of ${points.length} — see full list below.',
-                  style: TextStyle(
-                    fontSize: 11.5,
-                    color: AppColors.inkSoft,
-                  ),
+                  style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
                 ),
               ),
           ],
@@ -720,6 +717,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: Text(_titles[widget.type] ?? 'Report'),
         actions: [
           if (data.hasValue)

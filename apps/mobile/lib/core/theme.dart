@@ -122,14 +122,14 @@ class AppColors {
 /// Soft elevated shadow used on cards and the bottom bar.
 /// Shadows stay dark in both modes (a light "shadow" reads as a glow).
 List<BoxShadow> softShadow([double blur = 16]) => [
-      BoxShadow(
-        color: AppColors.isDark
-            ? Colors.black.withValues(alpha: 0.35)
-            : const Color(0xFF17223B).withValues(alpha: 0.06),
-        blurRadius: blur,
-        offset: const Offset(0, 4),
-      ),
-    ];
+  BoxShadow(
+    color: AppColors.isDark
+        ? Colors.black.withValues(alpha: 0.35)
+        : const Color(0xFF17223B).withValues(alpha: 0.06),
+    blurRadius: blur,
+    offset: const Offset(0, 4),
+  ),
+];
 
 const seedColor = AppColors.primary;
 
@@ -158,10 +158,14 @@ ThemeData buildTheme({bool dark = false}) {
     useMaterial3: true,
     scaffoldBackgroundColor: AppColors.canvas,
     textTheme: textTheme.copyWith(
-      headlineSmall: textTheme.headlineSmall
-          ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.5),
-      titleLarge: textTheme.titleLarge
-          ?.copyWith(fontWeight: FontWeight.w800, letterSpacing: -0.3),
+      headlineSmall: textTheme.headlineSmall?.copyWith(
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.5,
+      ),
+      titleLarge: textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w800,
+        letterSpacing: -0.3,
+      ),
       titleMedium: textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
       titleSmall: textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
       labelLarge: textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -212,7 +216,10 @@ ThemeData buildTheme({bool dark = false}) {
         minimumSize: const Size.fromHeight(52),
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
-        textStyle: GoogleFonts.manrope(fontSize: 15, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 15,
+          fontWeight: FontWeight.w700,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         elevation: 0,
       ),
@@ -222,14 +229,20 @@ ThemeData buildTheme({bool dark = false}) {
         minimumSize: const Size(48, 48),
         foregroundColor: AppColors.ink,
         side: BorderSide(color: AppColors.line),
-        textStyle: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
       style: TextButton.styleFrom(
         foregroundColor: AppColors.primary,
-        textStyle: GoogleFonts.manrope(fontSize: 14, fontWeight: FontWeight.w700),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 14,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     ),
     floatingActionButtonTheme: const FloatingActionButtonThemeData(
@@ -249,34 +262,41 @@ ThemeData buildTheme({bool dark = false}) {
       ),
       margin: EdgeInsets.zero,
     ),
-    listTileTheme: ListTileThemeData(
-      dense: true,
-      iconColor: AppColors.inkSoft,
-    ),
+    listTileTheme: ListTileThemeData(dense: true, iconColor: AppColors.inkSoft),
     dividerTheme: DividerThemeData(color: AppColors.line, space: 1),
     chipTheme: ChipThemeData(
       backgroundColor: AppColors.card,
       selectedColor: AppColors.primarySoft,
       checkmarkColor: AppColors.primary,
       labelStyle: GoogleFonts.manrope(
-          fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.ink),
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: AppColors.ink,
+      ),
       side: BorderSide(color: AppColors.line),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
         selectedBackgroundColor: AppColors.primarySoft,
-        selectedForegroundColor:
-            dark ? const Color(0xFFCBB6F6) : AppColors.primary,
+        selectedForegroundColor: dark
+            ? const Color(0xFFCBB6F6)
+            : AppColors.primary,
         side: BorderSide(color: AppColors.line),
-        textStyle: GoogleFonts.manrope(fontSize: 13, fontWeight: FontWeight.w600),
+        textStyle: GoogleFonts.manrope(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+        ),
       ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.card,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       titleTextStyle: GoogleFonts.manrope(
-          fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.ink),
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: AppColors.ink,
+      ),
     ),
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.card,

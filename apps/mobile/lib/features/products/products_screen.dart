@@ -29,80 +29,110 @@ class ProductsScreen extends ConsumerWidget {
             tooltip: 'Categories, brands & units',
             onPressed: () => context.push('/products/master-data'),
           ),
-          CoachTarget(page: 'products', id: 'master', child: IconButton(
-            icon: const Icon(Icons.upload_file_outlined),
-            tooltip: 'Excel import',
-            onPressed: () => context.push('/import'),
-          )),
+          CoachTarget(
+            page: 'products',
+            id: 'master',
+            child: IconButton(
+              icon: const Icon(Icons.upload_file_outlined),
+              tooltip: 'Excel import',
+              onPressed: () => context.push('/import'),
+            ),
+          ),
         ],
       ),
-      floatingActionButton: CoachTarget(page: 'products', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => context.push('/products/new'),
-        icon: const Icon(Icons.add),
-        label: const Text('Add product'),
-      )),
+      floatingActionButton: CoachTarget(
+        page: 'products',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => context.push('/products/new'),
+          icon: const Icon(Icons.add),
+          label: const Text('Add product'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-            child: CoachTarget(page: 'products', id: 'search', child: SearchField(
-              hint: 'Search name, SKU or barcode',
-              onChanged: (v) => ref.read(productSearchProvider.notifier).set(v),
-            )),
+            child: CoachTarget(
+              page: 'products',
+              id: 'search',
+              child: SearchField(
+                hint: 'Search name, SKU or barcode',
+                onChanged: (v) =>
+                    ref.read(productSearchProvider.notifier).set(v),
+              ),
+            ),
           ),
           Expanded(
-            child: CoachTarget(page: 'products', id: 'list', child: RefreshIndicator(
-              onRefresh: () async => ref.invalidate(productsProvider),
-              child: AsyncView(
-                value: products,
-                onRetry: () => ref.invalidate(productsProvider),
-                builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.inventory_2_outlined,
-                        message: 'No products yet.\nAdd your first product or import from Excel.')
-                    : isDesktop
-                        ? DesktopTable<Map<String, dynamic>>(
-                            rows: rows,
-                            leadingWidth: _colLeadingWidth,
-                            trailingWidth: _colStatusWidth,
-                            columns: [
-                              DesktopTableColumn(
-                                  label: 'Product',
-                                  flex: _colName,
-                                  comparable: (p) => (p['name'] as String? ?? '').toLowerCase()),
-                              DesktopTableColumn(
-                                  label: 'Category',
-                                  flex: _colCategory,
-                                  comparable: (p) =>
-                                      ((p['categories'] as Map?)?['name'] as String? ?? '')
-                                          .toLowerCase()),
-                              DesktopTableColumn(
-                                  label: 'Brand',
-                                  flex: _colBrand,
-                                  comparable: (p) =>
-                                      ((p['brands'] as Map?)?['name'] as String? ?? '')
-                                          .toLowerCase()),
-                              DesktopTableColumn(
-                                  label: 'Price',
-                                  flex: _colPrice,
-                                  alignEnd: true,
-                                  comparable: (p) => toDouble(p['selling_price'])),
-                              DesktopTableColumn(
-                                  label: 'Stock',
-                                  flex: _colStock,
-                                  alignEnd: true,
-                                  comparable: (p) => toDouble(p['current_stock'])),
-                            ],
-                            rowBuilder: (context, product) => _ProductRow(product: product),
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-                            itemCount: rows.length,
-                            separatorBuilder: (_, _) => const SizedBox(height: 8),
-                            itemBuilder: (context, i) => _ProductTile(product: rows[i]),
-                          ),
+            child: CoachTarget(
+              page: 'products',
+              id: 'list',
+              child: RefreshIndicator(
+                onRefresh: () async => ref.invalidate(productsProvider),
+                child: AsyncView(
+                  value: products,
+                  onRetry: () => ref.invalidate(productsProvider),
+                  builder: (rows) => rows.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.inventory_2_outlined,
+                          message:
+                              'No products yet.\nAdd your first product or import from Excel.',
+                        )
+                      : isDesktop
+                      ? DesktopTable<Map<String, dynamic>>(
+                          rows: rows,
+                          leadingWidth: _colLeadingWidth,
+                          trailingWidth: _colStatusWidth,
+                          columns: [
+                            DesktopTableColumn(
+                              label: 'Product',
+                              flex: _colName,
+                              comparable: (p) =>
+                                  (p['name'] as String? ?? '').toLowerCase(),
+                            ),
+                            DesktopTableColumn(
+                              label: 'Category',
+                              flex: _colCategory,
+                              comparable: (p) =>
+                                  ((p['categories'] as Map?)?['name']
+                                              as String? ??
+                                          '')
+                                      .toLowerCase(),
+                            ),
+                            DesktopTableColumn(
+                              label: 'Brand',
+                              flex: _colBrand,
+                              comparable: (p) =>
+                                  ((p['brands'] as Map?)?['name'] as String? ??
+                                          '')
+                                      .toLowerCase(),
+                            ),
+                            DesktopTableColumn(
+                              label: 'Price',
+                              flex: _colPrice,
+                              alignEnd: true,
+                              comparable: (p) => toDouble(p['selling_price']),
+                            ),
+                            DesktopTableColumn(
+                              label: 'Stock',
+                              flex: _colStock,
+                              alignEnd: true,
+                              comparable: (p) => toDouble(p['current_stock']),
+                            ),
+                          ],
+                          rowBuilder: (context, product) =>
+                              _ProductRow(product: product),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+                          itemCount: rows.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, i) =>
+                              _ProductTile(product: rows[i]),
+                        ),
+                ),
               ),
-            )),
+            ),
           ),
         ],
       ),
@@ -149,90 +179,129 @@ class _ProductRow extends StatelessWidget {
       onTap: () => context.push('/products/${product['id']}'),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        child: Row(children: [
-          SizedBox(
-            width: _colLeadingWidth,
-            child: product['image_url'] != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(10),
-                    child: CachedNetworkImage(
+        child: Row(
+          children: [
+            SizedBox(
+              width: _colLeadingWidth,
+              child: product['image_url'] != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: CachedNetworkImage(
                         imageUrl: product['image_url'] as String,
-                        width: 36, height: 36, fit: BoxFit.cover,
-                        errorWidget: (_, _, _) =>
-                            IconChip(Icons.inventory_2_outlined, color: accent, size: 36)),
-                  )
-                : IconChip(Icons.inventory_2_outlined, color: accent, size: 36),
-          ),
-          Expanded(
-            flex: _colName,
-            child: Padding(
-              padding: const EdgeInsets.only(right: 8),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name,
+                        width: 36,
+                        height: 36,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => IconChip(
+                          Icons.inventory_2_outlined,
+                          color: accent,
+                          size: 36,
+                        ),
+                      ),
+                    )
+                  : IconChip(
+                      Icons.inventory_2_outlined,
+                      color: accent,
+                      size: 36,
+                    ),
+            ),
+            Expanded(
+              flex: _colName,
+              child: Padding(
+                padding: const EdgeInsets.only(right: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 13.5,
-                        decoration: inactive ? TextDecoration.lineThrough : null,
-                      )),
-                  if (sku.isNotEmpty)
-                    Text(sku,
+                        decoration: inactive
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    if (sku.isNotEmpty)
+                      Text(
+                        sku,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft)),
-                ],
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
+                  ],
+                ),
               ),
             ),
-          ),
-          Expanded(
-            flex: _colCategory,
-            child: Text(category ?? '—',
+            Expanded(
+              flex: _colCategory,
+              child: Text(
+                category ?? '—',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
-                    fontSize: 13, color: category == null ? AppColors.line : AppColors.inkSoft)),
-          ),
-          Expanded(
-            flex: _colBrand,
-            child: Text(brand ?? '—',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontSize: 13, color: brand == null ? AppColors.line : AppColors.inkSoft)),
-          ),
-          Expanded(
-            flex: _colPrice,
-            child: Text(money(product['selling_price'] as num?),
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-          ),
-          Expanded(
-            flex: _colStock,
-            child: Text(qtyUnit(stock, unit),
-                textAlign: TextAlign.right,
-                style: TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 13.5,
-                    color: isOut ? AppColors.red : (isLow ? AppColors.orange : AppColors.green))),
-          ),
-          SizedBox(
-            width: _colStatusWidth,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: inactive
-                  ? StatusChip('inactive', color: AppColors.inkSoft)
-                  : isOut
-                      ? const StatusChip('out of stock', color: AppColors.red)
-                      : isLow
-                          ? const StatusChip('low stock', color: AppColors.orange)
-                          : const StatusChip('active', color: AppColors.green),
+                  fontSize: 13,
+                  color: category == null ? AppColors.line : AppColors.inkSoft,
+                ),
+              ),
             ),
-          ),
-        ]),
+            Expanded(
+              flex: _colBrand,
+              child: Text(
+                brand ?? '—',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: brand == null ? AppColors.line : AppColors.inkSoft,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: _colPrice,
+              child: Text(
+                money(product['selling_price'] as num?),
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
+            Expanded(
+              flex: _colStock,
+              child: Text(
+                qtyUnit(stock, unit),
+                textAlign: TextAlign.right,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 13.5,
+                  color: isOut
+                      ? AppColors.red
+                      : (isLow ? AppColors.orange : AppColors.green),
+                ),
+              ),
+            ),
+            SizedBox(
+              width: _colStatusWidth,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: inactive
+                    ? StatusChip('inactive', color: AppColors.inkSoft)
+                    : isOut
+                    ? const StatusChip('out of stock', color: AppColors.red)
+                    : isLow
+                    ? const StatusChip('low stock', color: AppColors.orange)
+                    : const StatusChip('active', color: AppColors.green),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -266,67 +335,101 @@ class _ProductTile extends ConsumerWidget {
         onTap: () => context.push('/products/${product['id']}'),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-          child: Row(children: [
-            product['image_url'] != null
-                ? ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: CachedNetworkImage(
+          child: Row(
+            children: [
+              product['image_url'] != null
+                  ? ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedNetworkImage(
                         imageUrl: product['image_url'] as String,
-                        width: 44, height: 44, fit: BoxFit.cover,
-                        errorWidget: (_, _, _) =>
-                            IconChip(Icons.inventory_2_outlined, color: accent, size: 44)),
-                  )
-                : IconChip(Icons.inventory_2_outlined, color: accent, size: 44),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(name,
+                        width: 44,
+                        height: 44,
+                        fit: BoxFit.cover,
+                        errorWidget: (_, _, _) => IconChip(
+                          Icons.inventory_2_outlined,
+                          color: accent,
+                          size: 44,
+                        ),
+                      ),
+                    )
+                  : IconChip(
+                      Icons.inventory_2_outlined,
+                      color: accent,
+                      size: 44,
+                    ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
-                        decoration: inactive ? TextDecoration.lineThrough : null,
-                      )),
-                  const SizedBox(height: 2),
-                  Row(children: [
-                    Text(money(product['selling_price'] as num?),
-                        style: TextStyle(
-                            fontWeight: FontWeight.w700, color: AppColors.ink, fontSize: 12.5)),
-                    const SizedBox(width: 8),
-                    if ((product['brands'] as Map?)?['name'] != null)
-                      Flexible(
-                          child: Text((product['brands'] as Map)['name'] as String,
+                        decoration: inactive
+                            ? TextDecoration.lineThrough
+                            : null,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      children: [
+                        Text(
+                          money(product['selling_price'] as num?),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.ink,
+                            fontSize: 12.5,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        if ((product['brands'] as Map?)?['name'] != null)
+                          Flexible(
+                            child: Text(
+                              (product['brands'] as Map)['name'] as String,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 12, color: AppColors.inkSoft))),
-                  ]),
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    qtyUnit(stock, unit),
+                    style: TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 13,
+                      color: isOut
+                          ? AppColors.red
+                          : (isLow ? AppColors.orange : AppColors.green),
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  if (inactive)
+                    StatusChip('inactive', color: AppColors.inkSoft)
+                  else if (isOut)
+                    const StatusChip('out of stock', color: AppColors.red)
+                  else if (isLow)
+                    const StatusChip('low stock', color: AppColors.orange),
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(qtyUnit(stock, unit),
-                    style: TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 13,
-                        color: isOut ? AppColors.red : (isLow ? AppColors.orange : AppColors.green))),
-                const SizedBox(height: 2),
-                if (inactive)
-                  StatusChip('inactive', color: AppColors.inkSoft)
-                else if (isOut)
-                  const StatusChip('out of stock', color: AppColors.red)
-                else if (isLow)
-                  const StatusChip('low stock', color: AppColors.orange),
-              ],
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );

@@ -530,6 +530,18 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final scaffold = Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        // In edit-bill mode the back arrow must run the same discard-confirm
+        // guard as the system back gesture (a plain pop would bypass the
+        // PopScope below — GoRouter's programmatic pop doesn't consult it).
+        leading: editing != null
+            ? BackButton(
+                onPressed: () async {
+                  if (await _confirmDiscardEdit() && context.mounted) {
+                    context.pop();
+                  }
+                },
+              )
+            : appBarBack(context),
         title: Text(
           editing == null ? 'New Bill' : 'Edit Bill — ${editing.invoiceNo}',
         ),
@@ -573,39 +585,47 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: CoachTarget(page: 'pos', id: 'search', child: SearchField(
-                    controller: _searchController,
-                    focusNode: _searchFocus,
-                    hint: 'Search or scan barcode…',
-                    onChanged: (v) =>
-                        ref.read(posSearchProvider.notifier).set(v),
-                    onSubmitted: _onSubmitted,
-                    suffix: search.isNotEmpty
-                        ? IconButton(
-                            icon: const Icon(Icons.close),
-                            onPressed: _clearSearch,
-                          )
-                        : null,
-                  )),
+                  child: CoachTarget(
+                    page: 'pos',
+                    id: 'search',
+                    child: SearchField(
+                      controller: _searchController,
+                      focusNode: _searchFocus,
+                      hint: 'Search or scan barcode…',
+                      onChanged: (v) =>
+                          ref.read(posSearchProvider.notifier).set(v),
+                      onSubmitted: _onSubmitted,
+                      suffix: search.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.close),
+                              onPressed: _clearSearch,
+                            )
+                          : null,
+                    ),
+                  ),
                 ),
                 if (!isDesktopPlatform) ...[
                   const SizedBox(width: 8),
-                  CoachTarget(page: 'pos', id: 'scan', child: Material(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(14),
-                    child: InkWell(
+                  CoachTarget(
+                    page: 'pos',
+                    id: 'scan',
+                    child: Material(
+                      color: AppColors.primary,
                       borderRadius: BorderRadius.circular(14),
-                      onTap: () => context.push('/scan'),
-                      child: const Padding(
-                        padding: EdgeInsets.all(14),
-                        child: Icon(
-                          Icons.qr_code_scanner,
-                          color: Colors.white,
-                          size: 22,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(14),
+                        onTap: () => context.push('/scan'),
+                        child: const Padding(
+                          padding: EdgeInsets.all(14),
+                          child: Icon(
+                            Icons.qr_code_scanner,
+                            color: Colors.white,
+                            size: 22,
+                          ),
                         ),
                       ),
                     ),
-                  )),
+                  ),
                 ],
               ],
             ),
@@ -613,82 +633,89 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           // customer row
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-            child: CoachTarget(page: 'pos', id: 'customer', child: Material(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(14),
-              child: InkWell(
+            child: CoachTarget(
+              page: 'pos',
+              id: 'customer',
+              child: Material(
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(14),
-                // Editing an existing bill never changes who it was billed
-                // to (update_invoice doesn't touch customer_id) — the
-                // customer here is just shown for context, not editable.
-                onTap: editing != null
-                    ? null
-                    : () async {
-                        final customer = await showCustomerPicker(context);
-                        if (customer != null) {
-                          ref.read(cartProvider.notifier).setCustomer(customer);
-                        }
-                      },
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: AppColors.line),
-                  ),
-                  child: Row(
-                    children: [
-                      cart.customer == null
-                          ? const IconChip(
-                              Icons.person_add_alt_1,
-                              color: AppColors.indigo,
-                              size: 34,
-                            )
-                          : InitialsAvatar(
-                              cart.customer!['name'] as String? ?? '',
-                              radius: 17,
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  // Editing an existing bill never changes who it was billed
+                  // to (update_invoice doesn't touch customer_id) — the
+                  // customer here is just shown for context, not editable.
+                  onTap: editing != null
+                      ? null
+                      : () async {
+                          final customer = await showCustomerPicker(context);
+                          if (customer != null) {
+                            ref
+                                .read(cartProvider.notifier)
+                                .setCustomer(customer);
+                          }
+                        },
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: AppColors.line),
+                    ),
+                    child: Row(
+                      children: [
+                        cart.customer == null
+                            ? const IconChip(
+                                Icons.person_add_alt_1,
+                                color: AppColors.indigo,
+                                size: 34,
+                              )
+                            : InitialsAvatar(
+                                cart.customer!['name'] as String? ?? '',
+                                radius: 17,
+                              ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Text(
+                            cart.customer == null
+                                ? 'Walk-in customer (tap to select)'
+                                : '${cart.customer!['name']}'
+                                      '${(cart.customer!['phone'] as String? ?? '').isNotEmpty ? ' • ${cart.customer!['phone']}' : ''}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 13.5,
+                              color: cart.customer == null
+                                  ? AppColors.inkSoft
+                                  : AppColors.ink,
+                              fontWeight: cart.customer == null
+                                  ? FontWeight.w500
+                                  : FontWeight.w700,
                             ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: Text(
-                          cart.customer == null
-                              ? 'Walk-in customer (tap to select)'
-                              : '${cart.customer!['name']}'
-                                    '${(cart.customer!['phone'] as String? ?? '').isNotEmpty ? ' • ${cart.customer!['phone']}' : ''}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 13.5,
-                            color: cart.customer == null
-                                ? AppColors.inkSoft
-                                : AppColors.ink,
-                            fontWeight: cart.customer == null
-                                ? FontWeight.w500
-                                : FontWeight.w700,
                           ),
                         ),
-                      ),
-                      if (editing != null)
-                        const SizedBox.shrink()
-                      else if (cart.customer != null)
-                        IconButton(
-                          icon: const Icon(Icons.close, size: 18),
-                          onPressed: () =>
-                              ref.read(cartProvider.notifier).setCustomer(null),
-                        )
-                      else
-                        Icon(
-                          Icons.chevron_right,
-                          color: AppColors.inkSoft,
-                          size: 20,
-                        ),
-                    ],
+                        if (editing != null)
+                          const SizedBox.shrink()
+                        else if (cart.customer != null)
+                          IconButton(
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () => ref
+                                .read(cartProvider.notifier)
+                                .setCustomer(null),
+                          )
+                        else
+                          Icon(
+                            Icons.chevron_right,
+                            color: AppColors.inkSoft,
+                            size: 20,
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
-            )),
+            ),
           ),
           Expanded(
             child: search.isNotEmpty
@@ -753,158 +780,166 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     message:
                         'Bill is empty.\nSearch or scan products to add them.',
                   )
-                : CoachTarget(page: 'pos', id: 'cart', child: ListView.separated(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                    itemCount: cart.lines.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) {
-                      final line = cart.lines[i];
-                      return Card(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(18),
-                          onTap: () => _editLine(line),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Row(
-                              children: [
-                                IconChip(
-                                  line.trackSerial
-                                      ? Icons.smartphone
-                                      : Icons.inventory_2_outlined,
-                                  color: AppColors.accentFor(line.name),
-                                  size: 42,
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                : CoachTarget(
+                    page: 'pos',
+                    id: 'cart',
+                    child: ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      itemCount: cart.lines.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      itemBuilder: (context, i) {
+                        final line = cart.lines[i];
+                        return Card(
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(18),
+                            onTap: () => _editLine(line),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Row(
+                                children: [
+                                  IconChip(
+                                    line.trackSerial
+                                        ? Icons.smartphone
+                                        : Icons.inventory_2_outlined,
+                                    color: AppColors.accentFor(line.name),
+                                    size: 42,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 2),
+                                        Text(
+                                          '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: AppColors.inkSoft,
+                                          ),
+                                        ),
+                                        if (line.trackSerial)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 2,
+                                            ),
+                                            child: Text(
+                                              line.serialNo.isEmpty
+                                                  ? 'Tap to add IMEI/serial'
+                                                  : 'S/N: ${line.serialNo}',
+                                              style: TextStyle(
+                                                fontSize: 11,
+                                                fontWeight: FontWeight.w600,
+                                                color: line.serialNo.isEmpty
+                                                    ? AppColors.orange
+                                                    : AppColors.inkSoft,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
                                     children: [
                                       Text(
-                                        '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
+                                        money(line.gross),
                                         style: const TextStyle(
-                                          fontWeight: FontWeight.w700,
+                                          fontWeight: FontWeight.w800,
                                           fontSize: 14,
                                         ),
                                       ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.inkSoft,
-                                        ),
+                                      const SizedBox(height: 4),
+                                      _QtyStepper(
+                                        qty: line.qty,
+                                        onDecrement: () => ref
+                                            .read(cartProvider.notifier)
+                                            .changeQty(line, line.qty - 1),
+                                        onIncrement: () =>
+                                            _changeQty(line, line.qty + 1),
                                       ),
-                                      if (line.trackSerial)
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            top: 2,
-                                          ),
-                                          child: Text(
-                                            line.serialNo.isEmpty
-                                                ? 'Tap to add IMEI/serial'
-                                                : 'S/N: ${line.serialNo}',
-                                            style: TextStyle(
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w600,
-                                              color: line.serialNo.isEmpty
-                                                  ? AppColors.orange
-                                                  : AppColors.inkSoft,
-                                            ),
-                                          ),
-                                        ),
                                     ],
                                   ),
-                                ),
-                                const SizedBox(width: 8),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    Text(
-                                      money(line.gross),
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.w800,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    _QtyStepper(
-                                      qty: line.qty,
-                                      onDecrement: () => ref
-                                          .read(cartProvider.notifier)
-                                          .changeQty(line, line.qty - 1),
-                                      onIncrement: () =>
-                                          _changeQty(line, line.qty + 1),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  )),
+                        );
+                      },
+                    ),
+                  ),
           ),
           // ---- bottom bar ----
           if (cart.lines.isNotEmpty)
             SafeArea(
               top: false,
-              child: CoachTarget(page: 'pos', id: 'charge', child: Container(
-                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  boxShadow: softShadow(20),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${cart.itemCount} items • Qty ${qty(cart.totalQty)}',
-                            style: TextStyle(
-                              fontSize: 11.5,
-                              color: AppColors.inkSoft,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            money(cart.total),
-                            style: const TextStyle(
-                              fontSize: 21,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          if (cart.taxTotal > 0)
+              child: CoachTarget(
+                page: 'pos',
+                id: 'charge',
+                child: Container(
+                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    boxShadow: softShadow(20),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              'incl. GST ${money(cart.taxTotal)}',
+                              '${cart.itemCount} items • Qty ${qty(cart.totalQty)}',
                               style: TextStyle(
-                                fontSize: 11,
+                                fontSize: 11.5,
                                 color: AppColors.inkSoft,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
-                        ],
+                            Text(
+                              money(cart.total),
+                              style: const TextStyle(
+                                fontSize: 21,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            if (cart.taxTotal > 0)
+                              Text(
+                                'incl. GST ${money(cart.taxTotal)}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.inkSoft,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    FilledButton.icon(
-                      onPressed: () => showCheckoutSheet(context),
-                      icon: const Icon(Icons.arrow_forward, size: 18),
-                      label: Text(
-                        editing == null ? 'Checkout' : 'Review changes',
+                      FilledButton.icon(
+                        onPressed: () => showCheckoutSheet(context),
+                        icon: const Icon(Icons.arrow_forward, size: 18),
+                        label: Text(
+                          editing == null ? 'Checkout' : 'Review changes',
+                        ),
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(150, 52),
+                          padding: const EdgeInsets.symmetric(horizontal: 20),
+                        ),
                       ),
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(150, 52),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              )),
+              ),
             ),
         ],
       ),

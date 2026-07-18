@@ -10,6 +10,7 @@ export const LEAD_SOURCES: [string, string][] = [
   ["phone_call", "Phone call"],
   ["whatsapp", "WhatsApp"],
   ["social", "Social media"],
+  ["website", "Website"],
   ["other", "Other"],
 ];
 

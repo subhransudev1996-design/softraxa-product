@@ -34,7 +34,13 @@ export default function LeadDetailPage() {
     setPlans(p.data ?? []);
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  useEffect(() => { load(); }, [load]);
+  // Defer the initial fetch out of the synchronous effect body so its state
+  // updates don't run during the effect (react-hooks/set-state-in-effect).
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => { if (active) load(); });
+    return () => { active = false; };
+  }, [load]);
 
   function flash(text: string) {
     setMsg(text);

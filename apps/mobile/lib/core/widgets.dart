@@ -1,8 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'formatters.dart';
 import 'theme.dart';
+
+/// Explicit AppBar back button for screens living under the secondary
+/// ShellRoute (invoices, customers, purchases, …). Those pages sit in the
+/// shell's own inner Navigator, where each is the only page in the stack —
+/// so AppBar's automatic back arrow (which asks the *nearest* Navigator
+/// "can you pop?") never appears, even though GoRouter can pop back across
+/// navigators just fine. Returns null when there's genuinely nowhere to go
+/// back to (e.g. the screen is the app's initial location), so AppBar
+/// falls back to showing nothing.
+Widget? appBarBack(BuildContext context) => GoRouter.of(context).canPop()
+    ? BackButton(onPressed: () => context.pop())
+    : null;
 
 /// Colored initials avatar (deterministic color per name) — used for
 /// customers, suppliers and invoice lists.
@@ -685,10 +698,7 @@ class PartyCard extends StatelessWidget {
                 children: [
                   Text(
                     dueLabel,
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      color: AppColors.inkSoft,
-                    ),
+                    style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                   ),
                   Text(
                     money(due),

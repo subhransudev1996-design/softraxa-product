@@ -10,6 +10,7 @@ import 'package:softraxa_inventory/features/import/excel_import_screen.dart'
     show parseImportNum, normalizeImportHeader, gstRateError;
 import 'package:softraxa_inventory/features/expenses/expenses_screen.dart'
     show expensePresetRange;
+import 'package:softraxa_inventory/core/notifications.dart' show expiryBuckets;
 
 void main() {
   group('Cart totals', () {
@@ -585,6 +586,39 @@ void main() {
         expect(lines[0].key, isNot(lines[1].key));
       },
     );
+  });
+
+  group('Expiry notification buckets', () {
+    final now = DateTime(2026, 7, 16, 14, 30); // mid-afternoon, mid-month
+
+    test('splits expired vs expiring within 30 days', () {
+      final r = expiryBuckets([
+        '2026-07-01', // expired
+        '2026-06-15', // expired
+        '2026-07-20', // near
+        '2026-08-10', // near (within 30 days)
+      ], now);
+      expect(r.expired, 2);
+      expect(r.nearExpiry, 2);
+    });
+
+    test('today counts as near-expiry, not expired — still sellable today', () {
+      final r = expiryBuckets(['2026-07-16'], now);
+      expect(r.expired, 0);
+      expect(r.nearExpiry, 1);
+    });
+
+    test('exactly 30 days out is near-expiry; 31 days is neither', () {
+      final r = expiryBuckets(['2026-08-15', '2026-08-16'], now);
+      expect(r.nearExpiry, 1);
+      expect(r.expired, 0);
+    });
+
+    test('unparsable dates are skipped, not crashed on', () {
+      final r = expiryBuckets(['garbage', '2026-07-01'], now);
+      expect(r.expired, 1);
+      expect(r.nearExpiry, 0);
+    });
   });
 
   group('Expense quick-filter presets', () {

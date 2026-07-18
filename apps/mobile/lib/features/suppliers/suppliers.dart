@@ -357,12 +357,20 @@ class SuppliersScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Suppliers'), actions: const [GuideButton('suppliers')]),
-      floatingActionButton: CoachTarget(page: 'suppliers', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => showSupplierForm(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add supplier'),
-      )),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Suppliers'),
+        actions: const [GuideButton('suppliers')],
+      ),
+      floatingActionButton: CoachTarget(
+        page: 'suppliers',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => showSupplierForm(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('Add supplier'),
+        ),
+      ),
       body: Column(
         children: [
           Padding(
@@ -398,64 +406,69 @@ class SuppliersScreen extends ConsumerWidget {
           Expanded(
             child: RefreshIndicator(
               onRefresh: () async => ref.invalidate(suppliersProvider),
-              child: CoachTarget(page: 'suppliers', id: 'list', child: AsyncView(
-                value: suppliers,
-                onRetry: () => ref.invalidate(suppliersProvider),
-                builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
-                        icon: Icons.local_shipping_outlined,
-                        message: 'No suppliers yet',
-                      )
-                    : isDesktop
-                    ? Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1400),
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.all(16),
-                            child: responsiveCardWrap([
-                              for (final s in rows)
-                                PartyCard(
-                                  name: s['name'] as String? ?? '',
-                                  phone: s['phone'] as String? ?? '',
-                                  due: toDouble(s['due_amount']),
-                                  dueLabel: 'We owe',
-                                  dueColor: AppColors.purple,
-                                  creditLimit: s['credit_limit'] == null
-                                      ? null
-                                      : toDouble(s['credit_limit']),
-                                  overLimit:
-                                      s['credit_limit'] != null &&
-                                      toDouble(s['due_amount']) >
-                                          toDouble(s['credit_limit']),
-                                  onTap: () =>
-                                      context.push('/suppliers/${s['id']}'),
-                                  onCall: (s['phone'] as String? ?? '').isEmpty
-                                      ? null
-                                      : () => _callPhone(
-                                          context,
-                                          s['phone'] as String,
-                                        ),
-                                  onPay: () => showRecordSupplierPayment(
-                                    context,
-                                    ref,
-                                    supplierId: s['id'] as String,
+              child: CoachTarget(
+                page: 'suppliers',
+                id: 'list',
+                child: AsyncView(
+                  value: suppliers,
+                  onRetry: () => ref.invalidate(suppliersProvider),
+                  builder: (rows) => rows.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.local_shipping_outlined,
+                          message: 'No suppliers yet',
+                        )
+                      : isDesktop
+                      ? Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 1400),
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: responsiveCardWrap([
+                                for (final s in rows)
+                                  PartyCard(
+                                    name: s['name'] as String? ?? '',
+                                    phone: s['phone'] as String? ?? '',
                                     due: toDouble(s['due_amount']),
+                                    dueLabel: 'We owe',
+                                    dueColor: AppColors.purple,
+                                    creditLimit: s['credit_limit'] == null
+                                        ? null
+                                        : toDouble(s['credit_limit']),
+                                    overLimit:
+                                        s['credit_limit'] != null &&
+                                        toDouble(s['due_amount']) >
+                                            toDouble(s['credit_limit']),
+                                    onTap: () =>
+                                        context.push('/suppliers/${s['id']}'),
+                                    onCall:
+                                        (s['phone'] as String? ?? '').isEmpty
+                                        ? null
+                                        : () => _callPhone(
+                                            context,
+                                            s['phone'] as String,
+                                          ),
+                                    onPay: () => showRecordSupplierPayment(
+                                      context,
+                                      ref,
+                                      supplierId: s['id'] as String,
+                                      due: toDouble(s['due_amount']),
+                                    ),
+                                    payLabel: 'Pay supplier',
                                   ),
-                                  payLabel: 'Pay supplier',
-                                ),
-                            ]),
+                              ]),
+                            ),
                           ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
+                          itemCount: rows.length,
+                          separatorBuilder: (_, _) => const SizedBox(height: 8),
+                          itemBuilder: (context, i) =>
+                              _SupplierTile(supplier: rows[i]),
                         ),
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 88),
-                        itemCount: rows.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 8),
-                        itemBuilder: (context, i) =>
-                            _SupplierTile(supplier: rows[i]),
-                      ),
-              )),
+                ),
+              ),
             ),
           ),
         ],
@@ -502,10 +515,7 @@ class _SupplierTile extends StatelessWidget {
                     ),
                     Text(
                       s['phone'] as String? ?? '',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: AppColors.inkSoft,
-                      ),
+                      style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
                     ),
                   ],
                 ),
@@ -562,6 +572,7 @@ class SupplierDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Supplier'),
         actions: [
           if (data.hasValue)

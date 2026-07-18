@@ -20,6 +20,7 @@ class CustomerDetailScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
+        leading: appBarBack(context),
         title: const Text('Customer'),
         actions: [
           if (data.hasValue)

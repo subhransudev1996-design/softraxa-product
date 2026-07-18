@@ -13,18 +13,34 @@ import 'service_providers.dart';
 class ServicesScreen extends ConsumerWidget {
   const ServicesScreen({super.key});
 
-  Future<void> _addOrEdit(BuildContext context, WidgetRef ref,
-      {Map<String, dynamic>? existing}) async {
-    final name = TextEditingController(text: existing?['name'] as String? ?? '');
-    final category = TextEditingController(text: existing?['category'] as String? ?? '');
+  Future<void> _addOrEdit(
+    BuildContext context,
+    WidgetRef ref, {
+    Map<String, dynamic>? existing,
+  }) async {
+    final name = TextEditingController(
+      text: existing?['name'] as String? ?? '',
+    );
+    final category = TextEditingController(
+      text: existing?['category'] as String? ?? '',
+    );
     final price = TextEditingController(
-        text: existing == null ? '' : toDouble(existing['price']).toStringAsFixed(2));
-    final sacCode = TextEditingController(text: existing?['sac_code'] as String? ?? '');
+      text: existing == null
+          ? ''
+          : toDouble(existing['price']).toStringAsFixed(2),
+    );
+    final sacCode = TextEditingController(
+      text: existing?['sac_code'] as String? ?? '',
+    );
     final minutes = TextEditingController(
-        text: existing?['estimated_minutes']?.toString() ?? '');
+      text: existing?['estimated_minutes']?.toString() ?? '',
+    );
     final warrantyDays = TextEditingController(
-        text: existing?['warranty_days']?.toString() ?? '');
-    final description = TextEditingController(text: existing?['description'] as String? ?? '');
+      text: existing?['warranty_days']?.toString() ?? '',
+    );
+    final description = TextEditingController(
+      text: existing?['description'] as String? ?? '',
+    );
     double gstRate = (existing?['gst_rate'] as num?)?.toDouble() ?? 18;
 
     final saved = await showDialog<bool>(
@@ -33,74 +49,107 @@ class ServicesScreen extends ConsumerWidget {
         builder: (ctx, setState) => AlertDialog(
           title: Text(existing == null ? 'Add service' : 'Edit service'),
           content: SingleChildScrollView(
-            child: Column(mainAxisSize: MainAxisSize.min, children: [
-              TextField(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
                   controller: name,
                   autofocus: existing == null,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Service name *')),
-              const SizedBox(height: 12),
-              TextField(
+                  decoration: const InputDecoration(
+                    labelText: 'Service name *',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
                   controller: category,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Category (optional)')),
-              const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: price,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Price ₹ *'),
+                  decoration: const InputDecoration(
+                    labelText: 'Category (optional)',
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: DropdownButtonFormField<double>(
-                    initialValue: gstRate,
-                    decoration: const InputDecoration(labelText: 'GST %'),
-                    items: const [
-                      DropdownMenuItem(value: 0.0, child: Text('0%')),
-                      DropdownMenuItem(value: 5.0, child: Text('5%')),
-                      DropdownMenuItem(value: 12.0, child: Text('12%')),
-                      DropdownMenuItem(value: 18.0, child: Text('18%')),
-                      DropdownMenuItem(value: 28.0, child: Text('28%')),
-                    ],
-                    onChanged: (v) => setState(() => gstRate = v ?? 0),
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: price,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Price ₹ *',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: DropdownButtonFormField<double>(
+                        initialValue: gstRate,
+                        decoration: const InputDecoration(labelText: 'GST %'),
+                        items: const [
+                          DropdownMenuItem(value: 0.0, child: Text('0%')),
+                          DropdownMenuItem(value: 5.0, child: Text('5%')),
+                          DropdownMenuItem(value: 12.0, child: Text('12%')),
+                          DropdownMenuItem(value: 18.0, child: Text('18%')),
+                          DropdownMenuItem(value: 28.0, child: Text('28%')),
+                        ],
+                        onChanged: (v) => setState(() => gstRate = v ?? 0),
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
-              const SizedBox(height: 12),
-              TextField(
+                const SizedBox(height: 12),
+                TextField(
                   controller: sacCode,
-                  decoration: const InputDecoration(labelText: 'SAC code (optional)')),
-              const SizedBox(height: 12),
-              Row(children: [
-                Expanded(
-                  child: TextField(
-                    controller: minutes,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Est. time (minutes)'),
+                  decoration: const InputDecoration(
+                    labelText: 'SAC code (optional)',
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: warrantyDays,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Warranty (days)'),
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: minutes,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Est. time (minutes)',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: warrantyDays,
+                        keyboardType: TextInputType.number,
+                        decoration: const InputDecoration(
+                          labelText: 'Warranty (days)',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ]),
-              const SizedBox(height: 12),
-              TextField(
+                const SizedBox(height: 12),
+                TextField(
                   controller: description,
                   maxLines: 2,
-                  decoration: const InputDecoration(labelText: 'Description (optional)')),
-            ]),
+                  decoration: const InputDecoration(
+                    labelText: 'Description (optional)',
+                  ),
+                ),
+              ],
+            ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Save'),
+            ),
           ],
         ),
       ),
@@ -121,9 +170,15 @@ class ServicesScreen extends ConsumerWidget {
       final client = ref.read(supabaseProvider);
       if (existing == null) {
         final businessId = ref.read(appContextProvider).value?.businessId;
-        await client.from('services').insert({...row, 'business_id': businessId});
+        await client.from('services').insert({
+          ...row,
+          'business_id': businessId,
+        });
       } else {
-        await client.from('services').update(row).eq('id', existing['id'] as String);
+        await client
+            .from('services')
+            .update(row)
+            .eq('id', existing['id'] as String);
       }
       ref.invalidate(servicesProvider);
     } catch (e) {
@@ -131,17 +186,25 @@ class ServicesScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, Map<String, dynamic> service) async {
-    final ok = await confirmDialog(context,
-        title: 'Remove "${service['name']}"?',
-        message: 'This only hides it from the service catalog; past job cards are unaffected.',
-        confirmText: 'Remove');
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> service,
+  ) async {
+    final ok = await confirmDialog(
+      context,
+      title: 'Remove "${service['name']}"?',
+      message:
+          'This only hides it from the service catalog; past job cards are unaffected.',
+      confirmText: 'Remove',
+    );
     if (!ok) return;
     try {
       await ref
           .read(supabaseProvider)
           .from('services')
-          .update({'is_active': false}).eq('id', service['id'] as String);
+          .update({'is_active': false})
+          .eq('id', service['id'] as String);
       ref.invalidate(servicesProvider);
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -154,52 +217,69 @@ class ServicesScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Service catalog'), actions: const [GuideButton('services')]),
-      floatingActionButton: CoachTarget(page: 'services', id: 'add', child: FloatingActionButton.extended(
-        onPressed: () => _addOrEdit(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('Add service'),
-      )),
+      appBar: AppBar(
+        leading: appBarBack(context),
+        title: const Text('Service catalog'),
+        actions: const [GuideButton('services')],
+      ),
+      floatingActionButton: CoachTarget(
+        page: 'services',
+        id: 'add',
+        child: FloatingActionButton.extended(
+          onPressed: () => _addOrEdit(context, ref),
+          icon: const Icon(Icons.add),
+          label: const Text('Add service'),
+        ),
+      ),
       body: AsyncView(
         value: services,
         onRetry: () => ref.invalidate(servicesProvider),
         builder: (rows) => rows.isEmpty
             ? const EmptyState(
                 icon: Icons.build_outlined,
-                message: 'No services yet.\nAdd repair/labor charges you offer.')
+                message:
+                    'No services yet.\nAdd repair/labor charges you offer.',
+              )
             : isDesktop
-                ? DesktopTable<Map<String, dynamic>>(
-                    rows: rows,
-                    trailingWidth: 90,
-                    columns: [
-                      DesktopTableColumn(
-                          label: 'Service',
-                          flex: 3,
-                          comparable: (s) => (s['name'] as String? ?? '').toLowerCase()),
-                      DesktopTableColumn(
-                          label: 'Category',
-                          flex: 2,
-                          comparable: (s) => (s['category'] as String? ?? '').toLowerCase()),
-                      DesktopTableColumn(
-                          label: 'Price',
-                          flex: 2,
-                          alignEnd: true,
-                          comparable: (s) => toDouble(s['price'])),
-                    ],
-                    rowBuilder: (context, s) => _ServiceRow(
-                        service: s,
-                        onTap: () => _addOrEdit(context, ref, existing: s),
-                        onDelete: () => _delete(context, ref, s)),
-                  )
-                : ListView.separated(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: rows.length,
-                    separatorBuilder: (_, _) => const SizedBox(height: 8),
-                    itemBuilder: (context, i) => _ServiceTile(
-                        service: rows[i],
-                        onTap: () => _addOrEdit(context, ref, existing: rows[i]),
-                        onDelete: () => _delete(context, ref, rows[i])),
+            ? DesktopTable<Map<String, dynamic>>(
+                rows: rows,
+                trailingWidth: 90,
+                columns: [
+                  DesktopTableColumn(
+                    label: 'Service',
+                    flex: 3,
+                    comparable: (s) =>
+                        (s['name'] as String? ?? '').toLowerCase(),
                   ),
+                  DesktopTableColumn(
+                    label: 'Category',
+                    flex: 2,
+                    comparable: (s) =>
+                        (s['category'] as String? ?? '').toLowerCase(),
+                  ),
+                  DesktopTableColumn(
+                    label: 'Price',
+                    flex: 2,
+                    alignEnd: true,
+                    comparable: (s) => toDouble(s['price']),
+                  ),
+                ],
+                rowBuilder: (context, s) => _ServiceRow(
+                  service: s,
+                  onTap: () => _addOrEdit(context, ref, existing: s),
+                  onDelete: () => _delete(context, ref, s),
+                ),
+              )
+            : ListView.separated(
+                padding: const EdgeInsets.all(16),
+                itemCount: rows.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, i) => _ServiceTile(
+                  service: rows[i],
+                  onTap: () => _addOrEdit(context, ref, existing: rows[i]),
+                  onDelete: () => _delete(context, ref, rows[i]),
+                ),
+              ),
       ),
     );
   }
@@ -208,7 +288,11 @@ class ServicesScreen extends ConsumerWidget {
 // ==================== desktop: sortable data table ====================
 
 class _ServiceRow extends StatelessWidget {
-  const _ServiceRow({required this.service, required this.onTap, required this.onDelete});
+  const _ServiceRow({
+    required this.service,
+    required this.onTap,
+    required this.onDelete,
+  });
 
   final Map<String, dynamic> service;
   final VoidCallback onTap;
@@ -221,40 +305,59 @@ class _ServiceRow extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-        child: Row(children: [
-          Expanded(
-            flex: 3,
-            child: Text(s['name'] as String,
+        child: Row(
+          children: [
+            Expanded(
+              flex: 3,
+              child: Text(
+                s['name'] as String,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(
-                (s['category'] as String? ?? '').isNotEmpty ? s['category'] as String : 'Service',
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 13, color: AppColors.inkSoft)),
-          ),
-          Expanded(
-            flex: 2,
-            child: Text(money(s['price'] as num?),
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-          ),
-          SizedBox(
-            width: 90,
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: IconButton(
-                icon: const Icon(Icons.delete_outline, color: AppColors.red, size: 18),
-                onPressed: onDelete,
-                visualDensity: VisualDensity.compact,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
               ),
             ),
-          ),
-        ]),
+            Expanded(
+              flex: 2,
+              child: Text(
+                (s['category'] as String? ?? '').isNotEmpty
+                    ? s['category'] as String
+                    : 'Service',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: Text(
+                money(s['price'] as num?),
+                textAlign: TextAlign.right,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13.5,
+                ),
+              ),
+            ),
+            SizedBox(
+              width: 90,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.red,
+                    size: 18,
+                  ),
+                  onPressed: onDelete,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -263,7 +366,11 @@ class _ServiceRow extends StatelessWidget {
 // ==================== mobile: card list (unchanged) ====================
 
 class _ServiceTile extends StatelessWidget {
-  const _ServiceTile({required this.service, required this.onTap, required this.onDelete});
+  const _ServiceTile({
+    required this.service,
+    required this.onTap,
+    required this.onDelete,
+  });
 
   final Map<String, dynamic> service;
   final VoidCallback onTap;
@@ -281,40 +388,58 @@ class _ServiceTile extends StatelessWidget {
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          child: Row(children: [
-            const IconChip(Icons.build_outlined, color: AppColors.indigo, size: 40),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(s['name'] as String,
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                  const SizedBox(height: 2),
-                  Text(
+          child: Row(
+            children: [
+              const IconChip(
+                Icons.build_outlined,
+                color: AppColors.indigo,
+                size: 40,
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      s['name'] as String,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
                       (s['category'] as String? ?? '').isNotEmpty
                           ? s['category'] as String
                           : 'Service',
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    money(s['price'] as num?),
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.red,
+                      size: 18,
+                    ),
+                    onPressed: onDelete,
+                    visualDensity: VisualDensity.compact,
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(width: 12),
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(money(s['price'] as num?),
-                    style: const TextStyle(fontWeight: FontWeight.w800)),
-                IconButton(
-                  icon: const Icon(Icons.delete_outline, color: AppColors.red, size: 18),
-                  onPressed: onDelete,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
-            ),
-          ]),
+            ],
+          ),
         ),
       ),
     );

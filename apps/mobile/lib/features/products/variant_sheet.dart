@@ -38,29 +38,30 @@ class VariantDraft {
   double? lowStockQty;
 
   Map<String, dynamic> toRow(String productId) => {
-        'product_id': productId,
-        'name': name,
-        'sku': sku,
-        'barcode': barcode,
-        'attributes': attributes,
-        'purchase_price': purchasePrice,
-        'selling_price': sellingPrice,
-        'mrp': mrp,
-        'low_stock_qty': lowStockQty,
-      };
+    'product_id': productId,
+    'name': name,
+    'sku': sku,
+    'barcode': barcode,
+    'attributes': attributes,
+    'purchase_price': purchasePrice,
+    'selling_price': sellingPrice,
+    'mrp': mrp,
+    'low_stock_qty': lowStockQty,
+  };
 
   static VariantDraft fromRow(Map<String, dynamic> row) => VariantDraft(
-        id: row['id'] as String?,
-        name: row['name'] as String? ?? '',
-        sku: row['sku'] as String? ?? '',
-        barcode: row['barcode'] as String? ?? '',
-        attributes: Map<String, String>.from(
-            (row['attributes'] as Map? ?? {}).map((k, v) => MapEntry('$k', '$v'))),
-        purchasePrice: (row['purchase_price'] as num?)?.toDouble(),
-        sellingPrice: (row['selling_price'] as num?)?.toDouble(),
-        mrp: (row['mrp'] as num?)?.toDouble(),
-        lowStockQty: (row['low_stock_qty'] as num?)?.toDouble(),
-      );
+    id: row['id'] as String?,
+    name: row['name'] as String? ?? '',
+    sku: row['sku'] as String? ?? '',
+    barcode: row['barcode'] as String? ?? '',
+    attributes: Map<String, String>.from(
+      (row['attributes'] as Map? ?? {}).map((k, v) => MapEntry('$k', '$v')),
+    ),
+    purchasePrice: (row['purchase_price'] as num?)?.toDouble(),
+    sellingPrice: (row['selling_price'] as num?)?.toDouble(),
+    mrp: (row['mrp'] as num?)?.toDouble(),
+    lowStockQty: (row['low_stock_qty'] as num?)?.toDouble(),
+  );
 }
 
 Future<VariantDraft?> showVariantSheet(
@@ -100,8 +101,8 @@ class _VariantSheet extends StatefulWidget {
 
 class _AttrRow {
   _AttrRow({String name = '', String value = ''})
-      : name = TextEditingController(text: name),
-        value = TextEditingController(text: value);
+    : name = TextEditingController(text: name),
+      value = TextEditingController(text: value);
   final TextEditingController name;
   final TextEditingController value;
 }
@@ -115,20 +116,32 @@ class _VariantSheetState extends State<_VariantSheet> {
             _AttrRow(name: e.key, value: e.value),
         ]
       : [
-          for (final f in variantTemplates[widget.businessType] ?? variantTemplates['other']!)
+          for (final f
+              in variantTemplates[widget.businessType] ??
+                  variantTemplates['other']!)
             _AttrRow(name: f),
         ];
   late final _sku = TextEditingController(text: widget.existing?.sku ?? '');
-  late final _barcode = TextEditingController(text: widget.existing?.barcode ?? '');
+  late final _barcode = TextEditingController(
+    text: widget.existing?.barcode ?? '',
+  );
   late final _purchase = TextEditingController(
-      text: widget.existing?.purchasePrice?.toString() ?? '');
+    text: widget.existing?.purchasePrice?.toString() ?? '',
+  );
   late final _selling = TextEditingController(
-      text: widget.existing?.sellingPrice?.toString() ?? '');
-  late final _mrp = TextEditingController(text: widget.existing?.mrp?.toString() ?? '');
+    text: widget.existing?.sellingPrice?.toString() ?? '',
+  );
+  late final _mrp = TextEditingController(
+    text: widget.existing?.mrp?.toString() ?? '',
+  );
   late final _opening = TextEditingController(
-      text: widget.existing == null ? '' : widget.existing!.openingStock.toString());
+    text: widget.existing == null
+        ? ''
+        : widget.existing!.openingStock.toString(),
+  );
   late final _lowStock = TextEditingController(
-      text: widget.existing?.lowStockQty?.toString() ?? '');
+    text: widget.existing?.lowStockQty?.toString() ?? '',
+  );
 
   void _addField() {
     setState(() => _rows.add(_AttrRow()));
@@ -175,34 +188,44 @@ class _VariantSheetState extends State<_VariantSheet> {
         controller: scrollController,
         padding: const EdgeInsets.all(16),
         children: [
-          Text(widget.existing == null ? 'Add variant' : 'Edit variant',
-              style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            widget.existing == null ? 'Add variant' : 'Edit variant',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SectionLabel('Attributes'),
           for (var i = 0; i < _rows.length; i++)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Expanded(
-                  flex: 4,
-                  child: TextField(
-                    controller: _rows[i].name,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(labelText: 'Field name'),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 4,
+                    child: TextField(
+                      controller: _rows[i].name,
+                      textCapitalization: TextCapitalization.words,
+                      decoration: const InputDecoration(
+                        labelText: 'Field name',
+                      ),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 5,
-                  child: TextField(
-                    controller: _rows[i].value,
-                    decoration: const InputDecoration(labelText: 'Value'),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 5,
+                    child: TextField(
+                      controller: _rows[i].value,
+                      decoration: const InputDecoration(labelText: 'Value'),
+                    ),
                   ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.remove_circle_outline, color: AppColors.red),
-                  onPressed: () => _removeField(i),
-                ),
-              ]),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.remove_circle_outline,
+                      color: AppColors.red,
+                    ),
+                    onPressed: () => _removeField(i),
+                  ),
+                ],
+              ),
             ),
           OutlinedButton.icon(
             onPressed: _addField,
@@ -210,45 +233,79 @@ class _VariantSheetState extends State<_VariantSheet> {
             label: const Text('Add field'),
           ),
           const SectionLabel('Codes'),
-          TextField(controller: _sku, decoration: const InputDecoration(labelText: 'SKU (optional)')),
+          TextField(
+            controller: _sku,
+            decoration: const InputDecoration(labelText: 'SKU (optional)'),
+          ),
           const SizedBox(height: 12),
-          TextField(controller: _barcode, decoration: const InputDecoration(labelText: 'Barcode (optional)')),
+          TextField(
+            controller: _barcode,
+            decoration: const InputDecoration(labelText: 'Barcode (optional)'),
+          ),
           const SectionLabel('Pricing (leave blank to use product price)'),
-          Row(children: [
-            Expanded(
-                child: TextField(
-                    controller: _purchase,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Purchase ₹'))),
-            const SizedBox(width: 12),
-            Expanded(
-                child: TextField(
-                    controller: _selling,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Selling ₹'))),
-            const SizedBox(width: 12),
-            Expanded(
-                child: TextField(
-                    controller: _mrp,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'MRP ₹'))),
-          ]),
-          const SectionLabel('Stock'),
-          Row(children: [
-            if (widget.allowOpeningStock) ...[
+          Row(
+            children: [
               Expanded(
-                  child: TextField(
-                      controller: _opening,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                      decoration: const InputDecoration(labelText: 'Opening stock'))),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
                 child: TextField(
-                    controller: _lowStock,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(labelText: 'Low stock alert qty'))),
-          ]),
+                  controller: _purchase,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'Purchase ₹'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _selling,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'Selling ₹'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _mrp,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'MRP ₹'),
+                ),
+              ),
+            ],
+          ),
+          const SectionLabel('Stock'),
+          Row(
+            children: [
+              if (widget.allowOpeningStock) ...[
+                Expanded(
+                  child: TextField(
+                    controller: _opening,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: const InputDecoration(
+                      labelText: 'Opening stock',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+              ],
+              Expanded(
+                child: TextField(
+                  controller: _lowStock,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Low stock alert qty',
+                  ),
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 20),
           FilledButton(onPressed: _save, child: const Text('Save variant')),
           const SizedBox(height: 24),
