@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/branding.dart';
 
 import '../../core/supabase_providers.dart';
@@ -33,11 +34,65 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             password: _password.text,
           );
       // Router redirects via auth state change.
+    } on AuthException catch (e) {
+      // Unverified email → don't dump a raw error; offer to resend.
+      final msg = e.message.toLowerCase();
+      if (mounted &&
+          (msg.contains('not confirmed') || msg.contains('not verified'))) {
+        await _promptResend();
+      } else if (mounted) {
+        showError(context, e);
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Shown when login fails because the email isn't verified yet.
+  Future<void> _promptResend() async {
+    final email = _email.text.trim();
+    final resend = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Verify your email'),
+        content: Text(
+          'Your email ($email) hasn\'t been verified yet. '
+          'Please open the verification link we emailed you.\n\n'
+          'Didn\'t get it? We can send it again.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Close'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Resend email'),
+          ),
+        ],
+      ),
+    );
+    if (resend == true) await _resendVerification(email);
+  }
+
+  Future<void> _resendVerification(String email) async {
+    try {
+      await ref.read(supabaseProvider).auth.resend(
+            type: OtpType.signup,
+            email: email,
+          );
+      if (mounted) {
+        showSuccess(context, 'Verification email sent to $email.');
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  Future<void> _forgotPassword() async {
+    context.go('/forgot-password');
   }
 
   @override
@@ -141,7 +196,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             )
                           : const Text('Login'),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 4),
+                    TextButton(
+                      onPressed: _busy ? null : _forgotPassword,
+                      child: const Text('Forgot password?'),
+                    ),
+                    const SizedBox(height: 8),
                     TextButton(
                       onPressed: () => context.go('/signup'),
                       child: const Text("Don't have an account? Sign up"),

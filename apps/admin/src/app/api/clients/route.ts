@@ -19,7 +19,7 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const { email, password, ownerName, business, planId, expiryDate } = body;
+  const { email, password, ownerName, business, planId, productId, expiryDate } = body;
   if (!email || !password || !business?.name) {
     return NextResponse.json({ error: "email, password and business.name are required" }, { status: 400 });
   }
@@ -84,13 +84,30 @@ export async function POST(req: Request) {
         business_id: biz.id, name, short_name, allow_decimal,
       }))
     );
-    const expiry = expiryDate || new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
+    // Trial length: explicit expiry wins, else the selected software's
+    // trial_days, else a 14-day default. (software_products, NOT products —
+    // `products` is the shop's inventory items.)
+    let trialDays = 14;
+    if (productId) {
+      const { data: sw } = await service
+        .from("software_products").select("trial_days").eq("id", productId).maybeSingle();
+      if (sw?.trial_days) trialDays = sw.trial_days;
+    }
+    const expiry = expiryDate || new Date(Date.now() + trialDays * 86400000).toISOString().slice(0, 10);
     await service.from("subscriptions").insert({
       business_id: biz.id,
       plan_id: planId || null,
+      software_id: productId || null,
       status: planId ? "active" : "trial",
       expiry_date: expiry,
     });
+
+    // Enforce the plan's features on the shop's feature_flags so the app
+    // hides anything this plan doesn't include. (No-op for a trial with no
+    // plan — the shop keeps all features on by default.)
+    if (planId) {
+      await service.rpc("apply_plan_features", { p_business: biz.id, p_plan: planId });
+    }
 
     return NextResponse.json({ businessId: biz.id, userId });
   } catch (e: unknown) {

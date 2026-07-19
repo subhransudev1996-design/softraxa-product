@@ -16,6 +16,7 @@ import { desktopShots } from "@/lib/shots";
 import MagneticButton from "@/components/magnetic-button";
 import WhyShowcase from "@/components/why-showcase";
 import WhatWeBuild from "@/components/what-we-build";
+import AuthCodeRedirect from "@/components/auth-code-redirect";
 
 const ico = "h-5 w-5 text-sky";
 
@@ -49,6 +50,7 @@ export default async function HomePage() {
 
   return (
     <>
+      <AuthCodeRedirect />
       {seo.structured_data && Object.keys(seo.structured_data).length > 0 && (
         <script
           type="application/ld+json"

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,8 +11,10 @@ import 'core/branding.dart';
 import 'core/desktop_titlebar.dart';
 import 'core/push_service.dart';
 import 'core/router.dart';
+import 'core/supabase_providers.dart';
 import 'core/theme.dart';
 import 'core/theme_mode.dart';
+import 'features/auth/forgot_password_screen.dart';
 import 'features/offline/offline_service.dart';
 
 Future<void> main() async {
@@ -48,12 +52,33 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
+  StreamSubscription<AuthState>? _authSub;
+
   @override
   void initState() {
     super.initState();
     // Start the offline service (connectivity listener + pending bill sync).
     final offline = ref.read(offlineServiceProvider);
     Future.microtask(offline.syncPendingBills);
+
+    // When the user opens a password-reset link, Supabase fires a
+    // passwordRecovery event — prompt them to set a new password.
+    _authSub = ref
+        .read(supabaseProvider)
+        .auth
+        .onAuthStateChange
+        .listen((state) {
+      if (state.event == AuthChangeEvent.passwordRecovery) {
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null && ctx.mounted) showSetNewPasswordDialog(ctx, ref);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _authSub?.cancel();
+    super.dispose();
   }
 
   @override

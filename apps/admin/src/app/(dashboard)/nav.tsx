@@ -7,6 +7,7 @@ import {
   Store,
   Target,
   Layers,
+  Boxes,
   IndianRupee,
   LifeBuoy,
   ScrollText,
@@ -14,6 +15,7 @@ import {
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/products", label: "Products", icon: Boxes },
   { href: "/clients", label: "Clients", icon: Store },
   { href: "/leads", label: "Leads", icon: Target },
   { href: "/plans", label: "Plans", icon: Layers },

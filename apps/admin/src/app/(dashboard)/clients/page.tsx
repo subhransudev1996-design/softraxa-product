@@ -16,7 +16,7 @@ type ClientRow = {
   phone: string;
   is_active: boolean;
   created_at: string;
-  subscriptions: { status: string; expiry_date: string; plans: { name: string } | null }[];
+  subscriptions: { status: string; expiry_date: string; plans: { name: string } | null; software: { name: string } | null }[];
 };
 
 export default function ClientsPage() {
@@ -27,7 +27,7 @@ export default function ClientsPage() {
     const supabase = createClient();
     let query = supabase
       .from("businesses")
-      .select("id, name, owner_name, business_type, phone, is_active, created_at, subscriptions(status, expiry_date, plans(name))")
+      .select("id, name, owner_name, business_type, phone, is_active, created_at, subscriptions(status, expiry_date, plans(name), software:software_products(name))")
       .order("created_at", { ascending: false });
     if (search.trim()) query = query.ilike("name", `%${search.trim()}%`);
     query.then(({ data }) => setRows((data as unknown as ClientRow[]) ?? []));
@@ -51,7 +51,7 @@ export default function ClientsPage() {
         <Spinner />
       ) : (
         <Card>
-          <Table headers={["Business", "Owner", "Type", "Plan", "Status", "Expires", ""]}>
+          <Table headers={["Business", "Owner", "Software", "Plan", "Status", "Expires", ""]}>
             {rows.map((c) => {
               const sub = c.subscriptions?.[0];
               return (
@@ -61,7 +61,7 @@ export default function ClientsPage() {
                     {!c.is_active && <span className="ml-2"><Badge color="red">disabled</Badge></span>}
                   </td>
                   <td className="px-4 py-3">{c.owner_name || "—"}</td>
-                  <td className="px-4 py-3 capitalize">{c.business_type}</td>
+                  <td className="px-4 py-3">{sub?.software?.name ?? "—"}</td>
                   <td className="px-4 py-3">{sub?.plans?.name ?? "—"}</td>
                   <td className="px-4 py-3">
                     <Badge color={subscriptionBadge(sub?.status)}>{sub?.status ?? "none"}</Badge>

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
 import '../features/customers/customer_detail_screen.dart';
@@ -109,7 +110,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     redirect: (context, state) {
       final loggedIn = ref.read(supabaseProvider).auth.currentUser != null;
       final loc = state.matchedLocation;
-      final atAuth = loc == '/login' || loc == '/signup';
+      final atAuth =
+          loc == '/login' || loc == '/signup' || loc == '/forgot-password';
 
       if (!loggedIn) return atAuth ? null : '/login';
 
@@ -129,6 +131,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/splash', builder: (_, _) => const _SplashScreen()),
       GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
       GoRoute(path: '/signup', builder: (_, _) => const SignupScreen()),
+      GoRoute(
+        path: '/forgot-password',
+        builder: (_, _) => const ForgotPasswordScreen(),
+      ),
       GoRoute(path: '/setup', builder: (_, _) => const BusinessSetupScreen()),
       GoRoute(path: '/blocked', builder: (_, _) => const BlockedScreen()),
 

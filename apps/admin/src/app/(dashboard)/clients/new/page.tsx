@@ -7,10 +7,22 @@ import { Button, Card, CardBody, Input, Label, Select } from "@/components/ui";
 
 export default function NewClientPage() {
   const router = useRouter();
-  const [plans, setPlans] = useState<{ id: string; name: string }[]>([]);
+  type Plan = { id: string; name: string; monthly_price: number; yearly_price: number };
+  type Product = { id: string; name: string; status: string; trial_days: number };
+  const [plans, setPlans] = useState<Plan[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [leadId, setLeadId] = useState<string | null>(null);
+  // True only after the first client render. The subscription/expiry UI depends
+  // on fetched data and `new Date()`, which differ between the server pass and
+  // the client — gating on this keeps SSR HTML identical to first client HTML
+  // and avoids a hydration mismatch.
+  const [mounted, setMounted] = useState(false);
+  // "monthly" | "yearly" — billing cycle for a paid plan.
+  const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("monthly");
+  // When true, the admin overrides the auto-computed expiry with a manual date.
+  const [overrideExpiry, setOverrideExpiry] = useState(false);
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -23,16 +35,61 @@ export default function NewClientPage() {
     invoicePrefix: "INV",
     taxPreference: "gst",
     planId: "",
+    productId: "",
     expiryDate: "",
   });
 
+  const selectedPlan = plans.find((p) => p.id === form.planId) || null;
+  const selectedProduct = products.find((p) => p.id === form.productId) || null;
+  // Which billing cycles this plan is actually priced for (> 0).
+  const availableCycles = selectedPlan
+    ? ([
+        selectedPlan.monthly_price > 0 ? "monthly" : null,
+        selectedPlan.yearly_price > 0 ? "yearly" : null,
+      ].filter(Boolean) as ("monthly" | "yearly")[])
+    : [];
+
+  // Auto-computed expiry (yyyy-mm-dd). Paid plan → today + cycle; trial → today
+  // + product trial_days (default 14).
+  function computedExpiry(): string {
+    const d = new Date();
+    if (selectedPlan && availableCycles.length) {
+      const cycle = availableCycles.includes(billingCycle) ? billingCycle : availableCycles[0];
+      if (cycle === "yearly") d.setFullYear(d.getFullYear() + 1);
+      else d.setMonth(d.getMonth() + 1);
+    } else {
+      d.setDate(d.getDate() + (selectedProduct?.trial_days ?? 14));
+    }
+    return d.toISOString().slice(0, 10);
+  }
+  const effectiveExpiry = overrideExpiry && form.expiryDate ? form.expiryDate : computedExpiry();
+
   useEffect(() => {
-    createClient()
+    // Deferred so the state update doesn't run synchronously in the effect
+    // body (react-hooks/set-state-in-effect).
+    Promise.resolve().then(() => setMounted(true));
+    const supabase = createClient();
+    supabase
       .from("plans")
-      .select("id, name")
+      .select("id, name, monthly_price, yearly_price")
       .eq("is_active", true)
       .order("name")
-      .then(({ data }) => setPlans(data ?? []));
+      .then(({ data }) => setPlans((data as Plan[]) ?? []));
+
+    // Softraxa software products. Default the picker to the first live one
+    // (Dukania today) so the common case needs no extra click.
+    // (software_products, NOT products — `products` is shop inventory items.)
+    supabase
+      .from("software_products")
+      .select("id, name, status, trial_days")
+      .eq("is_active", true)
+      .order("sort_order")
+      .then(({ data }) => {
+        const list = (data as Product[]) ?? [];
+        setProducts(list);
+        const live = list.find((p) => p.status === "live") ?? list[0];
+        if (live) setForm((f) => (f.productId ? f : { ...f, productId: live.id }));
+      });
 
     // Prefill when arriving from a lead's "Convert to client" button.
     // (window.location instead of useSearchParams — avoids the Suspense
@@ -72,7 +129,9 @@ export default function NewClientPage() {
         password: form.password,
         ownerName: form.ownerName,
         planId: form.planId || null,
-        expiryDate: form.expiryDate || null,
+        productId: form.productId || null,
+        expiryDate: effectiveExpiry,
+        billingCycle: selectedPlan && availableCycles.length ? billingCycle : null,
         business: {
           name: form.businessName,
           type: form.type,
@@ -175,21 +234,85 @@ export default function NewClientPage() {
               </div>
             </div>
             <h2 className="pt-2 text-sm font-semibold text-zinc-700">Subscription</h2>
+            {!mounted ? (
+              <p className="text-sm text-zinc-400">Loading plans…</p>
+            ) : (
             <div className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label>Software</Label>
+                <Select value={form.productId} onChange={(e) => set("productId", e.target.value)}>
+                  {products.length === 0 && <option value="">—</option>}
+                  {products.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name}{p.status !== "live" ? " (coming soon)" : ""}
+                    </option>
+                  ))}
+                </Select>
+              </div>
               <div>
-                <Label>Plan (blank = 14-day trial)</Label>
-                <Select value={form.planId} onChange={(e) => set("planId", e.target.value)}>
+                <Label>Plan (blank = trial)</Label>
+                <Select
+                  value={form.planId}
+                  onChange={(e) => {
+                    const id = e.target.value;
+                    set("planId", id);
+                    // Reset cycle to the first one this plan is priced for.
+                    const p = plans.find((x) => x.id === id);
+                    if (p) setBillingCycle(p.monthly_price > 0 ? "monthly" : "yearly");
+                    setOverrideExpiry(false);
+                  }}
+                >
                   <option value="">Trial</option>
                   {plans.map((p) => (
                     <option key={p.id} value={p.id}>{p.name}</option>
                   ))}
                 </Select>
               </div>
-              <div>
-                <Label>Expiry date</Label>
-                <Input type="date" value={form.expiryDate} onChange={(e) => set("expiryDate", e.target.value)} />
+
+              {/* Billing cycle — only for a paid plan, only cycles it's priced for */}
+              {selectedPlan && availableCycles.length > 0 && (
+                <div>
+                  <Label>Billing cycle</Label>
+                  <Select
+                    value={availableCycles.includes(billingCycle) ? billingCycle : availableCycles[0]}
+                    onChange={(e) => setBillingCycle(e.target.value as "monthly" | "yearly")}
+                  >
+                    {availableCycles.includes("monthly") && (
+                      <option value="monthly">Monthly — ₹{selectedPlan.monthly_price}</option>
+                    )}
+                    {availableCycles.includes("yearly") && (
+                      <option value="yearly">Yearly — ₹{selectedPlan.yearly_price}</option>
+                    )}
+                  </Select>
+                </div>
+              )}
+
+              {/* Expiry — auto-computed, read-only, with an override toggle */}
+              <div className="col-span-2">
+                <div className="flex items-center justify-between">
+                  <Label>
+                    {selectedPlan && availableCycles.length ? "Expiry (auto from cycle)" : "Trial expiry (auto)"}
+                  </Label>
+                  <label className="flex items-center gap-1.5 text-xs text-zinc-500">
+                    <input
+                      type="checkbox"
+                      checked={overrideExpiry}
+                      onChange={(e) => {
+                        setOverrideExpiry(e.target.checked);
+                        if (e.target.checked && !form.expiryDate) set("expiryDate", computedExpiry());
+                      }}
+                    />
+                    Set a custom date
+                  </label>
+                </div>
+                {overrideExpiry ? (
+                  <Input type="date" value={form.expiryDate} onChange={(e) => set("expiryDate", e.target.value)} />
+                ) : (
+                  <Input type="date" value={effectiveExpiry} readOnly className="bg-zinc-50 text-zinc-500" />
+                )}
               </div>
             </div>
+            )}
             {error && <p className="text-sm text-red-600">{error}</p>}
             <Button type="submit" disabled={busy}>
               {busy ? "Creating…" : "Create client"}
