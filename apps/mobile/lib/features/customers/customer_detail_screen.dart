@@ -7,6 +7,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/walkthrough.dart';
 import '../../core/widgets.dart';
+import 'customer_prices_section.dart';
 import 'customer_providers.dart';
 import 'customers_screen.dart';
 
@@ -269,6 +270,15 @@ class CustomerDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ],
+                if (c['is_wholesale'] == true)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      'Wholesale customer — wholesale prices from the first unit',
+                      style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                    ),
+                  ),
+                CustomerPricesSection(customerId: customerId),
                 const SectionLabel('Ledger'),
                 if (entries.isEmpty)
                   const EmptyState(

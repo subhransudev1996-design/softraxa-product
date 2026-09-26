@@ -39,6 +39,11 @@ Future<Map<String, dynamic>?> showCustomerForm(
   var state = existing?['state_code'] as String? ?? '';
   // Existing rows carry the flag; a new customer starts on the store default.
   var unlimited = existing?['credit_unlimited'] == true;
+  // Wholesale customers get wholesale prices from the first unit (PD05);
+  // changing it needs the price permission (0043).
+  var wholesale = existing?['is_wholesale'] == true;
+  final canEditPrices =
+      ref.read(appContextProvider).value?.canEditPrices ?? false;
   // Credit limits are owner-only (PD17; enforced by guard_party_columns).
   final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
 
@@ -88,6 +93,14 @@ Future<Map<String, dynamic>?> showCustomerForm(
                 onChanged: (v) => setState(() => state = v),
               ),
               const SizedBox(height: 4),
+              if (canEditPrices)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Wholesale customer'),
+                  subtitle: const Text('Wholesale prices from the first unit'),
+                  value: wholesale,
+                  onChanged: (v) => setState(() => wholesale = v),
+                ),
               if (isOwner)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
@@ -135,6 +148,7 @@ Future<Map<String, dynamic>?> showCustomerForm(
     'address': address.text.trim(),
     'gst_number': gst.text.trim().toUpperCase(),
     'state_code': state,
+    if (canEditPrices) 'is_wholesale': wholesale,
     if (isOwner) ...{
       'credit_unlimited': unlimited,
       'credit_limit': unlimited || creditLimit.text.trim().isEmpty

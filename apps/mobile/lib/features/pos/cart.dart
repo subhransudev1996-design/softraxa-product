@@ -33,6 +33,9 @@ class CartLine {
     this.wholesaleMinQty,
     this.retailPrice,
     this.pieceId,
+    this.customerPrice,
+    this.wholesaleCustomer = false,
+    this.priceIsDefault = true,
   });
 
   final String key; // productId:variantId
@@ -62,6 +65,62 @@ class CartLine {
   /// see stock_pieces (migration 0021). Auxiliary: not sent to the server;
   /// used for the best-effort piece-length update after checkout.
   final String? pieceId;
+
+  /// The selected customer's agreed price for this item (migration 0043).
+  double? customerPrice;
+
+  /// The selected customer buys at wholesale prices (PD05).
+  bool wholesaleCustomer;
+
+  /// False once someone changed the price by hand — then quantity or
+  /// customer changes no longer reprice the line.
+  bool priceIsDefault;
+
+  bool get _wholesaleApplies =>
+      (wholesalePrice ?? 0) > 0 &&
+      (wholesaleCustomer ||
+          (wholesaleMinQty != null && qty >= wholesaleMinQty!));
+
+  /// Default price (D15): customer's agreed price → wholesale (customer or
+  /// quantity tier) → retail. Null for items without a catalogue price.
+  double? get defaultPrice {
+    if (customerPrice != null) return customerPrice;
+    if (_wholesaleApplies) return wholesalePrice;
+    return (retailPrice ?? 0) > 0 ? retailPrice : null;
+  }
+
+  /// Which price the line is charged at, as recorded on the bill.
+  String get priceSource {
+    bool at(double? p) => p != null && (price - p).abs() < 0.005;
+    final def = defaultPrice;
+    if (def == null) return 'manual';
+    if (at(def)) {
+      return customerPrice != null
+          ? 'customer'
+          : _wholesaleApplies
+          ? 'wholesale'
+          : 'retail';
+    }
+    if (at(customerPrice)) return 'customer';
+    if (at(wholesalePrice)) return 'wholesale';
+    if (at(retailPrice)) return 'retail';
+    return 'negotiated';
+  }
+
+  /// The prices this line may be charged at, for picking one by hand.
+  List<(String source, double price)> get priceOptions => [
+    if (customerPrice != null) ('customer', customerPrice!),
+    if ((wholesalePrice ?? 0) > 0) ('wholesale', wholesalePrice!),
+    if ((retailPrice ?? 0) > 0) ('retail', retailPrice!),
+  ];
+
+  /// Amount this line is charged below its default price (0 if none).
+  double get reductionFromDefault {
+    final def = defaultPrice;
+    if (def == null) return 0;
+    final r = qty * def - gross;
+    return r > 0 ? r : 0;
+  }
 
   /// Resolved ₹ discount, whichever unit [discount] was entered in.
   double get discountAmount =>
@@ -93,8 +152,20 @@ class CartLine {
     wholesaleMinQty: wholesaleMinQty,
     retailPrice: retailPrice,
     pieceId: pieceId,
+    customerPrice: customerPrice,
+    wholesaleCustomer: wholesaleCustomer,
+    priceIsDefault: priceIsDefault,
   );
 }
+
+/// Human label for a price source.
+String priceSourceLabel(String source) => switch (source) {
+  'customer' => 'Customer price',
+  'wholesale' => 'Wholesale',
+  'retail' => 'Retail',
+  'negotiated' => 'Negotiated',
+  _ => 'Manual',
+};
 
 class CartState {
   const CartState({
@@ -103,10 +174,28 @@ class CartState {
     this.billDiscount = 0,
     this.billDiscountIsPercent = false,
     this.applyGst = true,
+    this.customerPrices = const {},
+    this.wholesaleCustomer = false,
   });
 
   final List<CartLine> lines;
   final Map<String, dynamic>? customer;
+
+  /// The selected customer's agreed prices, keyed "productId:variantId".
+  final Map<String, double> customerPrices;
+  final bool wholesaleCustomer;
+
+  /// What the bill would come to at default prices, and how far below that
+  /// it is — price changes, line and bill discounts together (PD07).
+  double get defaultTotal =>
+      lines.fold(0.0, (s, l) => s + l.qty * (l.defaultPrice ?? l.price));
+  double get priceReduction {
+    final r = defaultTotal - grandBeforeRound;
+    return r > 0.005 ? r : 0;
+  }
+
+  double get priceReductionPct =>
+      defaultTotal > 0 ? priceReduction / defaultTotal * 100 : 0;
   final double
   billDiscount; // a ₹ amount, or a 0-100 percent if billDiscountIsPercent
   final bool billDiscountIsPercent;
@@ -153,6 +242,8 @@ class CartState {
     double? billDiscount,
     bool? billDiscountIsPercent,
     bool? applyGst,
+    Map<String, double>? customerPrices,
+    bool? wholesaleCustomer,
   }) => CartState(
     lines: lines ?? this.lines,
     customer: customer == _sentinel
@@ -161,6 +252,8 @@ class CartState {
     billDiscount: billDiscount ?? this.billDiscount,
     billDiscountIsPercent: billDiscountIsPercent ?? this.billDiscountIsPercent,
     applyGst: applyGst ?? this.applyGst,
+    customerPrices: customerPrices ?? this.customerPrices,
+    wholesaleCustomer: wholesaleCustomer ?? this.wholesaleCustomer,
   );
 
   static const _sentinel = Object();
@@ -252,6 +345,8 @@ class CartNotifier extends Notifier<CartState> {
       unitName: (product['units'] as Map?)?['short_name'] as String? ?? '',
       price: retail,
       retailPrice: retail,
+      customerPrice: state.customerPrices[key],
+      wholesaleCustomer: state.wholesaleCustomer,
       gstRate: toDouble(product['gst_rate']),
       costPrice: toDouble(
         variant?['purchase_price'] ?? product['purchase_price'],
@@ -266,6 +361,7 @@ class CartNotifier extends Notifier<CartState> {
       wholesalePrice: (product['wholesale_price'] as num?)?.toDouble(),
       wholesaleMinQty: (product['wholesale_min_qty'] as num?)?.toDouble(),
     );
+    line.price = line.defaultPrice ?? retail;
     state = state.copyWith(lines: [...state.lines, line]);
   }
 
@@ -276,21 +372,35 @@ class CartNotifier extends Notifier<CartState> {
     }
     _update(line, (l) {
       l.qty = newQty;
-      // Auto wholesale pricing (hardware shops)
-      if (l.wholesalePrice != null &&
-          l.wholesaleMinQty != null &&
-          l.retailPrice != null) {
-        if (newQty >= l.wholesaleMinQty! && l.price == l.retailPrice) {
-          l.price = l.wholesalePrice!;
-        } else if (newQty < l.wholesaleMinQty! && l.price == l.wholesalePrice) {
-          l.price = l.retailPrice!;
-        }
-      }
+      // Quantity tiers (wholesale from N units) follow the quantity unless
+      // the price was set by hand.
+      if (l.priceIsDefault && l.defaultPrice != null) l.price = l.defaultPrice!;
     });
   }
 
-  void changePrice(CartLine line, double newPrice) =>
-      _update(line, (l) => l.price = newPrice);
+  void changePrice(CartLine line, double newPrice) => _update(line, (l) {
+    l.price = newPrice;
+    final def = l.defaultPrice;
+    l.priceIsDefault = def != null && (newPrice - def).abs() < 0.005;
+  });
+
+  /// Applies the selected customer's agreed prices and wholesale status to
+  /// every line and to lines added later (D15). Lines whose price was set
+  /// by hand keep it.
+  void applyCustomerPricing(Map<String, double> prices, {required bool wholesale}) {
+    state = state.copyWith(
+      customerPrices: prices,
+      wholesaleCustomer: wholesale,
+      lines: [
+        for (final l in state.lines)
+          l.copy()..also((c) {
+            c.customerPrice = prices['${c.productId}:${c.variantId ?? ''}'];
+            c.wholesaleCustomer = wholesale;
+            if (c.priceIsDefault && c.defaultPrice != null) c.price = c.defaultPrice!;
+          }),
+      ],
+    );
+  }
 
   void changeDiscount(CartLine line, double discount) =>
       _update(line, (l) => l.discount = discount);
@@ -431,6 +541,10 @@ CartLine _invoiceItemToCartLine(Map<String, dynamic> it) {
     availableStock: toDouble(
       (variantId != null ? variant : product)?['current_stock'],
     ),
+    // The default price recorded on the bill (0043), so the editor can show
+    // how far below default the bill is; an edit keeps the charged price.
+    retailPrice: (it['list_price'] as num?)?.toDouble(),
+    priceIsDefault: false,
   );
 }
 

@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 
 import '../customers/customer_providers.dart';
 import '../pos/cart.dart';
+import '../pos/pos_providers.dart';
 import '../purchases/purchase_providers.dart';
 import 'exchange.dart';
 import '../suppliers/suppliers.dart';
@@ -972,7 +973,9 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       ),
     );
     ref.read(editingInvoiceProvider.notifier).set(null);
-    ref.read(cartProvider.notifier).replaceAll(CartState(customer: customer));
+    ref.read(cartProvider.notifier).replaceAll(const CartState());
+    await setCartCustomer(ref, customer); // their agreed prices apply (0043)
+    if (!mounted) return;
     context.push('/sale-returns/exchange');
   }
 

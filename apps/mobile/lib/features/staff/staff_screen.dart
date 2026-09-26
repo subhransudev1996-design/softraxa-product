@@ -537,6 +537,7 @@ class _EditPermissionsDialog extends ConsumerStatefulWidget {
 
 class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> {
   late final Map<String, bool> _perms;
+  late final TextEditingController _limit;
   bool _busy = false;
 
   @override
@@ -547,15 +548,35 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
       for (final perm in staffPermissions)
         perm.key: (p[perm.key] as bool?) ?? perm.byDefault,
     };
+    // PD07/PD08: percent of the bill's default total; new staff start at 0.
+    _limit = TextEditingController(
+      text: '${(p['discount_limit_pct'] as num?)?.toDouble() ?? 0}'
+          .replaceAll(RegExp(r'\.0$'), ''),
+    );
+  }
+
+  @override
+  void dispose() {
+    _limit.dispose();
+    super.dispose();
   }
 
   Future<void> _save() async {
+    final limit = double.tryParse(_limit.text.trim()) ?? 0;
+    if (limit < 0 || limit > 100) {
+      showError(context, 'The discount limit must be between 0 and 100%');
+      return;
+    }
     setState(() => _busy = true);
     try {
       final client = ref.read(supabaseProvider);
       await client.rpc('update_staff_permissions', params: {
         'p_profile_id': widget.staff['id'],
         'p_permissions': _perms,
+      });
+      await client.rpc('set_staff_discount_limit', params: {
+        'p_profile': widget.staff['id'],
+        'p_pct': _perms['can_edit_prices'] == true ? limit : 0,
       });
 
       if (mounted) {
@@ -576,9 +597,29 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
     return AlertDialog(
       title: Text('Edit Permissions (${widget.staff['full_name']})'),
       content: SingleChildScrollView(
-        child: _PermissionChecklist(
-          values: _perms,
-          onChanged: (k, v) => setState(() => _perms[k] = v),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _PermissionChecklist(
+              values: _perms,
+              onChanged: (k, v) => setState(() => _perms[k] = v),
+            ),
+            if (_perms['can_edit_prices'] == true)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: TextField(
+                  controller: _limit,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: const InputDecoration(
+                    labelText: 'Discount limit %',
+                    helperText:
+                        'Most a bill may go below the default prices — price changes, '
+                        'line and bill discounts together',
+                    helperMaxLines: 2,
+                  ),
+                ),
+              ),
+          ],
         ),
       ),
       actions: [

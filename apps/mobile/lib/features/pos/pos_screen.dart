@@ -528,10 +528,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     );
     final serial = TextEditingController(text: line.serialNo);
     var discountIsPercent = line.discountIsPercent;
-    // The server rejects below-list prices and discounts without this
-    // permission (migration 0037 check_line_price), so don't offer them.
+    // The server rejects prices below the default and discounts without
+    // this permission, or beyond the staff member's limit (migration 0043),
+    // so don't offer them.
     final canEditPrices =
         ref.read(appContextProvider).value?.canEditPrices ?? false;
+    final options = line.priceOptions;
 
     final saved = await showDialog<bool>(
       context: context,
@@ -563,12 +565,35 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         ),
                         decoration: InputDecoration(
                           labelText: 'Price ₹',
-                          helperText: canEditPrices ? null : 'Owner sets prices',
+                          helperText: canEditPrices
+                              ? priceSourceLabel(line.priceSource)
+                              : 'Owner sets prices',
                         ),
+                        onChanged: (_) => setDialogState(() {}),
                       ),
                     ),
                   ],
                 ),
+                // D15: the default is picked automatically; an authorised
+                // user may choose another applicable price.
+                if (canEditPrices && options.length > 1) ...[
+                  const SizedBox(height: 10),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final (source, p) in options)
+                        ChoiceChip(
+                          label: Text('${priceSourceLabel(source)} ${money(p)}'),
+                          selected:
+                              (double.tryParse(price.text) ?? -1) == p,
+                          onSelected: (_) => setDialogState(
+                            () => price.text = p.toStringAsFixed(2),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
                 if (canEditPrices) ...[
                   const SizedBox(height: 12),
                   AmountOrPercentField(
@@ -620,7 +645,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         .read(cartProvider)
         .lines
         .firstWhere((l) => l.key == line.key, orElse: () => line);
-    notifier.changePrice(updated, double.tryParse(price.text) ?? line.price);
+    // Only a price typed or picked here counts as a manual price; otherwise
+    // keep the (possibly re-tiered) default after a quantity change.
+    final typed = double.tryParse(price.text);
+    if (typed != null && (typed - line.price).abs() >= 0.005) {
+      notifier.changePrice(updated, typed);
+    }
     notifier.changeDiscount(updated, double.tryParse(discount.text) ?? 0);
     notifier.changeDiscountMode(updated, discountIsPercent);
     if (line.trackSerial) notifier.changeSerial(updated, serial.text.trim());
@@ -803,14 +833,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   // Editing an existing bill never changes who it was billed
                   // to (update_invoice doesn't touch customer_id) — the
                   // customer here is just shown for context, not editable.
-                  onTap: editing != null
+                  onTap: editing != null || exchange != null
                       ? null
                       : () async {
                           final customer = await showCustomerPicker(context);
                           if (customer != null) {
-                            ref
-                                .read(cartProvider.notifier)
-                                .setCustomer(customer);
+                            await setCartCustomer(ref, customer);
                           }
                         },
                   child: Container(
@@ -859,9 +887,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         else if (cart.customer != null)
                           IconButton(
                             icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => ref
-                                .read(cartProvider.notifier)
-                                .setCustomer(null),
+                            onPressed: () => setCartCustomer(ref, null),
                           )
                         else
                           Icon(
@@ -980,7 +1006,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}',
+                                          '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}'
+                                          '${line.priceSource == 'retail' || line.priceSource == 'manual' ? '' : '  • ${priceSourceLabel(line.priceSource)}'}',
                                           style: TextStyle(
                                             fontSize: 12,
                                             color: AppColors.inkSoft,

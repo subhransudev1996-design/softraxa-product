@@ -16,6 +16,7 @@ import '../offline/offline_service.dart';
 import '../stock/piece_providers.dart';
 import 'billing_service.dart';
 import 'cart.dart';
+import 'pos_providers.dart';
 import '../../core/theme.dart';
 
 Future<void> showCheckoutSheet(BuildContext context) {
@@ -177,6 +178,16 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         for (final e in resolved.realPayments) {'mode': e.$1, 'amount': e.$2},
       ];
       paymentModeToSend = resolved.mode;
+    }
+    // D16/PD07: staff stay within their discount limit (the server enforces
+    // the same rule; this just says so before saving).
+    if (_docType != 'estimate') {
+      final rights = await ref.read(pricingRightsProvider.future);
+      final problem = pricingProblem(cart, rights);
+      if (problem != null) {
+        if (mounted) showError(context, problem);
+        return;
+      }
     }
     final paid = _computePaid(cart);
     if (!mounted) return;
@@ -577,9 +588,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                           onPressed: () async {
                             final picked = await showCustomerPicker(context);
                             if (picked != null) {
-                              ref
-                                  .read(cartProvider.notifier)
-                                  .setCustomer(picked);
+                              await setCartCustomer(ref, picked);
                             }
                           },
                           child: Text(
@@ -588,9 +597,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         ),
                         if (cart.customer != null)
                           TextButton(
-                            onPressed: () => ref
-                                .read(cartProvider.notifier)
-                                .setCustomer(null),
+                            onPressed: () => setCartCustomer(ref, null),
                             style: TextButton.styleFrom(
                               foregroundColor: AppColors.inkSoft,
                             ),
@@ -642,6 +649,20 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                           ),
                         ),
                       ),
+                    ),
+                  if (cart.priceReduction > 0.05)
+                    Builder(
+                      builder: (context) {
+                        final rights = ref.watch(pricingRightsProvider).value;
+                        final over = rights != null && pricingProblem(cart, rights) != null;
+                        return _row(
+                          'Below default prices',
+                          '${money(cart.priceReduction)} (${qty(cart.priceReductionPct)}%)'
+                          '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
+                          dim: !over,
+                          color: over ? AppColors.red : null,
+                        );
+                      },
                     ),
                   const Divider(height: 20),
                   _row('Round off', money(cart.roundOff), dim: true),
