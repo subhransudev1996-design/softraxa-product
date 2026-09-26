@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'approvals.dart';
 import 'formatters.dart';
 import 'theme.dart';
 
@@ -161,6 +162,13 @@ String friendlyError(Object e) {
   final s = e.toString();
   if (s.contains('SocketException') || s.contains('Failed host lookup')) {
     return 'No internet connection. Please check your network.';
+  }
+  // Owner approval needed (migration 0044) — the message carries a JSON list.
+  final approval = approvalExceptions(e);
+  if (approval != null) {
+    return approval.isEmpty
+        ? 'This sale needs the owner\'s approval.'
+        : 'Needs the owner\'s approval — ${approvalSummary(approval)}';
   }
   // Surface PostgREST / RPC exception messages cleanly
   final match = RegExp(r'message:? ?([^,}]+)').firstMatch(s);

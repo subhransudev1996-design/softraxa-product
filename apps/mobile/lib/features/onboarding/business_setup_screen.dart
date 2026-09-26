@@ -57,6 +57,13 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   late final _returnWindow = TextEditingController(
     text: '${(widget.existing?['return_window_days'] as num?)?.toInt() ?? 30}',
   );
+  // PD19/PD20: due date = bill date + terms; overdue after the grace days.
+  late final _terms = TextEditingController(
+    text: '${(widget.existing?['payment_terms_days'] as num?)?.toInt() ?? 30}',
+  );
+  late final _grace = TextEditingController(
+    text: '${(widget.existing?['overdue_grace_days'] as num?)?.toInt() ?? 0}',
+  );
   late String _type = widget.existing?['business_type'] ?? 'mobile';
   late String _taxPref = widget.existing?['tax_preference'] ?? 'gst';
   XFile? _logo;
@@ -105,6 +112,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'state_code': _state,
         'default_credit_limit': double.tryParse(_defaultCredit.text) ?? 0,
         'return_window_days': int.tryParse(_returnWindow.text.trim()) ?? 30,
+        'payment_terms_days': int.tryParse(_terms.text.trim()) ?? 30,
+        'overdue_grace_days': int.tryParse(_grace.text.trim()) ?? 0,
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -304,6 +313,40 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   final n = int.tryParse((v ?? '').trim());
                   return n == null || n < 0 || n > 3650 ? 'Enter 0–3650 days' : null;
                 },
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _terms,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Payment terms (days)',
+                        helperText: 'Credit bills are due after this',
+                      ),
+                      validator: (v) {
+                        final n = int.tryParse((v ?? '').trim());
+                        return n == null || n < 0 || n > 365 ? '0–365' : null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _grace,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Grace days',
+                        helperText: 'Before a bill counts as overdue',
+                      ),
+                      validator: (v) {
+                        final n = int.tryParse((v ?? '').trim());
+                        return n == null || n < 0 || n > 365 ? '0–365' : null;
+                      },
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
               TextFormField(

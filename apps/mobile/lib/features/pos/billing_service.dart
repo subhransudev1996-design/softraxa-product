@@ -30,18 +30,22 @@ class BillingService {
     required String paymentMode,
     List<Map<String, dynamic>>? payments,
     String notes = '',
+    Map<String, dynamic> extra = const {},
   }) async {
     final localId = const Uuid().v4();
-    final payload = buildInvoicePayload(
-      cart: cart,
-      invoiceType: invoiceType,
-      paidAmount: paidAmount,
-      paymentMode: paymentMode,
-      payments: payments,
-      notes: notes,
-      localId: localId,
-      invoiceDate: DateTime.now(),
-    );
+    final payload = {
+      ...buildInvoicePayload(
+        cart: cart,
+        invoiceType: invoiceType,
+        paidAmount: paidAmount,
+        paymentMode: paymentMode,
+        payments: payments,
+        notes: notes,
+        localId: localId,
+        invoiceDate: DateTime.now(),
+      ),
+      ...extra, // e.g. owner_ack (migration 0044)
+    };
 
     try {
       final res =
@@ -88,14 +92,18 @@ class BillingService {
     required CartState cart,
     required String invoiceType,
     String notes = '',
+    Map<String, dynamic> extra = const {},
   }) async {
-    final payload = buildInvoicePayload(
-      cart: cart,
-      invoiceType: invoiceType,
-      paidAmount: 0,
-      paymentMode: 'cash',
-      notes: notes,
-    );
+    final payload = {
+      ...buildInvoicePayload(
+        cart: cart,
+        invoiceType: invoiceType,
+        paidAmount: 0,
+        paymentMode: 'cash',
+        notes: notes,
+      ),
+      ...extra,
+    };
     final res =
         await _ref
                 .read(supabaseProvider)
@@ -108,6 +116,33 @@ class BillingService {
     return BillResult(
       invoiceNo: res['invoice_no'] as String,
       invoiceId: invoiceId,
+    );
+  }
+
+  /// D18/D19: keep a sale that needs the owner as a pending request on the
+  /// server (request_sale_approval, migration 0044). Nothing is sold yet.
+  Future<Map<String, dynamic>> requestApproval({
+    required CartState cart,
+    required String invoiceType,
+    required double paidAmount,
+    required String paymentMode,
+    List<Map<String, dynamic>>? payments,
+    String notes = '',
+    String reason = '',
+  }) async {
+    final payload = buildInvoicePayload(
+      cart: cart,
+      invoiceType: invoiceType,
+      paidAmount: paidAmount,
+      paymentMode: paymentMode,
+      payments: payments,
+      notes: notes,
+    );
+    return Map<String, dynamic>.from(
+      await _ref.read(supabaseProvider).rpc(
+        'request_sale_approval',
+        params: {'payload': payload, 'p_reason': reason},
+      ) as Map,
     );
   }
 }

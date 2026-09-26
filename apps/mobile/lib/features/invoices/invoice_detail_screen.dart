@@ -392,6 +392,38 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           fontSize: 13,
                         ),
                       ),
+                      // PD19/PD20: when the unpaid amount is due.
+                      if (due > 0 && inv['due_date'] != null && !cancelled)
+                        Builder(
+                          builder: (context) {
+                            final dueDate = DateTime.tryParse('${inv['due_date']}');
+                            final late = dueDate != null &&
+                                dueDate.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+                            return Text(
+                              '${late ? 'Overdue since' : 'Due by'} ${dateStr(inv['due_date'])}',
+                              style: TextStyle(
+                                color: late ? AppColors.red : AppColors.inkSoft,
+                                fontSize: 13,
+                                fontWeight: late ? FontWeight.w700 : FontWeight.normal,
+                              ),
+                            );
+                          },
+                        ),
+                      // Migration 0044: how a rule exception on this sale was cleared.
+                      if ((inv['exception_status'] as String? ?? '').isNotEmpty)
+                        Text(
+                          switch (inv['exception_status']) {
+                            'approved' => 'Approved by the owner',
+                            'acknowledged' => 'Owner acknowledged the warnings',
+                            'flagged' => 'Billed offline — flagged for owner review',
+                            _ => '${inv['exception_status']}',
+                          },
+                          style: const TextStyle(
+                            color: AppColors.orange,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       if (isGst)
                         InkWell(
                           onTap: cancelled

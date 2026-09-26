@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'route_permissions.dart';
+import '../features/approvals/approvals_screen.dart';
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
@@ -458,6 +459,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/staff',
             pageBuilder: (context, state) =>
                 _page(context, state, const StaffScreen()),
+          ),
+          GoRoute(
+            path: '/approvals',
+            pageBuilder: (context, state) =>
+                _page(context, state, const ApprovalsScreen()),
           ),
           GoRoute(
             path: '/subscription/plans',

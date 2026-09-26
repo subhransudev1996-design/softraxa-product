@@ -8,6 +8,9 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../../core/approvals.dart';
+import '../approvals/approval_dialogs.dart';
+import '../approvals/approvals_screen.dart';
 import '../customers/customer_providers.dart';
 import '../invoices/advance_actions.dart';
 import '../returns/exchange.dart';
@@ -143,7 +146,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     );
   }
 
-  Future<void> _createBill() async {
+  /// [extra] is merged into the create_invoice payload — `owner_ack` when
+  /// the owner acknowledged the sale's exceptions (migration 0044).
+  Future<void> _createBill({Map<String, dynamic> extra = const {}}) async {
     final cart = ref.read(cartProvider);
     if (cart.lines.isEmpty) return;
 
@@ -179,12 +184,13 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       ];
       paymentModeToSend = resolved.mode;
     }
-    // D16/PD07: staff stay within their discount limit (the server enforces
-    // the same rule; this just says so before saving).
+    // D15: staff without price permission can't go below the default
+    // price at all. Beyond a staff discount limit the sale goes to the
+    // owner for approval instead (PD10) — the server says so below.
     if (_docType != 'estimate') {
       final rights = await ref.read(pricingRightsProvider.future);
       final problem = pricingProblem(cart, rights);
-      if (problem != null) {
+      if (problem != null && !rights.canEditPrices) {
         if (mounted) showError(context, problem);
         return;
       }
@@ -202,24 +208,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       return;
     }
 
+    // Credit limit, overdue bills, below-cost and over-limit discounts are
+    // checked by the server; it answers APPROVAL_REQUIRED (handled below).
     final newDue = (payable - paid).clamp(0, double.infinity);
-    final creditLimit = cart.customer?['credit_limit'] == null
-        ? null
-        : toDouble(cart.customer!['credit_limit']);
-    if (creditLimit != null && _docType != 'estimate') {
-      final projectedDue = toDouble(cart.customer?['due_amount']) + newDue;
-      if (projectedDue > creditLimit) {
-        final proceed = await confirmDialog(
-          context,
-          title: 'Credit limit exceeded',
-          message:
-              '${cart.customer?['name']}\'s due would become ${money(projectedDue)}, '
-              'above their credit limit of ${money(creditLimit)}. Continue anyway?',
-          confirmText: 'Continue',
-        );
-        if (!proceed) return;
-      }
-    }
 
     final exchange = _exchange;
     if (exchange != null) {
@@ -229,6 +220,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         paid: paid,
         paymentMode: paymentModeToSend,
         payments: splitPayments,
+        extra: extra,
       );
       return;
     }
@@ -244,6 +236,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             paymentMode: paymentModeToSend,
             payments: _docType == 'estimate' ? null : splitPayments,
             notes: _notes.text.trim(),
+            extra: extra,
           );
       // Shorten the cut pieces these lines came from (rod/sheet stores) —
       // strictly best-effort auxiliary bookkeeping: a failure here must
@@ -297,6 +290,62 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         context.push('/invoices/${result.invoiceId}?new=1');
       }
     } catch (e) {
+      final exceptions = approvalExceptions(e);
+      if (exceptions != null && extra.isEmpty && mounted) {
+        setState(() => _busy = false);
+        await _needsApproval(
+          exceptions,
+          cart,
+          paid: paid,
+          paymentMode: paymentModeToSend,
+          payments: splitPayments,
+        );
+        return;
+      }
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// D17–D19: the owner acknowledges and bills; staff send the sale to the
+  /// owner as a pending request (nothing sold until approved).
+  Future<void> _needsApproval(
+    List<Map<String, dynamic>> exceptions,
+    CartState cart, {
+    required double paid,
+    required String paymentMode,
+    List<Map<String, dynamic>>? payments,
+  }) async {
+    final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
+    if (isOwner) {
+      if (await showOwnerAcknowledge(context, exceptions) && mounted) {
+        await _createBill(extra: const {'owner_ack': true});
+      }
+      return;
+    }
+    final reason = await showRequestApproval(context, exceptions);
+    if (reason == null || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      await ref.read(billingServiceProvider).requestApproval(
+        cart: cart,
+        invoiceType: _docType,
+        paidAmount: paid,
+        paymentMode: paymentMode,
+        payments: payments,
+        notes: _notes.text.trim(),
+        reason: reason,
+      );
+      ref.read(cartProvider.notifier).clear();
+      ref.invalidate(myApprovalsProvider);
+      if (!mounted) return;
+      Navigator.pop(context); // close sheet
+      showSuccess(
+        context,
+        'Sent to the owner. Complete the sale from Approvals once it is approved.',
+      );
+    } catch (e) {
       if (mounted) showError(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -312,17 +361,21 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     required double paid,
     required String paymentMode,
     List<Map<String, dynamic>>? payments,
+    Map<String, dynamic> extra = const {},
   }) async {
     setState(() => _busy = true);
     try {
-      final sale = buildInvoicePayload(
-        cart: cart,
-        invoiceType: _docType,
-        paidAmount: paid,
-        paymentMode: paymentMode,
-        payments: payments,
-        notes: _notes.text.trim(),
-      );
+      final sale = {
+        ...buildInvoicePayload(
+          cart: cart,
+          invoiceType: _docType,
+          paidAmount: paid,
+          paymentMode: paymentMode,
+          payments: payments,
+          notes: _notes.text.trim(),
+        ),
+        ...extra,
+      };
       final res = Map<String, dynamic>.from(
         await ref.read(supabaseProvider).rpc(
           'create_exchange',
@@ -348,6 +401,19 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       showSuccess(context, exchangeSummary(res));
       context.go('/invoices/${res['invoice_id']}?new=1');
     } catch (e) {
+      // An exchange can't wait for approval at launch: the owner
+      // acknowledges; staff are told to ask the owner.
+      final exceptions = approvalExceptions(e);
+      final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
+      if (exceptions != null && isOwner && extra.isEmpty && mounted) {
+        setState(() => _busy = false);
+        if (await showOwnerAcknowledge(context, exceptions) && mounted) {
+          await _createExchange(cart, exchange,
+              paid: paid, paymentMode: paymentMode, payments: payments,
+              extra: const {'owner_ack': true});
+        }
+        return;
+      }
       if (mounted) showError(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -356,7 +422,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
 
   /// Saves edits to an existing invoice via `update_invoice` — payments
   /// already recorded are left untouched, only items/discount/notes change.
-  Future<void> _saveEdit(EditingInvoice editing) async {
+  Future<void> _saveEdit(
+    EditingInvoice editing, {
+    Map<String, dynamic> extra = const {},
+  }) async {
     final cart = ref.read(cartProvider);
     if (cart.lines.isEmpty) {
       showError(context, 'Add at least one item to the bill');
@@ -385,6 +454,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             cart: cart,
             invoiceType: editing.invoiceType,
             notes: _notes.text.trim(),
+            extra: extra,
           );
       ref.read(cartProvider.notifier).clear();
       ref.read(editingInvoiceProvider.notifier).set(null);
@@ -397,6 +467,17 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       Navigator.pop(context); // close sheet
       if (context.mounted) context.pop(); // back to invoice detail
     } catch (e) {
+      // Edits can't wait for approval at launch (0044): the owner
+      // acknowledges; staff are told the owner must make this change.
+      final exceptions = approvalExceptions(e);
+      final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
+      if (exceptions != null && isOwner && extra.isEmpty && mounted) {
+        setState(() => _busy = false);
+        if (await showOwnerAcknowledge(context, exceptions) && mounted) {
+          await _saveEdit(editing, extra: const {'owner_ack': true});
+        }
+        return;
+      }
       if (mounted) showError(context, e);
     } finally {
       if (mounted) setState(() => _busy = false);

@@ -7,6 +7,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import '../approvals/approvals_screen.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -100,6 +101,23 @@ class MoreScreen extends ConsumerWidget {
                   '/sale-returns',
                   color: AppColors.orange,
                   enabled: appContext?.canManageReturns ?? false,
+                ),
+                const Divider(),
+                // D18: the owner's approval inbox; staff see their requests.
+                Builder(
+                  builder: (context) {
+                    final isOwner = appContext?.isOwner ?? false;
+                    final pending = ref.watch(pendingApprovalCountProvider).value ?? 0;
+                    return tile(
+                      Icons.verified_user_outlined,
+                      isOwner ? 'Approvals' : 'My approval requests',
+                      '/approvals',
+                      color: pending > 0 ? AppColors.red : AppColors.teal,
+                      subtitle: isOwner
+                          ? (pending > 0 ? '$pending waiting for you' : 'Sales that need your OK')
+                          : 'Sales waiting for the owner',
+                    );
+                  },
                 ),
                 const Divider(),
                 tile(
