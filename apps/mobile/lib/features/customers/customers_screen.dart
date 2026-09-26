@@ -12,6 +12,7 @@ import '../../core/widgets.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../invoices/invoice_providers.dart';
 import 'customer_providers.dart';
+import 'receive_payment_dialog.dart';
 import '../../core/theme.dart';
 
 /// Add/edit customer dialog shared by the list and detail screens.
@@ -170,41 +171,67 @@ Future<Map<String, dynamic>?> showCustomerForm(
   }
 }
 
-/// "Receive due payment" dialog — shared by the customer detail screen and
-/// the desktop card's quick action, so there's one payment-recording path.
+/// "Receive payment" — shared by the customer detail screen and the desktop
+/// card's quick action, so there's one payment-recording path. Oldest bills
+/// first or chosen bills; any excess becomes an advance (migration 0041).
 Future<void> showRecordCustomerPayment(
   BuildContext context,
   WidgetRef ref, {
   required String customerId,
   required double due,
 }) async {
-  final amount = TextEditingController(
-    text: due > 0 ? due.toStringAsFixed(2) : '',
+  final request = await showDialog<PaymentRequest>(
+    context: context,
+    builder: (_) => ReceivePaymentDialog(customerId: customerId, due: due),
   );
+  if (request == null) return;
+  try {
+    await ref
+        .read(supabaseProvider)
+        .rpc('record_customer_payment', params: request.toParams(customerId));
+    _refreshCustomerMoney(ref, customerId);
+    if (context.mounted) showSuccess(context, 'Payment recorded');
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
+}
+
+/// Everything that shows a customer's balances or bills.
+void _refreshCustomerMoney(WidgetRef ref, String customerId) {
+  ref.invalidate(customerLedgerProvider(customerId));
+  ref.invalidate(customersProvider);
+  ref.invalidate(dashboardStatsProvider);
+  ref.invalidate(invoicesProvider);
+  ref.invalidate(recentInvoicesProvider);
+}
+
+/// Pay back part or all of a customer's advance. Owner only (0041).
+Future<void> showRefundAdvance(
+  BuildContext context,
+  WidgetRef ref, {
+  required String customerId,
+  required double advance,
+}) async {
+  final amount = TextEditingController(text: advance.toStringAsFixed(2));
   final note = TextEditingController();
   String mode = 'cash';
-  final saved = await showDialog<bool>(
+  final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: const Text('Receive due payment'),
+        title: const Text('Refund advance'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: amount,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: 'Amount ₹ (due ${money(due)})',
-              ),
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: InputDecoration(labelText: 'Amount ₹ (advance ${money(advance)})'),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: mode,
-              decoration: const InputDecoration(labelText: 'Payment mode'),
+              decoration: const InputDecoration(labelText: 'Paid back by'),
               items: const [
                 DropdownMenuItem(value: 'cash', child: Text('Cash')),
                 DropdownMenuItem(value: 'upi', child: Text('UPI')),
@@ -220,39 +247,82 @@ Future<void> showRecordCustomerPayment(
           ],
         ),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Refund')),
+        ],
+      ),
+    ),
+  );
+  final amt = double.tryParse(amount.text.trim()) ?? 0;
+  if (ok != true || amt <= 0) return;
+  try {
+    await ref.read(supabaseProvider).rpc(
+      'refund_customer_advance',
+      params: {
+        'p_customer_id': customerId,
+        'p_amount': amt,
+        'p_mode': mode,
+        'p_note': note.text.trim(),
+      },
+    );
+    _refreshCustomerMoney(ref, customerId);
+    if (context.mounted) showSuccess(context, 'Refunded ${money(amt)}');
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
+}
+
+/// Reverse a recorded payment (owner only, reason required — PD23). Its
+/// bills become due again; the receipt stays in history as reversed.
+Future<void> showReversePayment(
+  BuildContext context,
+  WidgetRef ref, {
+  required String customerId,
+  required Map<String, dynamic> payment,
+}) async {
+  final reason = TextEditingController();
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text('Reverse payment of ${money(payment['amount'] as num?)}?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'The bills it paid will show as due again. The payment stays in '
+              'the history, marked reversed.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reason,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'Reason *',
+                hintText: 'e.g. cheque bounced, entered twice',
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Receive'),
+            onPressed: reason.text.trim().length >= 3 ? () => Navigator.pop(ctx, true) : null,
+            child: const Text('Reverse'),
           ),
         ],
       ),
     ),
   );
-  if (saved != true) return;
-  final amt = double.tryParse(amount.text) ?? 0;
-  if (amt <= 0) return;
+  if (ok != true) return;
   try {
-    await ref
-        .read(supabaseProvider)
-        .rpc(
-          'record_customer_payment',
-          params: {
-            'p_customer_id': customerId,
-            'p_amount': amt,
-            'p_mode': mode,
-            'p_note': note.text.trim(),
-          },
-        );
-    ref.invalidate(customerLedgerProvider(customerId));
-    ref.invalidate(customersProvider);
-    ref.invalidate(dashboardStatsProvider);
-    ref.invalidate(invoicesProvider);
-    ref.invalidate(recentInvoicesProvider);
-    if (context.mounted) showSuccess(context, 'Payment recorded');
+    await ref.read(supabaseProvider).rpc(
+      'reverse_customer_payment',
+      params: {'p_payment_id': payment['id'], 'p_reason': reason.text.trim()},
+    );
+    _refreshCustomerMoney(ref, customerId);
+    if (context.mounted) showSuccess(context, 'Payment reversed');
   } catch (e) {
     if (context.mounted) showError(context, e);
   }

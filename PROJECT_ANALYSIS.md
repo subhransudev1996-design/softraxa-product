@@ -29,7 +29,7 @@ All 20 findings have code fixes in the working tree. The database fixes are in m
 
 Known limits, scheduled for R1:
 - Staff without the cost/profit permission are blocked from reports and dashboard figures, but raw cost columns (for example `products.purchase_price`) can still be read through the API. Hiding them needs a separate cost table.
-- Unrefunded return credit beyond a bill's due is still kept as a negative customer balance until advances are modelled (PD22).
+- ~~Unrefunded return credit beyond a bill's due is still kept as a negative customer balance until advances are modelled (PD22).~~ Resolved in migration 0041: it becomes a customer advance (also payment excess, paid-then-cancelled bills and bills edited below the amount paid).
 
 Check results (26 Sep): Flutter analyze reports no issues; 87 Flutter tests pass; admin and website lint with 0 errors, type-check and production-build successfully.
 

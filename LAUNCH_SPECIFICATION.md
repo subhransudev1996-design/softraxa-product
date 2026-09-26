@@ -775,7 +775,7 @@ Status against the current code. "Partial" means some building blocks exist but 
 | Offline billing | Drift queue with idempotent local ID | Not isolated per account (5); no offline cold start and 100-product cache (6) | R0 |
 | Pricing | Retail and MRP; single wholesale price and minimum quantity | Customer-specific prices, precedence, multi-tier pricing (R2), overrides and audit | R1/R2 |
 | Approval inbox | None | New: below-cost, credit-limit and overdue exceptions | R1 |
-| Credit and dues | Customer credit limit with explicit "unlimited" flag and store default limit for new customers (PD17/PD18, migration 0036); POS warning when exceeded; FIFO due allocation | Limit enforcement and approval, due dates, overdue checks, advances, party validation (19) | R1 |
+| Credit and dues | Customer credit limit with explicit "unlimited" flag and store default limit for new customers (PD17/PD18, migration 0036); POS warning when exceeded; receipts with allocations (oldest first or chosen bills) and a preview; customer advances with their own ledger, applied only on request (PD22), refundable and reversible by the owner (PD23) (migration 0041) | Limit enforcement and approval, due dates, overdue checks | R1 |
 | Returns and exchanges | Sale and purchase returns with aggregated quantity checks, locking and bill-first settlement (0038); GST credit/debit notes (0040) | Condition classification, exchanges | R1 |
 | Units | One secondary unit per product (migration 0020) | Conversion snapshots on documents; variable-measure goods (R2) | R1/R2 |
 | Cut pieces | Piece tracking (available/consumed/scrap) and piece picker | Suggestion with allowance, lineage, thresholds, cutting charge; customer-owned remnants (R2); slabs (R3) | R1–R3 |

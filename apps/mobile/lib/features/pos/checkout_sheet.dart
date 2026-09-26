@@ -8,6 +8,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../invoices/advance_actions.dart';
 import '../invoices/invoice_providers.dart';
 import '../offline/offline_service.dart';
 import '../stock/piece_providers.dart';
@@ -221,6 +222,24 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       ref.invalidate(recentInvoicesProvider);
       ref.invalidate(pendingBillCountProvider);
       if (!mounted) return;
+
+      // PD22: offer the customer's advance for what's still due — asked,
+      // never automatic. Needs a connection, so online bills only.
+      final advance = toDouble(cart.customer?['advance_amount']);
+      if (!result.offline &&
+          result.invoiceId != null &&
+          _docType != 'estimate' &&
+          newDue > 0.005 &&
+          advance > 0.005) {
+        await applyAdvanceToInvoice(
+          context,
+          ref,
+          invoiceId: result.invoiceId!,
+          amount: advance < newDue ? advance : newDue.toDouble(),
+          customerName: cart.customer?['name'] as String?,
+        );
+        if (!mounted) return;
+      }
       Navigator.pop(context); // close sheet
 
       if (result.offline) {

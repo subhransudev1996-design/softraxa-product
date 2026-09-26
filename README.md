@@ -19,6 +19,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
 1. **Database:** Supabase SQL Editor → run each file in `supabase/migrations/` in numeric order.
    - Migrations **0036–0039** harden security and accounting. Run them on a **staging copy** first, then run `supabase/tests/r0_security_and_integrity.sql` there: every check must print `PASS`. It rolls back its own test data.
    - Migration **0040** adds GST credit/debit notes and the GSTR-1 / GSTR-3B / purchase register reports. Test it on staging with `supabase/tests/r1_gst_returns.sql` the same way.
+   - Migration **0041** adds customer advances and payment allocation. Test with `supabase/tests/r1_customer_advances.sql`. Apply it before running the matching app build (the app reads `advance_amount`).
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**

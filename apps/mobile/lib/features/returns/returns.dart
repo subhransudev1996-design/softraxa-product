@@ -9,6 +9,7 @@ import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import '../customers/customer_providers.dart';
 import '../purchases/purchase_providers.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
@@ -949,12 +950,15 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
         // the bill's due first (migration 0038), so report its figures.
         final applied = toDouble(res['applied_to_bill']);
         final refund = toDouble(res['refund']);
+        final advance = toDouble(res['advance']); // 0041
         showSuccess(
           context,
           'Return ${res['return_no']} recorded — ${money(res['total'] as num?)}'
           '${applied > 0 ? ', ${money(applied)} off the bill' : ''}'
-          '${refund > 0 ? ', ${money(refund)} to refund' : ''}',
+          '${refund > 0 ? ', ${money(refund)} to refund' : ''}'
+          '${advance > 0 ? ', ${money(advance)} kept as customer advance' : ''}',
         );
+        ref.invalidate(customersProvider);
         context.pop();
       }
     } catch (e) {

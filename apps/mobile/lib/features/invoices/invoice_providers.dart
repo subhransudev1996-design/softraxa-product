@@ -92,7 +92,7 @@ final invoiceDetailProvider = FutureProvider.autoDispose
             '*, '
             'invoice_items(*, products(track_serial, current_stock, units(allow_decimal)), '
             'product_variants(current_stock)), '
-            'invoice_payments(*)',
+            'invoice_payments(*), customers(advance_amount)',
           )
           .eq('id', id)
           .single();

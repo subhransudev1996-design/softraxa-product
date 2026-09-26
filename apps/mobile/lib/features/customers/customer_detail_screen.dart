@@ -52,7 +52,11 @@ class CustomerDetailScreen extends ConsumerWidget {
         builder: (d) {
           final c = d['customer'] as Map<String, dynamic>;
           final entries = d['entries'] as List<Map<String, dynamic>>;
+          final advances = d['advances'] as List<Map<String, dynamic>>;
           final due = toDouble(c['due_amount']);
+          final advance = toDouble(c['advance_amount']);
+          final appCtx = ref.watch(appContextProvider).value;
+          final isOwner = appCtx?.isOwner ?? false;
           final creditLimit = c['credit_limit'] == null
               ? null
               : toDouble(c['credit_limit']);
@@ -124,6 +128,23 @@ class CustomerDetailScreen extends ConsumerWidget {
                               ),
                             ],
                           ),
+                          if (advance > 0) ...[
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text('Advance'),
+                                Text(
+                                  money(advance),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.green,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                           if (c['credit_unlimited'] == true)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
@@ -185,9 +206,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                if (due > 0 &&
-                    (ref.watch(appContextProvider).value?.canRecordPayments ??
-                        false)) ...[
+                if (appCtx?.canRecordPayments ?? false) ...[
                   const SizedBox(height: 12),
                   CoachTarget(
                     page: 'customer_detail',
@@ -200,7 +219,53 @@ class CustomerDetailScreen extends ConsumerWidget {
                         due: due,
                       ),
                       icon: const Icon(Icons.payments),
-                      label: const Text('Receive payment'),
+                      label: Text(due > 0 ? 'Receive payment' : 'Receive advance'),
+                    ),
+                  ),
+                ],
+                if (isOwner && advance > 0) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => showRefundAdvance(
+                      context,
+                      ref,
+                      customerId: customerId,
+                      advance: advance,
+                    ),
+                    icon: const Icon(Icons.undo),
+                    label: Text('Refund advance (${money(advance)})'),
+                  ),
+                ],
+                if (advances.isNotEmpty) ...[
+                  const SectionLabel('Advance history'),
+                  Card(
+                    child: Column(
+                      children: [
+                        for (final a in advances)
+                          ListTile(
+                            dense: true,
+                            leading: Icon(
+                              toDouble(a['amount']) > 0
+                                  ? Icons.add_circle_outline
+                                  : Icons.remove_circle_outline,
+                              color: toDouble(a['amount']) > 0
+                                  ? AppColors.green
+                                  : AppColors.orange,
+                            ),
+                            title: Text(advanceKindLabel(a['kind'] as String?)),
+                            subtitle: Text(
+                              [
+                                dateStr(a['created_at']),
+                                if ((a['note'] as String? ?? '').isNotEmpty) a['note'],
+                              ].join(' • '),
+                            ),
+                            trailing: Text(
+                              '${toDouble(a['amount']) > 0 ? '+' : '−'} '
+                              '${money(toDouble(a['amount']).abs())}',
+                              style: const TextStyle(fontWeight: FontWeight.w700),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -217,7 +282,26 @@ class CustomerDetailScreen extends ConsumerWidget {
                     child: Card(
                       child: Column(
                         children: [
-                          for (final e in entries) _ledgerTile(context, e),
+                          for (final e in entries)
+                            _ledgerTile(
+                              context,
+                              e,
+                              // Owners reverse receipts recorded with
+                              // allocations (0041) — PD23.
+                              onReverse: isOwner &&
+                                      e['kind'] == 'payment' &&
+                                      (e['data'] as Map)['tracked'] == true &&
+                                      (e['data'] as Map)['reversed_at'] == null
+                                  ? () => showReversePayment(
+                                      context,
+                                      ref,
+                                      customerId: customerId,
+                                      payment: Map<String, dynamic>.from(
+                                        e['data'] as Map,
+                                      ),
+                                    )
+                                  : null,
+                            ),
                         ],
                       ),
                     ),
@@ -231,7 +315,11 @@ class CustomerDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _ledgerTile(BuildContext context, Map<String, dynamic> e) {
+  Widget _ledgerTile(
+    BuildContext context,
+    Map<String, dynamic> e, {
+    VoidCallback? onReverse,
+  }) {
     final data = e['data'] as Map;
     final discount = e['kind'] == 'invoice'
         ? toDouble(data['discount_amount'])
@@ -247,6 +335,7 @@ class CustomerDetailScreen extends ConsumerWidget {
       onTap: e['kind'] == 'invoice'
           ? () => context.push('/invoices/${data['id']}')
           : null,
+      onLongPress: onReverse,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         child: Row(
@@ -294,6 +383,13 @@ class CustomerDetailScreen extends ConsumerWidget {
                   ),
               ],
             ),
+            if (onReverse != null)
+              IconButton(
+                icon: const Icon(Icons.undo, size: 18),
+                tooltip: 'Reverse payment',
+                visualDensity: VisualDensity.compact,
+                onPressed: onReverse,
+              ),
           ],
         ),
       ),

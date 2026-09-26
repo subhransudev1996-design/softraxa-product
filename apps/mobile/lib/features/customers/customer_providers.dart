@@ -38,6 +38,19 @@ final customersProvider =
       return List<Map<String, dynamic>>.from(rows);
     });
 
+/// Label for a customer_advance_entries.kind (migration 0041).
+String advanceKindLabel(String? kind) => switch (kind) {
+  'opening' => 'Credit carried over',
+  'payment_excess' => 'Paid in advance',
+  'return_credit' => 'Return credit',
+  'cancelled_bill' => 'Paid on a cancelled bill',
+  'overpaid_bill' => 'Bill reduced below amount paid',
+  'applied' => 'Used on a bill',
+  'refund' => 'Refunded',
+  'reversal' => 'Payment reversed',
+  _ => 'Advance',
+};
+
 /// Customer + unified ledger (invoices, payments, returns) — PRD 7.13.
 final customerLedgerProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, id) async {
@@ -68,6 +81,13 @@ final customerLedgerProvider = FutureProvider.autoDispose
           .eq('customer_id', id)
           .order('return_date', ascending: false)
           .limit(100);
+      // Advance history (migration 0041): what added to it and what used it.
+      final advances = await client
+          .from('customer_advance_entries')
+          .select('id, amount, kind, payment_mode, note, created_at')
+          .eq('customer_id', id)
+          .order('created_at', ascending: false)
+          .limit(100);
 
       // merge into one ledger, newest first
       final entries =
@@ -85,9 +105,12 @@ final customerLedgerProvider = FutureProvider.autoDispose
               {
                 'kind': 'payment',
                 'date': p['payment_date'],
-                'label': 'Payment received (${p['payment_mode']})',
+                'label': p['reversed_at'] != null
+                    ? 'Payment reversed (${p['payment_mode']}) — ${p['reversal_reason']}'
+                    : 'Payment received (${p['payment_mode']})',
                 'debit': null,
-                'credit': p['amount'],
+                // A reversed receipt no longer counts.
+                'credit': p['reversed_at'] != null ? null : p['amount'],
                 'data': p,
               },
             for (final r in returns)
@@ -109,5 +132,6 @@ final customerLedgerProvider = FutureProvider.autoDispose
         'customer': Map<String, dynamic>.from(customer),
         'entries': entries,
         'invoices': List<Map<String, dynamic>>.from(invoices),
+        'advances': List<Map<String, dynamic>>.from(advances),
       };
     });

@@ -12,6 +12,7 @@ import '../../core/widgets.dart';
 import '../customers/customer_providers.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../pos/cart.dart';
+import 'advance_actions.dart';
 import 'invoice_pdf.dart';
 import 'invoice_providers.dart';
 import 'thermal_printer.dart';
@@ -188,7 +189,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
       context,
       title: 'Cancel invoice?',
       message:
-          'Stock will be restored and customer due reversed. This cannot be undone.',
+          'Stock will be restored and customer due reversed. Any amount already '
+          'paid is kept as the customer\'s advance. This cannot be undone.',
       confirmText: 'Cancel invoice',
     );
     if (!ok) return;
@@ -317,9 +319,15 @@ class InvoiceDetailScreen extends ConsumerWidget {
           final items = List<Map<String, dynamic>>.from(
             inv['invoice_items'] as List? ?? [],
           );
-          final payments = List<Map<String, dynamic>>.from(
-            inv['invoice_payments'] as List? ?? [],
-          );
+          // Reversed receipts stay in the database for history (0041) but
+          // no longer count as paid.
+          final payments = [
+            for (final p in List<Map<String, dynamic>>.from(
+              inv['invoice_payments'] as List? ?? [],
+            ))
+              if (p['reversed'] != true) p,
+          ];
+          final advance = toDouble((inv['customers'] as Map?)?['advance_amount']);
           final cancelled = inv['is_cancelled'] == true;
           final due = toDouble(inv['due_amount']);
           final isGst = inv['invoice_type'] == 'gst';
@@ -524,7 +532,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           ),
                           title: Text(money(p['amount'] as num?)),
                           subtitle: Text(
-                            '${p['payment_mode']} • ${dateTimeStr(p['payment_date'])}',
+                            '${p['is_advance'] == true ? 'advance' : p['payment_mode']}'
+                            ' • ${dateTimeStr(p['payment_date'])}',
                           ),
                         ),
                     ],
@@ -543,6 +552,28 @@ class InvoiceDetailScreen extends ConsumerWidget {
                       onPressed: () => _recordPayment(context, ref, inv),
                       icon: const Icon(Icons.payments),
                       label: Text('Record payment (due ${money(due)})'),
+                    ),
+                  ),
+                // PD22: an advance is used only when the shop chooses to.
+                if (due > 0 &&
+                    advance > 0 &&
+                    inv['invoice_type'] != 'estimate' &&
+                    (features?.canRecordPayments ?? false))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: OutlinedButton.icon(
+                      onPressed: () => applyAdvanceToInvoice(
+                        context,
+                        ref,
+                        invoiceId: invoiceId,
+                        amount: advance < due ? advance : due,
+                        customerName: inv['customer_name'] as String?,
+                      ),
+                      icon: const Icon(Icons.account_balance_wallet_outlined),
+                      label: Text(
+                        'Use advance ${money(advance < due ? advance : due)} '
+                        '(of ${money(advance)})',
+                      ),
                     ),
                   ),
                 Row(
