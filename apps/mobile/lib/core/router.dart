@@ -31,6 +31,7 @@ import '../features/purchases/purchases_screen.dart';
 import '../features/reports/gst_returns_screen.dart';
 import '../features/reports/report_detail_screen.dart';
 import '../features/reports/reports_screen.dart';
+import '../features/returns/held_goods_screen.dart';
 import '../features/returns/returns.dart';
 import '../features/services/services_screen.dart';
 import '../features/shell/blocked_screen.dart';
@@ -346,6 +347,18 @@ final routerProvider = Provider<GoRouter>((ref) {
                 invoice: state.extra as Map<String, dynamic>,
               ),
             ),
+          ),
+          // Exchange (D29): the POS, pre-set with the return as credit —
+          // replacement items are picked with the normal billing screen.
+          GoRoute(
+            path: '/sale-returns/exchange',
+            pageBuilder: (context, state) =>
+                _page(context, state, const PosScreen()),
+          ),
+          GoRoute(
+            path: '/sale-returns/held',
+            pageBuilder: (context, state) =>
+                _page(context, state, const HeldGoodsScreen()),
           ),
           GoRoute(
             path: '/sale-returns/:id',

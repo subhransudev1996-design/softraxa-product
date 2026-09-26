@@ -54,6 +54,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         ) ??
         '0',
   );
+  late final _returnWindow = TextEditingController(
+    text: '${(widget.existing?['return_window_days'] as num?)?.toInt() ?? 30}',
+  );
   late String _type = widget.existing?['business_type'] ?? 'mobile';
   late String _taxPref = widget.existing?['tax_preference'] ?? 'gst';
   XFile? _logo;
@@ -101,6 +104,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       final extra = <String, dynamic>{
         'state_code': _state,
         'default_credit_limit': double.tryParse(_defaultCredit.text) ?? 0,
+        'return_window_days': int.tryParse(_returnWindow.text.trim()) ?? 30,
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -286,6 +290,20 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   helperText:
                       '0 = new customers get no credit until you set a limit',
                 ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _returnWindow,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Return window (days)',
+                  helperText:
+                      'Returns after this need the owner and a reason. 0 = no limit',
+                ),
+                validator: (v) {
+                  final n = int.tryParse((v ?? '').trim());
+                  return n == null || n < 0 || n > 3650 ? 'Enter 0–3650 days' : null;
+                },
               ),
               const SizedBox(height: 12),
               TextFormField(

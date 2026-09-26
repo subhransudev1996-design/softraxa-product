@@ -16,6 +16,10 @@ String? permissionRedirect(String loc, AppContext c) {
     _ when under('/purchases') || under('/purchase-returns') ||
         under('/suppliers') =>
       c.canManagePurchases,
+    // Held returned goods: returns staff reclassify, stock staff release (PD29).
+    _ when under('/sale-returns/held') => c.canManageReturns || c.canManageStock,
+    _ when under('/sale-returns/exchange') =>
+      c.canManageReturns && c.canCreateInvoice,
     _ when under('/sale-returns') => c.canManageReturns,
     _ when under('/expenses') => c.canManageExpenses,
     _ when under('/services') || under('/job-cards') => c.canManageServices,

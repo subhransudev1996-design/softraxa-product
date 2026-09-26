@@ -8,7 +8,9 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../customers/customer_providers.dart';
 import '../invoices/advance_actions.dart';
+import '../returns/exchange.dart';
 import '../invoices/invoice_providers.dart';
 import '../offline/offline_service.dart';
 import '../stock/piece_providers.dart';
@@ -53,6 +55,22 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
   bool _splitMode = false;
   final List<_SplitEntry> _splits = [];
 
+  // Exchange mode (D29): credit left over after the replacement is kept as
+  // advance or refunded (walk-in customers: always refunded, PD28).
+  String _excess = 'advance';
+  String _refundMode = 'cash';
+
+  ExchangeDraft? get _exchange => ref.read(exchangeDraftProvider);
+
+  /// What the customer pays for this bill: the total, less the exchange
+  /// credit in exchange mode.
+  double _payable(CartState cart) {
+    final ex = _exchange;
+    if (ex == null) return cart.total;
+    final rest = cart.total - ex.credit;
+    return rest > 0 ? rest : 0;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -79,13 +97,14 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
   /// same as leaving that portion uncovered — so it's excluded here and
   /// simply flows into `due` (cart.total - paid) like any other shortfall.
   double _computePaid(CartState cart) {
+    final payable = _payable(cart);
     if (_splitMode) {
       final collected = resolveSplitPayments(_splitEntries).collected;
-      return collected > cart.total ? cart.total : collected;
+      return collected > payable ? payable : collected;
     }
     return _paidTouched
         ? (double.tryParse(_paid.text) ?? 0)
-        : (_paymentMode == 'credit' ? 0.0 : cart.total);
+        : (_paymentMode == 'credit' ? 0.0 : payable);
   }
 
   void _toggleSplit(double total) {
@@ -161,15 +180,18 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     }
     final paid = _computePaid(cart);
     if (!mounted) return;
-    if (paid < cart.total && cart.customer == null && _docType != 'estimate') {
+    final payable = _payable(cart);
+    if (paid < payable - 0.005 && cart.customer == null && _docType != 'estimate') {
       showError(
         context,
-        'Select a customer for credit/partial bills so the due can be tracked.',
+        _exchange != null
+            ? 'Collect the full difference for a walk-in exchange.'
+            : 'Select a customer for credit/partial bills so the due can be tracked.',
       );
       return;
     }
 
-    final newDue = (cart.total - paid).clamp(0, double.infinity);
+    final newDue = (payable - paid).clamp(0, double.infinity);
     final creditLimit = cart.customer?['credit_limit'] == null
         ? null
         : toDouble(cart.customer!['credit_limit']);
@@ -186,6 +208,18 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         );
         if (!proceed) return;
       }
+    }
+
+    final exchange = _exchange;
+    if (exchange != null) {
+      await _createExchange(
+        cart,
+        exchange,
+        paid: paid,
+        paymentMode: paymentModeToSend,
+        payments: splitPayments,
+      );
+      return;
     }
 
     setState(() => _busy = true);
@@ -258,6 +292,57 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     }
   }
 
+  /// D29: the return and the replacement bill in one server transaction
+  /// (create_exchange, migration 0042). Needs a connection — no offline
+  /// fallback. The request id makes a retry safe.
+  Future<void> _createExchange(
+    CartState cart,
+    ExchangeDraft exchange, {
+    required double paid,
+    required String paymentMode,
+    List<Map<String, dynamic>>? payments,
+  }) async {
+    setState(() => _busy = true);
+    try {
+      final sale = buildInvoicePayload(
+        cart: cart,
+        invoiceType: _docType,
+        paidAmount: paid,
+        paymentMode: paymentMode,
+        payments: payments,
+        notes: _notes.text.trim(),
+      );
+      final res = Map<String, dynamic>.from(
+        await ref.read(supabaseProvider).rpc(
+          'create_exchange',
+          params: {
+            'payload': {
+              'request_id': exchange.requestId,
+              'return': exchange.returnPayload,
+              'sale': sale,
+              'excess': exchange.hasCustomer ? _excess : 'refund',
+              'refund_mode': _refundMode,
+            },
+          },
+        ) as Map,
+      );
+      ref.read(cartProvider.notifier).clear();
+      ref.read(exchangeDraftProvider.notifier).set(null);
+      invalidateStockData(ref);
+      ref.invalidate(invoicesProvider);
+      ref.invalidate(recentInvoicesProvider);
+      ref.invalidate(customersProvider);
+      if (!mounted) return;
+      Navigator.pop(context); // close sheet
+      showSuccess(context, exchangeSummary(res));
+      context.go('/invoices/${res['invoice_id']}?new=1');
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   /// Saves edits to an existing invoice via `update_invoice` — payments
   /// already recorded are left untouched, only items/discount/notes change.
   Future<void> _saveEdit(EditingInvoice editing) async {
@@ -312,8 +397,11 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     final cart = ref.watch(cartProvider);
     final editing = ref.watch(editingInvoiceProvider);
     final appContext = ref.watch(appContextProvider).value;
+    final exchange = ref.watch(exchangeDraftProvider);
+    final payable = _payable(cart);
+    final excess = exchange == null ? 0.0 : exchange.credit - cart.total;
     final paid = _computePaid(cart);
-    final due = (cart.total - paid).clamp(0, double.infinity);
+    final due = (payable - paid).clamp(0, double.infinity);
 
     return DraggableScrollableSheet(
       expand: false,
@@ -365,7 +453,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   value: 'cash_memo',
                   label: Text('Cash memo'),
                 ),
-                const ButtonSegment(value: 'estimate', label: Text('Estimate')),
+                if (exchange == null)
+                  const ButtonSegment(value: 'estimate', label: Text('Estimate')),
               ],
               selected: {_docType},
               onSelectionChanged: (s) => setState(() => _docType = s.first),
@@ -478,8 +567,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     ),
                   ),
                   // Editing an existing bill never changes who it was
-                  // billed to (update_invoice doesn't touch customer_id).
-                  if (editing == null)
+                  // billed to (update_invoice doesn't touch customer_id);
+                  // an exchange stays with the original bill's customer.
+                  if (editing == null && exchange == null)
                     Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -556,10 +646,65 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   const Divider(height: 20),
                   _row('Round off', money(cart.roundOff), dim: true),
                   _row('Total', money(cart.total), bold: true),
+                  if (exchange != null) ...[
+                    _row(
+                      'Exchange credit (≈)',
+                      '− ${money(exchange.credit < cart.total ? exchange.credit : cart.total)}',
+                      color: AppColors.indigo,
+                    ),
+                    _row('To collect', money(payable), bold: true),
+                  ],
                 ],
               ),
             ),
           ),
+          if (exchange != null && excess > 0.005) ...[
+            const SizedBox(height: 8),
+            Card(
+              color: AppColors.green.withValues(alpha: 0.06),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'About ${money(excess)} of credit is left after this bill.',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 8),
+                    if (exchange.hasCustomer)
+                      SegmentedButton<String>(
+                        segments: const [
+                          ButtonSegment(value: 'advance', label: Text('Keep as advance')),
+                          ButtonSegment(value: 'refund', label: Text('Refund now')),
+                        ],
+                        selected: {_excess},
+                        onSelectionChanged: (s) => setState(() => _excess = s.first),
+                      )
+                    else
+                      Text(
+                        'Walk-in customer: it will be refunded.',
+                        style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                      ),
+                    if (!exchange.hasCustomer || _excess == 'refund') ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          for (final m in const [('cash', 'Cash'), ('upi', 'UPI')])
+                            ChoiceChip(
+                              label: Text('Refund by ${m.$2}'),
+                              selected: _refundMode == m.$1,
+                              onSelected: (_) => setState(() => _refundMode = m.$1),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SizedBox(height: 8),
           _ProfitBanner(profit: cart.estimatedProfit),
           if (editing == null && _docType != 'estimate') ...[
@@ -568,7 +713,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               children: [
                 const SectionLabel('Payment'),
                 TextButton.icon(
-                  onPressed: () => _toggleSplit(cart.total),
+                  onPressed: () => _toggleSplit(payable),
                   icon: Icon(
                     _splitMode ? Icons.close : Icons.call_split,
                     size: 16,
@@ -596,7 +741,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         _paidTouched = false;
                         _paid.text = mode.$1 == 'credit'
                             ? '0'
-                            : cart.total.toStringAsFixed(2);
+                            : payable.toStringAsFixed(2);
                       }),
                     ),
                 ],
@@ -612,7 +757,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       ),
                       decoration: InputDecoration(
                         labelText: 'Paid amount ₹',
-                        hintText: cart.total.toStringAsFixed(2),
+                        hintText: payable.toStringAsFixed(2),
                       ),
                       onChanged: (_) => setState(() => _paidTouched = true),
                     ),
@@ -707,7 +852,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               Align(
                 alignment: Alignment.centerLeft,
                 child: TextButton.icon(
-                  onPressed: () => _addSplit(cart.total),
+                  onPressed: () => _addSplit(payable),
                   icon: const Icon(Icons.add, size: 16),
                   label: const Text('Add payment method'),
                 ),
@@ -851,6 +996,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             label: Text(
               editing != null
                   ? 'Save changes • ${money(cart.total)}'
+                  : exchange != null
+                  ? 'Complete exchange • collect ${money(payable)}'
                   : _docType == 'estimate'
                   ? 'Save estimate'
                   : 'Create bill • ${money(cart.total)}',

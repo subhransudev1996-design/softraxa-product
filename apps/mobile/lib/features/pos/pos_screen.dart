@@ -11,6 +11,7 @@ import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../offline/offline_service.dart';
 import '../products/product_providers.dart' show parseWeightedBarcode;
+import '../returns/exchange.dart';
 import '../stock/adjust_stock_sheet.dart';
 import '../stock/piece_picker.dart';
 import 'cart.dart';
@@ -637,15 +638,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   /// the global cart with [editingInvoiceProvider] still set, silently
   /// hijacking the next "New Bill" the cashier starts.
   Future<bool> _confirmDiscardEdit() async {
+    final exchanging = ref.read(exchangeDraftProvider) != null;
     final ok = await confirmDialog(
       context,
-      title: 'Discard changes?',
-      message: 'Changes to this bill haven\'t been saved yet.',
-      confirmText: 'Discard',
+      title: exchanging ? 'Cancel exchange?' : 'Discard changes?',
+      message: exchanging
+          ? 'Nothing has been saved — the return and the replacement are only recorded together at checkout.'
+          : 'Changes to this bill haven\'t been saved yet.',
+      confirmText: exchanging ? 'Cancel exchange' : 'Discard',
     );
     if (ok) {
       ref.read(cartProvider.notifier).clear();
       ref.read(editingInvoiceProvider.notifier).set(null);
+      ref.read(exchangeDraftProvider.notifier).set(null);
     }
     return ok;
   }
@@ -658,14 +663,31 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final isOnline = ref.watch(isOnlineProvider).value ?? true;
     final pendingCount = ref.watch(pendingBillCountProvider).value ?? 0;
     final editing = ref.watch(editingInvoiceProvider);
+    // Exchange mode only on its own route. Leaving it some other way (e.g.
+    // switching tabs) must not turn the next ordinary bill into an exchange,
+    // so a leftover draft is dropped once the exchange screen isn't on top.
+    final onExchange =
+        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path ==
+        '/sale-returns/exchange';
+    final exchange = onExchange ? ref.watch(exchangeDraftProvider) : null;
+    if (!onExchange && ref.read(exchangeDraftProvider) != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        final top = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+        if (mounted && top != '/sale-returns/exchange') {
+          ref.read(exchangeDraftProvider.notifier).set(null);
+        }
+      });
+    }
+    final guarded = editing != null || exchange != null;
 
     final scaffold = Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        // In edit-bill mode the back arrow must run the same discard-confirm
-        // guard as the system back gesture (a plain pop would bypass the
-        // PopScope below — GoRouter's programmatic pop doesn't consult it).
-        leading: editing != null
+        // In edit-bill and exchange mode the back arrow must run the same
+        // discard-confirm guard as the system back gesture (a plain pop would
+        // bypass the PopScope below — GoRouter's programmatic pop doesn't
+        // consult it).
+        leading: guarded
             ? BackButton(
                 onPressed: () async {
                   if (await _confirmDiscardEdit() && context.mounted) {
@@ -675,7 +697,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               )
             : appBarBack(context),
         title: Text(
-          editing == null ? 'New Bill' : 'Edit Bill — ${editing.invoiceNo}',
+          exchange != null
+              ? 'Exchange — ${exchange.invoiceNo}'
+              : editing == null
+              ? 'New Bill'
+              : 'Edit Bill — ${editing.invoiceNo}',
         ),
         actions: [
           const GuideButton('pos'),
@@ -712,6 +738,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       ),
       body: Column(
         children: [
+          if (exchange != null) _ExchangeBanner(exchange: exchange),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: Row(
@@ -1084,7 +1111,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     // confirming is the pattern Flutter's own docs recommend for this exact
     // "confirm before leaving" case — a re-check of `canPop` itself would
     // otherwise re-block the very pop the confirmation just approved.
-    if (editing == null) return scaffold;
+    if (!guarded) return scaffold;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -1094,6 +1121,42 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         }
       },
       child: scaffold,
+    );
+  }
+}
+
+/// Exchange mode (D29): what the return is worth toward the replacement.
+class _ExchangeBanner extends StatelessWidget {
+  const _ExchangeBanner({required this.exchange});
+
+  final ExchangeDraft exchange;
+
+  @override
+  Widget build(BuildContext context) {
+    final settled = exchange.returnValue - exchange.credit;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppColors.indigo.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.swap_horiz, color: AppColors.indigo),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              'Return worth about ${money(exchange.returnValue)}'
+              '${settled > 0.005 ? ' — ${money(settled)} first clears what ${exchange.invoiceNo} still owes' : ''}. '
+              'Credit for the replacement ≈ ${money(exchange.credit)}. '
+              'Add the replacement items, then check out.',
+              style: const TextStyle(fontSize: 12.5, color: AppColors.indigo),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

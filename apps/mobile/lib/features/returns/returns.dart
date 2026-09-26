@@ -9,8 +9,12 @@ import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import 'package:uuid/uuid.dart';
+
 import '../customers/customer_providers.dart';
+import '../pos/cart.dart';
 import '../purchases/purchase_providers.dart';
+import 'exchange.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
 import 'credit_note_pdf.dart';
@@ -261,6 +265,11 @@ class SaleReturnsScreen extends ConsumerWidget {
         title: const Text('Sale returns'),
         actions: [
           const GuideButton('sale_returns'),
+          IconButton(
+            icon: const Icon(Icons.inventory_outlined),
+            tooltip: 'Held returned goods',
+            onPressed: () => context.push('/sale-returns/held'),
+          ),
           IconButton(
             icon: const Icon(Icons.date_range),
             tooltip: 'Filter by date',
@@ -734,7 +743,8 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                           ),
                           subtitle: Text(
                             'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}'
-                            '${(items[i]['serial_no'] as String? ?? '').isNotEmpty ? '\nIMEI/Serial: ${items[i]['serial_no']}' : ''}',
+                            '${(items[i]['serial_no'] as String? ?? '').isNotEmpty ? '\nIMEI/Serial: ${items[i]['serial_no']}' : ''}'
+                            '${(items[i]['condition'] ?? 'sellable') != 'sellable' ? '\nCondition: ${returnConditions[items[i]['condition']] ?? items[i]['condition']} (held, not in stock)' : ''}',
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.inkSoft,
@@ -838,9 +848,133 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
   };
   final _refund = TextEditingController();
   final _notes = TextEditingController();
+  final _lateReason = TextEditingController();
   String _refundMode = 'cash';
   bool _busy = false;
   bool _refundTouched = false;
+
+  /// Condition per line (D28): one condition for the whole quantity, or a
+  /// split across conditions ("mixed").
+  final Map<String, String> _condition = {};
+  final Map<String, Map<String, double>> _mixed = {};
+
+  Map<String, double> _splitFor(Map<String, dynamic> it) {
+    final id = it['id'] as String;
+    final q = _returnQty[id] ?? 0;
+    final mixed = _mixed[id];
+    if (mixed != null &&
+        (mixed.values.fold(0.0, (s, v) => s + v) - q).abs() < 0.0005) {
+      return mixed;
+    }
+    return {_condition[id] ?? 'sellable': q};
+  }
+
+  /// Days since the bill, and the shop's return window (PD25, 0 = none).
+  int get _billAgeDays {
+    final d = DateTime.tryParse('${widget.invoice['invoice_date']}')?.toLocal();
+    if (d == null) return 0;
+    final now = DateTime.now();
+    return DateTime(now.year, now.month, now.day)
+        .difference(DateTime(d.year, d.month, d.day))
+        .inDays;
+  }
+
+  int get _windowDays =>
+      ((ref.read(appContextProvider).value?.business?['return_window_days'])
+              as num?)
+          ?.toInt() ??
+      30;
+
+  bool get _isLate => _windowDays > 0 && _billAgeDays > _windowDays;
+
+  /// Items for create_sale_return: one row per condition of each line.
+  List<Map<String, dynamic>> get _payloadItems => [
+    for (final it in _items)
+      if ((_returnQty[it['id']] ?? 0) > 0)
+        for (final e in _splitFor(it).entries)
+          if (e.value > 0)
+            {
+              'product_id': it['product_id'],
+              'variant_id': it['variant_id'],
+              'product_name': it['product_name'],
+              'serial_no': it['serial_no'] ?? '',
+              'quantity': e.value,
+              'condition': e.key,
+              'unit_price': _lineInclRate(it),
+              'tax_amount': 0,
+              'line_total': double.parse(
+                (e.value * _lineInclRate(it)).toStringAsFixed(2),
+              ),
+            },
+  ];
+
+  Map<String, dynamic> get _returnPayloadBase => {
+    'invoice_id': widget.invoice['id'],
+    'customer_id': widget.invoice['customer_id'],
+    'notes': _notes.text.trim(),
+    if (_isLate) 'window_override_reason': _lateReason.text.trim(),
+    'items': _payloadItems,
+  };
+
+  /// Blocks saving a late return unless the owner gave a reason.
+  bool _lateBlocked() {
+    if (!_isLate) return false;
+    final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
+    if (!isOwner) {
+      showError(
+        context,
+        'This bill is $_billAgeDays days old; returns are accepted within '
+        '$_windowDays days. Ask the owner to accept it.',
+      );
+      return true;
+    }
+    if (_lateReason.text.trim().isEmpty) {
+      showError(context, 'Give a reason for accepting this late return');
+      return true;
+    }
+    return false;
+  }
+
+  /// D29: take this return into the POS as credit for replacement items.
+  Future<void> _startExchange() async {
+    if (_payloadItems.isEmpty) {
+      showError(context, 'Choose the items being returned first');
+      return;
+    }
+    if (_lateBlocked()) return;
+    Map<String, dynamic>? customer;
+    final customerId = widget.invoice['customer_id'] as String?;
+    try {
+      if (customerId != null) {
+        customer = Map<String, dynamic>.from(
+          await ref
+              .read(supabaseProvider)
+              .from('customers')
+              .select('id, name, phone, address, due_amount, advance_amount, credit_limit')
+              .eq('id', customerId)
+              .single(),
+        );
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+      return;
+    }
+    if (!mounted) return;
+    ref.read(exchangeDraftProvider.notifier).set(
+      ExchangeDraft(
+        requestId: const Uuid().v4(),
+        invoiceId: widget.invoice['id'] as String,
+        invoiceNo: widget.invoice['invoice_no'] as String? ?? '',
+        returnPayload: _returnPayloadBase,
+        returnValue: _total * invoiceDiscountFactor(widget.invoice),
+        originalDue: toDouble(widget.invoice['due_amount']),
+        hasCustomer: customerId != null,
+      ),
+    );
+    ref.read(editingInvoiceProvider.notifier).set(null);
+    ref.read(cartProvider.notifier).replaceAll(CartState(customer: customer));
+    context.push('/sale-returns/exchange');
+  }
 
   /// Already-returned quantity per product/variant on this invoice (from
   /// earlier sale returns), keyed the same way as [_maxReturnable]. Loaded
@@ -913,30 +1047,13 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       showError(context, 'Enter return quantity for at least one item');
       return;
     }
+    if (_lateBlocked()) return;
     setState(() => _busy = true);
     try {
       final payload = {
-        'invoice_id': widget.invoice['id'],
-        'customer_id': widget.invoice['customer_id'],
+        ..._returnPayloadBase,
         'refund_amount': _refundAmount,
         'refund_mode': _refundMode,
-        'notes': _notes.text.trim(),
-        'items': [
-          for (final it in returningItems)
-            {
-              'product_id': it['product_id'],
-              'variant_id': it['variant_id'],
-              'product_name': it['product_name'],
-              'serial_no': it['serial_no'] ?? '',
-              'quantity': _returnQty[it['id']],
-              'unit_price': _lineInclRate(it),
-              'tax_amount': 0,
-              'line_total': double.parse(
-                ((_returnQty[it['id']] ?? 0) * _lineInclRate(it))
-                    .toStringAsFixed(2),
-              ),
-            },
-        ],
       };
       final res =
           await ref
@@ -990,7 +1107,10 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                     _alreadyReturned['${it['product_id']}:${it['variant_id'] ?? ''}'] ??
                     0;
                 final canReturn = !_loadingReturned && maxReturnable > 0;
-                return Card(
+                final lineId = it['id'] as String;
+                final returning = (_returnQty[lineId] ?? 0) > 0;
+                final split = _splitFor(it);
+                final card = Card(
                   margin: const EdgeInsets.only(bottom: 8),
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
@@ -1097,8 +1217,99 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                     ),
                   ),
                 );
+                if (!returning) return card;
+                // D28: condition decides whether it goes back into stock.
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    card,
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
+                      child: Row(
+                        children: [
+                          Text(
+                            'Condition:',
+                            style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                          ),
+                          const SizedBox(width: 8),
+                          if (split.length > 1)
+                            Expanded(
+                              child: Text(
+                                conditionSplitLabel(split),
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            )
+                          else
+                            DropdownButton<String>(
+                              value: split.keys.first,
+                              isDense: true,
+                              items: [
+                                for (final e in returnConditions.entries)
+                                  DropdownMenuItem(value: e.key, child: Text(e.value)),
+                              ],
+                              onChanged: (v) => setState(() {
+                                _mixed.remove(lineId);
+                                _condition[lineId] = v ?? 'sellable';
+                              }),
+                            ),
+                          const Spacer(),
+                          if ((_returnQty[lineId] ?? 0) > 1)
+                            TextButton(
+                              onPressed: () async {
+                                final res = await showConditionSplitDialog(
+                                  context,
+                                  name: '${it['product_name']}',
+                                  total: _returnQty[lineId] ?? 0,
+                                  current: split,
+                                );
+                                if (res != null && mounted) {
+                                  setState(() => _mixed[lineId] = res);
+                                }
+                              },
+                              child: const Text('Split…'),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                );
               },
             ),
+          if (_isLate) ...[
+            const SizedBox(height: 4),
+            Card(
+              color: AppColors.orange.withValues(alpha: 0.08),
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'This bill is $_billAgeDays days old. Returns are accepted '
+                      'within $_windowDays days.',
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: 6),
+                    if (ref.watch(appContextProvider).value?.isOwner ?? false)
+                      TextField(
+                        controller: _lateReason,
+                        decoration: const InputDecoration(
+                          labelText: 'Reason for accepting it *',
+                        ),
+                      )
+                    else
+                      Text(
+                        'Only the owner can accept a late return.',
+                        style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ],
           const SectionLabel('Refund'),
           Row(
             children: [
@@ -1160,6 +1371,14 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                   )
                 : Text('Record return • ${money(_total)}'),
           ),
+          if (ref.watch(appContextProvider).value?.canCreateInvoice ?? false) ...[
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: _busy || _total <= 0 ? null : _startExchange,
+              icon: const Icon(Icons.swap_horiz),
+              label: const Text('Exchange for other items'),
+            ),
+          ],
           const SizedBox(height: 24),
         ],
       ),
