@@ -96,6 +96,7 @@ class AppContext {
   bool get canManageReturns => _perm('can_manage_returns', false);
   bool get canEditInvoices => _perm('can_edit_invoices', false);
   bool get canRecordPayments => _perm('can_record_payments', true);
+  bool get canManageCash => _perm('can_manage_cash', false); // 0045
 
   /// Staff management is owner-only at launch (LAUNCH_SPECIFICATION roles).
   bool get canManageStaff => isOwner;

@@ -204,6 +204,15 @@ class MoreScreen extends ConsumerWidget {
             child: Column(
               children: [
                 tile(
+                  Icons.point_of_sale_outlined,
+                  'Cashbook & day closing',
+                  '/cashbook',
+                  color: AppColors.green,
+                  enabled: appContext?.canManageCash ?? false,
+                  subtitle: 'Cash in the drawer, count and close the day',
+                ),
+                const Divider(),
+                tile(
                   Icons.payments_outlined,
                   'Expenses',
                   '/expenses',

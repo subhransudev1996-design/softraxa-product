@@ -23,6 +23,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0042** adds returned-goods condition (held stock), the return window and exchanges. Test with `supabase/tests/r1_returns_exchanges.sql`; apply before the matching app build.
    - Migration **0043** adds customer agreed prices, wholesale customers and staff discount limits (bills are checked in `create_invoice`/`update_invoice`). Test with `supabase/tests/r1_pricing.sql`; apply before the matching app build.
    - Migration **0044** adds the owner approval inbox (below cost, credit limit, overdue, over-limit discounts), due dates and overdue grace days. Test with `supabase/tests/r1_approvals.sql`; apply before the matching app build.
+   - Migration **0045** adds the daily cashbook and day closing (cash drawer permission for staff). Test with `supabase/tests/r1_cashbook.sql`.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**

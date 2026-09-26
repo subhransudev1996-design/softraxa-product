@@ -781,7 +781,7 @@ Status against the current code. "Partial" means some building blocks exist but 
 | Cut pieces | Piece tracking (available/consumed/scrap) and piece picker | Suggestion with allowance, lineage, thresholds, cutting charge; customer-owned remnants (R2); slabs (R3) | R1–R3 |
 | Serials/IMEI | Serial table and bulk import helpers (uncommitted) | Import can resurrect sold serials; sale does not verify serial availability (15) | R0 |
 | Job cards and repairs | Job cards, services, statuses including estimate/waiting approval, advance, location | Versioned estimates, D38 evidence and attachments, vehicle fields, parts consumption | R1 |
-| Cashbook and closing | Expenses only | Entire D34–D36 cashbook | R1 |
+| Cashbook and closing | One shared drawer: cash in/out derived from bill payments (cash part of splits), customer payments and reversals, job advances, refunds, supplier payments and refunds, cash expenses and manual owner/bank entries; UPI/card shown apart; late movements roll to the next open day (PD57); closing with counted cash and reason for a difference, locked, owner review and owner-only reopen with history (PD54–PD56); cash permission for staff; closing refused with unsynced offline bills (PD58) (migration 0045) | Separate counters and shifts (R3, D35 optional); denomination entry (optional, PD55) | R1 |
 | Sales orders, reservations, deliveries | None | Entire D08–D13 scope | R2 |
 | Purchase orders and receipts | Direct purchase bills that add stock immediately | Orders, receipts, combined bills, supplier advances, return claims | R2 |
 | Subscriptions and plans | Plans, feature flags, user limit, blocked screen | Server-side enforcement (16), grace and read-only rules | R0/R1 |

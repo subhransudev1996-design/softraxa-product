@@ -25,6 +25,7 @@ const List<StaffPermission> staffPermissions = [
   (key: 'can_manage_stock', label: 'Stock adjustments & cut pieces', chip: 'Stock', byDefault: false),
   (key: 'can_manage_purchases', label: 'Purchases, suppliers & supplier payments', chip: 'Purchases', byDefault: false),
   (key: 'can_manage_expenses', label: 'Expenses', chip: 'Expenses', byDefault: false),
+  (key: 'can_manage_cash', label: 'Cash drawer & day closing', chip: 'Cash', byDefault: false),
   (key: 'can_manage_services', label: 'Services & job cards', chip: 'Services', byDefault: true),
   (key: 'can_view_reports', label: 'View reports', chip: 'Reports', byDefault: false),
   (key: 'can_view_profit', label: 'See cost prices & profit', chip: 'Profit', byDefault: false),
@@ -449,12 +450,18 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
 
     try {
       final client = ref.read(supabaseProvider);
-      await client.rpc('create_staff_user', params: {
+      final created = await client.rpc('create_staff_user', params: {
         'p_email': _emailCtrl.text.trim(),
         'p_password': _passwordCtrl.text,
         'p_full_name': _nameCtrl.text.trim(),
         'p_permissions': _perms,
       });
+      // The cash permission (0045) is set by its own owner-only call.
+      final userId = (created as Map?)?['user_id'] as String?;
+      if (userId != null && _perms['can_manage_cash'] == true) {
+        await client.rpc('set_staff_cash_permission',
+            params: {'p_profile': userId, 'p_value': true});
+      }
 
       if (mounted) {
         Navigator.pop(context);
@@ -577,6 +584,10 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
       await client.rpc('set_staff_discount_limit', params: {
         'p_profile': widget.staff['id'],
         'p_pct': _perms['can_edit_prices'] == true ? limit : 0,
+      });
+      await client.rpc('set_staff_cash_permission', params: {
+        'p_profile': widget.staff['id'],
+        'p_value': _perms['can_manage_cash'] == true,
       });
 
       if (mounted) {

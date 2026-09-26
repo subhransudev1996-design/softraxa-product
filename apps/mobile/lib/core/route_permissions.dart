@@ -22,6 +22,7 @@ String? permissionRedirect(String loc, AppContext c) {
       c.canManageReturns && c.canCreateInvoice,
     _ when under('/sale-returns') => c.canManageReturns,
     _ when under('/expenses') => c.canManageExpenses,
+    _ when under('/cashbook') => c.canManageCash,
     _ when under('/services') || under('/job-cards') => c.canManageServices,
     _ when under('/import') ||
         loc == '/products/new' ||
