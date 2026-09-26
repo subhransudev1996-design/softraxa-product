@@ -28,6 +28,7 @@ import '../features/products/product_form_screen.dart';
 import '../features/products/products_screen.dart';
 import '../features/purchases/purchase_form_screen.dart';
 import '../features/purchases/purchases_screen.dart';
+import '../features/reports/gst_returns_screen.dart';
 import '../features/reports/report_detail_screen.dart';
 import '../features/reports/reports_screen.dart';
 import '../features/returns/returns.dart';
@@ -403,6 +404,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 ),
               ),
             ),
+          ),
+          GoRoute(
+            path: '/reports/gst-returns',
+            pageBuilder: (context, state) =>
+                _page(context, state, const GstReturnsScreen()),
           ),
           GoRoute(
             path: '/reports/:type',

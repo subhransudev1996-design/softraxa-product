@@ -121,6 +121,14 @@ class CartState {
   double get billDiscountAmount =>
       billDiscountIsPercent ? itemsGross * billDiscount / 100 : billDiscount;
   double get grandBeforeRound => itemsGross - billDiscountAmount;
+
+  /// GST inside the amount actually charged: the bill discount comes off the
+  /// tax-inclusive total, so it reduces tax in proportion — the same figure
+  /// the saved invoice shows (migration 0040). [taxTotal] stays the pre-bill-
+  /// discount line tax that is sent to the server.
+  double get billTaxTotal => itemsGross > 0
+      ? taxTotal * (grandBeforeRound.clamp(0, itemsGross) / itemsGross)
+      : 0;
   double get roundOff => roundOffFor(grandBeforeRound);
   double get total => grandBeforeRound + roundOff;
   int get itemCount => lines.length;

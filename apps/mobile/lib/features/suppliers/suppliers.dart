@@ -178,13 +178,13 @@ Future<Map<String, dynamic>?> showSupplierForm(
               TextField(
                 controller: gst,
                 textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
+                decoration: InputDecoration(
                   labelText: 'GSTIN (optional)',
+                  errorText: gstinError(gst.text),
                 ),
-                onChanged: (v) {
-                  final s = stateFromGstin(v);
-                  if (s != null && s != state) setState(() => state = s);
-                },
+                onChanged: (v) => setState(() {
+                  state = stateFromGstin(v) ?? state;
+                }),
               ),
               const SizedBox(height: 12),
               GstStateField(
@@ -213,7 +213,9 @@ Future<Map<String, dynamic>?> showSupplierForm(
             child: const Text('Cancel'),
           ),
           FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
+            onPressed: gstinError(gst.text) == null
+                ? () => Navigator.pop(ctx, true)
+                : null,
             child: const Text('Save'),
           ),
         ],

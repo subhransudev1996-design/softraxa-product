@@ -256,6 +256,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     decoration: const InputDecoration(
                       labelText: 'GST number (GSTIN)',
                     ),
+                    validator: (v) => gstinError(v ?? ''),
                     onChanged: (v) {
                       final s = stateFromGstin(v);
                       if (s != null && s != _state) setState(() => _state = s);

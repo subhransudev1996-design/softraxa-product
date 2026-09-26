@@ -58,6 +58,30 @@ String? stateFromGstin(String gstin) {
   return gstStates.containsKey(code) ? code : null;
 }
 
+const _gstinChars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+/// True for a well-formed GSTIN: 15 characters, a valid state code and a
+/// correct mod-36 check digit. Mirrors public.is_valid_gstin() (0040).
+bool isValidGstin(String gstin) {
+  final g = gstin.trim().toUpperCase();
+  if (!RegExp(r'^[0-9]{2}[A-Z0-9]{13}$').hasMatch(g)) return false;
+  if (!gstStates.containsKey(g.substring(0, 2))) return false;
+  var sum = 0;
+  for (var i = 0; i < 14; i++) {
+    final product = _gstinChars.indexOf(g[i]) * (i.isOdd ? 2 : 1);
+    sum += product ~/ 36 + product % 36;
+  }
+  return _gstinChars[(36 - sum % 36) % 36] == g[14];
+}
+
+/// Error text for an optional GSTIN field, or null when empty or valid.
+String? gstinError(String gstin) {
+  final g = gstin.trim();
+  if (g.isEmpty) return null;
+  if (g.length != 15) return 'A GSTIN has 15 characters (${g.length} entered)';
+  return isValidGstin(g) ? null : 'This GSTIN is not valid — check for a typo';
+}
+
 /// Dropdown for picking a GST state. [value] '' = not set.
 class GstStateField extends StatelessWidget {
   const GstStateField({
@@ -94,8 +118,9 @@ class GstStateField extends StatelessWidget {
   }
 }
 
-/// CGST / SGST / IGST totals of invoice or purchase lines. Lines saved before
-/// migration 0036 have no split stored, so their tax counts as CGST + SGST.
+/// CGST / SGST / IGST totals of invoice, purchase or return lines. The stored
+/// split already reflects any bill discount (migration 0040). Rows without
+/// split columns (older cached data) count their tax as CGST + SGST.
 ({double cgst, double sgst, double igst}) gstSplit(
   List<Map<String, dynamic>> items,
 ) {
@@ -104,7 +129,7 @@ class GstStateField extends StatelessWidget {
     final c = toDouble(it['cgst_amount']);
     final s = toDouble(it['sgst_amount']);
     final i = toDouble(it['igst_amount']);
-    if (c == 0 && s == 0 && i == 0) {
+    if (!it.containsKey('cgst_amount') && !it.containsKey('igst_amount')) {
       final tax = toDouble(it['tax_amount']);
       cgst += tax / 2;
       sgst += tax / 2;
@@ -116,6 +141,10 @@ class GstStateField extends StatelessWidget {
   }
   return (cgst: cgst, sgst: sgst, igst: igst);
 }
+
+/// Total taxable value of lines (after any bill discount, migration 0040).
+double gstTaxableTotal(List<Map<String, dynamic>> items) =>
+    items.fold(0.0, (s, it) => s + toDouble(it['taxable_value']));
 
 /// Per-rate breakup rows for printed invoices: CGST/SGST at half the rate,
 /// IGST at the full rate. Returns (label, amount) pairs.

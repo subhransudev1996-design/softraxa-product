@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 import '../../core/data_refresh.dart';
 
+import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
@@ -11,6 +12,63 @@ import '../../core/widgets.dart';
 import '../purchases/purchase_providers.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
+import 'credit_note_pdf.dart';
+
+/// Saves or shares the GST credit note (sale return) or debit note
+/// (purchase return) PDF for [row] (migration 0040).
+Future<void> _shareNotePdf(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> row, {
+  required bool isDebitNote,
+}) async {
+  final business = ref.read(appContextProvider).value?.business ?? {};
+  final noteNo =
+      row[isDebitNote ? 'debit_note_no' : 'credit_note_no'] as String? ?? 'note';
+  try {
+    final doc = await CreditNotePdf(
+      business: business,
+      saleReturn: row,
+      isDebitNote: isDebitNote,
+    ).build();
+    final message = await saveOrShareFile(
+      await doc.save(),
+      '${noteNo.replaceAll('/', '-')}.pdf',
+    );
+    if (message != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
+  } catch (e) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(friendlyError(e))),
+      );
+    }
+  }
+}
+
+/// "Credit note CN/26-27/00001" line under a return's date.
+class _NoteNumber extends StatelessWidget {
+  const _NoteNumber(this.label, this.number);
+
+  final String label;
+  final String number;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(top: 6),
+    child: Row(
+      children: [
+        const Icon(Icons.description_outlined, size: 16, color: AppColors.green),
+        const SizedBox(width: 6),
+        Text(
+          '$label $number',
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ],
+    ),
+  );
+}
 
 /// Tap-to-type return quantity — needed for loose goods where the sold
 /// quantity is fractional (e.g. 1.19 kg) and the ±1 stepper can't reach it.
@@ -144,7 +202,8 @@ final saleReturnDetailProvider = FutureProvider.autoDispose
       final row = await client
           .from('sale_returns')
           .select(
-            '*, invoices(invoice_no), customers(name), sale_return_items(*)',
+            '*, invoices(invoice_no, invoice_date, customer_name), customers(name), '
+            'sale_return_items(*)',
           )
           .eq('id', id)
           .single();
@@ -554,6 +613,15 @@ class SaleReturnDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Sale return'),
+        actions: [
+          if (data.value?['credit_note_no'] != null)
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: 'Credit note PDF',
+              onPressed: () =>
+                  _shareNotePdf(context, ref, data.value!, isDebitNote: false),
+            ),
+        ],
       ),
       body: AsyncView(
         value: data,
@@ -606,6 +674,8 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                             fontSize: 12.5,
                           ),
                         ),
+                        if (r['credit_note_no'] != null)
+                          _NoteNumber('Credit note', r['credit_note_no'] as String),
                         if (invoiceNo != null) ...[
                           const SizedBox(height: 8),
                           InkWell(
@@ -1168,7 +1238,8 @@ final purchaseReturnDetailProvider = FutureProvider.autoDispose
       final row = await client
           .from('purchase_returns')
           .select(
-            '*, purchases(purchase_no), suppliers(name), purchase_return_items(*)',
+            '*, purchases(purchase_no, bill_no, purchase_date), suppliers(name), '
+            'purchase_return_items(*)',
           )
           .eq('id', id)
           .single();
@@ -1504,6 +1575,15 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Purchase return'),
+        actions: [
+          if (data.value?['debit_note_no'] != null)
+            IconButton(
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              tooltip: 'Debit note PDF',
+              onPressed: () =>
+                  _shareNotePdf(context, ref, data.value!, isDebitNote: true),
+            ),
+        ],
       ),
       body: AsyncView(
         value: data,
@@ -1557,6 +1637,8 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                             fontSize: 12.5,
                           ),
                         ),
+                        if (r['debit_note_no'] != null)
+                          _NoteNumber('Debit note', r['debit_note_no'] as String),
                         if (purchaseNo != null) ...[
                           const SizedBox(height: 8),
                           InkWell(

@@ -119,6 +119,11 @@ class InvoicePdf {
               style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
             ),
             pw.Text(invoice['customer_name'] as String),
+            if (isGst && _customerGstin.isNotEmpty)
+              pw.Text(
+                'GSTIN: $_customerGstin',
+                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+              ),
             if ((invoice['customer_phone'] as String? ?? '').isNotEmpty)
               pw.Text(
                 'Phone: ${invoice['customer_phone']}',
@@ -195,7 +200,10 @@ class InvoicePdf {
                         'Discount',
                         '- ${_rs(invoice['discount_amount'] as num?)}',
                       ),
-                    if (isGst) ..._gstBreakup(),
+                    if (isGst) ...[
+                      _totRow('Taxable value', _rs(gstTaxableTotal(items))),
+                      ..._gstBreakup(),
+                    ],
                     if (toDouble(invoice['round_off']) != 0)
                       _totRow('Round off', _rs(invoice['round_off'] as num?)),
                     pw.Divider(),
@@ -321,6 +329,8 @@ class InvoicePdf {
             ),
             if ((invoice['customer_name'] as String? ?? '').isNotEmpty)
               pw.Text('Customer: ${invoice['customer_name']}', style: small),
+            if (isGst && _customerGstin.isNotEmpty)
+              pw.Text('GSTIN: $_customerGstin', style: small),
             if (isGst && _placeOfSupply.isNotEmpty)
               pw.Text(_placeOfSupply, style: small),
             pw.Divider(height: 6, borderStyle: pw.BorderStyle.dashed),
@@ -354,9 +364,15 @@ class InvoicePdf {
                 '-${toDouble(invoice['discount_amount']).toStringAsFixed(2)}',
                 small,
               ),
-            if (isGst && toDouble(invoice['tax_amount']) > 0)
+            if (isGst && toDouble(invoice['tax_amount']) > 0) ...[
+              _tRow(
+                'Taxable value',
+                gstTaxableTotal(items).toStringAsFixed(2),
+                small,
+              ),
               for (final (label, amount) in gstBreakupRows(items))
                 _tRow('Incl. $label', amount.toStringAsFixed(2), small),
+            ],
             if (toDouble(invoice['round_off']) != 0)
               _tRow(
                 'Round off',
@@ -417,6 +433,9 @@ class InvoicePdf {
     for (final (label, amount) in gstBreakupRows(items))
       _totRow('$label (incl.)', _rs(amount)),
   ];
+
+  /// The customer's GSTIN as it was when billed (migration 0040).
+  String get _customerGstin => invoice['customer_gstin'] as String? ?? '';
 
   /// "Place of supply: 27 - Maharashtra", or '' when not recorded.
   String get _placeOfSupply {

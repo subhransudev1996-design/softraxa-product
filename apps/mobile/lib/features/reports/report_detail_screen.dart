@@ -465,57 +465,42 @@ final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic
               )
               as Map<String, dynamic>;
       final output = d['output_tax'] as List? ?? [];
+      final credit = d['credit_notes'] as List? ?? [];
       final input = d['input_tax'] as List? ?? [];
-      final outTotal = output.fold<double>(
-        0,
-        (s, r) => s + toDouble(r['tax_amount']),
-      );
-      final inTotal = input.fold<double>(
-        0,
-        (s, r) => s + toDouble(r['tax_amount']),
-      );
-      final byRate = gstByRate(output, input);
+      final debit = d['debit_notes'] as List? ?? [];
       double sumOf(List rows, String key) =>
           rows.fold<double>(0, (s, r) => s + toDouble(r[key]));
+      final outTotal =
+          sumOf(output, 'tax_amount') - sumOf(credit, 'tax_amount');
+      final inTotal = sumOf(input, 'tax_amount') - sumOf(debit, 'tax_amount');
+      final byRate = gstByRate(output, input);
+      String split(List plus, List minus) =>
+          '${money(sumOf(plus, 'cgst_amount') - sumOf(minus, 'cgst_amount'))} / '
+          '${money(sumOf(plus, 'sgst_amount') - sumOf(minus, 'sgst_amount'))} / '
+          '${money(sumOf(plus, 'igst_amount') - sumOf(minus, 'igst_amount'))}';
+      List<String> row(String type, dynamic r) => [
+        type,
+        '${qty(r['gst_rate'] as num?)}%',
+        money(r['taxable_value'] as num?),
+        money(r['cgst_amount'] as num?),
+        money(r['sgst_amount'] as num?),
+        money(r['igst_amount'] as num?),
+      ];
       return {
         'summary': [
-          ('Output tax (sales)', money(outTotal)),
-          (
-            '  CGST / SGST / IGST',
-            '${money(sumOf(output, 'cgst_amount'))} / '
-                '${money(sumOf(output, 'sgst_amount'))} / '
-                '${money(sumOf(output, 'igst_amount'))}',
-          ),
-          ('Input tax (purchases)', money(inTotal)),
-          (
-            '  CGST / SGST / IGST',
-            '${money(sumOf(input, 'cgst_amount'))} / '
-                '${money(sumOf(input, 'sgst_amount'))} / '
-                '${money(sumOf(input, 'igst_amount'))}',
-          ),
+          ('Output tax (sales − credit notes)', money(outTotal)),
+          ('  CGST / SGST / IGST', split(output, credit)),
+          ('Input tax (purchases − debit notes)', money(inTotal)),
+          ('  CGST / SGST / IGST', split(input, debit)),
           ('Net GST payable', money(outTotal - inTotal)),
         ],
         'table': {
           'headers': ['Type', 'Rate', 'Taxable value', 'CGST', 'SGST', 'IGST'],
           'rows': [
-            for (final r in output)
-              [
-                'Sales',
-                '${qty(r['gst_rate'] as num?)}%',
-                money(r['taxable_value'] as num?),
-                money(r['cgst_amount'] as num?),
-                money(r['sgst_amount'] as num?),
-                money(r['igst_amount'] as num?),
-              ],
-            for (final r in input)
-              [
-                'Purchase',
-                '${qty(r['gst_rate'] as num?)}%',
-                money(r['taxable_value'] as num?),
-                money(r['cgst_amount'] as num?),
-                money(r['sgst_amount'] as num?),
-                money(r['igst_amount'] as num?),
-              ],
+            for (final r in output) row('Sales', r),
+            for (final r in credit) row('Credit note', r),
+            for (final r in input) row('Purchase', r),
+            for (final r in debit) row('Debit note', r),
           ],
         },
         'chart': byRate.output,

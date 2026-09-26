@@ -132,6 +132,10 @@ class ThermalPrinterService {
     if ((invoice['customer_name'] as String? ?? '').isNotEmpty) {
       bytes += generator.text('Customer: ${invoice['customer_name']}');
     }
+    final customerGstin = invoice['customer_gstin'] as String? ?? '';
+    if (isGst && customerGstin.isNotEmpty) {
+      bytes += generator.text('GSTIN: $customerGstin');
+    }
     final pos = gstStateLabel(invoice['place_of_supply'] as String?);
     if (isGst && pos.isNotEmpty) {
       bytes += generator.text('Place of supply: $pos');
@@ -183,6 +187,7 @@ class ThermalPrinterService {
       totalRow('Discount', -toDouble(invoice['discount_amount']));
     }
     if (isGst && toDouble(invoice['tax_amount']) > 0) {
+      totalRow('Taxable value', gstTaxableTotal(items));
       for (final (label, amount) in gstBreakupRows(items)) {
         totalRow('Incl. $label', amount);
       }

@@ -1048,7 +1048,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                             ),
                             if (cart.taxTotal > 0)
                               Text(
-                                'incl. GST ${money(cart.taxTotal)}',
+                                'incl. GST ${money(cart.billTaxTotal)}',
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: AppColors.inkSoft,

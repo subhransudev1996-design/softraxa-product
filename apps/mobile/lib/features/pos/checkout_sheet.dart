@@ -501,7 +501,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 children: [
                   _row('Items (${cart.itemCount})', money(cart.itemsGross)),
                   if (_docType == 'gst' && cart.taxTotal > 0)
-                    _row('Included GST', money(cart.taxTotal), dim: true),
+                    _row('Included GST', money(cart.billTaxTotal), dim: true),
                   // Bill discounts need price permission (enforced by the
                   // server's invoice guard, migration 0037).
                   if (appContext?.canEditPrices ?? false) ...[

@@ -82,6 +82,13 @@ class ReportsScreen extends ConsumerWidget {
       Icons.receipt_long_outlined,
       AppColors.indigo,
     ),
+    (
+      'gst-returns',
+      'GST returns',
+      'GSTR-1, GSTR-3B & purchase register in Excel for your accountant',
+      Icons.assignment_outlined,
+      AppColors.green,
+    ),
   ];
 
   @override
