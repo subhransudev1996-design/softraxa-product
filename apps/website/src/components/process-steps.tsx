@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   FileSearch, Code2, Rocket, MessageSquareDot, Check,
   Workflow, GitBranch, ArrowRight, Sparkles, Terminal
@@ -69,7 +68,7 @@ const STEPS = [
             "Staff profiles configured",
             "Inventory CSV imported",
             "App live on counter"
-          ].map((item, idx) => (
+          ].map((item) => (
             <div key={item} className="flex items-center gap-2 text-paper">
               <span className="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-teal/20 text-teal">
                 <Check className="h-2.5 w-2.5" />

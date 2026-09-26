@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
+import '../../core/gst.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -144,63 +145,79 @@ Future<Map<String, dynamic>?> showSupplierForm(
         : toDouble(existing!['credit_limit']).toStringAsFixed(0),
   );
 
+  var state = existing?['state_code'] as String? ?? '';
+
   final saved = await showDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(existing == null ? 'Add supplier' : 'Edit supplier'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: name,
-              autofocus: existing == null,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Name *'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phone,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: address,
-              maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Address'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: gst,
-              textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(labelText: 'GSTIN (optional)'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: creditLimit,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text(existing == null ? 'Add supplier' : 'Edit supplier'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                autofocus: existing == null,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Name *'),
               ),
-              decoration: const InputDecoration(
-                labelText: 'Credit limit ₹ (optional)',
-                helperText:
-                    'Max amount you can owe this supplier — leave blank for no limit',
+              const SizedBox(height: 12),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Phone'),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: address,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Address'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: gst,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'GSTIN (optional)',
+                ),
+                onChanged: (v) {
+                  final s = stateFromGstin(v);
+                  if (s != null && s != state) setState(() => state = s);
+                },
+              ),
+              const SizedBox(height: 12),
+              GstStateField(
+                value: state,
+                helperText: 'Another state means IGST on their bills',
+                onChanged: (v) => setState(() => state = v),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: creditLimit,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Credit limit ₹ (optional)',
+                  helperText:
+                      'Max amount you can owe this supplier — leave blank for no limit',
+                ),
+              ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Save'),
-        ),
-      ],
     ),
   );
   if (saved != true || name.text.trim().isEmpty) return null;
@@ -211,6 +228,7 @@ Future<Map<String, dynamic>?> showSupplierForm(
     'phone': phone.text.trim(),
     'address': address.text.trim(),
     'gst_number': gst.text.trim().toUpperCase(),
+    'state_code': state,
     'credit_limit': creditLimit.text.trim().isEmpty
         ? null
         : double.tryParse(creditLimit.text),
@@ -448,7 +466,9 @@ class SuppliersScreen extends ConsumerWidget {
                                             context,
                                             s['phone'] as String,
                                           ),
-                                    onPay: () => showRecordSupplierPayment(
+                                    onPay: !(ref.watch(appContextProvider).value?.canManagePurchases ?? false)
+                                        ? null
+                                        : () => showRecordSupplierPayment(
                                       context,
                                       ref,
                                       supplierId: s['id'] as String,
@@ -575,19 +595,24 @@ class SupplierDetailScreen extends ConsumerWidget {
         leading: appBarBack(context),
         title: const Text('Supplier'),
         actions: [
+          const GuideButton('supplier_detail'),
           if (data.hasValue)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () async {
-                final updated = await showSupplierForm(
-                  context,
-                  ref,
-                  existing: data.value!['supplier'] as Map<String, dynamic>,
-                );
-                if (updated != null) {
-                  ref.invalidate(supplierLedgerProvider(supplierId));
-                }
-              },
+            CoachTarget(
+              page: 'supplier_detail',
+              id: 'edit',
+              child: IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () async {
+                  final updated = await showSupplierForm(
+                    context,
+                    ref,
+                    existing: data.value!['supplier'] as Map<String, dynamic>,
+                  );
+                  if (updated != null) {
+                    ref.invalidate(supplierLedgerProvider(supplierId));
+                  }
+                },
+              ),
             ),
         ],
       ),
@@ -609,109 +634,113 @@ class SupplierDetailScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            InitialsAvatar(
-                              s['name'] as String? ?? '',
-                              radius: 26,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    s['name'] as String,
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  if ((s['phone'] as String? ?? '').isNotEmpty)
-                                    Text(s['phone'] as String),
-                                  if ((s['address'] as String? ?? '')
-                                      .isNotEmpty)
+                CoachTarget(
+                  page: 'supplier_detail',
+                  id: 'info',
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              InitialsAvatar(
+                                s['name'] as String? ?? '',
+                                radius: 26,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      s['address'] as String,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.inkSoft,
+                                      s['name'] as String,
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                ],
+                                    if ((s['phone'] as String? ?? '').isNotEmpty)
+                                      Text(s['phone'] as String),
+                                    if ((s['address'] as String? ?? '')
+                                        .isNotEmpty)
+                                      Text(
+                                        s['address'] as String,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.inkSoft,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Pending payment'),
-                            Text(
-                              money(due),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: due > 0
-                                    ? AppColors.purple
-                                    : AppColors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (creditLimit != null) ...[
-                          const SizedBox(height: 4),
+                            ],
+                          ),
+                          const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              const Text('Pending payment'),
                               Text(
-                                'Credit limit',
+                                money(due),
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.inkSoft,
-                                ),
-                              ),
-                              Text(
-                                money(creditLimit),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.inkSoft,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: due > 0
+                                      ? AppColors.purple
+                                      : AppColors.green,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                        if (overLimit) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.warning_amber,
-                                size: 16,
-                                color: AppColors.orange,
-                              ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  'Over credit limit by ${money(due - creditLimit)}',
-                                  style: const TextStyle(
+                          if (creditLimit != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Credit limit',
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.orange,
-                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.inkSoft,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                Text(
+                                  money(creditLimit),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.inkSoft,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (overLimit) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.warning_amber,
+                                  size: 16,
+                                  color: AppColors.orange,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Over credit limit by ${money(due - creditLimit)}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.orange,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
@@ -719,24 +748,32 @@ class SupplierDetailScreen extends ConsumerWidget {
                 Row(
                   children: [
                     Expanded(
-                      child: FilledButton.icon(
-                        onPressed: () => showRecordSupplierPayment(
-                          context,
-                          ref,
-                          supplierId: supplierId,
-                          due: due,
+                      child: CoachTarget(
+                        page: 'supplier_detail',
+                        id: 'pay',
+                        child: FilledButton.icon(
+                          onPressed: () => showRecordSupplierPayment(
+                            context,
+                            ref,
+                            supplierId: supplierId,
+                            due: due,
+                          ),
+                          icon: const Icon(Icons.payments),
+                          label: const Text('Pay supplier'),
                         ),
-                        icon: const Icon(Icons.payments),
-                        label: const Text('Pay supplier'),
                       ),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () =>
-                            context.push('/purchases/new?supplier=$supplierId'),
-                        icon: const Icon(Icons.add_shopping_cart),
-                        label: const Text('New purchase'),
+                      child: CoachTarget(
+                        page: 'supplier_detail',
+                        id: 'new_purchase',
+                        child: OutlinedButton.icon(
+                          onPressed: () =>
+                              context.push('/purchases/new?supplier=$supplierId'),
+                          icon: const Icon(Icons.add_shopping_cart),
+                          label: const Text('New purchase'),
+                        ),
                       ),
                     ),
                   ],
@@ -748,11 +785,15 @@ class SupplierDetailScreen extends ConsumerWidget {
                     message: 'No transactions yet',
                   )
                 else
-                  Card(
-                    child: Column(
-                      children: [
-                        for (final e in entries) _ledgerTile(context, e),
-                      ],
+                  CoachTarget(
+                    page: 'supplier_detail',
+                    id: 'ledger',
+                    child: Card(
+                      child: Column(
+                        children: [
+                          for (final e in entries) _ledgerTile(context, e),
+                        ],
+                      ),
                     ),
                   ),
                 const SizedBox(height: 24),

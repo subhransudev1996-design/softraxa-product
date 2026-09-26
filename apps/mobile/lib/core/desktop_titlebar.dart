@@ -122,7 +122,7 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                   ref.read(routerProvider).go('/home');
                   await Future<void>.delayed(const Duration(milliseconds: 250));
                   final ctx = rootNavigatorKey.currentContext;
-                  if (ctx != null) showWalkthrough(ctx, 'home');
+                  if (ctx != null && ctx.mounted) showWalkthrough(ctx, 'home');
                 },
               ),
               const _NotificationBell(),

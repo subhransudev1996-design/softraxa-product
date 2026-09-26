@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/supabase_providers.dart';
@@ -44,8 +46,9 @@ final posProductsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>
     final rows = List<Map<String, dynamic>>.from(
       await query.order('name').limit(100),
     );
-    // refresh cache in background (full refresh only when browsing, not filtering)
-    if (search.isEmpty) offline.cacheProducts(rows);
+    // Keep the whole catalogue cached for offline billing (throttled,
+    // paged, removes stale rows) — not just this first page of results.
+    unawaited(offline.syncCatalog());
     return rows;
   } catch (_) {
     return offline.searchCachedProducts(search);

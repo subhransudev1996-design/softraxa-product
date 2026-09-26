@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
+import '../../core/gst.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -34,76 +35,109 @@ Future<Map<String, dynamic>?> showCustomerForm(
         ? ''
         : toDouble(existing!['credit_limit']).toStringAsFixed(0),
   );
+  var state = existing?['state_code'] as String? ?? '';
+  // Existing rows carry the flag; a new customer starts on the store default.
+  var unlimited = existing?['credit_unlimited'] == true;
+  // Credit limits are owner-only (PD17; enforced by guard_party_columns).
+  final isOwner = ref.read(appContextProvider).value?.isOwner ?? false;
 
   final saved = await showDialog<bool>(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(existing == null ? 'Add customer' : 'Edit customer'),
-      content: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: name,
-              autofocus: existing == null,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Name *'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phone,
-              keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: address,
-              maxLines: 2,
-              decoration: const InputDecoration(labelText: 'Address'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: gst,
-              textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(labelText: 'GSTIN (optional)'),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: creditLimit,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text(existing == null ? 'Add customer' : 'Edit customer'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                autofocus: existing == null,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Name *'),
               ),
-              decoration: const InputDecoration(
-                labelText: 'Credit limit ₹ (optional)',
-                helperText: 'Leave blank for no limit',
+              const SizedBox(height: 12),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: const InputDecoration(labelText: 'Phone'),
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: address,
+                maxLines: 2,
+                decoration: const InputDecoration(labelText: 'Address'),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: gst,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'GSTIN (optional)',
+                ),
+                onChanged: (v) {
+                  final s = stateFromGstin(v);
+                  if (s != null && s != state) setState(() => state = s);
+                },
+              ),
+              const SizedBox(height: 12),
+              GstStateField(
+                value: state,
+                helperText: 'Another state means IGST on their invoices',
+                onChanged: (v) => setState(() => state = v),
+              ),
+              const SizedBox(height: 4),
+              if (isOwner)
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Unlimited credit'),
+                  value: unlimited,
+                  onChanged: (v) => setState(() => unlimited = v),
+                ),
+              if (isOwner && !unlimited)
+                TextField(
+                  controller: creditLimit,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Credit limit ₹',
+                    helperText: 'Leave blank to use the shop default',
+                  ),
+                ),
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
+        ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Save'),
-        ),
-      ],
     ),
   );
   if (saved != true || name.text.trim().isEmpty) return null;
 
   final client = ref.read(supabaseProvider);
+  // A null limit (not unlimited) is replaced by the shop default in the
+  // database (normalize_customer_credit, migration 0036).
   final row = {
     'name': name.text.trim(),
     'phone': phone.text.trim(),
     'address': address.text.trim(),
     'gst_number': gst.text.trim().toUpperCase(),
-    'credit_limit': creditLimit.text.trim().isEmpty
-        ? null
-        : double.tryParse(creditLimit.text),
+    'state_code': state,
+    if (isOwner) ...{
+      'credit_unlimited': unlimited,
+      'credit_limit': unlimited || creditLimit.text.trim().isEmpty
+          ? null
+          : double.tryParse(creditLimit.text),
+    },
   };
   try {
     Map<String, dynamic> result;
@@ -336,7 +370,9 @@ class CustomersScreen extends ConsumerWidget {
                                             context,
                                             c['phone'] as String,
                                           ),
-                                    onPay: () => showRecordCustomerPayment(
+                                    onPay: !(ref.watch(appContextProvider).value?.canRecordPayments ?? false)
+                                        ? null
+                                        : () => showRecordCustomerPayment(
                                       context,
                                       ref,
                                       customerId: c['id'] as String,

@@ -4,20 +4,18 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Layers, WifiOff, Store, BarChart3, Database, Server, Monitor,
-  Smartphone, Check, RefreshCw, ArrowUpRight, TrendingUp, IndianRupee
+  ArrowUpRight, TrendingUp
 } from "lucide-react";
 import Reveal from "./reveal";
 
 export default function WhatWeBuild() {
   // Simulating live database syncing status
-  const [syncedCount, setSyncedCount] = useState(537);
   const [syncStatus, setSyncStatus] = useState("Idle");
 
   useEffect(() => {
     const timer = setInterval(() => {
       setSyncStatus("Syncing...");
       setTimeout(() => {
-        setSyncedCount(c => c + 1);
         setSyncStatus("Idle");
       }, 1000);
     }, 5000);

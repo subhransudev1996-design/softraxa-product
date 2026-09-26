@@ -502,20 +502,24 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   _row('Items (${cart.itemCount})', money(cart.itemsGross)),
                   if (_docType == 'gst' && cart.taxTotal > 0)
                     _row('Included GST', money(cart.taxTotal), dim: true),
-                  const SizedBox(height: 4),
-                  const Text('Bill discount', style: TextStyle(fontSize: 13)),
-                  const SizedBox(height: 4),
-                  AmountOrPercentField(
-                    controller: _discount,
-                    isPercent: _discountIsPercent,
-                    onModeChanged: (v) => setState(() {
-                      _discountIsPercent = v;
-                      ref.read(cartProvider.notifier).setBillDiscountMode(v);
-                    }),
-                    onChanged: (v) => ref
-                        .read(cartProvider.notifier)
-                        .setBillDiscount(double.tryParse(v) ?? 0),
-                  ),
+                  // Bill discounts need price permission (enforced by the
+                  // server's invoice guard, migration 0037).
+                  if (appContext?.canEditPrices ?? false) ...[
+                    const SizedBox(height: 4),
+                    const Text('Bill discount', style: TextStyle(fontSize: 13)),
+                    const SizedBox(height: 4),
+                    AmountOrPercentField(
+                      controller: _discount,
+                      isPercent: _discountIsPercent,
+                      onModeChanged: (v) => setState(() {
+                        _discountIsPercent = v;
+                        ref.read(cartProvider.notifier).setBillDiscountMode(v);
+                      }),
+                      onChanged: (v) => ref
+                          .read(cartProvider.notifier)
+                          .setBillDiscount(double.tryParse(v) ?? 0),
+                    ),
+                  ],
                   if (cart.billDiscount > 0)
                     Padding(
                       padding: const EdgeInsets.only(top: 4),

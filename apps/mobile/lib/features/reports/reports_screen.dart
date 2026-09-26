@@ -88,6 +88,19 @@ class ReportsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final features = ref.watch(appContextProvider).value;
     final enabled = features?.featureOn('reports') ?? true;
+    final allowed = features?.canViewReports ?? false;
+    // Reports whose data needs an extra permission (the server refuses
+    // them otherwise — migration 0037 report wrappers and table policies).
+    final reports = [
+      for (final r in _reports)
+        if (switch (r.$1) {
+          'profit' => features?.canViewProfit ?? false,
+          'purchases' || 'supplier_due' => features?.canManagePurchases ?? false,
+          'expenses' => features?.canManageExpenses ?? false,
+          _ => true,
+        })
+          r,
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -97,15 +110,20 @@ class ReportsScreen extends ConsumerWidget {
       ),
       body: !enabled
           ? const Center(child: Text('Reports are not enabled on your plan.'))
+          : !allowed
+          ? const EmptyState(
+              icon: Icons.lock_outline,
+              message: 'Ask the shop owner for permission to view reports.',
+            )
           : CoachTarget(
               page: 'reports',
               id: 'list',
               child: ListView.separated(
                 padding: const EdgeInsets.all(16),
-                itemCount: _reports.length,
+                itemCount: reports.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, i) {
-                  final r = _reports[i];
+                  final r = reports[i];
                   return Card(
                     child: ListTile(
                       leading: IconChip(r.$4, color: r.$5, size: 40),

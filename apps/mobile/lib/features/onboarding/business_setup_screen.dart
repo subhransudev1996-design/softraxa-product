@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/gst.dart';
 import '../../core/imagekit.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -44,6 +45,14 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   );
   late final _prefix = TextEditingController(
     text: widget.existing?['invoice_prefix'] ?? 'INV',
+  );
+  late String _state = widget.existing?['state_code'] ?? '';
+  late final _defaultCredit = TextEditingController(
+    text:
+        (widget.existing?['default_credit_limit'] as num?)?.toStringAsFixed(
+          0,
+        ) ??
+        '0',
   );
   late String _type = widget.existing?['business_type'] ?? 'mobile';
   late String _taxPref = widget.existing?['tax_preference'] ?? 'gst';
@@ -88,22 +97,28 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'invoice_prefix': _prefix.text.trim().toUpperCase(),
         'tax_preference': _taxPref,
       };
+      // Not accepted by create_business, so saved with a follow-up update.
+      final extra = <String, dynamic>{
+        'state_code': _state,
+        'default_credit_limit': double.tryParse(_defaultCredit.text) ?? 0,
+      };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
         final logoUrl = await _uploadLogo(client, id);
         if (logoUrl != null) payload['logo_url'] = logoUrl;
-        await client.from('businesses').update(payload).eq('id', id);
+        await client
+            .from('businesses')
+            .update({...payload, ...extra})
+            .eq('id', id);
       } else {
         final businessId =
             await client.rpc('create_business', params: {'payload': payload})
                 as String;
         final logoUrl = await _uploadLogo(client, businessId);
-        if (logoUrl != null) {
-          await client
-              .from('businesses')
-              .update({'logo_url': logoUrl})
-              .eq('id', businessId);
-        }
+        await client
+            .from('businesses')
+            .update({...extra, 'logo_url': ?logoUrl})
+            .eq('id', businessId);
       }
       await ref.read(appContextProvider.notifier).refresh();
       if (mounted) {
@@ -241,8 +256,37 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     decoration: const InputDecoration(
                       labelText: 'GST number (GSTIN)',
                     ),
+                    onChanged: (v) {
+                      final s = stateFromGstin(v);
+                      if (s != null && s != _state) setState(() => _state = s);
+                    },
                   ),
                 ),
+              if (_taxPref == 'gst')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: GstStateField(
+                    value: _state,
+                    label: 'State *',
+                    helperText: 'Decides CGST + SGST vs IGST on invoices',
+                    onChanged: (v) => setState(() => _state = v),
+                    validator: (v) => (v ?? '').isEmpty
+                        ? 'Required for GST billing'
+                        : null,
+                  ),
+                ),
+              TextFormField(
+                controller: _defaultCredit,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Default credit limit for new customers ₹',
+                  helperText:
+                      '0 = new customers get no credit until you set a limit',
+                ),
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _prefix,
                 textCapitalization: TextCapitalization.characters,

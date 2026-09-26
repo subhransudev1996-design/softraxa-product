@@ -140,17 +140,45 @@ class ExpensesScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (saved != true || name.text.trim().isEmpty) return;
+    final trimmedName = name.text.trim();
+    if (saved != true || trimmedName.isEmpty) return;
     try {
       final client = ref.read(supabaseProvider);
       final businessId = ref.read(appContextProvider).value?.businessId;
+
+      // Check existing loaded categories (case-insensitive)
+      final existingCategories =
+          ref.read(expenseCategoriesProvider).value ?? [];
+      final existingMatch = existingCategories.firstWhere(
+        (c) =>
+            (c['name'] as String?)?.trim().toLowerCase() ==
+            trimmedName.toLowerCase(),
+        orElse: () => {},
+      );
+
+      if (existingMatch.isNotEmpty) {
+        final existingId = existingMatch['id'] as String;
+        onAdded(existingId, existingCategories);
+        if (context.mounted) {
+          showSuccess(
+            context,
+            'Expense category "$trimmedName" already exists',
+          );
+        }
+        return;
+      }
+
       final inserted = await client
           .from('expense_categories')
-          .insert({'business_id': businessId, 'name': name.text.trim()})
+          .insert({'business_id': businessId, 'name': trimmedName})
           .select('id')
           .single();
-      final fresh = await ref.refresh(expenseCategoriesProvider.future);
+      ref.invalidate(expenseCategoriesProvider);
+      final fresh = await ref.read(expenseCategoriesProvider.future);
       onAdded(inserted['id'] as String, fresh);
+      if (context.mounted) {
+        showSuccess(context, 'Expense category "$trimmedName" added');
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -206,8 +234,15 @@ class ExpensesScreen extends ConsumerWidget {
                   children: [
                     Expanded(
                       child: DropdownButtonFormField<String>(
+                        key: ValueKey(
+                          'expense_cat_${categories.any((c) => c['id'] == categoryId) ? categoryId : null}',
+                        ),
                         isExpanded: true,
-                        initialValue: categoryId,
+                        initialValue: categories.any(
+                          (c) => c['id'] == categoryId,
+                        )
+                            ? categoryId
+                            : null,
                         decoration: const InputDecoration(
                           labelText: 'Category',
                         ),

@@ -475,28 +475,46 @@ final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic
         (s, r) => s + toDouble(r['tax_amount']),
       );
       final byRate = gstByRate(output, input);
+      double sumOf(List rows, String key) =>
+          rows.fold<double>(0, (s, r) => s + toDouble(r[key]));
       return {
         'summary': [
           ('Output tax (sales)', money(outTotal)),
+          (
+            '  CGST / SGST / IGST',
+            '${money(sumOf(output, 'cgst_amount'))} / '
+                '${money(sumOf(output, 'sgst_amount'))} / '
+                '${money(sumOf(output, 'igst_amount'))}',
+          ),
           ('Input tax (purchases)', money(inTotal)),
+          (
+            '  CGST / SGST / IGST',
+            '${money(sumOf(input, 'cgst_amount'))} / '
+                '${money(sumOf(input, 'sgst_amount'))} / '
+                '${money(sumOf(input, 'igst_amount'))}',
+          ),
           ('Net GST payable', money(outTotal - inTotal)),
         ],
         'table': {
-          'headers': ['Type', 'Rate', 'Taxable value', 'Tax'],
+          'headers': ['Type', 'Rate', 'Taxable value', 'CGST', 'SGST', 'IGST'],
           'rows': [
             for (final r in output)
               [
                 'Sales',
                 '${qty(r['gst_rate'] as num?)}%',
                 money(r['taxable_value'] as num?),
-                money(r['tax_amount'] as num?),
+                money(r['cgst_amount'] as num?),
+                money(r['sgst_amount'] as num?),
+                money(r['igst_amount'] as num?),
               ],
             for (final r in input)
               [
                 'Purchase',
                 '${qty(r['gst_rate'] as num?)}%',
                 money(r['taxable_value'] as num?),
-                money(r['tax_amount'] as num?),
+                money(r['cgst_amount'] as num?),
+                money(r['sgst_amount'] as num?),
+                money(r['igst_amount'] as num?),
               ],
           ],
         },

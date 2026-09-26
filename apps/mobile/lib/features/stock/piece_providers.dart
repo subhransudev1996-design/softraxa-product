@@ -25,22 +25,11 @@ Future<void> applyPieceCuts(
   List<(String pieceId, double cutQty)> cuts,
 ) async {
   for (final (pieceId, cutQty) in cuts) {
-    final row = await client
-        .from('stock_pieces')
-        .select('length')
-        .eq('id', pieceId)
-        .maybeSingle();
-    if (row == null) continue;
-    final remaining = ((row['length'] as num).toDouble() - cutQty).clamp(
-      0.0,
-      double.infinity,
+    // Server-side so billing staff without stock permission can cut, and
+    // two counters can't cut the same length twice (migration 0037).
+    await client.rpc(
+      'apply_piece_cut',
+      params: {'p_piece_id': pieceId, 'p_cut': cutQty},
     );
-    await client
-        .from('stock_pieces')
-        .update({
-          'length': remaining,
-          if (remaining <= 0.0005) 'status': 'consumed',
-        })
-        .eq('id', pieceId);
   }
 }

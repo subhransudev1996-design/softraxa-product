@@ -5,8 +5,15 @@
 //
 // Setup (see PLAN.md Runbook):
 //   supabase secrets set FIREBASE_SERVICE_ACCOUNT="$(cat service-account.json)"
+//   supabase secrets set PUSH_ALERTS_SECRET="<long random string>"
 //   supabase functions deploy push-alerts --no-verify-jwt
-//   Schedule it (e.g. daily 09:00 IST) from Dashboard → Edge Functions → Cron.
+//   Schedule it (e.g. daily 09:00 IST) as a POST with the header
+//     Authorization: Bearer <PUSH_ALERTS_SECRET>
+//
+// Security (PROJECT_ANALYSIS finding 12): the gateway's JWT check is off
+// for the scheduler, so this function authenticates the caller itself,
+// accepts only POST, and runs at most once per day (push_alert_runs table,
+// migration 0039) — a leaked URL can't be used to spam every device.
 //
 // SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are injected automatically.
 
@@ -137,9 +144,38 @@ async function alertLines(db: any, businessId: string): Promise<string[]> {
   return lines;
 }
 
+// ---------- Caller authentication ----------
+
+/** Constant-time string comparison (no early exit on the first mismatch). */
+function safeEqual(a: string, b: string): boolean {
+  const enc = new TextEncoder();
+  const x = enc.encode(a);
+  const y = enc.encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  }
+  return diff === 0;
+}
+
+function isAuthorized(req: Request): boolean {
+  const secret = Deno.env.get("PUSH_ALERTS_SECRET") ?? "";
+  if (secret.length < 16) return false; // not configured → refuse everyone
+  const header = req.headers.get("Authorization") ?? "";
+  const token = header.startsWith("Bearer ") ? header.slice(7) : "";
+  return safeEqual(token, secret);
+}
+
 // ---------- Main ----------
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  if (req.method !== "POST") {
+    return new Response("Method not allowed", { status: 405, headers: { Allow: "POST" } });
+  }
+  if (!isAuthorized(req)) {
+    return new Response("Unauthorized", { status: 401 });
+  }
+
   const sa = JSON.parse(
     Deno.env.get("FIREBASE_SERVICE_ACCOUNT") ?? "{}",
   ) as ServiceAccount;
@@ -151,6 +187,21 @@ Deno.serve(async () => {
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
   );
+
+  // At most one broadcast per day (IST), even if the scheduler retries or
+  // the endpoint is called repeatedly.
+  const runDate = new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10);
+  const { error: runError } = await db
+    .from("push_alert_runs")
+    .insert({ run_date: runDate });
+  if (runError) {
+    if (runError.code === "23505") {
+      return new Response(JSON.stringify({ skipped: "already ran today", run_date: runDate }), {
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+    return new Response(`run ledger failed: ${runError.message}`, { status: 500 });
+  }
 
   const { data: tokens, error } = await db
     .from("device_tokens")

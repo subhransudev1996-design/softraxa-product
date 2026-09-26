@@ -8,6 +8,7 @@ import '../../core/notifications.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
+import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 
 final dashboardStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
@@ -308,15 +309,16 @@ class _DesktopDashboard extends StatelessWidget {
                           color: AppColors.primary,
                           onTap: () => context.push('/invoices'),
                         ),
-                        _StatCard(
-                          title: "Today's Profit",
-                          value: s == null
-                              ? '…'
-                              : moneyCompact(s!['today_profit'] as num?),
-                          icon: Icons.trending_up_rounded,
-                          color: AppColors.teal,
-                          onTap: () => context.push('/invoices'),
-                        ),
+                        if (appContext?.canViewProfit ?? true)
+                          _StatCard(
+                            title: "Today's Profit",
+                            value: s == null
+                                ? '…'
+                                : moneyCompact(s!['today_profit'] as num?),
+                            icon: Icons.trending_up_rounded,
+                            color: AppColors.teal,
+                            onTap: () => context.push('/invoices'),
+                          ),
                         _StatCard(
                           title: 'Stock Value',
                           value: s == null
@@ -537,7 +539,7 @@ class _MobileDashboard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (s != null)
+                    if (s != null && (appContext?.canViewProfit ?? true))
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 10,
@@ -780,36 +782,98 @@ class _HeaderIconButton extends StatelessWidget {
   }
 }
 
-class _TrialBanner extends StatelessWidget {
+class _TrialBanner extends ConsumerWidget {
   const _TrialBanner({this.subscription});
   final Map<String, dynamic>? subscription;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final appContext = ref.watch(appContextProvider).value;
     final expiry = subscription?['expiry_date'];
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF7E6),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFFFE1A8)),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const IconChip(
-            Icons.timer_outlined,
-            color: AppColors.orange,
-            size: 34,
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Trial plan — expires ${dateStr(expiry)}. Contact us to activate your subscription.',
-              style: const TextStyle(
-                fontSize: 12.5,
-                fontWeight: FontWeight.w600,
+          Row(
+            children: [
+              const IconChip(
+                Icons.timer_outlined,
+                color: AppColors.orange,
+                size: 36,
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Trial plan active — expires ${dateStr(expiry)}',
+                      style: const TextStyle(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF8C5400),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    const Text(
+                      'Upgrade your plan to unlock full features & staff logins.',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Color(0xFF996300),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF8C5400),
+                    side: const BorderSide(color: Color(0xFFFFD180)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  icon: const Icon(Icons.workspace_premium_outlined, size: 18),
+                  label: const Text(
+                    'View Plans',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                  ),
+                  onPressed: () => context.push('/subscription/plans'),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF25D366),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  icon: const Icon(Icons.chat, size: 18),
+                  label: const Text(
+                    'WhatsApp',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                  ),
+                  onPressed: () => launchWhatsAppContact(context, appContext),
+                ),
+              ),
+            ],
           ),
         ],
       ),

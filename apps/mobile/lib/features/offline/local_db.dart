@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/platform.dart';
+import '../../core/supabase_providers.dart';
 
 part 'local_db.g.dart';
 
@@ -58,10 +59,16 @@ class LocalDb extends _$LocalDb {
   // (guaranteed writable, not cloud-synced). Mobile keeps the original
   // documents-dir default so existing installs keep their cached data and
   // any queued offline bills.
-  LocalDb()
+  //
+  // Each signed-in user gets their own database file (finding 5): cached
+  // products/customers and queued bills can never leak into — or be synced
+  // under — another account on the same device. A user belongs to exactly
+  // one business, so the user id is the right key, and it is known offline
+  // from the saved session.
+  LocalDb.named(String name)
     : super(
         driftDatabase(
-          name: 'softraxa_local',
+          name: name,
           native: isDesktopPlatform
               ? const DriftNativeOptions(
                   databaseDirectory: getApplicationSupportDirectory,
@@ -70,12 +77,21 @@ class LocalDb extends _$LocalDb {
         ),
       );
 
+  /// The database of [userId]; a throwaway one while signed out.
+  factory LocalDb.forAccount(String? userId) =>
+      LocalDb.named(userId == null ? 'softraxa_signed_out' : 'softraxa_$userId');
+
+  /// The single shared database used before per-account files. Only opened
+  /// to hand its queued bills to the first account that signs in.
+  factory LocalDb.legacyShared() => LocalDb.named('softraxa_local');
+
   @override
   int get schemaVersion => 1;
 }
 
+/// The signed-in account's local database; reopened on sign-in/sign-out.
 final localDbProvider = Provider<LocalDb>((ref) {
-  final db = LocalDb();
+  final db = LocalDb.forAccount(ref.watch(currentUserIdProvider));
   ref.onDispose(db.close);
   return db;
 });

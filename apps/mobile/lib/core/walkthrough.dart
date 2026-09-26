@@ -210,18 +210,46 @@ class _CoachOverlayState extends State<_CoachOverlay> {
     if (step.id != null) {
       final targetCtx = CoachRegistry.contextOf(widget.pageKey, step.id!);
       if (targetCtx != null && targetCtx.mounted) {
-        try {
-          await Scrollable.ensureVisible(
-            targetCtx,
-            alignment: 0.45,
-            duration: const Duration(milliseconds: 250),
+        final initialOverlayRo = context.findRenderObject();
+        final initialRo = targetCtx.findRenderObject();
+
+        if (initialRo is RenderBox &&
+            initialRo.attached &&
+            initialRo.hasSize &&
+            initialOverlayRo is RenderBox &&
+            initialOverlayRo.attached) {
+          final relTopLeft = initialRo.localToGlobal(
+            Offset.zero,
+            ancestor: initialOverlayRo,
           );
-        } catch (_) {}
-        await Future<void>.delayed(const Duration(milliseconds: 60));
-        if (!mounted) return;
+          final initialSpot = relTopLeft & initialRo.size;
+          final overlaySize = initialOverlayRo.size;
+
+          final isOffscreen = initialSpot.top < 10 || initialSpot.bottom > overlaySize.height - 10;
+          if (isOffscreen) {
+            try {
+              await Scrollable.ensureVisible(
+                targetCtx,
+                alignment: 0.25,
+                duration: const Duration(milliseconds: 250),
+              );
+              await Future<void>.delayed(const Duration(milliseconds: 60));
+            } catch (_) {}
+          }
+        }
+
+        if (!mounted || !targetCtx.mounted) return;
         final ro = targetCtx.findRenderObject();
-        if (ro is RenderBox && ro.attached && ro.hasSize) {
-          final topLeft = ro.localToGlobal(Offset.zero);
+        final currentOverlayRo = context.findRenderObject();
+        if (ro is RenderBox &&
+            ro.attached &&
+            ro.hasSize &&
+            currentOverlayRo is RenderBox &&
+            currentOverlayRo.attached) {
+          final topLeft = ro.localToGlobal(
+            Offset.zero,
+            ancestor: currentOverlayRo,
+          );
           rect = topLeft & ro.size;
         }
       }
@@ -818,6 +846,36 @@ const Map<String, PageGuide> pageGuides = {
           'Save name, phone and address; set an optional credit limit to get warned before dues grow too big.',
     ),
   ]),
+  'customer_detail': PageGuide('Customer Profile & Ledger', [
+    CoachStep(
+      id: 'info',
+      icon: Icons.person_outline,
+      title: 'Customer profile & dues',
+      body:
+          'View customer contact details, current outstanding due amount, credit limit, and over-limit warnings.',
+    ),
+    CoachStep(
+      id: 'edit',
+      icon: Icons.edit_outlined,
+      title: 'Edit customer details',
+      body:
+          'Tap here anytime to update customer name, phone number, address, GSTIN, or change credit limit.',
+    ),
+    CoachStep(
+      id: 'pay',
+      icon: Icons.payments_outlined,
+      title: 'Receive due payment',
+      body:
+          'Tap here to record a payment received from this customer (Cash, UPI, Card). Outstanding balance is updated immediately.',
+    ),
+    CoachStep(
+      id: 'ledger',
+      icon: Icons.receipt_long_outlined,
+      title: 'Transaction ledger',
+      body:
+          'Complete chronological record of all invoices, payments received, and sales returns. Tap any invoice row to view or print it.',
+    ),
+  ]),
   'suppliers': PageGuide('Suppliers', [
     CoachStep(
       id: 'list',
@@ -830,7 +888,45 @@ const Map<String, PageGuide> pageGuides = {
       id: 'add',
       icon: Icons.add,
       title: 'Add a supplier',
-      body: 'Save their contact details, then record purchases against them.',
+      body:
+          'Save name, phone and address; track how much you owe on purchase orders.',
+    ),
+  ]),
+  'supplier_detail': PageGuide('Supplier Profile & Ledger', [
+    CoachStep(
+      id: 'info',
+      icon: Icons.local_shipping_outlined,
+      title: 'Supplier profile & pending due',
+      body:
+          'View supplier contact details, total pending balance owed to this supplier, credit limit, and over-limit status.',
+    ),
+    CoachStep(
+      id: 'edit',
+      icon: Icons.edit_outlined,
+      title: 'Edit supplier details',
+      body:
+          'Tap here anytime to update supplier name, phone, address, GSTIN, or set credit limits.',
+    ),
+    CoachStep(
+      id: 'pay',
+      icon: Icons.payments_outlined,
+      title: 'Pay supplier',
+      body:
+          'Tap here to record a payment made to this supplier (Cash, UPI, Card, Bank). It reduces your pending balance.',
+    ),
+    CoachStep(
+      id: 'new_purchase',
+      icon: Icons.add_shopping_cart,
+      title: 'New purchase',
+      body:
+          'Record a new stock purchase bill prefilled for this supplier.',
+    ),
+    CoachStep(
+      id: 'ledger',
+      icon: Icons.receipt_long_outlined,
+      title: 'Supplier ledger',
+      body:
+          'Complete chronological history of all purchases, payments made, and purchase returns. Tap any purchase to view details.',
     ),
   ]),
   'stock': PageGuide('Stock', [

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import * as LucideIcons from "lucide-react";
 import PageHero from "@/components/page-hero";
 import SectionHeading from "@/components/section-heading";
 import Reveal from "@/components/reveal";
 import CtaBand from "@/components/cta-band";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
+import { cmsIcon, type CmsItem } from "@/lib/cms-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/about");
@@ -75,9 +75,8 @@ export default async function AboutPage() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <SectionHeading eyebrow="What we believe" title="The principles behind every build." />
         <div className="mt-12 grid gap-6 sm:grid-cols-2">
-          {valuesItems.map((v: any, i: number) => {
-            // @ts-ignore
-            const IconComponent = LucideIcons[v.icon] || LucideIcons.HelpCircle;
+          {valuesItems.map((v: CmsItem, i: number) => {
+            const IconComponent = cmsIcon(v.icon);
             return (
               <Reveal key={v.title} delay={(i % 2) * 0.08}>
                 <div className="glass flex h-full gap-5 rounded-2xl p-6">

@@ -22,7 +22,12 @@ Future<void> main() async {
   await dotenv.load(fileName: '.env');
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
-    anonKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    // The legacy anon key is accepted here too; SUPABASE_ANON_KEY is kept
+    // as a fallback so existing .env files keep working.
+    publishableKey:
+        dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
+        dotenv.env['SUPABASE_ANON_KEY'] ??
+        '',
   );
   if (isDesktopPlatform) {
     await windowManager.ensureInitialized();

@@ -16,6 +16,7 @@ import { MobileShot } from "@/components/app-shot";
 import { desktopShots, mobileShots } from "@/lib/shots";
 import MagneticButton from "@/components/magnetic-button";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
+import { cmsIcon, type CmsItem } from "@/lib/cms-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/dukania");
@@ -266,9 +267,8 @@ export default async function DukaniaPage() {
         <SectionHeading eyebrow="Built in" title="Everything a counter needs, built in."
           lead="No add-ons to buy, no separate tools to wire together." align="center" />
         <div className="mt-12 grid gap-8 sm:grid-cols-3">
-          {builtinItems.map((f: any, i: number) => {
-            // @ts-ignore
-            const IconComponent = LucideIcons[f.icon] || LucideIcons.HelpCircle;
+          {builtinItems.map((f: CmsItem, i: number) => {
+            const IconComponent = cmsIcon(f.icon);
             return (
               <Reveal key={f.title} delay={i * 0.08}>
                 <div className="glass h-full rounded-2xl p-6">

@@ -31,7 +31,7 @@ export default function ClientDetailPage() {
   const [flags, setFlags] = useState<any>(null);
   const [plans, setPlans] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
-  const [usage, setUsage] = useState<{ products: number; invoices: number } | null>(null);
+  const [usage, setUsage] = useState<{ products: number; invoices: number; staff: number } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -50,11 +50,12 @@ export default function ClientDetailPage() {
     setPlans(pl.data ?? []);
     setPayments(pay.data ?? []);
 
-    const [prodCount, invCount] = await Promise.all([
+    const [prodCount, invCount, staffCount] = await Promise.all([
       supabase.from("products").select("id", { count: "exact", head: true }).eq("business_id", id),
       supabase.from("invoices").select("id", { count: "exact", head: true }).eq("business_id", id),
+      supabase.from("profiles").select("id", { count: "exact", head: true }).eq("business_id", id),
     ]);
-    setUsage({ products: prodCount.count ?? 0, invoices: invCount.count ?? 0 });
+    setUsage({ products: prodCount.count ?? 0, invoices: invCount.count ?? 0, staff: staffCount.count ?? 0 });
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Defer the initial fetch out of the synchronous effect body so its state
@@ -71,9 +72,23 @@ export default function ClientDetailPage() {
   }
 
   async function toggleActive() {
-    await supabase.from("businesses").update({ is_active: !business.is_active }).eq("id", id);
-    await load();
-    flash(business.is_active ? "Client suspended" : "Client activated");
+    const isCurrentlyActive = business.is_active;
+    const res = await fetch("/api/clients/toggle-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        businessId: id,
+        suspend: isCurrentlyActive,
+      }),
+    });
+
+    if (res.ok) {
+      await load();
+      flash(isCurrentlyActive ? "Client suspended — app access blocked" : "Client activated");
+    } else {
+      const err = await res.json().catch(() => ({}));
+      flash(err.error || "Failed to update client status");
+    }
   }
 
   async function saveSubscription(patch: Record<string, unknown>) {
@@ -114,6 +129,30 @@ export default function ClientDetailPage() {
     flash("Payment recorded");
   }
 
+  // Sends a fresh one-time set-password link (the server looks the client
+  // up itself). If email isn't configured, the link is offered for copying.
+  async function resendEmail() {
+    const res = await fetch("/api/clients/send-email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId: id }),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (res.ok && json.sent) {
+      flash(`Set-password email sent to ${json.email}`);
+      return;
+    }
+    if (json.setPasswordLink) {
+      const copy = window.confirm(
+        `The email was not sent: ${json.error ?? "unknown error"}.\n\n` +
+          "Copy the one-time set-password link to share with the owner privately?"
+      );
+      if (copy) await navigator.clipboard.writeText(json.setPasswordLink);
+      return;
+    }
+    flash(json.error || "Failed to send email");
+  }
+
   if (!business) return <Spinner />;
 
   return (
@@ -127,6 +166,9 @@ export default function ClientDetailPage() {
         </div>
         <div className="flex items-center gap-3">
           {msg && <span className="text-sm font-medium text-green-700">{msg}</span>}
+          <Button variant="outline" onClick={resendEmail}>
+            ✉️ Send Welcome Email
+          </Button>
           <Button variant={business.is_active ? "danger" : "primary"} onClick={toggleActive}>
             {business.is_active ? "Suspend client" : "Activate client"}
           </Button>
@@ -137,7 +179,10 @@ export default function ClientDetailPage() {
         {/* business + usage */}
         <Card>
           <CardBody>
-            <h2 className="mb-3 text-sm font-semibold text-zinc-700">Business details</h2>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold text-zinc-700">Business details</h2>
+              <Button variant="outline" onClick={resendEmail}>Resend Email</Button>
+            </div>
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between"><dt className="text-zinc-500">Email</dt><dd>{business.email || "—"}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Address</dt><dd className="text-right">{business.address || "—"}</dd></div>
@@ -146,6 +191,7 @@ export default function ClientDetailPage() {
               <div className="flex justify-between"><dt className="text-zinc-500">Joined</dt><dd>{dateStr(business.created_at)}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Products</dt><dd>{usage?.products ?? "…"}</dd></div>
               <div className="flex justify-between"><dt className="text-zinc-500">Invoices (all time)</dt><dd>{usage?.invoices ?? "…"}</dd></div>
+              <div className="flex justify-between"><dt className="text-zinc-500">Staff registered</dt><dd>{usage?.staff ?? "…"} / {subscription?.plans?.user_limit ?? "Unlimited"}</dd></div>
             </dl>
           </CardBody>
         </Card>

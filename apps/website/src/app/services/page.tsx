@@ -6,6 +6,7 @@ import ProcessSteps from "@/components/process-steps";
 import Reveal from "@/components/reveal";
 import CtaBand from "@/components/cta-band";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
+import { cmsIcon, type CmsItem } from "@/lib/cms-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/services");
@@ -80,9 +81,8 @@ export default async function ServicesPage() {
 
       <section className="mx-auto max-w-7xl px-6 py-20">
         <div className="grid gap-6 md:grid-cols-2">
-          {servicesItems.map((s: any, i: number) => {
-            // @ts-ignore
-            const IconComponent = LucideIcons[s.icon] || LucideIcons.HelpCircle;
+          {servicesItems.map((s: CmsItem, i: number) => {
+            const IconComponent = cmsIcon(s.icon);
             return (
               <Reveal key={s.title} delay={(i % 2) * 0.08}>
                 <div className="glass h-full rounded-2xl p-8">

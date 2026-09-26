@@ -875,7 +875,16 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       ref.invalidate(saleReturnsProvider);
       invalidateStockData(ref);
       if (mounted) {
-        showSuccess(context, 'Return ${res['return_no']} recorded');
+        // The server values the return from the original bill and settles
+        // the bill's due first (migration 0038), so report its figures.
+        final applied = toDouble(res['applied_to_bill']);
+        final refund = toDouble(res['refund']);
+        showSuccess(
+          context,
+          'Return ${res['return_no']} recorded — ${money(res['total'] as num?)}'
+          '${applied > 0 ? ', ${money(applied)} off the bill' : ''}'
+          '${refund > 0 ? ', ${money(refund)} to refund' : ''}',
+        );
         context.pop();
       }
     } catch (e) {
@@ -1930,7 +1939,14 @@ class _PurchaseReturnFormScreenState
       ref.invalidate(suppliersProvider);
       ref.invalidate(purchaseReturnsProvider);
       if (mounted) {
-        showSuccess(context, 'Return ${res['return_no']} recorded');
+        final applied = toDouble(res['applied_to_bill']);
+        final received = toDouble(res['received']);
+        showSuccess(
+          context,
+          'Return ${res['return_no']} recorded — ${money(res['total'] as num?)}'
+          '${applied > 0 ? ', ${money(applied)} off the purchase' : ''}'
+          '${received > 0 ? ', ${money(received)} received back' : ''}',
+        );
         context.pop();
       }
     } catch (e) {

@@ -33,6 +33,26 @@ export default function ClientsPage() {
     query.then(({ data }) => setRows((data as unknown as ClientRow[]) ?? []));
   }, [search]);
 
+  async function toggleStatus(clientId: string, isCurrentlyActive: boolean) {
+    const res = await fetch("/api/clients/toggle-status", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ businessId: clientId, suspend: isCurrentlyActive }),
+    });
+    if (res.ok) {
+      // Reload rows
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("businesses")
+        .select("id, name, owner_name, business_type, phone, is_active, created_at, subscriptions(status, expiry_date, plans(name), software:software_products(name))")
+        .order("created_at", { ascending: false });
+      setRows((data as unknown as ClientRow[]) ?? []);
+    } else {
+      const err = await res.json().catch(() => ({}));
+      window.alert(err.error || "Failed to update client status");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -51,23 +71,34 @@ export default function ClientsPage() {
         <Spinner />
       ) : (
         <Card>
-          <Table headers={["Business", "Owner", "Software", "Plan", "Status", "Expires", ""]}>
+          <Table headers={["Business", "Owner", "Software", "Plan", "Status", "Expires", "Actions"]}>
             {rows.map((c) => {
               const sub = c.subscriptions?.[0];
+              const displayStatus = !c.is_active ? "suspended" : (sub?.status ?? "none");
               return (
                 <tr key={c.id} className="hover:bg-zinc-50">
                   <td className="px-4 py-3 font-medium text-zinc-900">
                     {c.name}
-                    {!c.is_active && <span className="ml-2"><Badge color="red">disabled</Badge></span>}
+                    {!c.is_active && <span className="ml-2"><Badge color="red">suspended</Badge></span>}
                   </td>
                   <td className="px-4 py-3">{c.owner_name || "—"}</td>
                   <td className="px-4 py-3">{sub?.software?.name ?? "—"}</td>
                   <td className="px-4 py-3">{sub?.plans?.name ?? "—"}</td>
                   <td className="px-4 py-3">
-                    <Badge color={subscriptionBadge(sub?.status)}>{sub?.status ?? "none"}</Badge>
+                    <Badge color={subscriptionBadge(displayStatus)}>{displayStatus}</Badge>
                   </td>
                   <td className="px-4 py-3">{dateStr(sub?.expiry_date)}</td>
-                  <td className="px-4 py-3 text-right">
+                  <td className="px-4 py-3 text-right flex items-center justify-end gap-3">
+                    <button
+                      onClick={() => toggleStatus(c.id, c.is_active)}
+                      className={`text-xs font-semibold px-2.5 py-1 rounded-md transition-colors ${
+                        c.is_active
+                          ? "bg-red-50 text-red-700 hover:bg-red-100 border border-red-200"
+                          : "bg-green-50 text-green-700 hover:bg-green-100 border border-green-200"
+                      }`}
+                    >
+                      {c.is_active ? "Suspend" : "Activate"}
+                    </button>
                     <Link href={`/clients/${c.id}`} className="text-sm font-medium text-brand hover:underline">
                       Manage
                     </Link>

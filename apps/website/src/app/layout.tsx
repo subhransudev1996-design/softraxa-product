@@ -21,6 +21,10 @@ const jetbrainsMono = JetBrains_Mono({
   subsets: ["latin"],
 });
 
+// CMS content is re-read at least hourly; CMS saves also publish
+// immediately through /api/revalidate.
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "Softraxa — software for businesses that don't stop moving",
   description:

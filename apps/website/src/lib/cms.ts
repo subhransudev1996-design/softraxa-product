@@ -1,8 +1,9 @@
 import { supabase } from "./supabase-client";
 import type { Metadata } from "next";
+import type { CmsJson } from "./cms-types";
 
 // --- Static Default Fallbacks ---
-const DEFAULTS: Record<string, Record<string, any>> = {
+const DEFAULTS: Record<string, Record<string, CmsJson>> = {
   home: {
     hero: {
       content: {
@@ -137,7 +138,7 @@ const DEFAULTS: Record<string, Record<string, any>> = {
   }
 };
 
-const SEO_DEFAULTS: Record<string, { title: string; description: string; keywords: string[]; og_image?: string; structured_data?: any }> = {
+const SEO_DEFAULTS: Record<string, { title: string; description: string; keywords: string[]; og_image?: string; structured_data?: CmsJson }> = {
   "/": {
     title: "Softraxa — software for businesses that don't stop moving",
     description: "Softraxa is a software agency building practical, offline-first business software. Dukania, our flagship product, runs billing, stock and reporting for real shops across India.",
@@ -213,7 +214,7 @@ export async function getPageSeo(path: string) {
 /**
  * Fetches all section content for a page, merging it with static defaults.
  */
-export async function getPageContentMap(page: string): Promise<Record<string, any>> {
+export async function getPageContentMap(page: string): Promise<Record<string, CmsJson>> {
   const pageDefaults = DEFAULTS[page] || {};
   try {
     const { data, error } = await supabase
@@ -249,7 +250,7 @@ export async function getPageContentMap(page: string): Promise<Record<string, an
 /**
  * Maps the Yoast SEO Pro parameters returned by getPageSeo to a standard Next.js Metadata object.
  */
-export function buildPageMetadata(seo: any): Metadata {
+export function buildPageMetadata(seo: CmsJson): Metadata {
   const robots = [];
   if (seo.meta_robots_noindex) robots.push("noindex");
   if (seo.meta_robots_nofollow) robots.push("nofollow");

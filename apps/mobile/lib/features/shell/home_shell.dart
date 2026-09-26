@@ -234,7 +234,6 @@ class _NavItem extends StatelessWidget {
 
 const _sidebarBg = Color(0xFF14162B);
 const _sidebarMuted = Color(0xFF9A9FC0);
-const _sidebarDivider = Color(0xFF272A47);
 const _sidebarActiveBg = Color(0x3A7C3AED); // AppColors.primary @ ~23% alpha
 
 class _DesktopShell extends StatelessWidget {
@@ -299,16 +298,12 @@ class AppSidebar extends ConsumerWidget {
             padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
             child: SizedBox(
               width: double.infinity,
-              child: CoachTarget(
-                page: 'home',
-                id: 'new_bill',
-                child: FilledButton.icon(
-                  onPressed: () => context.go('/pos'),
-                  icon: const Icon(Icons.receipt_long, size: 18),
-                  label: const Text('New Bill'),
-                  style: FilledButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
+              child: FilledButton.icon(
+                onPressed: () => context.go('/pos'),
+                icon: const Icon(Icons.receipt_long, size: 18),
+                label: const Text('New Bill'),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                 ),
               ),
             ),
@@ -449,7 +444,7 @@ class _SidebarSectionLabel extends StatelessWidget {
 }
 
 class _RailTile extends StatelessWidget {
-  _RailTile({
+  const _RailTile({
     required this.icon,
     required this.label,
     required this.onTap,

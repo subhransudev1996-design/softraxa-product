@@ -1,13 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import * as LucideIcons from "lucide-react";
 import Reveal from "@/components/reveal";
 import Accordion from "@/components/accordion";
 import ContactForm from "@/components/contact-form";
 import HonestCall from "@/components/honest-call";
+import { cmsIcon, type CmsItem, type CmsJson } from "@/lib/cms-types";
 
-export default function ContactPageClient({ content }: { content?: any }) {
+export default function ContactPageClient({ content }: { content?: CmsJson }) {
   const detailsItems = content?.details?.items || [
     { icon: "Mail", label: "Email", value: "hello@softraxa.com", note: "Replace with your address" },
     { icon: "MessageCircle", label: "WhatsApp", value: "+91 00000 00000", note: "Replace with your number" },
@@ -84,9 +84,8 @@ export default function ContactPageClient({ content }: { content?: any }) {
 
           <Reveal delay={0.1}>
             <div className="space-y-6 lg:mt-14">
-              {detailsItems.map((d: any) => {
-                // @ts-ignore
-                const IconComponent = LucideIcons[d.icon] || LucideIcons.HelpCircle;
+              {detailsItems.map((d: CmsItem) => {
+                const IconComponent = cmsIcon(d.icon);
                 return (
                   <div key={d.label} className="glass flex items-start gap-4 rounded-2xl p-5">
                     <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-paper/4 ring-1 ring-paper/10">

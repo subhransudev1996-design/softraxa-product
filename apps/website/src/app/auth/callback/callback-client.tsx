@@ -1,13 +1,52 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient, type EmailOtpType } from "@supabase/supabase-js";
+import { useEffect, useRef, useState, type FormEvent } from "react";
+import { createClient, type EmailOtpType, type SupabaseClient } from "@supabase/supabase-js";
 
-type Status = "working" | "success" | "error";
+// "reset": a verified password-recovery link — ask for the new password.
+// "reset-done": the password was changed.
+type Status = "working" | "success" | "reset" | "reset-done" | "error";
+
+const MIN_PASSWORD = 8;
 
 export default function CallbackClient() {
   const [status, setStatus] = useState<Status>("working");
   const [message, setMessage] = useState("");
+  // The recovery link's session lives only in this in-memory client (nothing
+  // is persisted in the browser); it is used once, to set the new password.
+  const clientRef = useRef<SupabaseClient | null>(null);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [formError, setFormError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function savePassword(e: FormEvent) {
+    e.preventDefault();
+    if (password.length < MIN_PASSWORD) {
+      setFormError(`Use at least ${MIN_PASSWORD} characters.`);
+      return;
+    }
+    if (password !== confirm) {
+      setFormError("The two passwords don't match.");
+      return;
+    }
+    const supabase = clientRef.current;
+    if (!supabase) {
+      setFormError("This reset link has expired. Request a new one from the app.");
+      return;
+    }
+    setSaving(true);
+    setFormError("");
+    const { error } = await supabase.auth.updateUser({ password });
+    setSaving(false);
+    if (error) {
+      setFormError(error.message);
+      return;
+    }
+    await supabase.auth.signOut();
+    clientRef.current = null;
+    setStatus("reset-done");
+  }
 
   useEffect(() => {
     let active = true;
@@ -54,6 +93,9 @@ export default function CallbackClient() {
             ? "This link has expired. Please request a new one from the app."
             : error.message
         );
+      } else if (type === "recovery") {
+        clientRef.current = supabase;
+        setStatus("reset");
       } else {
         setStatus("success");
       }
@@ -91,6 +133,65 @@ export default function CallbackClient() {
             <p className="mt-2 text-sm leading-6 text-neutral-500">
               Your account is confirmed. Open the <strong>Dukania</strong> app and log in
               with your email and password.
+            </p>
+          </>
+        )}
+
+        {status === "reset" && (
+          <form onSubmit={savePassword} className="text-left">
+            <h1 className="text-center text-xl font-semibold">Set a new password</h1>
+            <p className="mt-2 text-center text-sm text-neutral-500">
+              Choose the password you&apos;ll use to log in to the Dukania app.
+            </p>
+            <label className="mt-6 block text-sm font-medium" htmlFor="new-password">
+              New password
+            </label>
+            <input
+              id="new-password"
+              type="password"
+              autoComplete="new-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+              minLength={MIN_PASSWORD}
+              required
+            />
+            <label className="mt-4 block text-sm font-medium" htmlFor="confirm-password">
+              Confirm new password
+            </label>
+            <input
+              id="confirm-password"
+              type="password"
+              autoComplete="new-password"
+              value={confirm}
+              onChange={(e) => setConfirm(e.target.value)}
+              className="mt-1 w-full rounded-lg border border-black/15 bg-transparent px-3 py-2 text-sm dark:border-white/20"
+              minLength={MIN_PASSWORD}
+              required
+            />
+            {formError && (
+              <p className="mt-3 text-sm text-red-600" role="alert">
+                {formError}
+              </p>
+            )}
+            <button
+              type="submit"
+              disabled={saving}
+              className="mt-6 w-full rounded-lg bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-white disabled:opacity-60 dark:bg-white dark:text-neutral-900"
+            >
+              {saving ? "Saving…" : "Save new password"}
+            </button>
+          </form>
+        )}
+
+        {status === "reset-done" && (
+          <>
+            <div className="mx-auto grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/40">
+              <CheckIcon />
+            </div>
+            <h1 className="mt-5 text-xl font-semibold">Password changed ✅</h1>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">
+              Open the <strong>Dukania</strong> app and log in with your new password.
             </p>
           </>
         )}

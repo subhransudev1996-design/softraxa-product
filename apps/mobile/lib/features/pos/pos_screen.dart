@@ -58,6 +58,113 @@ Future<String?> _showStockDialog(
   );
 }
 
+Future<String?> showImeiPicker(
+  BuildContext context,
+  WidgetRef ref, {
+  required String productId,
+  String? variantId,
+  required String productName,
+}) async {
+  final client = ref.read(supabaseProvider);
+  List<Map<String, dynamic>> serials = [];
+  try {
+    final rows = await client.rpc('get_available_serials', params: {
+      'p_product_id': productId,
+      'p_variant_id': variantId,
+    });
+    serials = List<Map<String, dynamic>>.from(rows as List? ?? []);
+  } catch (_) {}
+
+  final controller = TextEditingController();
+
+  if (!context.mounted) return null;
+
+  return showDialog<String>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text('Select IMEI / Serial — $productName'),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: 'Search or enter IMEI',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    onPressed: () async {
+                      final code = isDesktopPlatform
+                          ? await promptBarcode(context, title: 'Enter IMEI')
+                          : await context.push<String>('/scan?mode=return');
+                      if (code != null && code.isNotEmpty && ctx.mounted) {
+                        Navigator.pop(ctx, code);
+                      }
+                    },
+                  ),
+                ),
+                onSubmitted: (v) {
+                  if (v.trim().isNotEmpty) {
+                    Navigator.pop(ctx, v.trim());
+                  }
+                },
+              ),
+              const SizedBox(height: 12),
+              if (serials.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: Text(
+                    'No in-stock IMEIs found in database. Type or scan an IMEI above.',
+                    style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                  ),
+                )
+              else
+                Flexible(
+                  child: ListView(
+                    shrinkWrap: true,
+                    children: [
+                      for (final s in serials)
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(
+                            Icons.qr_code,
+                            size: 18,
+                            color: AppColors.purple,
+                          ),
+                          title: Text(
+                            s['serial_no'] as String? ?? '',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          onTap: () =>
+                              Navigator.pop(ctx, s['serial_no'] as String),
+                        ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, null),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              final val = controller.text.trim();
+              if (val.isNotEmpty) Navigator.pop(ctx, val);
+            },
+            child: const Text('Confirm'),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 /// POS / billing screen (PRD 7.7). The search field also receives input from
 /// external keyboard-wedge barcode scanners (they type the code and press
 /// Enter, which triggers [_onSubmitted]).
@@ -187,6 +294,20 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       pieceId = pick.piece?['id'] as String?;
     }
 
+    String serialNo = '';
+    if (product['track_serial'] == true) {
+      if (!mounted) return;
+      final pickedSerial = await showImeiPicker(
+        context,
+        ref,
+        productId: product['id'] as String,
+        variantId: variant?['id'] as String?,
+        productName: product['name'] as String,
+      );
+      if (pickedSerial == null || pickedSerial.isEmpty || !mounted) return;
+      serialNo = pickedSerial;
+    }
+
     var stock = toDouble(variant?['current_stock'] ?? product['current_stock']);
     final alreadyInCart = ref
         .read(cartProvider.notifier)
@@ -208,6 +329,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         .addProduct(
           product,
           variant: variant,
+          serialNo: serialNo,
           addQty: addQty,
           pieceId: pieceId,
         );
@@ -405,6 +527,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     );
     final serial = TextEditingController(text: line.serialNo);
     var discountIsPercent = line.discountIsPercent;
+    // The server rejects below-list prices and discounts without this
+    // permission (migration 0037 check_line_price), so don't offer them.
+    final canEditPrices =
+        ref.read(appContextProvider).value?.canEditPrices ?? false;
 
     final saved = await showDialog<bool>(
       context: context,
@@ -430,22 +556,28 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     Expanded(
                       child: TextField(
                         controller: price,
+                        readOnly: !canEditPrices,
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(labelText: 'Price ₹'),
+                        decoration: InputDecoration(
+                          labelText: 'Price ₹',
+                          helperText: canEditPrices ? null : 'Owner sets prices',
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                AmountOrPercentField(
-                  controller: discount,
-                  isPercent: discountIsPercent,
-                  onModeChanged: (v) =>
-                      setDialogState(() => discountIsPercent = v),
-                  label: 'Line discount',
-                ),
+                if (canEditPrices) ...[
+                  const SizedBox(height: 12),
+                  AmountOrPercentField(
+                    controller: discount,
+                    isPercent: discountIsPercent,
+                    onModeChanged: (v) =>
+                        setDialogState(() => discountIsPercent = v),
+                    label: 'Line discount',
+                  ),
+                ],
                 if (line.trackSerial) ...[
                   const SizedBox(height: 12),
                   TextField(

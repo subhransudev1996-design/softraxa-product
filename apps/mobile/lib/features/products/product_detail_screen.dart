@@ -484,6 +484,10 @@ class ProductDetailScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       PiecesCard(product: p),
                     ],
+                    if (p['track_serial'] == true) ...[
+                      const SizedBox(height: 12),
+                      _SerialsCard(productId: productId, product: p),
+                    ],
                     if (p['sku'] != null && (p['sku'] as String).isNotEmpty ||
                         (p['barcode'] as String? ?? '').isNotEmpty) ...[
                       const SectionLabel('Details'),
@@ -600,6 +604,188 @@ class ProductDetailScreen extends ConsumerWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+final productSerialsProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, productId) async {
+  final client = ref.watch(supabaseProvider);
+  final rows = await client
+      .from('product_serials')
+      .select('*, invoice:invoices(invoice_no, invoice_date)')
+      .eq('product_id', productId)
+      .order('created_at', ascending: false);
+  return List<Map<String, dynamic>>.from(rows);
+});
+
+class _SerialsCard extends ConsumerWidget {
+  const _SerialsCard({required this.productId, required this.product});
+
+  final String productId;
+  final Map<String, dynamic> product;
+
+  Future<void> _addSerial(BuildContext context, WidgetRef ref) async {
+    final controller = TextEditingController();
+    final added = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add IMEI / Serial Number'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              autofocus: true,
+              decoration: const InputDecoration(
+                labelText: 'IMEI / Serial Number',
+                hintText: 'e.g. 356789012345678',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+
+    if (added == true && controller.text.trim().isNotEmpty) {
+      final client = ref.read(supabaseProvider);
+      try {
+        await client.rpc('add_product_serials', params: {
+          'p_product_id': productId,
+          'p_variant_id': null,
+          'p_serials': [controller.text.trim()],
+        });
+        ref.invalidate(productSerialsProvider(productId));
+        ref.invalidate(productDetailProvider(productId));
+        if (context.mounted) showSuccess(context, 'IMEI added');
+      } catch (e) {
+        if (context.mounted) showError(context, e);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final serialsAsync = ref.watch(productSerialsProvider(productId));
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Row(
+                  children: [
+                    Icon(Icons.qr_code, size: 20, color: AppColors.purple),
+                    SizedBox(width: 8),
+                    Text(
+                      'IMEI / Serial Numbers',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                      ),
+                    ),
+                  ],
+                ),
+                TextButton.icon(
+                  onPressed: () => _addSerial(context, ref),
+                  icon: const Icon(Icons.add, size: 16),
+                  label: const Text('Add IMEI'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            AsyncView(
+              value: serialsAsync,
+              onRetry: () => ref.invalidate(productSerialsProvider(productId)),
+              builder: (serials) {
+                if (serials.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: Text(
+                      'No IMEIs recorded yet. Tap "+ Add IMEI" above.',
+                      style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                    ),
+                  );
+                }
+
+                final inStock = serials.where((s) => s['status'] == 'in_stock').toList();
+                final sold = serials.where((s) => s['status'] == 'sold').toList();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'In Stock (${inStock.length})  •  Sold (${sold.length})',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.inkSoft,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (inStock.isNotEmpty) ...[
+                      const Text(
+                        'Available In Stock',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.green),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (final s in inStock)
+                            Chip(
+                              avatar: const Icon(Icons.check_circle_outline, size: 14, color: AppColors.green),
+                              label: Text(s['serial_no'] as String? ?? '', style: const TextStyle(fontSize: 12)),
+                              backgroundColor: AppColors.green.withAlpha(20),
+                            ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    if (sold.isNotEmpty) ...[
+                      Text(
+                        'Sold Units',
+                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.inkSoft),
+                      ),
+                      const SizedBox(height: 6),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: [
+                          for (final s in sold)
+                            Chip(
+                              avatar: Icon(Icons.sell_outlined, size: 14, color: AppColors.inkSoft),
+                              label: Text(
+                                '${s['serial_no']}${s['invoice'] != null ? ' (${s['invoice']['invoice_no']})' : ''}',
+                                style: const TextStyle(fontSize: 12),
+                              ),
+                              backgroundColor: AppColors.canvas,
+                            ),
+                        ],
+                      ),
+                    ],
+                  ],
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -5,6 +5,7 @@ import 'package:printing/printing.dart';
 import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
+import '../../core/gst.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -57,6 +58,51 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final pdf = InvoicePdf(business: business, invoice: invoice, items: items);
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.layoutPdf(onLayout: (_) => doc.save());
+  }
+
+  /// Place of supply defaults to the customer's state (or the store's); it
+  /// only needs changing when goods are delivered to a different state. The
+  /// database re-splits the lines into CGST+SGST / IGST (migration 0036).
+  Future<void> _changePlaceOfSupply(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> invoice,
+  ) async {
+    var selected = invoice['place_of_supply'] as String? ?? '';
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Place of supply'),
+        content: GstStateField(
+          value: selected,
+          helperText: 'State where the goods are delivered',
+          onChanged: (v) => selected = v,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (saved != true || selected == invoice['place_of_supply']) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'set_invoice_place_of_supply',
+            params: {'p_invoice_id': invoice['id'], 'p_state': selected},
+          );
+      ref.invalidate(invoiceDetailProvider(invoice['id'] as String));
+      if (context.mounted) showSuccess(context, 'Place of supply updated');
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
   }
 
   Future<void> _recordPayment(
@@ -243,7 +289,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
         leading: appBarBack(context),
         title: Text(detail.value?['invoice_no'] as String? ?? 'Invoice'),
         actions: [
-          if (detail.hasValue && detail.value!['is_cancelled'] != true)
+          if (detail.hasValue &&
+              detail.value!['is_cancelled'] != true &&
+              (features?.canEditInvoices ?? false))
             PopupMenuButton<String>(
               onSelected: (v) {
                 if (v == 'edit') _editBill(context, ref, detail.value!);
@@ -336,6 +384,24 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           fontSize: 13,
                         ),
                       ),
+                      if (isGst)
+                        InkWell(
+                          onTap: cancelled
+                              ? null
+                              : () => _changePlaceOfSupply(context, ref, inv),
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 2),
+                            child: Text(
+                              'Place of supply: '
+                              '${gstStateLabel(inv['place_of_supply'] as String?).isEmpty ? 'not set' : gstStateLabel(inv['place_of_supply'] as String?)}'
+                              '${cancelled ? '' : '  ✎'}',
+                              style: TextStyle(
+                                color: AppColors.inkSoft,
+                                fontSize: 13,
+                              ),
+                            ),
+                          ),
+                        ),
                       if ((inv['customer_name'] as String? ?? '')
                           .isNotEmpty) ...[
                         const Divider(height: 20),
@@ -393,11 +459,14 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               '- ${money(inv['discount_amount'] as num?)}',
                             ),
                           if (isGst && toDouble(inv['tax_amount']) > 0)
-                            _row(
-                              'Included GST',
-                              money(inv['tax_amount'] as num?),
-                              dim: true,
-                            ),
+                            for (final (label, amount) in gstBreakupRows(
+                              items,
+                            ))
+                              _row(
+                                'Included $label',
+                                money(amount),
+                                dim: true,
+                              ),
                           if (toDouble(inv['round_off']) != 0)
                             _row(
                               'Round off',
@@ -411,6 +480,13 @@ class InvoiceDetailScreen extends ConsumerWidget {
                             bold: true,
                           ),
                           _row('Paid', money(inv['paid_amount'] as num?)),
+                          // Return credit settles the bill's balance first
+                          // (migration 0038, spec D27).
+                          if (toDouble(inv['credit_amount']) > 0)
+                            _row(
+                              'Returns credit',
+                              money(inv['credit_amount'] as num?),
+                            ),
                           if (due > 0)
                             _row(
                               'Due',
@@ -459,7 +535,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
               if (!cancelled) ...[
                 if (due > 0 &&
                     inv['customer_id'] != null &&
-                    inv['invoice_type'] != 'estimate')
+                    inv['invoice_type'] != 'estimate' &&
+                    (features?.canRecordPayments ?? false))
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: FilledButton.icon(

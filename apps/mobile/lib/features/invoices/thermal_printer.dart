@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../core/formatters.dart';
+import '../../core/gst.dart';
 import '../../core/widgets.dart';
 
 /// Bluetooth ESC/POS thermal printing (PRD 7.8).
@@ -131,6 +132,10 @@ class ThermalPrinterService {
     if ((invoice['customer_name'] as String? ?? '').isNotEmpty) {
       bytes += generator.text('Customer: ${invoice['customer_name']}');
     }
+    final pos = gstStateLabel(invoice['place_of_supply'] as String?);
+    if (isGst && pos.isNotEmpty) {
+      bytes += generator.text('Place of supply: $pos');
+    }
     bytes += generator.hr();
 
     for (final it in items) {
@@ -178,7 +183,9 @@ class ThermalPrinterService {
       totalRow('Discount', -toDouble(invoice['discount_amount']));
     }
     if (isGst && toDouble(invoice['tax_amount']) > 0) {
-      totalRow('Incl. GST', invoice['tax_amount'] as num?);
+      for (final (label, amount) in gstBreakupRows(items)) {
+        totalRow('Incl. $label', amount);
+      }
     }
     if (toDouble(invoice['round_off']) != 0) {
       totalRow('Round off', invoice['round_off'] as num?);

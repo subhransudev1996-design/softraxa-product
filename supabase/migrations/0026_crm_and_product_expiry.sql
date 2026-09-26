@@ -55,3 +55,24 @@ create policy "admin manage leads" on public.leads for all
 alter table public.lead_activities enable row level security;
 create policy "admin manage lead activities" on public.lead_activities for all
   using (public.is_admin()) with check (public.is_admin());
+
+
+-- ============================================================
+-- Merged from 0026_product_expiry.sql (two migrations shared the 0026 prefix; they are
+-- independent, so combining them keeps version numbers unique for the
+-- Supabase CLI without changing what gets applied).
+-- ============================================================
+
+-- Product expiry tracking (for the notification bell's expired /
+-- near-expiry alerts). One optional date per product — batch-level expiry
+-- (different dates per purchase lot) is out of scope for V1; shops that
+-- need it can model batches as variants.
+alter table public.products add column expiry_date date;
+
+comment on column public.products.expiry_date is
+  'Optional expiry date; drives the expired/near-expiry alerts in the app''s notification bell.';
+
+-- The alert query filters active products with a non-null expiry_date at or
+-- below a cutoff — keep it cheap even for large catalogs.
+create index idx_products_expiry on public.products(business_id, expiry_date)
+  where expiry_date is not null;

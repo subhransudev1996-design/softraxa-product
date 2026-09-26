@@ -75,6 +75,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late bool _trackSerial = widget.existing?['track_serial'] == true;
   late bool _trackPieces = widget.existing?['track_pieces'] == true;
   final List<VariantDraft> _variants = [];
+  final List<String> _serials = [];
+  final TextEditingController _singleImeiInput = TextEditingController();
   bool _busy = false;
 
   static String _num(dynamic v) =>
@@ -138,14 +140,74 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         ],
       ),
     );
-    if (saved != true || name.text.trim().isEmpty) return;
+    final trimmedName = name.text.trim();
+    if (saved != true || trimmedName.isEmpty) return;
 
     try {
       final client = ref.read(supabaseProvider);
       final businessId = ref.read(appContextProvider).value?.businessId;
+      if (businessId == null) return;
+
+      // Check existing loaded list first (case-insensitive)
+      final existingList = switch (table) {
+        'categories' => ref.read(categoriesProvider).value ?? [],
+        'brands' => ref.read(brandsProvider).value ?? [],
+        _ => ref.read(unitsProvider).value ?? [],
+      };
+
+      final existingMatch = existingList.firstWhere(
+        (item) =>
+            (item['name'] as String?)?.trim().toLowerCase() ==
+            trimmedName.toLowerCase(),
+        orElse: () => {},
+      );
+
+      if (existingMatch.isNotEmpty) {
+        final existingId = existingMatch['id'] as String;
+        if (mounted) {
+          onAdded(existingId);
+          showSuccess(
+            context,
+            '${label[0].toUpperCase()}${label.substring(1)} "$trimmedName" already exists',
+          );
+        }
+        return;
+      }
+
+      // Check DB in case it exists in database but wasn't in loaded list
+      final existingInDb = await client
+          .from(table)
+          .select('id, name')
+          .eq('business_id', businessId)
+          .ilike('name', trimmedName)
+          .maybeSingle();
+
+      if (existingInDb != null) {
+        final existingId = existingInDb['id'] as String;
+        switch (table) {
+          case 'categories':
+            ref.invalidate(categoriesProvider);
+            await ref.read(categoriesProvider.future);
+          case 'brands':
+            ref.invalidate(brandsProvider);
+            await ref.read(brandsProvider.future);
+          default:
+            ref.invalidate(unitsProvider);
+            await ref.read(unitsProvider.future);
+        }
+        if (mounted) {
+          onAdded(existingId);
+          showSuccess(
+            context,
+            '${label[0].toUpperCase()}${label.substring(1)} "$trimmedName" already exists',
+          );
+        }
+        return;
+      }
+
       final row = {
         'business_id': businessId,
-        'name': name.text.trim(),
+        'name': trimmedName,
         if (table == 'units') 'short_name': shortName.text.trim(),
       };
       final inserted = await client
@@ -153,15 +215,25 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           .insert(row)
           .select('id')
           .single();
+      final newId = inserted['id'] as String;
       switch (table) {
         case 'categories':
           ref.invalidate(categoriesProvider);
+          await ref.read(categoriesProvider.future);
         case 'brands':
           ref.invalidate(brandsProvider);
+          await ref.read(brandsProvider.future);
         default:
           ref.invalidate(unitsProvider);
+          await ref.read(unitsProvider.future);
       }
-      onAdded(inserted['id'] as String);
+      if (mounted) {
+        onAdded(newId);
+        showSuccess(
+          context,
+          'New $label "$trimmedName" added',
+        );
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     }
@@ -227,18 +299,21 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             : double.tryParse(_conversionFactor.text),
       };
 
+      late String productId;
+
       if (isEdit) {
+        productId = widget.existing!['id'] as String;
         await client
             .from('products')
             .update(row)
-            .eq('id', widget.existing!['id'] as String);
+            .eq('id', productId);
       } else {
         final inserted = await client
             .from('products')
             .insert(row)
             .select('id')
             .single();
-        final productId = inserted['id'] as String;
+        productId = inserted['id'] as String;
 
         if (_hasVariants) {
           for (final draft in _variants) {
@@ -273,6 +348,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         }
       }
 
+      if (_trackSerial && _serials.isNotEmpty) {
+        await client.rpc('add_product_serials', params: {
+          'p_product_id': productId,
+          'p_variant_id': null,
+          'p_serials': _serials,
+        });
+      }
+
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
       if (mounted) {
         showSuccess(context, isEdit ? 'Product updated' : 'Product added');
@@ -294,6 +377,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         ref.watch(appContextProvider).value?.business?['business_type']
             as String? ??
         'other';
+
+    final selectedCategory =
+        categories.any((c) => c['id'] == _categoryId) ? _categoryId : null;
+    final selectedBrand =
+        brands.any((b) => b['id'] == _brandId) ? _brandId : null;
+    final selectedUnit =
+        units.any((u) => u['id'] == _unitId) ? _unitId : null;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -319,10 +409,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
+                    key: ValueKey('category_$selectedCategory'),
                     // isExpanded: a dropdown sizes itself to its WIDEST menu
                     // item, so one long name overflows the half-width field.
                     isExpanded: true,
-                    initialValue: _categoryId,
+                    initialValue: selectedCategory,
                     decoration: const InputDecoration(labelText: 'Category'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
@@ -346,8 +437,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 const SizedBox(width: 4),
                 Expanded(
                   child: DropdownButtonFormField<String>(
+                    key: ValueKey('brand_$selectedBrand'),
                     isExpanded: true,
-                    initialValue: _brandId,
+                    initialValue: selectedBrand,
                     decoration: const InputDecoration(labelText: 'Brand'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
@@ -376,8 +468,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               children: [
                 Expanded(
                   child: DropdownButtonFormField<String>(
+                    key: ValueKey('unit_$selectedUnit'),
                     isExpanded: true,
-                    initialValue: _unitId,
+                    initialValue: selectedUnit,
                     decoration: const InputDecoration(labelText: 'Unit'),
                     items: [
                       const DropdownMenuItem(value: null, child: Text('—')),
@@ -613,7 +706,97 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               subtitle: const Text('Rods, sheets, rolls — sold as cut lengths'),
               onChanged: (v) => setState(() => _trackPieces = v),
             ),
-            if (_trackSerial)
+            if (_trackSerial) ...[
+              const SizedBox(height: 8),
+              Card(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'IMEI / Serial Numbers',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Add or scan unique IMEI numbers for individual stock units.',
+                        style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                      ),
+                      const SizedBox(height: 10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _singleImeiInput,
+                              decoration: const InputDecoration(
+                                labelText: 'Enter or scan IMEI / Serial',
+                                isDense: true,
+                              ),
+                              onSubmitted: (v) {
+                                final imei = v.trim();
+                                if (imei.isNotEmpty && !_serials.contains(imei)) {
+                                  setState(() {
+                                    _serials.add(imei);
+                                    _singleImeiInput.clear();
+                                  });
+                                }
+                              },
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          IconButton(
+                            icon: const Icon(Icons.qr_code_scanner),
+                            onPressed: () async {
+                              final code = isDesktopPlatform
+                                  ? await promptBarcode(context, title: 'Enter IMEI')
+                                  : await context.push<String>('/scan?mode=return');
+                              if (code != null &&
+                                  code.isNotEmpty &&
+                                  !_serials.contains(code)) {
+                                setState(() => _serials.add(code));
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.add),
+                            onPressed: () {
+                              final imei = _singleImeiInput.text.trim();
+                              if (imei.isNotEmpty && !_serials.contains(imei)) {
+                                setState(() {
+                                  _serials.add(imei);
+                                  _singleImeiInput.clear();
+                                });
+                              }
+                            },
+                          ),
+                        ],
+                      ),
+                      if (_serials.isNotEmpty) ...[
+                        const SizedBox(height: 10),
+                        Wrap(
+                          spacing: 6,
+                          runSpacing: 6,
+                          children: [
+                            for (final imei in _serials)
+                              Chip(
+                                avatar: const Icon(Icons.qr_code, size: 14),
+                                label: Text(
+                                  imei,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                onDeleted: () =>
+                                    setState(() => _serials.remove(imei)),
+                              ),
+                          ],
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
@@ -624,6 +807,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   ),
                 ),
               ),
+            ],
             if (!isEdit)
               SwitchListTile(
                 value: _hasVariants,

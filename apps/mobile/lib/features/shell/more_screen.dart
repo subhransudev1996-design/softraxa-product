@@ -5,6 +5,7 @@ import '../../core/walkthrough.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
+import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -98,6 +99,7 @@ class MoreScreen extends ConsumerWidget {
                   'Sale returns',
                   '/sale-returns',
                   color: AppColors.orange,
+                  enabled: appContext?.canManageReturns ?? false,
                 ),
                 const Divider(),
                 tile(
@@ -125,6 +127,7 @@ class MoreScreen extends ConsumerWidget {
                   'Purchases',
                   '/purchases',
                   color: AppColors.teal,
+                  enabled: appContext?.canManagePurchases ?? false,
                 ),
                 const Divider(),
                 tile(
@@ -132,6 +135,7 @@ class MoreScreen extends ConsumerWidget {
                   'Purchase returns',
                   '/purchase-returns',
                   color: AppColors.orange,
+                  enabled: appContext?.canManagePurchases ?? false,
                 ),
                 const Divider(),
                 tile(
@@ -139,6 +143,7 @@ class MoreScreen extends ConsumerWidget {
                   'Suppliers',
                   '/suppliers',
                   color: AppColors.purple,
+                  enabled: appContext?.canManagePurchases ?? false,
                 ),
                 const Divider(),
                 tile(
@@ -146,7 +151,8 @@ class MoreScreen extends ConsumerWidget {
                   'Import products (Excel)',
                   '/import',
                   color: AppColors.pink,
-                  enabled: features?.featureOn('excel_import') ?? true,
+                  enabled: (features?.featureOn('excel_import') ?? true) &&
+                      (appContext?.canManageProducts ?? false),
                 ),
               ],
             ),
@@ -160,7 +166,8 @@ class MoreScreen extends ConsumerWidget {
                   'Service catalog',
                   '/services',
                   color: AppColors.indigo,
-                  enabled: features?.featureOn('service_module') ?? true,
+                  enabled: (features?.featureOn('service_module') ?? true) &&
+                      (appContext?.canManageServices ?? false),
                 ),
                 const Divider(),
                 tile(
@@ -168,7 +175,8 @@ class MoreScreen extends ConsumerWidget {
                   'Job cards',
                   '/job-cards',
                   color: AppColors.teal,
-                  enabled: features?.featureOn('service_module') ?? true,
+                  enabled: (features?.featureOn('service_module') ?? true) &&
+                      (appContext?.canManageServices ?? false),
                 ),
               ],
             ),
@@ -182,11 +190,38 @@ class MoreScreen extends ConsumerWidget {
                   'Expenses',
                   '/expenses',
                   color: AppColors.red,
-                  enabled: features?.featureOn('expense_module') ?? true,
+                  enabled: (features?.featureOn('expense_module') ?? true) &&
+                      (appContext?.canManageExpenses ?? false),
                 ),
               ],
             ),
           ),
+          if (appContext?.isOwner == true) ...[
+            const SectionLabel('Store Management'),
+            Card(
+              child: Column(
+                children: [
+                  tile(
+                    Icons.workspace_premium_outlined,
+                    'Subscription Plans',
+                    '/subscription/plans',
+                    color: AppColors.primary,
+                    enabled: true,
+                    subtitle: 'View active plans & upgrade subscription',
+                  ),
+                  const Divider(),
+                  tile(
+                    Icons.badge_outlined,
+                    'Staff & Permissions',
+                    '/staff',
+                    color: AppColors.teal,
+                    enabled: true,
+                    subtitle: 'Manage store user accounts and permissions',
+                  ),
+                ],
+              ),
+            ),
+          ],
           const SectionLabel('Other'),
           Card(
             child: Column(
@@ -228,9 +263,30 @@ class MoreScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 10),
+                ListTile(
+                  leading: const IconChip(
+                    Icons.chat,
+                    color: Color(0xFF25D366),
+                    size: 38,
+                  ),
+                  title: const Text(
+                    'Contact Support on WhatsApp',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: const Text(
+                    'Get instant help or upgrade plan on WhatsApp',
+                    style: TextStyle(fontSize: 12),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => launchWhatsAppContact(context, appContext),
+                ),
+                const Divider(),
                 tile(
                   Icons.support_agent_outlined,
-                  'Support',
+                  'Support tickets',
                   '/support',
                   color: AppColors.indigo,
                 ),

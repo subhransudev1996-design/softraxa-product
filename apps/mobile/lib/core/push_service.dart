@@ -83,14 +83,15 @@ class PushService {
     String businessId,
     String userId,
   ) async {
+    // Server-side so a device that switches accounts moves its token to the
+    // signed-in user (migration 0037); business/user come from the session.
     try {
-      await ref.read(supabaseProvider).from('device_tokens').upsert({
-        'business_id': businessId,
-        'user_id': userId,
-        'token': token,
-        'platform': 'android',
-        'updated_at': DateTime.now().toUtc().toIso8601String(),
-      }, onConflict: 'token');
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'register_device_token',
+            params: {'p_token': token, 'p_platform': 'android'},
+          );
     } catch (_) {
       // Table missing (migration 0027 not applied) or offline — ignore.
     }

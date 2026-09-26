@@ -16,7 +16,10 @@ create extension if not exists pgcrypto;
 create or replace function public.get_imagekit_auth()
 returns jsonb language plpgsql security definer set search_path = public as $$
 declare
-  v_private_key text := 'private_9orxs5avxeYyuvEKQPDsvuU2f68=';
+  -- The key that used to be hardcoded here was exposed in source control
+  -- and must be rotated. 0037_security_hardening.sql replaces this function
+  -- with one that reads the key from Supabase Vault.
+  v_private_key text := 'rotated-see-0037';
   v_token       text := gen_random_uuid()::text;
   v_expire      bigint := extract(epoch from now())::bigint + 3540; -- ImageKit max ~1h
   v_signature   text;

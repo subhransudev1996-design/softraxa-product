@@ -25,7 +25,6 @@ export default function NewClientPage() {
   const [overrideExpiry, setOverrideExpiry] = useState(false);
   const [form, setForm] = useState({
     email: "",
-    password: "",
     ownerName: "",
     businessName: "",
     type: "mobile",
@@ -117,6 +116,16 @@ export default function NewClientPage() {
 
   const set = (k: string, v: string) => setForm((f) => ({ ...f, [k]: v }));
 
+  const [createdResult, setCreatedResult] = useState<{
+    businessId: string;
+    email: string;
+    ownerName: string;
+    businessName: string;
+    emailSent: boolean;
+    emailError: string | null;
+    setPasswordLink: string | null;
+  } | null>(null);
+
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -126,7 +135,6 @@ export default function NewClientPage() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email: form.email,
-        password: form.password,
         ownerName: form.ownerName,
         planId: form.planId || null,
         productId: form.productId || null,
@@ -165,7 +173,108 @@ export default function NewClientPage() {
         created_by: user?.id ?? null,
       });
     }
-    router.push(`/clients/${json.businessId}`);
+
+    setCreatedResult({
+      businessId: json.businessId,
+      email: form.email,
+      ownerName: form.ownerName,
+      businessName: form.businessName,
+      emailSent: json.emailSent === true,
+      emailError: json.emailError ?? null,
+      setPasswordLink: json.setPasswordLink ?? null,
+    });
+    setBusy(false);
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert("Copied to clipboard!");
+  };
+
+  if (createdResult) {
+    return (
+      <div className="max-w-2xl space-y-6">
+        <div className="rounded-xl border border-green-200 bg-green-50 p-6">
+          <div className="flex items-center gap-3 text-green-800">
+            <span className="text-2xl">✓</span>
+            <div>
+              <h1 className="text-xl font-bold">Client Account Created!</h1>
+              <p className="text-sm opacity-90">
+                Account setup complete for <strong>{createdResult.businessName}</strong>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Card>
+          <CardBody className="space-y-4">
+            <h2 className="text-base font-semibold text-zinc-900">Owner login</h2>
+            <div className="rounded-lg bg-zinc-50 p-4 border border-zinc-200 font-mono text-sm flex items-center justify-between">
+              <div>
+                <span className="text-xs font-semibold text-zinc-500 block uppercase">Email</span>
+                <span className="font-bold text-zinc-900">{createdResult.email}</span>
+              </div>
+              <Button variant="outline" onClick={() => copyToClipboard(createdResult.email)}>
+                Copy Email
+              </Button>
+            </div>
+
+            {createdResult.emailSent ? (
+              <div className="rounded-lg bg-blue-50 p-3 text-xs text-blue-800">
+                ✉️ A set-password link was emailed to <strong>{createdResult.email}</strong>. The owner chooses
+                their own password — nobody else ever sees it.
+              </div>
+            ) : (
+              <div className="rounded-lg bg-amber-50 p-3 text-xs text-amber-900 space-y-2">
+                <p>
+                  ⚠️ The welcome email was <strong>not</strong> sent
+                  {createdResult.emailError ? `: ${createdResult.emailError}` : "."}
+                </p>
+                {createdResult.setPasswordLink && (
+                  <>
+                    <p>Share this one-time set-password link with the owner privately (it expires soon):</p>
+                    <div className="flex items-center gap-2">
+                      <code className="flex-1 truncate rounded bg-white px-2 py-1 border border-amber-200">
+                        {createdResult.setPasswordLink}
+                      </code>
+                      <Button variant="outline" onClick={() => copyToClipboard(createdResult.setPasswordLink!)}>
+                        Copy link
+                      </Button>
+                    </div>
+                  </>
+                )}
+                <p>You can also resend it later from the client&apos;s profile.</p>
+              </div>
+            )}
+
+            <div className="flex gap-3 pt-2">
+              <Button onClick={() => router.push(`/clients/${createdResult.businessId}`)}>
+                Go to Client Profile
+              </Button>
+              <Button variant="outline" onClick={() => {
+                setCreatedResult(null);
+                setForm({
+                  email: "",
+                  ownerName: "",
+                  businessName: "",
+                  type: "mobile",
+                  phone: "",
+                  address: "",
+                  gstNumber: "",
+                  invoicePrefix: "INV",
+                  taxPreference: "gst",
+                  planId: "",
+                  productId: "",
+                  expiryDate: "",
+                });
+              }}>
+                Create Another Client
+              </Button>
+            </div>
+          </CardBody>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -179,16 +288,13 @@ export default function NewClientPage() {
       <Card>
         <CardBody>
           <form onSubmit={submit} className="space-y-4">
-            <h2 className="text-sm font-semibold text-zinc-700">Login credentials</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Email *</Label>
-                <Input type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} />
-              </div>
-              <div>
-                <Label>Password *</Label>
-                <Input type="text" required minLength={6} value={form.password} onChange={(e) => set("password", e.target.value)} />
-              </div>
+            <h2 className="text-sm font-semibold text-zinc-700">Owner login</h2>
+            <div>
+              <Label>Owner email *</Label>
+              <Input type="email" required value={form.email} onChange={(e) => set("email", e.target.value)} />
+              <p className="mt-1 text-xs text-zinc-500">
+                The owner gets an email with a link to set their own password.
+              </p>
             </div>
             <h2 className="pt-2 text-sm font-semibold text-zinc-700">Business details</h2>
             <div className="grid grid-cols-2 gap-4">

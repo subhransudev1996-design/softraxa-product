@@ -28,6 +28,7 @@ export default function ContactForm() {
           email: fd.get("email"),
           city: fd.get("city"),
           notes: fd.get("notes"),
+          website: fd.get("website"), // honeypot — real visitors leave it empty
         }),
       });
       if (!res.ok) {
@@ -55,6 +56,11 @@ export default function ContactForm() {
 
   return (
     <form onSubmit={onSubmit} className="glass grid gap-5 rounded-2xl p-6 sm:grid-cols-2 sm:p-8">
+      {/* Honeypot: hidden from people and screen readers; bots fill it in. */}
+      <div aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 overflow-hidden">
+        <label htmlFor="website">Website</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
+      </div>
       <div className="sm:col-span-2">
         <label htmlFor="shopName" className="block text-sm font-medium text-paper">
           Shop or business name

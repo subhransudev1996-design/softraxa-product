@@ -3,10 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/formatters.dart';
+import '../../core/supabase_providers.dart';
+import '../../core/theme.dart';
+import '../../core/walkthrough.dart';
 import '../../core/widgets.dart';
 import 'customer_providers.dart';
 import 'customers_screen.dart';
-import '../../core/theme.dart';
 
 class CustomerDetailScreen extends ConsumerWidget {
   const CustomerDetailScreen({super.key, required this.customerId});
@@ -23,19 +25,24 @@ class CustomerDetailScreen extends ConsumerWidget {
         leading: appBarBack(context),
         title: const Text('Customer'),
         actions: [
+          const GuideButton('customer_detail'),
           if (data.hasValue)
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () async {
-                final updated = await showCustomerForm(
-                  context,
-                  ref,
-                  existing: data.value!['customer'] as Map<String, dynamic>,
-                );
-                if (updated != null) {
-                  ref.invalidate(customerLedgerProvider(customerId));
-                }
-              },
+            CoachTarget(
+              page: 'customer_detail',
+              id: 'edit',
+              child: IconButton(
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () async {
+                  final updated = await showCustomerForm(
+                    context,
+                    ref,
+                    existing: data.value!['customer'] as Map<String, dynamic>,
+                  );
+                  if (updated != null) {
+                    ref.invalidate(customerLedgerProvider(customerId));
+                  }
+                },
+              ),
             ),
         ],
       ),
@@ -57,123 +64,144 @@ class CustomerDetailScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            InitialsAvatar(
-                              c['name'] as String? ?? '',
-                              radius: 26,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    c['name'] as String,
-                                    style: const TextStyle(
-                                      fontSize: 17,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  if ((c['phone'] as String? ?? '').isNotEmpty)
-                                    Text(c['phone'] as String),
-                                  if ((c['address'] as String? ?? '')
-                                      .isNotEmpty)
+                CoachTarget(
+                  page: 'customer_detail',
+                  id: 'info',
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              InitialsAvatar(
+                                c['name'] as String? ?? '',
+                                radius: 26,
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
                                     Text(
-                                      c['address'] as String,
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: AppColors.inkSoft,
+                                      c['name'] as String,
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                ],
+                                    if ((c['phone'] as String? ?? '').isNotEmpty)
+                                      Text(c['phone'] as String),
+                                    if ((c['address'] as String? ?? '')
+                                        .isNotEmpty)
+                                      Text(
+                                        c['address'] as String,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: AppColors.inkSoft,
+                                        ),
+                                      ),
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const Divider(height: 24),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Outstanding due'),
-                            Text(
-                              money(due),
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: due > 0
-                                    ? AppColors.red
-                                    : AppColors.green,
-                              ),
-                            ),
-                          ],
-                        ),
-                        if (creditLimit != null) ...[
-                          const SizedBox(height: 4),
+                            ],
+                          ),
+                          const Divider(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
+                              const Text('Outstanding due'),
                               Text(
-                                'Credit limit',
+                                money(due),
                                 style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.inkSoft,
-                                ),
-                              ),
-                              Text(
-                                money(creditLimit),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.inkSoft,
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: due > 0
+                                      ? AppColors.red
+                                      : AppColors.green,
                                 ),
                               ),
                             ],
                           ),
-                        ],
-                        if (overLimit) ...[
-                          const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.warning_amber,
-                                size: 16,
-                                color: AppColors.orange,
+                          if (c['credit_unlimited'] == true)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Text(
+                                'Unlimited credit',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkSoft,
+                                ),
                               ),
-                              const SizedBox(width: 6),
-                              Expanded(
-                                child: Text(
-                                  'Over credit limit by ${money(due - creditLimit)}',
-                                  style: const TextStyle(
+                            ),
+                          if (creditLimit != null) ...[
+                            const SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Credit limit',
+                                  style: TextStyle(
                                     fontSize: 12,
-                                    color: AppColors.orange,
-                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.inkSoft,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
+                                Text(
+                                  money(creditLimit),
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.inkSoft,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (overLimit) ...[
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.warning_amber,
+                                  size: 16,
+                                  color: AppColors.orange,
+                                ),
+                                const SizedBox(width: 6),
+                                Expanded(
+                                  child: Text(
+                                    'Over credit limit by ${money(due - creditLimit)}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.orange,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
                         ],
-                      ],
+                      ),
                     ),
                   ),
                 ),
-                if (due > 0) ...[
+                if (due > 0 &&
+                    (ref.watch(appContextProvider).value?.canRecordPayments ??
+                        false)) ...[
                   const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: () => showRecordCustomerPayment(
-                      context,
-                      ref,
-                      customerId: customerId,
-                      due: due,
+                  CoachTarget(
+                    page: 'customer_detail',
+                    id: 'pay',
+                    child: FilledButton.icon(
+                      onPressed: () => showRecordCustomerPayment(
+                        context,
+                        ref,
+                        customerId: customerId,
+                        due: due,
+                      ),
+                      icon: const Icon(Icons.payments),
+                      label: const Text('Receive payment'),
                     ),
-                    icon: const Icon(Icons.payments),
-                    label: const Text('Receive payment'),
                   ),
                 ],
                 const SectionLabel('Ledger'),
@@ -183,11 +211,15 @@ class CustomerDetailScreen extends ConsumerWidget {
                     message: 'No transactions yet',
                   )
                 else
-                  Card(
-                    child: Column(
-                      children: [
-                        for (final e in entries) _ledgerTile(context, e),
-                      ],
+                  CoachTarget(
+                    page: 'customer_detail',
+                    id: 'ledger',
+                    child: Card(
+                      child: Column(
+                        children: [
+                          for (final e in entries) _ledgerTile(context, e),
+                        ],
+                      ),
                     ),
                   ),
                 const SizedBox(height: 24),

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/network.dart';
 import '../../core/supabase_providers.dart';
 import '../offline/offline_service.dart';
 import 'cart.dart';
@@ -54,12 +55,7 @@ class BillingService {
         invoiceId: res['id'] as String,
       );
     } catch (e) {
-      final msg = e.toString();
-      final isNetwork =
-          msg.contains('SocketException') ||
-          msg.contains('Failed host lookup') ||
-          msg.contains('TimeoutException') ||
-          msg.contains('Connection');
+      final isNetwork = isNetworkError(e);
       final offlineAllowed =
           _ref.read(appContextProvider).value?.featureOn('offline_billing') ??
           true;

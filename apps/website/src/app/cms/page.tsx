@@ -8,7 +8,6 @@ import {
   Trash2,
   Save,
   Sparkles,
-  HelpCircle,
   FileText,
   CheckCircle2,
   AlertCircle,
@@ -16,20 +15,12 @@ import {
   Lock,
   LogOut,
   User,
-  ExternalLink,
   Laptop,
   Smartphone,
-  Eye,
   Share2,
-  Settings as GearIcon,
-  Search,
-  Check,
   Info,
-  Phone,
-  Mail,
-  MessageCircle,
-  Clock
 } from "lucide-react";
+import { errorMessage, type CmsItem, type CmsJson } from "@/lib/cms-types";
 
 type SeoRow = {
   id?: string;
@@ -38,7 +29,7 @@ type SeoRow = {
   description: string;
   keywords: string[];
   og_image?: string | null;
-  structured_data?: any;
+  structured_data?: CmsJson;
   focus_keyphrase: string;
   canonical_url: string;
   meta_robots_noindex: boolean;
@@ -55,7 +46,7 @@ type ContentRow = {
   page: string;
   section: string;
   key: string;
-  value: any;
+  value: CmsJson;
 };
 
 type PageSelector = {
@@ -74,7 +65,7 @@ const PAGES_LIST: PageSelector[] = [
   { id: "", path: "/services/custom-solutions", label: "Custom Solutions" },
 ];
 
-const PAGE_DEFAULTS: Record<string, Record<string, any>> = {
+const PAGE_DEFAULTS: Record<string, Record<string, CmsJson>> = {
   home: {
     hero: {
       content: {
@@ -220,12 +211,7 @@ export default function CMSPage() {
     twitter_description: "",
     schema_type: "WebPage",
   });
-  const [pageContentMap, setPageContentMap] = useState<Record<string, any>>({});
-
-  // Check auth on mount
-  useEffect(() => {
-    checkSession();
-  }, []);
+  const [pageContentMap, setPageContentMap] = useState<Record<string, CmsJson>>({});
 
   const showToast = (type: "success" | "error", message: string) => {
     setToast({ type, message });
@@ -233,6 +219,27 @@ export default function CMSPage() {
       setToast(null);
     }, 4500);
   };
+
+  // Pages are pre-rendered; ask the server to re-render them so a save goes
+  // live now (api/revalidate, admin-only). Returns whether that worked.
+  const publishChanges = async (): Promise<boolean> => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return false;
+      const res = await fetch("/api/revalidate", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  };
+
+  const savedMessage = async (what: string) =>
+    (await publishChanges())
+      ? `${what} saved and published.`
+      : `${what} saved. The live site will update within an hour.`;
 
   const checkSession = async () => {
     setAuthLoading(true);
@@ -296,8 +303,8 @@ export default function CMSPage() {
           setAuthError("Unauthorized. This account does not have administrator privileges.");
         }
       }
-    } catch (err: any) {
-      setAuthError(err.message || "An error occurred during authentication.");
+    } catch (err: unknown) {
+      setAuthError(errorMessage(err, "An error occurred during authentication."));
     } finally {
       setAuthLoading(false);
     }
@@ -332,9 +339,9 @@ export default function CMSPage() {
       
       // Select the page
       selectPageByIndex(initialIdx, seoData || [], contentData || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error loading CMS data:", err);
-      showToast("error", `Failed to load data: ${err.message}`);
+      showToast("error", `Failed to load data: ${errorMessage(err, "unknown error")}`);
     } finally {
       setLoading(false);
     }
@@ -408,6 +415,21 @@ export default function CMSPage() {
     selectPageByIndex(index);
   };
 
+  // Check auth once on mount. Declared after the functions it calls, and
+  // deferred so its state updates don't run synchronously inside the effect
+  // (react-hooks/set-state-in-effect). Re-running it on every render would
+  // reload the whole CMS each time, hence the empty dependency list.
+  useEffect(() => {
+    let active = true;
+    Promise.resolve().then(() => {
+      if (active) checkSession();
+    });
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Save SEO settings
   const saveSeo = async () => {
     setSaving(true);
@@ -451,17 +473,17 @@ export default function CMSPage() {
         updatedRows.push({ ...payload });
       }
       setSeoRows(updatedRows);
-      showToast("success", `SEO settings for ${seoForm.path} saved successfully!`);
-    } catch (err: any) {
+      showToast("success", await savedMessage(`SEO settings for ${seoForm.path}`));
+    } catch (err: unknown) {
       console.error(err);
-      showToast("error", err.message || "Failed to save SEO metadata.");
+      showToast("error", errorMessage(err, "Failed to save SEO metadata."));
     } finally {
       setSaving(false);
     }
   };
 
   // Save Content Section
-  const saveContentSection = async (sectionName: string, keyName: string, value: any) => {
+  const saveContentSection = async (sectionName: string, keyName: string, value: CmsJson) => {
     const activePage = PAGES_LIST[selectedPageIndex];
     if (!activePage.id) return;
 
@@ -484,17 +506,17 @@ export default function CMSPage() {
       const existingIdx = contentRows.findIndex(
         (r) => r.page === activePage.id && r.section === sectionName && r.key === keyName
       );
-      let updatedRows = [...contentRows];
+      const updatedRows = [...contentRows];
       if (existingIdx >= 0) {
         updatedRows[existingIdx] = { ...updatedRows[existingIdx], value };
       } else {
         updatedRows.push({ ...payload });
       }
       setContentRows(updatedRows);
-      showToast("success", `Section [${sectionName}] saved successfully!`);
-    } catch (err: any) {
+      showToast("success", await savedMessage(`Section [${sectionName}]`));
+    } catch (err: unknown) {
       console.error(err);
-      showToast("error", err.message || "Failed to save content section.");
+      showToast("error", errorMessage(err, "Failed to save content section."));
     } finally {
       setSaving(false);
     }
@@ -822,7 +844,7 @@ export default function CMSPage() {
                     ].map((subTab) => (
                       <button
                         key={subTab.id}
-                        onClick={() => setSeoSubTab(subTab.id as any)}
+                        onClick={() => setSeoSubTab(subTab.id as "general" | "social" | "advanced")}
                         className={`text-xs font-bold pb-2 px-1 border-b-2 transition ${
                           seoSubTab === subTab.id
                             ? "border-violet text-violet"
@@ -1326,7 +1348,7 @@ export default function CMSPage() {
                               </button>
                             </div>
 
-                            {pageContentMap.stats?.items?.map((stat: any, index: number) => (
+                            {pageContentMap.stats?.items?.map((stat: CmsItem, index: number) => (
                               <div key={index} className="grid grid-cols-3 gap-4 border-b border-zinc-50 pb-3 last:border-0 last:pb-0">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-dim">Value</label>
@@ -1473,7 +1495,7 @@ export default function CMSPage() {
                               </button>
                             </div>
 
-                            {pageContentMap.values?.items?.map((item: any, idx: number) => (
+                            {pageContentMap.values?.items?.map((item: CmsItem, idx: number) => (
                               <div key={idx} className="grid grid-cols-2 gap-4 border-b border-zinc-100 pb-4 last:border-0 last:pb-0">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-dim">Belief Title</label>
@@ -1633,7 +1655,7 @@ export default function CMSPage() {
                               </div>
                             </div>
 
-                            {pageContentMap.faqs?.items?.map((faq: any, idx: number) => (
+                            {pageContentMap.faqs?.items?.map((faq: CmsItem, idx: number) => (
                               <div key={idx} className="border border-zinc-200 rounded-xl p-4 bg-zinc-50/20 relative space-y-2">
                                 <button
                                   onClick={() => {
@@ -1748,7 +1770,7 @@ export default function CMSPage() {
                               </button>
                             </div>
 
-                            {pageContentMap.list?.items?.map((item: any, idx: number) => (
+                            {pageContentMap.list?.items?.map((item: CmsItem, idx: number) => (
                               <div key={idx} className="border-b border-zinc-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0 space-y-3">
                                 <div className="grid grid-cols-2 gap-4">
                                   <div className="space-y-1">
@@ -1860,7 +1882,7 @@ export default function CMSPage() {
                               </button>
                             </div>
 
-                            {pageContentMap.details?.items?.map((item: any, idx: number) => (
+                            {pageContentMap.details?.items?.map((item: CmsItem, idx: number) => (
                               <div key={idx} className="grid grid-cols-2 gap-4 border-b border-zinc-50 pb-3 last:border-0 last:pb-0">
                                 <div className="space-y-1">
                                   <label className="text-xs font-semibold text-dim">{item.label} Value</label>
@@ -1917,7 +1939,7 @@ export default function CMSPage() {
                               </div>
                             </div>
 
-                            {pageContentMap.faqs?.items?.map((faq: any, idx: number) => (
+                            {pageContentMap.faqs?.items?.map((faq: CmsItem, idx: number) => (
                               <div key={idx} className="border border-zinc-200 rounded-xl p-4 bg-zinc-50/20 relative space-y-2">
                                 <button
                                   onClick={() => {

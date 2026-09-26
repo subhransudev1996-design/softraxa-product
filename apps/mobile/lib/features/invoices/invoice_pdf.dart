@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../core/formatters.dart';
+import '../../core/gst.dart';
 
 /// Default PDF fonts have no ₹ glyph, so amounts use "Rs." instead.
 String _rs(num? v) =>
@@ -100,6 +101,11 @@ class InvoicePdf {
                     'Date: ${dateTimeStr(invoice['invoice_date'])}',
                     style: const pw.TextStyle(fontSize: 9),
                   ),
+                  if (isGst && _placeOfSupply.isNotEmpty)
+                    pw.Text(
+                      _placeOfSupply,
+                      style: const pw.TextStyle(fontSize: 9),
+                    ),
                 ],
               ),
             ],
@@ -211,6 +217,11 @@ class InvoicePdf {
                           'Paid (${invoice['payment_mode']})',
                           _rs(invoice['paid_amount'] as num?),
                         ),
+                      if (toDouble(invoice['credit_amount']) > 0)
+                        _totRow(
+                          'Returns credit',
+                          _rs(invoice['credit_amount'] as num?),
+                        ),
                       if (toDouble(invoice['due_amount']) > 0)
                         _totRow(
                           'Balance Due',
@@ -310,6 +321,8 @@ class InvoicePdf {
             ),
             if ((invoice['customer_name'] as String? ?? '').isNotEmpty)
               pw.Text('Customer: ${invoice['customer_name']}', style: small),
+            if (isGst && _placeOfSupply.isNotEmpty)
+              pw.Text(_placeOfSupply, style: small),
             pw.Divider(height: 6, borderStyle: pw.BorderStyle.dashed),
             for (final it in items) ...[
               pw.Text(_itemName(it), style: smallBold),
@@ -342,11 +355,8 @@ class InvoicePdf {
                 small,
               ),
             if (isGst && toDouble(invoice['tax_amount']) > 0)
-              _tRow(
-                'Incl. GST',
-                toDouble(invoice['tax_amount']).toStringAsFixed(2),
-                small,
-              ),
+              for (final (label, amount) in gstBreakupRows(items))
+                _tRow('Incl. $label', amount.toStringAsFixed(2), small),
             if (toDouble(invoice['round_off']) != 0)
               _tRow(
                 'Round off',
@@ -403,19 +413,15 @@ class InvoicePdf {
   double _inclFactor(Map<String, dynamic> it) =>
       isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1;
 
-  List<pw.Widget> _gstBreakup() {
-    final byRate = <double, double>{};
-    for (final it in items) {
-      final rate = toDouble(it['gst_rate']);
-      if (rate <= 0) continue;
-      byRate[rate] = (byRate[rate] ?? 0) + toDouble(it['tax_amount']);
-    }
-    return [
-      for (final e in byRate.entries) ...[
-        _totRow('CGST ${qty(e.key / 2)}% (incl.)', _rs(e.value / 2)),
-        _totRow('SGST ${qty(e.key / 2)}% (incl.)', _rs(e.value / 2)),
-      ],
-    ];
+  List<pw.Widget> _gstBreakup() => [
+    for (final (label, amount) in gstBreakupRows(items))
+      _totRow('$label (incl.)', _rs(amount)),
+  ];
+
+  /// "Place of supply: 27 - Maharashtra", or '' when not recorded.
+  String get _placeOfSupply {
+    final label = gstStateLabel(invoice['place_of_supply'] as String?);
+    return label.isEmpty ? '' : 'Place of supply: $label';
   }
 
   pw.Widget _totRow(

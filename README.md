@@ -1,18 +1,25 @@
 # Dukania (by SOFTRAXA) — GST Billing & Stock Management
 
-A mobile-first inventory, billing, and stock management system for local Indian shops (mobile, garment, hardware). See [prd.md](prd.md) for full requirements and [PLAN.md](PLAN.md) for the implementation plan and progress.
+A mobile-first inventory, billing, and stock management system for local Indian shops (mobile, garment, hardware). See [prd.md](prd.md) for the original requirements, [LAUNCH_SPECIFICATION.md](LAUNCH_SPECIFICATION.md) for the launch specification and release plan, and [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md) for the security review and its fix status.
 
 ## Structure
 
 | Path | What it is |
 |---|---|
-| `apps/mobile` | Flutter customer app (shop owners) |
-| `apps/admin` | Next.js admin panel (software owner) |
-| `supabase/migrations` | Numbered SQL migrations — run in order in the Supabase SQL editor |
+| `apps/mobile` | Flutter shop app (owners and staff; Android + Windows) |
+| `apps/admin` | Next.js admin panel (SOFTRAXA staff) |
+| `apps/website` | Next.js marketing site, CMS and the password-setting page |
+| `supabase/migrations` | Numbered SQL migrations — run in order |
+| `supabase/tests` | SQL verification scripts — run on a staging copy |
+| `supabase/functions` | Edge Functions (push alerts) |
+| `scripts/check-repo.sh` | Repository checks used by CI (migration numbering, secret scan) |
 
 ## Getting started
 
-1. **Database:** Open your Supabase project → SQL Editor → run each file in `supabase/migrations/` in numeric order.
+1. **Database:** Supabase SQL Editor → run each file in `supabase/migrations/` in numeric order.
+   - Migrations **0036–0039** harden security and accounting. Run them on a **staging copy** first, then run `supabase/tests/r0_security_and_integrity.sql` there: every check must print `PASS`. It rolls back its own test data.
+   - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
+     `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**
    ```
    cd apps/mobile
@@ -23,7 +30,20 @@ A mobile-first inventory, billing, and stock management system for local Indian 
 3. **Admin panel:**
    ```
    cd apps/admin
-   copy .env.example .env.local   # needs service-role key (server-side only)
+   copy .env.example .env.local   # service-role key, WEBSITE_URL, RESEND_API_KEY
    npm install
    npm run dev
    ```
+   New clients receive an email link to set their own password. Without `RESEND_API_KEY`, the panel says the email wasn't sent and shows the link to share instead.
+4. **Push alerts (optional):** set the `FIREBASE_SERVICE_ACCOUNT` and `PUSH_ALERTS_SECRET` secrets, deploy `push-alerts`, and schedule a daily `POST` with `Authorization: Bearer <PUSH_ALERTS_SECRET>` (see the function's header comment).
+
+## Checks
+
+CI (`.github/workflows/ci.yml`) runs on every push to `master`: repository checks, Flutter analyze + tests, and lint + type-check + build for the admin panel and website. Run the same locally:
+
+```
+bash scripts/check-repo.sh
+cd apps/mobile && flutter analyze && flutter test
+cd apps/admin && npm run lint && npx tsc --noEmit && npm run build
+cd apps/website && npm run lint && npx tsc --noEmit && npm run build
+```

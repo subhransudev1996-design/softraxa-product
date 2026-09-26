@@ -1,12 +1,10 @@
-import { Layers, WifiOff, Store, BarChart3, ArrowRight, MessageCircle, IndianRupee } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Hero from "@/components/hero";
 import Marquee from "@/components/marquee";
 import SectionHeading from "@/components/section-heading";
-import FeatureCard from "@/components/feature-card";
 import ProcessSteps from "@/components/process-steps";
 import Reveal from "@/components/reveal";
 import StatCounter from "@/components/stat-counter";
-import CtaBand from "@/components/cta-band";
 import HonestCall from "@/components/honest-call";
 import Testimonials from "@/components/testimonials";
 import AppsSuite from "@/components/apps-suite";
@@ -18,23 +16,9 @@ import WhyShowcase from "@/components/why-showcase";
 import WhatWeBuild from "@/components/what-we-build";
 import AuthCodeRedirect from "@/components/auth-code-redirect";
 
-const ico = "h-5 w-5 text-sky";
-
-const SERVICES = [
-  { icon: <Layers className={ico} />, title: "Product engineering", body: "The whole product — mobile app, backend and admin tooling — designed and built as one system.", href: "/services" },
-  { icon: <WifiOff className={ico} />, title: "Offline-first mobile", body: "Apps that keep working with no signal and sync the moment a connection comes back.", href: "/services" },
-  { icon: <Store className={ico} />, title: "Business software", body: "POS, inventory and billing built around how a real shop actually runs its day.", href: "/services" },
-  { icon: <BarChart3 className={ico} />, title: "Data & reporting", body: "Sales, stock and expense data turned into reports an owner actually reads.", href: "/services" },
-];
-
-const WHY = [
-  { icon: <WifiOff className={ico} />, title: "Offline-first, always", body: "Every screen works without a connection and reconciles automatically once you're back online." },
-  { icon: <MessageCircle className={ico} />, title: "WhatsApp-speed support", body: "Message us directly and talk to the person who wrote the code — not a support script." },
-  { icon: <IndianRupee className={ico} />, title: "India-first pricing", body: "Priced for real shop margins, not enterprise SaaS budgets." },
-];
-
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
 import type { Metadata } from "next";
+import type { CmsItem } from "@/lib/cms-types";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/");
@@ -122,7 +106,7 @@ export default async function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-16">
         <Reveal>
           <div className="grid grid-cols-2 gap-8 rounded-2xl border border-hairline bg-paper/4 px-8 py-10 text-center sm:grid-cols-4">
-            {statsItems.map((stat: any) => (
+            {statsItems.map((stat: CmsItem) => (
               <div key={stat.label}>
                 <p className="font-display text-3xl font-bold text-paper sm:text-4xl">
                   <StatCounter to={stat.value} suffix={stat.suffix} />

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'route_permissions.dart';
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/signup_screen.dart';
@@ -34,7 +35,9 @@ import '../features/services/services_screen.dart';
 import '../features/shell/blocked_screen.dart';
 import '../features/shell/home_shell.dart';
 import '../features/shell/more_screen.dart';
+import '../features/staff/staff_screen.dart';
 import '../features/stock/stock_screens.dart';
+import '../features/subscription/plans_screen.dart';
 import '../features/suppliers/suppliers.dart';
 import '../features/support/support_screen.dart';
 import 'platform.dart';
@@ -125,7 +128,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       if (atAuth || loc == '/splash' || loc == '/setup' || loc == '/blocked') {
         return '/home';
       }
-      return null;
+      return permissionRedirect(loc, appCtx);
     },
     routes: [
       GoRoute(path: '/splash', builder: (_, _) => const _SplashScreen()),
@@ -431,6 +434,16 @@ final routerProvider = Provider<GoRouter>((ref) {
               state,
               JobCardDetailScreen(jobId: state.pathParameters['id']!),
             ),
+          ),
+          GoRoute(
+            path: '/staff',
+            pageBuilder: (context, state) =>
+                _page(context, state, const StaffScreen()),
+          ),
+          GoRoute(
+            path: '/subscription/plans',
+            pageBuilder: (context, state) =>
+                _page(context, state, const PlansScreen()),
           ),
         ],
       ),

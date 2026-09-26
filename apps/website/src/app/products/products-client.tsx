@@ -10,37 +10,6 @@ import SectionHeading from "@/components/section-heading";
 import ContactForm from "@/components/contact-form";
 
 /* ── capabilities ── */
-const CAPABILITIES = [
-  {
-    icon: Store,
-    title: "Custom POS & Billing",
-    body: "Point-of-sale tuned to a specific trade — pharmacy, grocery, hardware, garments. GST-ready invoicing built in.",
-    accent: "from-amber-500/15 to-amber-500/5",
-    iconColor: "text-amber-500",
-  },
-  {
-    icon: Truck,
-    title: "Field-Sales & CRM",
-    body: "Lead pipelines, visit logging, follow-ups and territory maps for teams that sell on the road.",
-    accent: "from-sky-500/15 to-sky-500/5",
-    iconColor: "text-sky-500",
-  },
-  {
-    icon: Boxes,
-    title: "Inventory Systems",
-    body: "Multi-location stock, purchase orders, returns, batch tracking and expiry management.",
-    accent: "from-violet-500/15 to-violet-500/5",
-    iconColor: "text-violet-500",
-  },
-  {
-    icon: Gauge,
-    title: "Operations Dashboards",
-    body: "One screen for the numbers that run the business — live data, alerts, and daily reports.",
-    accent: "from-teal-500/15 to-teal-500/5",
-    iconColor: "text-teal-500",
-  },
-];
-
 /* ── what you get ── */
 const INCLUDES = [
   { icon: Code2, text: "Source code ownership — you own everything we build" },
