@@ -513,6 +513,17 @@ class InvoicePdf {
     var name = it['product_name'] as String? ?? '';
     if (variant.isNotEmpty) name = '$name ($variant)';
     if (serial.isNotEmpty) name = '$name\nS/N: $serial';
+    // Bulk unit as it was when billed (migration 0052): 100 kg = 2 Bag.
+    final factor = toDouble(it['alt_factor']);
+    final altUnit = it['alt_unit_name'] as String? ?? '';
+    final q = toDouble(it['quantity']);
+    if (altUnit.isNotEmpty && factor > 0 && q >= factor) {
+      final bulk = q / factor;
+      final shown = bulk == bulk.roundToDouble()
+          ? bulk.toInt().toString()
+          : bulk.toStringAsFixed(2);
+      name = '$name\n(= $shown $altUnit)';
+    }
     return name;
   }
 

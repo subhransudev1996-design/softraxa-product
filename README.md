@@ -30,6 +30,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0049** makes cut pieces part of the sale: best-fit suggestion with cutting allowance, leftover kept or scrapped by threshold, cutting loss as stock loss, optional cutting charge, returns only when allowed. Test with `supabase/tests/r1_cut_pieces.sql`; apply before the matching app build.
    - Migration **0050** adds the nightly reconciliation (admin panel → Reconciliation) and the owner's full data export. Enable **pg_cron** first (Dashboard → Integrations → Cron) so the migration can schedule the run for 02:00 IST. Test with `supabase/tests/r1_reconciliation.sql`.
    - Migration **0051** adds opening balances (customer dues and advances, supplier dues) and Excel import of customers and suppliers. Run it on its own ('opening' is a new bill type), then `supabase/tests/r1_opening_imports.sql`. Apply before the matching app build.
+   - Migration **0052** adds the repair diagnostic fee, owner due-date changes, approval push support and unit snapshots on bill lines. Test with `supabase/tests/r1_leftovers.sql`; apply before the matching app build.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**
@@ -47,7 +48,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    npm run dev
    ```
    New clients receive an email link to set their own password. Without `RESEND_API_KEY`, the panel says the email wasn't sent and shows the link to share instead.
-4. **Push alerts (optional):** set the `FIREBASE_SERVICE_ACCOUNT` and `PUSH_ALERTS_SECRET` secrets, deploy `push-alerts`, and schedule a daily `POST` with `Authorization: Bearer <PUSH_ALERTS_SECRET>` (see the function's header comment).
+4. **Push alerts (optional):** set the `FIREBASE_SERVICE_ACCOUNT` and `PUSH_ALERTS_SECRET` secrets, deploy `push-alerts` (`--no-verify-jwt`) and schedule a daily `POST` with `Authorization: Bearer <PUSH_ALERTS_SECRET>` (see the function's header comment). Deploy `approval-push` too (with JWT verification on): it tells the owner's phone when staff ask for an approval.
 
 ## Checks
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
@@ -138,11 +140,21 @@ class BillingService {
       payments: payments,
       notes: notes,
     );
-    return Map<String, dynamic>.from(
-      await _ref.read(supabaseProvider).rpc(
-        'request_sale_approval',
-        params: {'payload': payload, 'p_reason': reason},
-      ) as Map,
+    final client = _ref.read(supabaseProvider);
+    final request = Map<String, dynamic>.from(
+      await client.rpc(
+            'request_sale_approval',
+            params: {'payload': payload, 'p_reason': reason},
+          )
+          as Map,
     );
+    // PD13: tell the owner's phones. Best effort — the in-app inbox is
+    // authoritative, so a missing or unconfigured push never blocks this.
+    unawaited(
+      client.functions
+          .invoke('approval-push', body: {'approval_id': request['id']})
+          .then((_) {}, onError: (_) {}),
+    );
+    return request;
   }
 }

@@ -8,6 +8,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
 import '../customers/customer_picker.dart';
+import '../services/service_providers.dart';
 import 'job_card_providers.dart';
 
 /// Repair/service intake flow (PRD Phase 2 §7).
@@ -44,6 +45,9 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   final _odometer = TextEditingController();
   String _fuel = '';
   String _advanceMode = 'cash';
+  // PD59: optional diagnostic fee, only with the customer's agreement.
+  Map<String, dynamic>? _diagService;
+  bool _diagConsent = false;
   DateTime? _expectedDelivery;
   bool _busy = false;
 
@@ -81,6 +85,10 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
         'customer_note': _customerNote.text.trim(),
         'internal_note': _internalNote.text.trim(),
         'job_type': _jobType,
+        if (_diagService != null) ...{
+          'diagnostic_service_id': _diagService!['id'],
+          'diagnostic_consent': _diagConsent,
+        },
         if (_jobType == 'vehicle') ...{
           'registration_no': _registration.text.trim(),
           'odometer_km': int.tryParse(_odometer.text.trim()),
@@ -102,6 +110,49 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Diagnostic fee (PD59): pick a service that has one, then record the
+  /// customer's agreement. Hidden when no service has a fee.
+  List<Widget> _diagnosticFee() {
+    final services = (ref.watch(servicesProvider).value ?? const [])
+        .where((s) => toDouble(s['diagnostic_fee']) > 0)
+        .toList();
+    if (services.isEmpty) return const [];
+    final fee = toDouble(_diagService?['diagnostic_fee']);
+    return [
+      const SectionLabel('Diagnostic fee'),
+      DropdownButtonFormField<String>(
+        initialValue: _diagService?['id'] as String?,
+        decoration: const InputDecoration(labelText: 'Checking fee (optional)'),
+        items: [
+          const DropdownMenuItem(value: null, child: Text('No diagnostic fee')),
+          for (final s in services)
+            DropdownMenuItem(
+              value: s['id'] as String,
+              child: Text(
+                '${s['name']} — ${money(s['diagnostic_fee'] as num?)}',
+              ),
+            ),
+        ],
+        onChanged: (id) => setState(() {
+          _diagService = id == null
+              ? null
+              : services.firstWhere((s) => s['id'] == id);
+          _diagConsent = false;
+        }),
+      ),
+      if (_diagService != null)
+        CheckboxListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _diagConsent,
+          onChanged: (v) => setState(() => _diagConsent = v ?? false),
+          title: Text(
+            'Customer agrees to pay ${money(fee)} for checking, even if the '
+            'repair is not done',
+          ),
+        ),
+    ];
   }
 
   @override
@@ -282,6 +333,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 labelText: 'Accessories received (optional)',
               ),
             ),
+            ..._diagnosticFee(),
             const SectionLabel('Estimate & advance'),
             Row(
               children: [

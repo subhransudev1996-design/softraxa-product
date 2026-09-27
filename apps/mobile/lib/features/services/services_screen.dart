@@ -32,6 +32,12 @@ class ServicesScreen extends ConsumerWidget {
     final sacCode = TextEditingController(
       text: existing?['sac_code'] as String? ?? '',
     );
+    // PD59: fixed fee to check a device, agreed at intake (migration 0052).
+    final diagFee = TextEditingController(
+      text: toDouble(existing?['diagnostic_fee']) == 0
+          ? ''
+          : toDouble(existing?['diagnostic_fee']).toStringAsFixed(2),
+    );
     final minutes = TextEditingController(
       text: existing?['estimated_minutes']?.toString() ?? '',
     );
@@ -110,6 +116,18 @@ class ServicesScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 12),
+                TextField(
+                  controller: diagFee,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Diagnostic fee ₹ (optional)',
+                    helperText:
+                        'Charged for checking, even if the repair is declined',
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     Expanded(
@@ -165,6 +183,7 @@ class ServicesScreen extends ConsumerWidget {
       'price': double.tryParse(price.text) ?? 0,
       'gst_rate': gstRate,
       'sac_code': sacCode.text.trim(),
+      'diagnostic_fee': double.tryParse(diagFee.text) ?? 0,
       'estimated_minutes': int.tryParse(minutes.text),
       'warranty_days': int.tryParse(warrantyDays.text),
       'description': description.text.trim(),

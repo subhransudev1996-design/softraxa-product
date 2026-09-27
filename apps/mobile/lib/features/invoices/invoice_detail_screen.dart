@@ -184,6 +184,66 @@ class InvoiceDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _changeDueDate(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> inv,
+  ) async {
+    final billDate = DateTime.parse(inv['invoice_date'] as String).toLocal();
+    final current = DateTime.tryParse(inv['due_date'] as String? ?? '');
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: current != null && !current.isBefore(billDate)
+          ? current
+          : billDate,
+      firstDate: DateTime(billDate.year, billDate.month, billDate.day),
+      lastDate: DateTime.now().add(const Duration(days: 730)),
+      helpText: 'New due date',
+    );
+    if (picked == null || !context.mounted) return;
+    final reason = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Due by ${dateStr(ymd(picked))}'),
+        content: TextField(
+          controller: reason,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Reason *'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !context.mounted) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'change_invoice_due_date',
+            params: {
+              'p_invoice': invoiceId,
+              'p_due_date': ymd(picked),
+              'p_reason': reason.text.trim(),
+            },
+          );
+      ref.invalidate(invoiceDetailProvider(invoiceId));
+      if (context.mounted) showSuccess(context, 'Due date changed');
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
     final ok = await confirmDialog(
       context,
@@ -298,11 +358,20 @@ class InvoiceDetailScreen extends ConsumerWidget {
               onSelected: (v) {
                 if (v == 'edit') _editBill(context, ref, detail.value!);
                 if (v == 'cancel') _cancel(context, ref);
+                if (v == 'due') _changeDueDate(context, ref, detail.value!);
               },
               itemBuilder: (_) => [
                 // Opening balances can't be edited, only cancelled (0051).
                 if (detail.value!['invoice_type'] != 'opening')
                   const PopupMenuItem(value: 'edit', child: Text('Edit bill')),
+                // PD19: owner-only, with a reason (migration 0052).
+                if ((features?.isOwner ?? false) &&
+                    toDouble(detail.value!['due_amount']) > 0 &&
+                    detail.value!['invoice_type'] != 'estimate')
+                  const PopupMenuItem(
+                    value: 'due',
+                    child: Text('Change due date'),
+                  ),
                 const PopupMenuItem(
                   value: 'cancel',
                   child: Text(

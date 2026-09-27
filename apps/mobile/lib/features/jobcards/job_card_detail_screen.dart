@@ -313,6 +313,23 @@ class JobCardDetailScreen extends ConsumerWidget {
     }
   }
 
+  Future<void> _addDiagnosticFee(BuildContext context, WidgetRef ref) async {
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'add_job_card_item',
+            params: {
+              'payload': {'job_card_id': jobId, 'is_diagnostic': true},
+            },
+          );
+      ref.invalidate(jobCardDetailProvider(jobId));
+      if (context.mounted) showSuccess(context, 'Diagnostic fee added');
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
   Future<void> _removeItem(
     BuildContext context,
     WidgetRef ref,
@@ -765,6 +782,21 @@ class JobCardDetailScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
+                // PD59: the agreed diagnostic fee, billable even if the
+                // repair is declined (migration 0052).
+                if (!closed &&
+                    toDouble(j['diagnostic_fee']) > 0 &&
+                    j['diagnostic_consent_at'] != null &&
+                    !items.any((it) => it['is_diagnostic'] == true)) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => _addDiagnosticFee(context, ref),
+                    icon: const Icon(Icons.fact_check_outlined),
+                    label: Text(
+                      'Add diagnostic fee ${money(j['diagnostic_fee'] as num?)}',
+                    ),
+                  ),
+                ],
                 if (!closed && needsEstimate) ...[
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
