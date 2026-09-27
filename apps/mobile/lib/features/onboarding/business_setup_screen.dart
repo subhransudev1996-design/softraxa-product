@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/business_category.dart';
+import '../../core/data_export.dart';
 import '../../core/gst.dart';
 import '../../core/imagekit.dart';
 import '../../core/supabase_providers.dart';
@@ -434,6 +435,16 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                       )
                     : Text(isEdit ? 'Save changes' : 'Start using the app'),
               ),
+              // Full data export for the owner (migration 0050).
+              if (isEdit &&
+                  (ref.watch(appContextProvider).value?.isOwner ?? false)) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () => exportAllData(context, ref),
+                  icon: const Icon(Icons.download_outlined),
+                  label: const Text('Export all data (Excel)'),
+                ),
+              ],
               const SizedBox(height: 24),
             ],
           ),

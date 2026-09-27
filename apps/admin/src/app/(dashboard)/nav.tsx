@@ -11,6 +11,7 @@ import {
   IndianRupee,
   LifeBuoy,
   ScrollText,
+  ScanSearch,
 } from "lucide-react";
 
 const nav = [
@@ -22,6 +23,7 @@ const nav = [
   { href: "/payments", label: "Payments", icon: IndianRupee },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/audit", label: "Audit logs", icon: ScrollText },
+  { href: "/reconciliation", label: "Reconciliation", icon: ScanSearch },
 ];
 
 export function SidebarNav() {
