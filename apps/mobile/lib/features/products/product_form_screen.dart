@@ -553,9 +553,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _hsn,
+              keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'HSN code (for GST invoice)',
+                helperText: 'Needed on bills to GST-registered customers',
               ),
+              // Same rule as the database (migration 0048).
+              validator: (v) {
+                final t = (v ?? '').trim();
+                return t.isEmpty ||
+                        RegExp(r'^[0-9]{4}([0-9]{2}){0,2}$').hasMatch(t)
+                    ? null
+                    : '4, 6 or 8 digits';
+              },
             ),
             const SectionLabel('Pricing'),
             Row(

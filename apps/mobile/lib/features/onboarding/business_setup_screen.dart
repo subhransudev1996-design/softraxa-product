@@ -124,7 +124,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'overdue_grace_days': int.tryParse(_grace.text.trim()) ?? 0,
         'require_repair_estimate': _requireEstimate,
         'upi_id': _upi.text.trim(),
-        if (_taxPref == 'gst') 'turnover_band': _band,
+        if (_taxPref != 'non_gst') 'turnover_band': _band,
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -256,6 +256,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 items: const [
                   DropdownMenuItem(value: 'gst', child: Text('GST billing')),
                   DropdownMenuItem(
+                    value: 'composition',
+                    child: Text('Composition (bill of supply)'),
+                  ),
+                  DropdownMenuItem(
                     value: 'non_gst',
                     child: Text('Non-GST billing'),
                   ),
@@ -263,7 +267,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 onChanged: (v) => setState(() => _taxPref = v ?? 'gst'),
               ),
               const SizedBox(height: 12),
-              if (_taxPref == 'gst')
+              if (_taxPref != 'non_gst')
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: TextFormField(
@@ -279,7 +283,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     },
                   ),
                 ),
-              if (_taxPref == 'gst')
+              if (_taxPref != 'non_gst')
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GstStateField(
@@ -291,7 +295,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                         (v ?? '').isEmpty ? 'Required for GST billing' : null,
                   ),
                 ),
-              if (_taxPref == 'gst')
+              if (_taxPref != 'non_gst')
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
                   child: DropdownButtonFormField<String>(
@@ -410,10 +414,14 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 textCapitalization: TextCapitalization.characters,
                 decoration: const InputDecoration(
                   labelText: 'Invoice prefix',
-                  helperText: 'e.g. INV — invoices become INV-00001',
+                  helperText:
+                      'Up to 4 characters — bills become INV/26-27/0001',
                 ),
+                // Bill numbers must fit in 16 characters (migration 0048).
                 validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Required' : null,
+                    RegExp(r'^[A-Za-z0-9]{1,4}$').hasMatch((v ?? '').trim())
+                    ? null
+                    : '1–4 letters or digits',
               ),
               const SizedBox(height: 24),
               FilledButton(

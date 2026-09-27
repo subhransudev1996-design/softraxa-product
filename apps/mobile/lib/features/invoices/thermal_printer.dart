@@ -139,10 +139,23 @@ class ThermalPrinterService {
         styles: const PosStyles(align: PosAlign.center),
       );
     }
-    if (isGst && (business['gst_number'] as String? ?? '').isNotEmpty) {
+    final composition = business['tax_preference'] == 'composition';
+    if ((isGst || composition) &&
+        (business['gst_number'] as String? ?? '').isNotEmpty) {
       bytes += generator.text(
         'GSTIN: ${business['gst_number']}',
         styles: const PosStyles(align: PosAlign.center, bold: true),
+      );
+    }
+    // Composition shops issue bills of supply (migration 0048).
+    if (composition && invoice['invoice_type'] != 'estimate') {
+      bytes += generator.text(
+        'BILL OF SUPPLY',
+        styles: const PosStyles(align: PosAlign.center, bold: true),
+      );
+      bytes += generator.text(
+        'Composition taxable person, not eligible to collect tax on supplies',
+        styles: const PosStyles(align: PosAlign.center),
       );
     }
     bytes += generator.hr();

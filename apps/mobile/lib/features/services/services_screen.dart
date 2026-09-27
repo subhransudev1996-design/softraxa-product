@@ -102,8 +102,11 @@ class ServicesScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: sacCode,
+                  keyboardType: TextInputType.number,
                   decoration: const InputDecoration(
                     labelText: 'SAC code (optional)',
+                    helperText:
+                        '6 digits starting 99 — needed on B2B GST bills',
                   ),
                 ),
                 const SizedBox(height: 12),

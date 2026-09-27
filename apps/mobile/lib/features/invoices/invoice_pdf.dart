@@ -70,12 +70,37 @@ class InvoicePdf {
     ],
   );
 
-  String get title => switch (invoice['invoice_type']) {
-    'gst' => 'TAX INVOICE',
-    'cash_memo' => 'CASH MEMO',
-    'estimate' => 'ESTIMATE / QUOTATION',
-    _ => 'INVOICE',
-  };
+  /// Composition shops can't charge GST: their bills are bills of supply
+  /// carrying the composition declaration (migration 0048).
+  bool get isComposition => business['tax_preference'] == 'composition';
+
+  /// Bill of supply: a composition shop's bill, or a GST shop's bill of
+  /// exempt goods only (every line at 0%).
+  bool get isBillOfSupply =>
+      !isEstimate &&
+      invoice['invoice_type'] != 'cash_memo' &&
+      (isComposition ||
+          (isGst &&
+              items.isNotEmpty &&
+              items.every((it) => toDouble(it['gst_rate']) == 0)));
+
+  /// The shop's GSTIN is printed on tax invoices and on a composition
+  /// shop's bills of supply.
+  bool get showsShopGstin =>
+      (isGst || isComposition) &&
+      (business['gst_number'] as String? ?? '').isNotEmpty;
+
+  static const compositionDeclaration =
+      'Composition taxable person, not eligible to collect tax on supplies';
+
+  String get title => isBillOfSupply
+      ? 'BILL OF SUPPLY'
+      : switch (invoice['invoice_type']) {
+          'gst' => 'TAX INVOICE',
+          'cash_memo' => 'CASH MEMO',
+          'estimate' => 'ESTIMATE / QUOTATION',
+          _ => 'INVOICE',
+        };
 
   // ---------------- A4 ----------------
 
@@ -113,8 +138,7 @@ class InvoicePdf {
                       'Phone: ${business['phone']}',
                       style: const pw.TextStyle(fontSize: 9),
                     ),
-                  if (isGst &&
-                      (business['gst_number'] as String? ?? '').isNotEmpty)
+                  if (showsShopGstin)
                     pw.Text(
                       'GSTIN: ${business['gst_number']}',
                       style: pw.TextStyle(
@@ -134,6 +158,15 @@ class InvoicePdf {
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
+                  if (isComposition)
+                    pw.SizedBox(
+                      width: 190,
+                      child: pw.Text(
+                        compositionDeclaration,
+                        style: const pw.TextStyle(fontSize: 8),
+                        textAlign: pw.TextAlign.right,
+                      ),
+                    ),
                   pw.SizedBox(height: 4),
                   pw.Text('No: ${invoice['invoice_no']}', style: bold),
                   pw.Text(
@@ -357,7 +390,7 @@ class InvoicePdf {
               pw.Center(
                 child: pw.Text('Ph: ${business['phone']}', style: small),
               ),
-            if (isGst && (business['gst_number'] as String? ?? '').isNotEmpty)
+            if (showsShopGstin)
               pw.Center(
                 child: pw.Text(
                   'GSTIN: ${business['gst_number']}',
@@ -365,6 +398,14 @@ class InvoicePdf {
                 ),
               ),
             pw.Center(child: pw.Text('--- $title ---', style: smallBold)),
+            if (isComposition)
+              pw.Center(
+                child: pw.Text(
+                  compositionDeclaration,
+                  style: small,
+                  textAlign: pw.TextAlign.center,
+                ),
+              ),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [

@@ -27,7 +27,7 @@ class SetupWizardScreen extends ConsumerStatefulWidget {
 final _upiPattern = RegExp(
   r'^[A-Za-z0-9._-]{2,255}@[A-Za-z][A-Za-z0-9]{1,63}$',
 );
-final _prefixPattern = RegExp(r'^[A-Za-z0-9]{1,6}$');
+final _prefixPattern = RegExp(r'^[A-Za-z0-9]{1,4}$');
 
 class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   static const _titles = [
@@ -80,7 +80,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
   bool _busy = false;
   bool _created = false; // create_business ran; a retry only re-saves
 
-  bool get _tooLarge => _tax == 'gst' && _band == 'above_5cr';
+  // Regular and composition shops both have a GSTIN (migration 0048).
+  bool get _registered => _tax != 'non_gst';
+
+  bool get _tooLarge => _registered && _band == 'above_5cr';
 
   void _next() {
     final ok = switch (_step) {
@@ -94,7 +97,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       showError(context, 'Choose your type of shop');
       return;
     }
-    if (_step == 2 && _tax == 'gst' && _band == null) {
+    if (_step == 2 && _registered && _band == null) {
       showError(context, 'Choose your annual turnover');
       return;
     }
@@ -113,9 +116,9 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     'phone': _phone.text.trim(),
     'address': _address.text.trim(),
     'tax_preference': _tax,
-    'gst_number': _tax == 'gst' ? _gstin.text.trim().toUpperCase() : '',
+    'gst_number': _registered ? _gstin.text.trim().toUpperCase() : '',
     'state_code': _state,
-    'turnover_band': _tax == 'gst' ? _band : null,
+    'turnover_band': _registered ? _band : null,
     'upi_id': _upi.text.trim(),
     'invoice_prefix': _prefix.text.trim().toUpperCase(),
   };
@@ -135,9 +138,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               'phone': _phone.text.trim(),
               'address': _address.text.trim(),
               'tax_preference': _tax,
-              'gst_number': _tax == 'gst'
-                  ? _gstin.text.trim().toUpperCase()
-                  : '',
+              'gst_number': _registered ? _gstin.text.trim().toUpperCase() : '',
               'invoice_prefix': _prefix.text.trim().toUpperCase(),
             },
           },
@@ -360,14 +361,24 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         children: [
           SegmentedButton<String>(
             segments: const [
-              ButtonSegment(value: 'gst', label: Text('GST registered')),
+              ButtonSegment(value: 'gst', label: Text('Regular GST')),
+              ButtonSegment(value: 'composition', label: Text('Composition')),
               ButtonSegment(value: 'non_gst', label: Text('Not registered')),
             ],
             selected: {_tax},
             onSelectionChanged: (s) => setState(() => _tax = s.first),
           ),
           const SizedBox(height: 16),
-          if (_tax == 'gst') ...[
+          if (_registered) ...[
+            if (_tax == 'composition')
+              Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Text(
+                  'Composition shops can\'t charge GST. Your bills will be '
+                  'printed as bills of supply with the composition declaration.',
+                  style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                ),
+              ),
             TextFormField(
               controller: _gstin,
               textCapitalization: TextCapitalization.characters,
@@ -469,11 +480,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             textCapitalization: TextCapitalization.characters,
             decoration: const InputDecoration(
               labelText: 'Invoice prefix',
-              helperText: 'e.g. INV — bills become INV-00001',
+              helperText: 'Up to 4 characters — bills become INV/26-27/0001',
             ),
             validator: (v) => _prefixPattern.hasMatch((v ?? '').trim())
                 ? null
-                : '1–6 letters or digits',
+                : '1–4 letters or digits',
           ),
         ],
       ),
@@ -522,7 +533,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 const SizedBox(height: 4),
                 Text(
                   '${categoryOf(_category).label} · '
-                  '${_tax == 'gst' ? 'GST ${_gstin.text.trim().toUpperCase()}' : 'Not GST registered'}'
+                  '${switch (_tax) {
+                    'gst' => 'GST ${_gstin.text.trim().toUpperCase()}',
+                    'composition' => 'Composition ${_gstin.text.trim().toUpperCase()}',
+                    _ => 'Not GST registered',
+                  }}'
                   '${_upi.text.trim().isEmpty ? '' : ' · UPI ${_upi.text.trim()}'}',
                   style: const TextStyle(fontSize: 13),
                 ),

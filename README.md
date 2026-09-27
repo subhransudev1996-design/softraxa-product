@@ -26,6 +26,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0045** adds the daily cashbook and day closing (cash drawer permission for staff). Test with `supabase/tests/r1_cashbook.sql`.
    - Migration **0046** adds repair estimates with versioned, staff-recorded customer approval, vehicle job fields and the private `job-attachments` Storage bucket for photos. Test with `supabase/tests/r1_repair_estimates.sql`; apply before the matching app build.
    - Migration **0047** adds the R1 shop categories and the setup wizard (GST, turnover band, UPI ID). Run it on its own first, then `supabase/tests/r1_categories_setup.sql` (new category values only exist once the migration is committed). Apply before the matching app build.
+   - Migration **0048** starts a new invoice number series each financial year (`INV/26-27/0001`), adds composition shops (bill of supply) and requires HSN/SAC on bills to GST-registered customers. Run it on its own, then `supabase/tests/r1_gst_series.sql`.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**
