@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../core/business_category.dart';
 import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
@@ -229,10 +230,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
       if (mounted) {
         onAdded(newId);
-        showSuccess(
-          context,
-          'New $label "$trimmedName" added',
-        );
+        showSuccess(context, 'New $label "$trimmedName" added');
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -303,10 +301,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
       if (isEdit) {
         productId = widget.existing!['id'] as String;
-        await client
-            .from('products')
-            .update(row)
-            .eq('id', productId);
+        await client.from('products').update(row).eq('id', productId);
       } else {
         final inserted = await client
             .from('products')
@@ -349,11 +344,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
 
       if (_trackSerial && _serials.isNotEmpty) {
-        await client.rpc('add_product_serials', params: {
-          'p_product_id': productId,
-          'p_variant_id': null,
-          'p_serials': _serials,
-        });
+        await client.rpc(
+          'add_product_serials',
+          params: {
+            'p_product_id': productId,
+            'p_variant_id': null,
+            'p_serials': _serials,
+          },
+        );
       }
 
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
@@ -378,12 +376,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             as String? ??
         'other';
 
-    final selectedCategory =
-        categories.any((c) => c['id'] == _categoryId) ? _categoryId : null;
-    final selectedBrand =
-        brands.any((b) => b['id'] == _brandId) ? _brandId : null;
-    final selectedUnit =
-        units.any((u) => u['id'] == _unitId) ? _unitId : null;
+    final selectedCategory = categories.any((c) => c['id'] == _categoryId)
+        ? _categoryId
+        : null;
+    final selectedBrand = brands.any((b) => b['id'] == _brandId)
+        ? _brandId
+        : null;
+    final selectedUnit = units.any((u) => u['id'] == _unitId) ? _unitId : null;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -420,7 +419,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       for (final c in categories)
                         DropdownMenuItem(
                           value: c['id'] as String,
-                          child: Text(c['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            c['name'] as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) => setState(() => _categoryId = v),
@@ -446,7 +449,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       for (final b in brands)
                         DropdownMenuItem(
                           value: b['id'] as String,
-                          child: Text(b['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            b['name'] as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) => setState(() => _brandId = v),
@@ -477,7 +484,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       for (final u in units)
                         DropdownMenuItem(
                           value: u['id'] as String,
-                          child: Text('${u['name']} (${u['short_name']})', maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            '${u['name']} (${u['short_name']})',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) => setState(() => _unitId = v),
@@ -602,7 +613,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               ],
               onChanged: (v) => setState(() => _gstRate = v ?? 0),
             ),
-            if (businessType == 'hardware') ...[
+            if (categoryOf(businessType).bulkPricing) ...[
               const SectionLabel('Bulk pricing (optional)'),
               Row(
                 children: [
@@ -722,7 +733,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       const SizedBox(height: 4),
                       Text(
                         'Add or scan unique IMEI numbers for individual stock units.',
-                        style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
                       ),
                       const SizedBox(height: 10),
                       Row(
@@ -736,7 +750,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               ),
                               onSubmitted: (v) {
                                 final imei = v.trim();
-                                if (imei.isNotEmpty && !_serials.contains(imei)) {
+                                if (imei.isNotEmpty &&
+                                    !_serials.contains(imei)) {
                                   setState(() {
                                     _serials.add(imei);
                                     _singleImeiInput.clear();
@@ -750,8 +765,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             icon: const Icon(Icons.qr_code_scanner),
                             onPressed: () async {
                               final code = isDesktopPlatform
-                                  ? await promptBarcode(context, title: 'Enter IMEI')
-                                  : await context.push<String>('/scan?mode=return');
+                                  ? await promptBarcode(
+                                      context,
+                                      title: 'Enter IMEI',
+                                    )
+                                  : await context.push<String>(
+                                      '/scan?mode=return',
+                                    );
                               if (code != null &&
                                   code.isNotEmpty &&
                                   !_serials.contains(code)) {

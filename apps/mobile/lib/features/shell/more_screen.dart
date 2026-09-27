@@ -181,32 +181,35 @@ class MoreScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SectionLabel('Services'),
-          Card(
-            child: Column(
-              children: [
-                tile(
-                  Icons.build_outlined,
-                  'Service catalog',
-                  '/services',
-                  color: AppColors.indigo,
-                  enabled:
-                      (features?.featureOn('service_module') ?? true) &&
-                      (appContext?.canManageServices ?? false),
-                ),
-                const Divider(),
-                tile(
-                  Icons.assignment_outlined,
-                  'Job cards',
-                  '/job-cards',
-                  color: AppColors.teal,
-                  enabled:
-                      (features?.featureOn('service_module') ?? true) &&
-                      (appContext?.canManageServices ?? false),
-                ),
-              ],
+          // Hidden for categories that don't do jobs (garment, hardware).
+          if (appContext?.category.jobCards ?? true) ...[
+            const SectionLabel('Services'),
+            Card(
+              child: Column(
+                children: [
+                  tile(
+                    Icons.build_outlined,
+                    'Service catalog',
+                    '/services',
+                    color: AppColors.indigo,
+                    enabled:
+                        (features?.featureOn('service_module') ?? true) &&
+                        (appContext?.canManageServices ?? false),
+                  ),
+                  const Divider(),
+                  tile(
+                    Icons.assignment_outlined,
+                    'Job cards',
+                    '/job-cards',
+                    color: AppColors.teal,
+                    enabled:
+                        (features?.featureOn('service_module') ?? true) &&
+                        (appContext?.canManageServices ?? false),
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
           const SectionLabel('Money'),
           Card(
             child: Column(

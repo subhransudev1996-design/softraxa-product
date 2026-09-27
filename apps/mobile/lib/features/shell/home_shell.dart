@@ -389,7 +389,8 @@ class AppSidebar extends ConsumerWidget {
                     label: 'Import products',
                     route: '/import',
                   ),
-                if (features?.featureOn('service_module') ?? true) ...[
+                if ((features?.featureOn('service_module') ?? true) &&
+                    (appContext?.category.jobCards ?? true)) ...[
                   const _SidebarSectionLabel('Services'),
                   railTile(
                     icon: Icons.build_outlined,

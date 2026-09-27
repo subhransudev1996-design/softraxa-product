@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { BUSINESS_TYPES } from "@/lib/business-types";
 import { Button, Card, CardBody, Input, Label, Select } from "@/components/ui";
 
 export default function NewClientPage() {
@@ -309,10 +310,9 @@ export default function NewClientPage() {
               <div>
                 <Label>Business type</Label>
                 <Select value={form.type} onChange={(e) => set("type", e.target.value)}>
-                  <option value="mobile">Mobile shop</option>
-                  <option value="garment">Garment shop</option>
-                  <option value="hardware">Hardware shop</option>
-                  <option value="other">Other</option>
+                  {BUSINESS_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </Select>
               </div>
               <div>

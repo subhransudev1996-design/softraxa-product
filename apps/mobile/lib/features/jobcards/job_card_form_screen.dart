@@ -35,7 +35,11 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   final _customerNote = TextEditingController();
   final _internalNote = TextEditingController();
   // PD64: vehicle jobs record registration (required), odometer and fuel.
-  String _jobType = 'device';
+  // Garages start on vehicle; other shops on device.
+  late String _jobType =
+      (ref.read(appContextProvider).value?.category.vehicleJobs ?? false)
+      ? 'vehicle'
+      : 'device';
   final _registration = TextEditingController();
   final _odometer = TextEditingController();
   String _fuel = '';

@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../core/business_category.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
-
-/// Attribute field templates per business type (PRD 7.5).
-const variantTemplates = <String, List<String>>{
-  'mobile': ['Model', 'RAM', 'Storage', 'Color'],
-  'garment': ['Size', 'Color', 'Fabric', 'Gender', 'Design'],
-  'hardware': ['Size/Weight', 'Material', 'Grade'],
-  'other': ['Option'],
-};
 
 /// Result of editing a variant in the sheet (not yet persisted).
 class VariantDraft {
@@ -116,9 +109,8 @@ class _VariantSheetState extends State<_VariantSheet> {
             _AttrRow(name: e.key, value: e.value),
         ]
       : [
-          for (final f
-              in variantTemplates[widget.businessType] ??
-                  variantTemplates['other']!)
+          // Attribute fields suggested for the shop's category (PRD 7.5).
+          for (final f in categoryOf(widget.businessType).variantFields)
             _AttrRow(name: f),
         ];
   late final _sku = TextEditingController(text: widget.existing?.sku ?? '');

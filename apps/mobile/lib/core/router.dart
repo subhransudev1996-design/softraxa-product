@@ -22,6 +22,7 @@ import '../features/offline/offline_bills_screen.dart';
 import 'splash_screen.dart';
 import 'theme.dart';
 import '../features/onboarding/business_setup_screen.dart';
+import '../features/onboarding/setup_wizard_screen.dart';
 import '../features/pos/pos_screen.dart';
 import '../features/pos/scan_screen.dart';
 import '../features/products/master_data_screen.dart';
@@ -70,22 +71,27 @@ class _SplashScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.wifi_off, size: 40, color: Colors.white70),
                 const SizedBox(height: 10),
-                const Text('Could not load your account.',
-                    style: TextStyle(color: Colors.white)),
+                const Text(
+                  'Could not load your account.',
+                  style: TextStyle(color: Colors.white),
+                ),
                 const SizedBox(height: 12),
                 FilledButton(
                   style: FilledButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      foregroundColor: AppColors.primaryDark,
-                      minimumSize: const Size(160, 46)),
+                    backgroundColor: Colors.white,
+                    foregroundColor: AppColors.primaryDark,
+                    minimumSize: const Size(160, 46),
+                  ),
                   onPressed: () =>
                       ref.read(appContextProvider.notifier).refresh(),
                   child: const Text('Retry'),
                 ),
                 TextButton(
                   onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-                  child: const Text('Logout',
-                      style: TextStyle(color: Colors.white70)),
+                  child: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.white70),
+                  ),
                 ),
               ],
             ),
@@ -129,6 +135,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final appCtx = ctxAsync.value!;
       if (!appCtx.hasBusiness) return loc == '/setup' ? null : '/setup';
       if (appCtx.isBlocked) return loc == '/blocked' ? null : '/blocked';
+      if (appCtx.needsSetup) return loc == '/setup' ? null : '/setup';
       if (atAuth || loc == '/splash' || loc == '/setup' || loc == '/blocked') {
         return '/home';
       }
@@ -142,7 +149,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/forgot-password',
         builder: (_, _) => const ForgotPasswordScreen(),
       ),
-      GoRoute(path: '/setup', builder: (_, _) => const BusinessSetupScreen()),
+      GoRoute(path: '/setup', builder: (_, _) => const SetupWizardScreen()),
       GoRoute(path: '/blocked', builder: (_, _) => const BlockedScreen()),
 
       // ---- main shell with bottom navigation ----

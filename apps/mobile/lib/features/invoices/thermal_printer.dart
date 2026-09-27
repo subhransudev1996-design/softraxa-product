@@ -14,7 +14,40 @@ class ThermalPrinterService {
     required Map<String, dynamic> business,
     required Map<String, dynamic> invoice,
     required List<Map<String, dynamic>> items,
-  }) async {
+  }) => _print(
+    context,
+    () => _buildTicket(business: business, invoice: invoice, items: items),
+  );
+
+  /// A short test slip, used by the setup wizard's printer check.
+  static Future<void> printTestPage(BuildContext context, String shopName) =>
+      _print(context, () async {
+        final profile = await CapabilityProfile.load();
+        final generator = Generator(PaperSize.mm80, profile);
+        return [
+          ...generator.text(
+            shopName,
+            styles: const PosStyles(align: PosAlign.center, bold: true),
+          ),
+          ...generator.text(
+            'Printer test - Dukania',
+            styles: const PosStyles(align: PosAlign.center),
+          ),
+          ...generator.text(
+            dateTimeStr(DateTime.now().toIso8601String()),
+            styles: const PosStyles(align: PosAlign.center),
+          ),
+          ...generator.hr(),
+          ...generator.text('If you can read this, billing will print.'),
+          ...generator.feed(2),
+          ...generator.cut(),
+        ];
+      });
+
+  static Future<void> _print(
+    BuildContext context,
+    Future<List<int>> Function() build,
+  ) async {
     try {
       final enabled = await PrintBluetoothThermal.bluetoothEnabled;
       if (!enabled) {
@@ -67,11 +100,7 @@ class ThermalPrinterService {
         }
         return;
       }
-      final bytes = await _buildTicket(
-        business: business,
-        invoice: invoice,
-        items: items,
-      );
+      final bytes = await build();
       await PrintBluetoothThermal.writeBytes(bytes);
       await PrintBluetoothThermal.disconnect;
       if (context.mounted) showSuccess(context, 'Sent to printer');

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { businessTypeLabel } from "@/lib/business-types";
 import {
   Badge, Button, Card, CardBody, Input, Label, Select, Spinner, Toggle,
   subscriptionBadge,
@@ -161,7 +162,7 @@ export default function ClientDetailPage() {
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">{business.name}</h1>
           <p className="text-sm text-zinc-500">
-            {business.owner_name} • {business.phone} • <span className="capitalize">{business.business_type}</span>
+            {business.owner_name} • {business.phone} • <span>{businessTypeLabel(business.business_type)}</span>
           </p>
         </div>
         <div className="flex items-center gap-3">

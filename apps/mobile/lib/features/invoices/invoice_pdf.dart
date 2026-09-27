@@ -31,6 +31,45 @@ class InvoicePdf {
     invoice['invoice_payments'] as List? ?? [],
   );
 
+  /// UPI "scan to pay" link for the balance due (setup wizard, 0047).
+  /// Null when the shop has no UPI ID or nothing is left to pay.
+  String? get _upiLink {
+    final upi = (business['upi_id'] as String? ?? '').trim();
+    final due = toDouble(invoice['due_amount']);
+    if (upi.isEmpty || isEstimate || due <= 0) return null;
+    return Uri(
+      scheme: 'upi',
+      host: 'pay',
+      queryParameters: {
+        'pa': upi,
+        'pn': business['name'] as String? ?? '',
+        'am': due.toStringAsFixed(2),
+        'cu': 'INR',
+        'tn': 'Bill ${invoice['invoice_no'] ?? ''}',
+      },
+    ).toString();
+  }
+
+  pw.Widget _upiQr(double size) => pw.Column(
+    children: [
+      pw.BarcodeWidget(
+        barcode: pw.Barcode.qrCode(),
+        data: _upiLink!,
+        width: size,
+        height: size,
+      ),
+      pw.SizedBox(height: 3),
+      pw.Text(
+        'Scan to pay ${_rs(invoice['due_amount'] as num?)} by UPI',
+        style: const pw.TextStyle(fontSize: 8),
+      ),
+      pw.Text(
+        business['upi_id'] as String,
+        style: const pw.TextStyle(fontSize: 7),
+      ),
+    ],
+  );
+
   String get title => switch (invoice['invoice_type']) {
     'gst' => 'TAX INVOICE',
     'cash_memo' => 'CASH MEMO',
@@ -122,7 +161,10 @@ class InvoicePdf {
             if (isGst && _customerGstin.isNotEmpty)
               pw.Text(
                 'GSTIN: $_customerGstin',
-                style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
+                style: pw.TextStyle(
+                  fontSize: 9,
+                  fontWeight: pw.FontWeight.bold,
+                ),
               ),
             if ((invoice['customer_phone'] as String? ?? '').isNotEmpty)
               pw.Text(
@@ -246,10 +288,13 @@ class InvoicePdf {
           pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text(
-                'Thank you for your business!',
-                style: const pw.TextStyle(fontSize: 9),
-              ),
+              if (_upiLink != null)
+                _upiQr(84)
+              else
+                pw.Text(
+                  'Thank you for your business!',
+                  style: const pw.TextStyle(fontSize: 9),
+                ),
               pw.Column(
                 children: [
                   pw.SizedBox(height: 24),
@@ -404,6 +449,10 @@ class InvoicePdf {
                   toDouble(invoice['due_amount']).toStringAsFixed(2),
                   smallBold,
                 ),
+            ],
+            if (_upiLink != null) ...[
+              pw.SizedBox(height: 6),
+              pw.Center(child: _upiQr(widthMm >= 70 ? 90 : 70)),
             ],
             pw.SizedBox(height: 6),
             pw.Center(child: pw.Text('Thank you! Visit again.', style: small)),

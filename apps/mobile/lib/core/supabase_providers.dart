@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'business_category.dart';
 import 'network.dart';
 
 final supabaseProvider = Provider<SupabaseClient>(
@@ -47,15 +48,17 @@ class AppContext {
   });
 
   /// Built from the `get_my_context` response.
-  factory AppContext.fromJson(Map<String, dynamic> data, {DateTime? offlineSince}) =>
-      AppContext(
-        profile: data['profile'] as Map<String, dynamic>?,
-        business: data['business'] as Map<String, dynamic>?,
-        features: data['features'] as Map<String, dynamic>?,
-        subscription: data['subscription'] as Map<String, dynamic>?,
-        permissions: data['permissions'] as Map<String, dynamic>?,
-        offlineSince: offlineSince,
-      );
+  factory AppContext.fromJson(
+    Map<String, dynamic> data, {
+    DateTime? offlineSince,
+  }) => AppContext(
+    profile: data['profile'] as Map<String, dynamic>?,
+    business: data['business'] as Map<String, dynamic>?,
+    features: data['features'] as Map<String, dynamic>?,
+    subscription: data['subscription'] as Map<String, dynamic>?,
+    permissions: data['permissions'] as Map<String, dynamic>?,
+    offlineSince: offlineSince,
+  );
 
   /// Set when the server couldn't be reached and this context is the last
   /// one saved on this device (offline start-up); the time it was saved.
@@ -69,6 +72,14 @@ class AppContext {
   final Map<String, dynamic>? permissions;
 
   bool get hasBusiness => business != null;
+
+  /// The owner still has to finish the setup wizard (migration 0047).
+  /// Staff aren't held up by it.
+  bool get needsSetup =>
+      hasBusiness && business!['onboarding_done'] == false && isOwner;
+
+  BusinessCategory get category =>
+      categoryOf(business?['business_type'] as String?);
   String? get businessId => business?['id'] as String?;
   String get businessName => (business?['name'] as String?) ?? '';
   String get invoicePrefix => (business?['invoice_prefix'] as String?) ?? 'INV';
@@ -158,7 +169,9 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
     }
     try {
       final data =
-          await client.rpc('get_my_context').timeout(const Duration(seconds: 15))
+          await client
+                  .rpc('get_my_context')
+                  .timeout(const Duration(seconds: 15))
               as Map<String, dynamic>;
       unawaited(_save(uid, data));
       return AppContext.fromJson(data);
@@ -188,7 +201,9 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
     }
   }
 
-  Future<({Map<String, dynamic> data, DateTime savedAt})?> _load(String uid) async {
+  Future<({Map<String, dynamic> data, DateTime savedAt})?> _load(
+    String uid,
+  ) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final raw = prefs.getString(_cacheKey(uid));
@@ -198,7 +213,10 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
       if (DateTime.now().toUtc().difference(savedAt) > kOfflineContextMaxAge) {
         return null;
       }
-      return (data: Map<String, dynamic>.from(json['data'] as Map), savedAt: savedAt);
+      return (
+        data: Map<String, dynamic>.from(json['data'] as Map),
+        savedAt: savedAt,
+      );
     } catch (_) {
       return null;
     }

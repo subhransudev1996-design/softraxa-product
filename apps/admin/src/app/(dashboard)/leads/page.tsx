@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { BUSINESS_TYPES, businessTypeLabel } from "@/lib/business-types";
 import {
   Badge, Button, Card, CardBody, Input, Label, Select, Spinner, StatCard, Table,
 } from "@/components/ui";
@@ -146,10 +147,9 @@ export default function LeadsPage() {
               <div>
                 <Label>Shop type</Label>
                 <Select name="business_type" defaultValue="mobile">
-                  <option value="mobile">Mobile shop</option>
-                  <option value="garment">Garment shop</option>
-                  <option value="hardware">Hardware shop</option>
-                  <option value="other">Other</option>
+                  {BUSINESS_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
                 </Select>
               </div>
               <div>
@@ -217,7 +217,7 @@ export default function LeadsPage() {
               <tr key={l.id} className="hover:bg-zinc-50">
                 <td className="px-4 py-3">
                   <p className="font-medium text-zinc-900">{l.shop_name}</p>
-                  <p className="text-xs capitalize text-zinc-500">{l.business_type} • {l.city || "—"}</p>
+                  <p className="text-xs text-zinc-500">{businessTypeLabel(l.business_type)} • {l.city || "—"}</p>
                 </td>
                 <td className="px-4 py-3">
                   <p>{l.contact_name || "—"}</p>

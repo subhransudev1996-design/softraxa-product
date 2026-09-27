@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { businessTypeLabel } from "@/lib/business-types";
 import {
   Badge, Button, Card, CardBody, Input, Label, Select, Spinner,
 } from "@/components/ui";
@@ -116,7 +117,7 @@ export default function LeadDetailPage() {
           </div>
           <p className="text-sm text-zinc-500">
             {lead.contact_name || "—"} • {lead.phone || "no phone"} •{" "}
-            <span className="capitalize">{lead.business_type}</span>
+            <span>{businessTypeLabel(lead.business_type)}</span>
             {lead.city ? ` • ${lead.city}` : ""}
           </p>
         </div>

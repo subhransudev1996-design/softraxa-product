@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/business_category.dart';
 import '../../core/gst.dart';
 import '../../core/imagekit.dart';
 import '../../core/supabase_providers.dart';
@@ -69,6 +70,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       widget.existing?['require_repair_estimate'] as bool? ?? true;
   late String _type = widget.existing?['business_type'] ?? 'mobile';
   late String _taxPref = widget.existing?['tax_preference'] ?? 'gst';
+  late final _upi = TextEditingController(
+    text: widget.existing?['upi_id'] as String? ?? '',
+  );
+  late String? _band = widget.existing?['turnover_band'] as String?;
   XFile? _logo;
   bool _busy = false;
 
@@ -118,6 +123,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'payment_terms_days': int.tryParse(_terms.text.trim()) ?? 30,
         'overdue_grace_days': int.tryParse(_grace.text.trim()) ?? 0,
         'require_repair_estimate': _requireEstimate,
+        'upi_id': _upi.text.trim(),
+        if (_taxPref == 'gst') 'turnover_band': _band,
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -216,17 +223,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               DropdownButtonFormField<String>(
                 initialValue: _type,
                 decoration: const InputDecoration(labelText: 'Business type'),
-                items: const [
-                  DropdownMenuItem(value: 'mobile', child: Text('Mobile shop')),
-                  DropdownMenuItem(
-                    value: 'garment',
-                    child: Text('Garment shop'),
-                  ),
-                  DropdownMenuItem(
-                    value: 'hardware',
-                    child: Text('Hardware shop'),
-                  ),
-                  DropdownMenuItem(value: 'other', child: Text('Other')),
+                items: [
+                  for (final c in businessCategories)
+                    DropdownMenuItem(value: c.key, child: Text(c.label)),
                 ],
                 onChanged: (v) => setState(() => _type = v ?? 'other'),
               ),
@@ -292,6 +291,48 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                         (v ?? '').isEmpty ? 'Required for GST billing' : null,
                   ),
                 ),
+              if (_taxPref == 'gst')
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DropdownButtonFormField<String>(
+                    initialValue: _band,
+                    decoration: const InputDecoration(
+                      labelText: 'Annual turnover',
+                      helperText:
+                          'Above ₹5 crore needs e-invoicing — contact SOFTRAXA',
+                    ),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'up_to_5cr',
+                        child: Text('Up to ₹5 crore'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'above_5cr',
+                        child: Text('Above ₹5 crore'),
+                      ),
+                    ],
+                    onChanged: (v) => setState(() => _band = v),
+                  ),
+                ),
+              TextFormField(
+                controller: _upi,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  labelText: 'UPI ID (optional)',
+                  hintText: 'shopname@okaxis',
+                  helperText: 'Printed on bills as a "scan to pay" QR code',
+                ),
+                validator: (v) {
+                  final t = (v ?? '').trim();
+                  return t.isEmpty ||
+                          RegExp(
+                            r'^[A-Za-z0-9._-]{2,255}@[A-Za-z][A-Za-z0-9]{1,63}$',
+                          ).hasMatch(t)
+                      ? null
+                      : 'Enter a UPI ID like name@bank';
+                },
+              ),
+              const SizedBox(height: 12),
               TextFormField(
                 controller: _defaultCredit,
                 keyboardType: const TextInputType.numberWithOptions(
