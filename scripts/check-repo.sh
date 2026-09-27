@@ -18,8 +18,9 @@ fi
 
 # --- 2. secret scan over tracked files ----------------------------------
 # Patterns: ImageKit private keys, JWTs (anon/service-role keys), Resend
-# keys, Supabase secret keys, PEM private keys.
-pattern='private_[A-Za-z0-9+/=]{20,}|eyJhbGciOi[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|re_[A-Za-z0-9]{24,}|sb_secret_[A-Za-z0-9_-]{10,}|-----BEGIN ([A-Z]+ )?PRIVATE KEY-----(\\n|$)'
+# keys, Supabase secret keys, PEM private keys, Sentry auth tokens.
+# (A Sentry DSN is public by design and is not flagged.)
+pattern='private_[A-Za-z0-9+/=]{20,}|eyJhbGciOi[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}|re_[A-Za-z0-9]{24,}|sb_secret_[A-Za-z0-9_-]{10,}|sntrys_[A-Za-z0-9_+/=]{20,}|sntryu_[a-f0-9]{20,}|-----BEGIN ([A-Z]+ )?PRIVATE KEY-----(\\n|$)'
 hits=$(git ls-files -z \
   | xargs -0 grep -nIE "$pattern" -- 2>/dev/null \
   | grep -v '^scripts/check-repo.sh:' || true)

@@ -3,6 +3,12 @@
 .env.local
 .env.*.local
 *.pem
+# Sentry wizard output: holds SENTRY_AUTH_TOKEN (can upload to your Sentry org)
+sentry.properties
+.sentryclirc
+.env.sentry-build-plugin
+.sentry-native/
+sentry-wizard.exe
 
 # Node / Next.js (apps/admin)
 node_modules/
@@ -29,3 +35,6 @@ ios/Flutter/Flutter.podspec
 # OS
 .DS_Store
 Thumbs.db
+
+# Editor
+.vscode/

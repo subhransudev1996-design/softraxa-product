@@ -1,8 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/crash_reporting.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
@@ -107,14 +109,17 @@ class MoreScreen extends ConsumerWidget {
                 Builder(
                   builder: (context) {
                     final isOwner = appContext?.isOwner ?? false;
-                    final pending = ref.watch(pendingApprovalCountProvider).value ?? 0;
+                    final pending =
+                        ref.watch(pendingApprovalCountProvider).value ?? 0;
                     return tile(
                       Icons.verified_user_outlined,
                       isOwner ? 'Approvals' : 'My approval requests',
                       '/approvals',
                       color: pending > 0 ? AppColors.red : AppColors.teal,
                       subtitle: isOwner
-                          ? (pending > 0 ? '$pending waiting for you' : 'Sales that need your OK')
+                          ? (pending > 0
+                                ? '$pending waiting for you'
+                                : 'Sales that need your OK')
                           : 'Sales waiting for the owner',
                     );
                   },
@@ -169,7 +174,8 @@ class MoreScreen extends ConsumerWidget {
                   'Import products (Excel)',
                   '/import',
                   color: AppColors.pink,
-                  enabled: (features?.featureOn('excel_import') ?? true) &&
+                  enabled:
+                      (features?.featureOn('excel_import') ?? true) &&
                       (appContext?.canManageProducts ?? false),
                 ),
               ],
@@ -184,7 +190,8 @@ class MoreScreen extends ConsumerWidget {
                   'Service catalog',
                   '/services',
                   color: AppColors.indigo,
-                  enabled: (features?.featureOn('service_module') ?? true) &&
+                  enabled:
+                      (features?.featureOn('service_module') ?? true) &&
                       (appContext?.canManageServices ?? false),
                 ),
                 const Divider(),
@@ -193,7 +200,8 @@ class MoreScreen extends ConsumerWidget {
                   'Job cards',
                   '/job-cards',
                   color: AppColors.teal,
-                  enabled: (features?.featureOn('service_module') ?? true) &&
+                  enabled:
+                      (features?.featureOn('service_module') ?? true) &&
                       (appContext?.canManageServices ?? false),
                 ),
               ],
@@ -217,7 +225,8 @@ class MoreScreen extends ConsumerWidget {
                   'Expenses',
                   '/expenses',
                   color: AppColors.red,
-                  enabled: (features?.featureOn('expense_module') ?? true) &&
+                  enabled:
+                      (features?.featureOn('expense_module') ?? true) &&
                       (appContext?.canManageExpenses ?? false),
                 ),
               ],
@@ -298,10 +307,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   title: const Text(
                     'Contact Support on WhatsApp',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
                   subtitle: const Text(
                     'Get instant help or upgrade plan on WhatsApp',
@@ -318,6 +324,21 @@ class MoreScreen extends ConsumerWidget {
                   color: AppColors.indigo,
                 ),
                 const Divider(),
+                if (kDebugMode && crashReportingEnabled) ...[
+                  ListTile(
+                    leading: const Icon(
+                      Icons.bug_report_outlined,
+                      color: AppColors.orange,
+                    ),
+                    title: const Text('Verify Sentry setup'),
+                    subtitle: const Text(
+                      'Debug builds only: throws a test error',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                    onTap: () => throw StateError('This is test exception'),
+                  ),
+                  const Divider(),
+                ],
                 ListTile(
                   leading: const Icon(Icons.logout, color: AppColors.red),
                   title: const Text(

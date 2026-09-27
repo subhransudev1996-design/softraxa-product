@@ -8,6 +8,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'core/platform.dart';
 import 'core/branding.dart';
+import 'core/crash_reporting.dart';
 import 'core/desktop_titlebar.dart';
 import 'core/push_service.dart';
 import 'core/router.dart';
@@ -20,6 +21,12 @@ import 'features/offline/offline_service.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
+  // Everything after .env loads runs inside Sentry (when SENTRY_DSN is
+  // set) so start-up failures are reported too.
+  await initCrashReporting(_start);
+}
+
+Future<void> _start() async {
   await Supabase.initialize(
     url: dotenv.env['SUPABASE_URL'] ?? '',
     // The legacy anon key is accepted here too; SUPABASE_ANON_KEY is kept
@@ -91,6 +98,11 @@ class _AppState extends ConsumerState<App> {
     // Registers this device's FCM token once login + business context are
     // ready (no-op on desktop or when FIREBASE_* env keys are absent).
     ref.watch(pushRegistrationProvider);
+    // Crash reports carry the shop ID and role (nothing else about the user).
+    ref.listen(appContextProvider, (_, next) {
+      final ctx = next.value;
+      setCrashReportingShop(businessId: ctx?.businessId, role: ctx?.role);
+    });
     final router = ref.watch(routerProvider);
     final dark = ref.watch(darkModeProvider);
     return MaterialApp.router(

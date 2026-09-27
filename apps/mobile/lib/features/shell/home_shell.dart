@@ -1,11 +1,14 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/crash_reporting.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
+import '../approvals/approvals_screen.dart';
 
 /// App shell.
 ///
@@ -264,6 +267,7 @@ class AppSidebar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final appContext = ref.watch(appContextProvider).value;
     final features = appContext;
+    final pendingApprovals = ref.watch(pendingApprovalCountProvider).value ?? 0;
     // Prefix match so a detail/edit page (e.g. /invoices/abc123) still
     // highlights its parent section (/invoices) in the sidebar.
     bool isActive(String route) =>
@@ -347,6 +351,17 @@ class AppSidebar extends ConsumerWidget {
                   label: 'Customers',
                   route: '/customers',
                 ),
+                // D18: the owner's approval inbox; staff see their requests.
+                railTile(
+                  icon: Icons.verified_user_outlined,
+                  label: (appContext?.isOwner ?? false)
+                      ? (pendingApprovals > 0
+                            ? 'Approvals ($pendingApprovals)'
+                            : 'Approvals')
+                      : 'My approval requests',
+                  route: '/approvals',
+                  color: pendingApprovals > 0 ? AppColors.red : null,
+                ),
                 const _SidebarSectionLabel('Inventory'),
                 railTile(
                   icon: Icons.warehouse_outlined,
@@ -387,12 +402,30 @@ class AppSidebar extends ConsumerWidget {
                     route: '/job-cards',
                   ),
                 ],
-                if (features?.featureOn('expense_module') ?? true) ...[
-                  const _SidebarSectionLabel('Money'),
+                const _SidebarSectionLabel('Money'),
+                if (appContext?.canManageCash ?? false)
+                  railTile(
+                    icon: Icons.point_of_sale_outlined,
+                    label: 'Cashbook & day closing',
+                    route: '/cashbook',
+                  ),
+                if (features?.featureOn('expense_module') ?? true)
                   railTile(
                     icon: Icons.payments_outlined,
                     label: 'Expenses',
                     route: '/expenses',
+                  ),
+                if (appContext?.isOwner == true) ...[
+                  const _SidebarSectionLabel('Store management'),
+                  railTile(
+                    icon: Icons.badge_outlined,
+                    label: 'Staff & permissions',
+                    route: '/staff',
+                  ),
+                  railTile(
+                    icon: Icons.workspace_premium_outlined,
+                    label: 'Subscription plans',
+                    route: '/subscription/plans',
                   ),
                 ],
                 const _SidebarSectionLabel('Other'),
@@ -411,6 +444,18 @@ class AppSidebar extends ConsumerWidget {
                   label: 'Business settings',
                   route: '/settings/business',
                 ),
+                if (kDebugMode && crashReportingEnabled)
+                  _RailTile(
+                    icon: Icons.bug_report_outlined,
+                    label: 'Verify Sentry setup',
+                    selected: false,
+                    color: AppColors.orange,
+                    foregroundColor: _sidebarMuted,
+                    selectedBackground: _sidebarActiveBg,
+                    selectedForeground: Colors.white,
+                    // Debug builds only: throws a test error for Sentry.
+                    onTap: () => throw StateError('This is test exception'),
+                  ),
               ],
             ),
           ),
