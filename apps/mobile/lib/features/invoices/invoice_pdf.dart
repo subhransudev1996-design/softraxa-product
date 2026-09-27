@@ -99,6 +99,7 @@ class InvoicePdf {
           'gst' => 'TAX INVOICE',
           'cash_memo' => 'CASH MEMO',
           'estimate' => 'ESTIMATE / QUOTATION',
+          'opening' => 'OPENING BALANCE',
           _ => 'INVOICE',
         };
 

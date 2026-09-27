@@ -407,6 +407,8 @@ final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic
           )
           .gte('purchase_date', from)
           .lte('purchase_date', to)
+          // Opening balances aren't purchases (migration 0051).
+          .eq('is_opening', false)
           .order('purchase_date', ascending: false)
           .limit(1000);
       final total = rows.fold<double>(0, (s, r) => s + toDouble(r['total']));

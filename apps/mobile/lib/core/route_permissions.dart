@@ -24,6 +24,9 @@ String? permissionRedirect(String loc, AppContext c) {
     _ when under('/expenses') => c.canManageExpenses,
     _ when under('/cashbook') => c.canManageCash,
     _ when under('/services') || under('/job-cards') => c.canManageServices,
+    // Opening balances move money owed: owner only (migration 0051).
+    _ when under('/import/customers') || under('/import/suppliers') =>
+      c.isOwner,
     _ when under('/import') ||
         loc == '/products/new' ||
         loc == '/products/master-data' ||

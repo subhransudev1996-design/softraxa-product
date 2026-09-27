@@ -13,6 +13,7 @@ import '../features/customers/customers_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
 import '../features/expenses/expenses_screen.dart';
 import '../features/import/excel_import_screen.dart';
+import '../features/import/party_import_screen.dart';
 import '../features/invoices/invoice_detail_screen.dart';
 import '../features/invoices/invoices_screen.dart';
 import '../features/jobcards/job_card_detail_screen.dart';
@@ -404,6 +405,19 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/import',
             pageBuilder: (context, state) =>
                 _page(context, state, const ExcelImportScreen()),
+          ),
+          GoRoute(
+            path: '/import/customers',
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              const PartyImportScreen(suppliers: false),
+            ),
+          ),
+          GoRoute(
+            path: '/import/suppliers',
+            pageBuilder: (context, state) =>
+                _page(context, state, const PartyImportScreen(suppliers: true)),
           ),
           GoRoute(
             path: '/offline-bills',

@@ -29,6 +29,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0048** starts a new invoice number series each financial year (`INV/26-27/0001`), adds composition shops (bill of supply) and requires HSN/SAC on bills to GST-registered customers. Run it on its own, then `supabase/tests/r1_gst_series.sql`.
    - Migration **0049** makes cut pieces part of the sale: best-fit suggestion with cutting allowance, leftover kept or scrapped by threshold, cutting loss as stock loss, optional cutting charge, returns only when allowed. Test with `supabase/tests/r1_cut_pieces.sql`; apply before the matching app build.
    - Migration **0050** adds the nightly reconciliation (admin panel → Reconciliation) and the owner's full data export. Enable **pg_cron** first (Dashboard → Integrations → Cron) so the migration can schedule the run for 02:00 IST. Test with `supabase/tests/r1_reconciliation.sql`.
+   - Migration **0051** adds opening balances (customer dues and advances, supplier dues) and Excel import of customers and suppliers. Run it on its own ('opening' is a new bill type), then `supabase/tests/r1_opening_imports.sql`. Apply before the matching app build.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**

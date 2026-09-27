@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
+import '../../core/opening_balance.dart';
 import '../../core/gst.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
@@ -380,7 +381,16 @@ class SuppliersScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Suppliers'),
-        actions: const [GuideButton('suppliers')],
+        actions: [
+          // Import from Excel with opening balances (owner, migration 0051).
+          if (ref.watch(appContextProvider).value?.isOwner ?? false)
+            IconButton(
+              tooltip: 'Import from Excel',
+              icon: const Icon(Icons.upload_file_outlined),
+              onPressed: () => context.push('/import/suppliers'),
+            ),
+          const GuideButton('suppliers'),
+        ],
       ),
       floatingActionButton: CoachTarget(
         page: 'suppliers',
@@ -598,6 +608,24 @@ class SupplierDetailScreen extends ConsumerWidget {
         title: const Text('Supplier'),
         actions: [
           const GuideButton('supplier_detail'),
+          // Balance from before Dukania (owner, migration 0051).
+          if (data.hasValue &&
+              (ref.watch(appContextProvider).value?.isOwner ?? false))
+            IconButton(
+              tooltip: 'Opening balance',
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              onPressed: () async {
+                final party = data.value!['supplier'] as Map<String, dynamic>;
+                final ok = await showOpeningBalanceDialog(
+                  context,
+                  ref,
+                  supplier: true,
+                  partyId: supplierId,
+                  name: party['name'] as String? ?? '',
+                );
+                if (ok) ref.invalidate(supplierLedgerProvider(supplierId));
+              },
+            ),
           if (data.hasValue)
             CoachTarget(
               page: 'supplier_detail',

@@ -368,7 +368,16 @@ class CustomersScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Customers'),
-        actions: const [GuideButton('customers')],
+        actions: [
+          // Import from Excel with opening balances (owner, migration 0051).
+          if (ref.watch(appContextProvider).value?.isOwner ?? false)
+            IconButton(
+              tooltip: 'Import from Excel',
+              icon: const Icon(Icons.upload_file_outlined),
+              onPressed: () => context.push('/import/customers'),
+            ),
+          const GuideButton('customers'),
+        ],
       ),
       floatingActionButton: CoachTarget(
         page: 'customers',

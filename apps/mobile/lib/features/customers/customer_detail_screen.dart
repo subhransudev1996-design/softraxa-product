@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/formatters.dart';
+import '../../core/opening_balance.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/walkthrough.dart';
@@ -27,6 +28,24 @@ class CustomerDetailScreen extends ConsumerWidget {
         title: const Text('Customer'),
         actions: [
           const GuideButton('customer_detail'),
+          // Balance from before Dukania (owner, migration 0051).
+          if (data.hasValue &&
+              (ref.watch(appContextProvider).value?.isOwner ?? false))
+            IconButton(
+              tooltip: 'Opening balance',
+              icon: const Icon(Icons.account_balance_wallet_outlined),
+              onPressed: () async {
+                final party = data.value!['customer'] as Map<String, dynamic>;
+                final ok = await showOpeningBalanceDialog(
+                  context,
+                  ref,
+                  supplier: false,
+                  partyId: customerId,
+                  name: party['name'] as String? ?? '',
+                );
+                if (ok) ref.invalidate(customerLedgerProvider(customerId));
+              },
+            ),
           if (data.hasValue)
             CoachTarget(
               page: 'customer_detail',

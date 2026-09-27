@@ -300,7 +300,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 if (v == 'cancel') _cancel(context, ref);
               },
               itemBuilder: (_) => [
-                const PopupMenuItem(value: 'edit', child: Text('Edit bill')),
+                // Opening balances can't be edited, only cancelled (0051).
+                if (detail.value!['invoice_type'] != 'opening')
+                  const PopupMenuItem(value: 'edit', child: Text('Edit bill')),
                 const PopupMenuItem(
                   value: 'cancel',
                   child: Text(
@@ -327,7 +329,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
             ))
               if (p['reversed'] != true) p,
           ];
-          final advance = toDouble((inv['customers'] as Map?)?['advance_amount']);
+          final advance = toDouble(
+            (inv['customers'] as Map?)?['advance_amount'],
+          );
           final cancelled = inv['is_cancelled'] == true;
           final due = toDouble(inv['due_amount']);
           final isGst = inv['invoice_type'] == 'gst';
@@ -396,15 +400,24 @@ class InvoiceDetailScreen extends ConsumerWidget {
                       if (due > 0 && inv['due_date'] != null && !cancelled)
                         Builder(
                           builder: (context) {
-                            final dueDate = DateTime.tryParse('${inv['due_date']}');
-                            final late = dueDate != null &&
-                                dueDate.isBefore(DateTime.now().subtract(const Duration(days: 1)));
+                            final dueDate = DateTime.tryParse(
+                              '${inv['due_date']}',
+                            );
+                            final late =
+                                dueDate != null &&
+                                dueDate.isBefore(
+                                  DateTime.now().subtract(
+                                    const Duration(days: 1),
+                                  ),
+                                );
                             return Text(
                               '${late ? 'Overdue since' : 'Due by'} ${dateStr(inv['due_date'])}',
                               style: TextStyle(
                                 color: late ? AppColors.red : AppColors.inkSoft,
                                 fontSize: 13,
-                                fontWeight: late ? FontWeight.w700 : FontWeight.normal,
+                                fontWeight: late
+                                    ? FontWeight.w700
+                                    : FontWeight.normal,
                               ),
                             );
                           },
@@ -415,7 +428,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           switch (inv['exception_status']) {
                             'approved' => 'Approved by the owner',
                             'acknowledged' => 'Owner acknowledged the warnings',
-                            'flagged' => 'Billed offline — flagged for owner review',
+                            'flagged' =>
+                              'Billed offline — flagged for owner review',
                             _ => '${inv['exception_status']}',
                           },
                           style: const TextStyle(
@@ -499,14 +513,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               '- ${money(inv['discount_amount'] as num?)}',
                             ),
                           if (isGst && toDouble(inv['tax_amount']) > 0)
-                            for (final (label, amount) in gstBreakupRows(
-                              items,
-                            ))
-                              _row(
-                                'Included $label',
-                                money(amount),
-                                dim: true,
-                              ),
+                            for (final (label, amount) in gstBreakupRows(items))
+                              _row('Included $label', money(amount), dim: true),
                           if (toDouble(inv['round_off']) != 0)
                             _row(
                               'Round off',
@@ -681,6 +689,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     'non_gst' => 'Invoice',
     'cash_memo' => 'Cash Memo',
     'estimate' => 'Estimate',
+    'opening' => 'Opening balance',
     _ => type,
   };
 
