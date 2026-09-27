@@ -33,6 +33,9 @@ class CartLine {
     this.wholesaleMinQty,
     this.retailPrice,
     this.pieceId,
+    this.keepRemnant,
+    this.remnantReason = '',
+    this.linkedTo,
     this.customerPrice,
     this.wholesaleCustomer = false,
     this.priceIsDefault = true,
@@ -61,10 +64,18 @@ class CartLine {
   final double? wholesaleMinQty;
   final double? retailPrice;
 
-  /// Which physical cut piece (rod/sheet remnant) this line is cut from —
-  /// see stock_pieces (migration 0021). Auxiliary: not sent to the server;
-  /// used for the best-effort piece-length update after checkout.
+  /// Which physical piece (wire coil, rod, pipe) this line is cut from.
+  /// Sent with the bill: the server cuts it in the same transaction
+  /// (migration 0049).
   final String? pieceId;
+
+  /// Leftover override for the cut: null follows the suggestion (D21).
+  final bool? keepRemnant;
+  final String remnantReason;
+
+  /// A cutting-charge line points at the cut line it belongs to (PD44),
+  /// so removing the cut removes its charge.
+  final String? linkedTo;
 
   /// The selected customer's agreed price for this item (migration 0043).
   double? customerPrice;
@@ -152,6 +163,9 @@ class CartLine {
     wholesaleMinQty: wholesaleMinQty,
     retailPrice: retailPrice,
     pieceId: pieceId,
+    keepRemnant: keepRemnant,
+    remnantReason: remnantReason,
+    linkedTo: linkedTo,
     customerPrice: customerPrice,
     wholesaleCustomer: wholesaleCustomer,
     priceIsDefault: priceIsDefault,
@@ -316,6 +330,8 @@ class CartNotifier extends Notifier<CartState> {
     String serialNo = '',
     double addQty = 1,
     String? pieceId,
+    bool? keepRemnant,
+    String remnantReason = '',
   }) {
     final variantId = variant?['id'] as String?;
     final key = '${product['id']}:${variantId ?? ''}';
@@ -336,6 +352,8 @@ class CartNotifier extends Notifier<CartState> {
     final line = CartLine(
       qty: addQty,
       pieceId: pieceId,
+      keepRemnant: keepRemnant,
+      remnantReason: remnantReason,
       key: ownLine ? '$key:${DateTime.now().microsecondsSinceEpoch}' : key,
       productId: product['id'] as String,
       variantId: variantId,
@@ -362,7 +380,28 @@ class CartNotifier extends Notifier<CartState> {
       wholesaleMinQty: (product['wholesale_min_qty'] as num?)?.toDouble(),
     );
     line.price = line.defaultPrice ?? retail;
-    state = state.copyWith(lines: [...state.lines, line]);
+    // Optional cutting charge (PD44): its own line, once per cut, billed
+    // under the product's HSN and GST rate (the cut goes with the goods).
+    final charge = toDouble(product['cutting_charge']);
+    state = state.copyWith(
+      lines: [
+        ...state.lines,
+        line,
+        if (pieceId != null && charge > 0)
+          CartLine(
+            key: 'cut:${line.key}',
+            productId: '',
+            name: 'Cutting charge — ${product['name']}',
+            hsnCode: line.hsnCode,
+            unitName: '',
+            price: charge,
+            retailPrice: charge,
+            gstRate: line.gstRate,
+            qty: 1,
+            linkedTo: line.key,
+          ),
+      ],
+    );
   }
 
   void changeQty(CartLine line, double newQty) {
@@ -387,7 +426,10 @@ class CartNotifier extends Notifier<CartState> {
   /// Applies the selected customer's agreed prices and wholesale status to
   /// every line and to lines added later (D15). Lines whose price was set
   /// by hand keep it.
-  void applyCustomerPricing(Map<String, double> prices, {required bool wholesale}) {
+  void applyCustomerPricing(
+    Map<String, double> prices, {
+    required bool wholesale,
+  }) {
     state = state.copyWith(
       customerPrices: prices,
       wholesaleCustomer: wholesale,
@@ -396,7 +438,9 @@ class CartNotifier extends Notifier<CartState> {
           l.copy()..also((c) {
             c.customerPrice = prices['${c.productId}:${c.variantId ?? ''}'];
             c.wholesaleCustomer = wholesale;
-            if (c.priceIsDefault && c.defaultPrice != null) c.price = c.defaultPrice!;
+            if (c.priceIsDefault && c.defaultPrice != null) {
+              c.price = c.defaultPrice!;
+            }
           }),
       ],
     );
@@ -417,7 +461,9 @@ class CartNotifier extends Notifier<CartState> {
       _update(line, (l) => l.availableStock = stock);
 
   void remove(CartLine line) => state = state.copyWith(
-    lines: state.lines.where((l) => l.key != line.key).toList(),
+    lines: state.lines
+        .where((l) => l.key != line.key && l.linkedTo != line.key)
+        .toList(),
   );
 
   void setCustomer(Map<String, dynamic>? customer) =>
@@ -567,7 +613,11 @@ Map<String, dynamic> buildInvoicePayload({
     final rate = gst ? l.gstRate : 0.0;
     final divisor = 1 + rate / 100;
     return {
-      'product_id': l.productId,
+      // A cutting charge has no product (no stock moves).
+      'product_id': l.productId.isEmpty ? null : l.productId,
+      if (l.pieceId != null) 'piece_id': l.pieceId,
+      if (l.keepRemnant != null) 'keep_remnant': l.keepRemnant,
+      if (l.remnantReason.isNotEmpty) 'remnant_reason': l.remnantReason,
       'variant_id': l.variantId,
       'product_name': l.name,
       'variant_name': l.variantName,

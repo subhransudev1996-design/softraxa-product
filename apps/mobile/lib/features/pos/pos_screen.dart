@@ -69,10 +69,10 @@ Future<String?> showImeiPicker(
   final client = ref.read(supabaseProvider);
   List<Map<String, dynamic>> serials = [];
   try {
-    final rows = await client.rpc('get_available_serials', params: {
-      'p_product_id': productId,
-      'p_variant_id': variantId,
-    });
+    final rows = await client.rpc(
+      'get_available_serials',
+      params: {'p_product_id': productId, 'p_variant_id': variantId},
+    );
     serials = List<Map<String, dynamic>>.from(rows as List? ?? []);
   } catch (_) {}
 
@@ -277,10 +277,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       addQty = result.qty;
     }
 
-    // Cut-piece stores (rods/sheets): pick which physical piece this cut
-    // comes from, so the remnant lengths stay accurate. Optional — skipping
-    // is always allowed; variants don't take part (pieces are per-product).
+    // Cut-piece shops (wire, rods, pipe): pick which physical piece this
+    // cut comes from — best fit first. The server cuts it with the sale
+    // (migration 0049). Variants don't take part (pieces are per-product).
     String? pieceId;
+    bool? keepRemnant;
+    var remnantReason = '';
     if (product['track_pieces'] == true && variant == null) {
       if (!mounted) return;
       final pick = await showPiecePicker(
@@ -293,6 +295,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       );
       if (pick == null || !mounted) return; // cancelled
       pieceId = pick.piece?['id'] as String?;
+      keepRemnant = pick.keepRemnant;
+      remnantReason = pick.reason;
     }
 
     String serialNo = '';
@@ -333,6 +337,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           serialNo: serialNo,
           addQty: addQty,
           pieceId: pieceId,
+          keepRemnant: keepRemnant,
+          remnantReason: remnantReason,
         );
     _clearSearch();
     _searchFocus.requestFocus();
@@ -584,9 +590,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     children: [
                       for (final (source, p) in options)
                         ChoiceChip(
-                          label: Text('${priceSourceLabel(source)} ${money(p)}'),
-                          selected:
-                              (double.tryParse(price.text) ?? -1) == p,
+                          label: Text(
+                            '${priceSourceLabel(source)} ${money(p)}',
+                          ),
+                          selected: (double.tryParse(price.text) ?? -1) == p,
                           onSelected: (_) => setDialogState(
                             () => price.text = p.toStringAsFixed(2),
                           ),
@@ -702,7 +709,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final exchange = onExchange ? ref.watch(exchangeDraftProvider) : null;
     if (!onExchange && ref.read(exchangeDraftProvider) != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final top = GoRouter.of(context).routerDelegate.currentConfiguration.uri.path;
+        final top = GoRouter.of(
+          context,
+        ).routerDelegate.currentConfiguration.uri.path;
         if (mounted && top != '/sale-returns/exchange') {
           ref.read(exchangeDraftProvider.notifier).set(null);
         }

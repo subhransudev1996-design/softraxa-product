@@ -21,7 +21,7 @@ const posProductColumns =
     'id, name, sku, barcode, selling_price, mrp, purchase_price, gst_rate, '
     'hsn_code, current_stock, track_serial, has_variants, is_active, '
     'wholesale_price, wholesale_min_qty, image_url, '
-    'secondary_unit_name, conversion_factor, track_pieces, '
+    'secondary_unit_name, conversion_factor, track_pieces, cutting_charge, '
     'units(name, short_name, allow_decimal), '
     'product_variants(id, name, sku, barcode, attributes, purchase_price, '
     'selling_price, mrp, current_stock, is_active)';

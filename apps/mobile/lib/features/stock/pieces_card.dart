@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/data_refresh.dart';
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
-import 'adjust_stock_sheet.dart';
 import 'piece_providers.dart';
 
 /// "Cut pieces" management card on the product detail page — for rod/sheet
@@ -173,32 +173,147 @@ class PiecesCard extends ConsumerWidget {
     Map<String, dynamic> piece,
   ) async {
     final length = toDouble(piece['length']);
-    final ok = await confirmDialog(
-      context,
-      title: 'Scrap this piece?',
-      message:
-          '${qty(length)} $_unit will be marked as scrap. You can then record it '
-          'as Damaged/Lost so total stock stays correct.',
-      confirmText: 'Mark scrap',
+    final reason = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Scrap this piece?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text('${qty(length)} $_unit leaves available stock as scrap.'),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reason,
+              autofocus: true,
+              decoration: const InputDecoration(labelText: 'Reason *'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
+            },
+            child: const Text('Mark scrap'),
+          ),
+        ],
+      ),
     );
-    if (!ok) return;
+    if (ok != true) return;
+    try {
+      // Server-side: the piece and total stock change together (0049).
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'reclassify_piece',
+            params: {
+              'p_piece': piece['id'],
+              'p_status': 'scrap',
+              'p_reason': reason.text.trim(),
+            },
+          );
+      ref.invalidate(stockPiecesProvider(_productId));
+      invalidateStockData(ref);
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
+  /// Per-product cutting rules (PD27, PD40, PD42, PD44; migration 0049).
+  Future<void> _editRules(BuildContext context, WidgetRef ref) async {
+    String n(String k) {
+      final v = toDouble(product[k]);
+      return v == 0 ? '' : qty(v);
+    }
+
+    final allowance = TextEditingController(text: n('cutting_allowance'));
+    final minLeft = TextEditingController(text: n('min_remnant_length'));
+    final charge = TextEditingController(text: n('cutting_charge'));
+    var returns = product['allow_piece_returns'] == true;
+    final saved = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setState) => AlertDialog(
+          title: const Text('Cutting rules'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: allowance,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Cutting loss per cut ($_unit)',
+                    helperText:
+                        'Lost at each cut, e.g. 0.01 — the shop\'s loss',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: minLeft,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Smallest reusable leftover ($_unit)',
+                    helperText: 'Shorter leftovers are suggested as scrap',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: charge,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(
+                    labelText: 'Cutting charge per cut ₹ (optional)',
+                    helperText: 'Added to the bill as its own line',
+                  ),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: returns,
+                  onChanged: (v) => setState(() => returns = v),
+                  title: const Text('Allow returns of cut pieces'),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Save'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (saved != true) return;
+    double v(TextEditingController c) => double.tryParse(c.text.trim()) ?? 0;
     try {
       await ref
           .read(supabaseProvider)
-          .from('stock_pieces')
-          .update({'status': 'scrap'})
-          .eq('id', piece['id'] as String);
-      ref.invalidate(stockPiecesProvider(_productId));
-      // Offer the existing damage adjustment so current_stock follows —
-      // the ONLY stock write stays the established adjust_stock path.
-      if (context.mounted) {
-        await showAdjustStockSheet(
-          context,
-          ref,
-          product: product,
-          variant: null,
-        );
-      }
+          .from('products')
+          .update({
+            'cutting_allowance': v(allowance),
+            'min_remnant_length': v(minLeft),
+            'cutting_charge': v(charge),
+            'allow_piece_returns': returns,
+          })
+          .eq('id', _productId);
+      invalidateStockData(ref);
+      if (context.mounted) showSuccess(context, 'Cutting rules saved');
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -228,6 +343,11 @@ class PiecesCard extends ConsumerWidget {
                     'Cut pieces',
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
+                ),
+                IconButton(
+                  tooltip: 'Cutting rules',
+                  icon: const Icon(Icons.tune, size: 20),
+                  onPressed: () => _editRules(context, ref),
                 ),
                 TextButton.icon(
                   onPressed: () => _addPieces(context, ref),
@@ -272,7 +392,12 @@ class PiecesCard extends ConsumerWidget {
                           Expanded(
                             child: Text(
                               '${(piece['label'] as String? ?? '').isNotEmpty ? '${piece['label']} — ' : ''}'
-                              '${qty(toDouble(piece['length']))} $_unit',
+                              '${qty(toDouble(piece['length']))} $_unit'
+                              '${switch (piece['source']) {
+                                'remnant' => ' · offcut',
+                                'return' => ' · returned',
+                                _ => '',
+                              }}',
                               style: const TextStyle(
                                 fontSize: 13.5,
                                 fontWeight: FontWeight.w600,

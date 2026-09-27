@@ -16,7 +16,6 @@ import '../invoices/advance_actions.dart';
 import '../returns/exchange.dart';
 import '../invoices/invoice_providers.dart';
 import '../offline/offline_service.dart';
-import '../stock/piece_providers.dart';
 import 'billing_service.dart';
 import 'cart.dart';
 import 'pos_providers.dart';
@@ -238,22 +237,6 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             notes: _notes.text.trim(),
             extra: extra,
           );
-      // Shorten the cut pieces these lines came from (rod/sheet stores) —
-      // strictly best-effort auxiliary bookkeeping: a failure here must
-      // never affect the bill, and offline bills skip it (no connection).
-      if (!result.offline && _docType != 'estimate') {
-        final cuts = [
-          for (final l in cart.lines)
-            if (l.pieceId != null) (l.pieceId!, l.qty),
-        ];
-        if (cuts.isNotEmpty) {
-          try {
-            await applyPieceCuts(ref.read(supabaseProvider), cuts);
-          } catch (_) {
-            /* pieces are an aid, never a blocker */
-          }
-        }
-      }
       ref.read(cartProvider.notifier).clear();
       invalidateStockData(ref); // products/stock/POS/dashboard quantities
       ref.invalidate(invoicesProvider);
