@@ -34,6 +34,11 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   final _advanceAmount = TextEditingController();
   final _customerNote = TextEditingController();
   final _internalNote = TextEditingController();
+  // PD64: vehicle jobs record registration (required), odometer and fuel.
+  String _jobType = 'device';
+  final _registration = TextEditingController();
+  final _odometer = TextEditingController();
+  String _fuel = '';
   String _advanceMode = 'cash';
   DateTime? _expectedDelivery;
   bool _busy = false;
@@ -71,6 +76,12 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             : null,
         'customer_note': _customerNote.text.trim(),
         'internal_note': _internalNote.text.trim(),
+        'job_type': _jobType,
+        if (_jobType == 'vehicle') ...{
+          'registration_no': _registration.text.trim(),
+          'odometer_km': int.tryParse(_odometer.text.trim()),
+          'fuel_level': _fuel,
+        },
       };
       final res =
           await ref
@@ -127,14 +138,91 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 },
               ),
             ),
-            const SectionLabel('Device / item'),
+            const SectionLabel('Device / vehicle'),
+            SegmentedButton<String>(
+              segments: const [
+                ButtonSegment(
+                  value: 'device',
+                  icon: Icon(Icons.smartphone),
+                  label: Text('Device / item'),
+                ),
+                ButtonSegment(
+                  value: 'vehicle',
+                  icon: Icon(Icons.two_wheeler),
+                  label: Text('Vehicle'),
+                ),
+              ],
+              selected: {_jobType},
+              onSelectionChanged: (s) => setState(() => _jobType = s.first),
+            ),
+            const SizedBox(height: 12),
             TextFormField(
               controller: _itemName,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Item name *'),
+              decoration: InputDecoration(
+                labelText: _jobType == 'vehicle'
+                    ? 'Vehicle (e.g. Bike, Car) *'
+                    : 'Item name *',
+              ),
               validator: (v) =>
                   v == null || v.trim().isEmpty ? 'Required' : null,
             ),
+            if (_jobType == 'vehicle') ...[
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _registration,
+                textCapitalization: TextCapitalization.characters,
+                decoration: const InputDecoration(
+                  labelText: 'Registration number *',
+                  hintText: 'e.g. OD02 AB 1234',
+                ),
+                validator: (v) =>
+                    _jobType == 'vehicle' && (v == null || v.trim().isEmpty)
+                    ? 'Required for vehicles'
+                    : null,
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _odometer,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Odometer (km)',
+                      ),
+                      validator: (v) {
+                        final t = (v ?? '').trim();
+                        if (t.isEmpty) return null;
+                        final n = int.tryParse(t);
+                        return n == null || n < 0 ? 'Whole number' : null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _fuel,
+                      decoration: const InputDecoration(
+                        labelText: 'Fuel level',
+                      ),
+                      items: const [
+                        DropdownMenuItem(value: '', child: Text('Not noted')),
+                        DropdownMenuItem(value: 'empty', child: Text('Empty')),
+                        DropdownMenuItem(value: 'quarter', child: Text('¼')),
+                        DropdownMenuItem(value: 'half', child: Text('½')),
+                        DropdownMenuItem(
+                          value: 'three_quarter',
+                          child: Text('¾'),
+                        ),
+                        DropdownMenuItem(value: 'full', child: Text('Full')),
+                      ],
+                      onChanged: (v) => setState(() => _fuel = v ?? ''),
+                    ),
+                  ),
+                ],
+              ),
+            ],
             const SizedBox(height: 12),
             Row(
               children: [

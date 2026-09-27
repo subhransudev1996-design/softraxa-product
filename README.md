@@ -24,6 +24,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0043** adds customer agreed prices, wholesale customers and staff discount limits (bills are checked in `create_invoice`/`update_invoice`). Test with `supabase/tests/r1_pricing.sql`; apply before the matching app build.
    - Migration **0044** adds the owner approval inbox (below cost, credit limit, overdue, over-limit discounts), due dates and overdue grace days. Test with `supabase/tests/r1_approvals.sql`; apply before the matching app build.
    - Migration **0045** adds the daily cashbook and day closing (cash drawer permission for staff). Test with `supabase/tests/r1_cashbook.sql`.
+   - Migration **0046** adds repair estimates with versioned, staff-recorded customer approval, vehicle job fields and the private `job-attachments` Storage bucket for photos. Test with `supabase/tests/r1_repair_estimates.sql`; apply before the matching app build.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**

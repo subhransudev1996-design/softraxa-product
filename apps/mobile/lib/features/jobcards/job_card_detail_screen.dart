@@ -13,6 +13,7 @@ import '../../core/theme.dart';
 import '../pos/pos_providers.dart';
 import '../services/service_providers.dart';
 import 'job_card_providers.dart';
+import 'job_estimates.dart';
 
 /// Job card detail: status timeline, spare parts / labor lines, advance,
 /// and closing the job into a final product+service invoice (PRD Phase 2
@@ -100,7 +101,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       isScrollControlled: true,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: _PartPicker(searchController: search),
+        child: PartPicker(searchController: search),
       ),
     );
     if (selected == null || !context.mounted) return;
@@ -233,7 +234,11 @@ class JobCardDetailScreen extends ConsumerWidget {
                       for (final s in services)
                         DropdownMenuItem(
                           value: s,
-                          child: Text(s['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                          child: Text(
+                            s['name'] as String,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                     ],
                     onChanged: (v) => setState(() {
@@ -492,6 +497,8 @@ class JobCardDetailScreen extends ConsumerWidget {
           final total = subtotal + tax;
           final advance = toDouble(j['advance_amount']);
           final closed = j['invoice_id'] != null;
+          // D37: repair work comes only from the approved estimate.
+          final needsEstimate = j['estimate_required'] == true;
           final invoiceNo = (j['invoices'] as Map?)?['invoice_no'] as String?;
 
           return RefreshIndicator(
@@ -541,6 +548,20 @@ class JobCardDetailScreen extends ConsumerWidget {
                             fontSize: 14,
                           ),
                         ),
+                        if (j['job_type'] == 'vehicle')
+                          Text(
+                            [
+                              j['registration_no'] as String? ?? '',
+                              if (j['odometer_km'] != null)
+                                '${j['odometer_km']} km',
+                              if ((j['fuel_level'] as String? ?? '').isNotEmpty)
+                                'Fuel: ${fuelLevelLabel(j['fuel_level'] as String)}',
+                            ].where((s) => s.isNotEmpty).join(' • '),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
                         if ((j['serial_no'] as String? ?? '').isNotEmpty)
                           Text(
                             'IMEI/Serial: ${j['serial_no']}',
@@ -677,7 +698,11 @@ class JobCardDetailScreen extends ConsumerWidget {
                   icon: const Icon(Icons.sync_alt),
                   label: Text('Status: ${jobStatusLabel(status)}'),
                 ),
-                const SectionLabel('Parts & labor'),
+                if (needsEstimate) ...[
+                  const SectionLabel('Estimate'),
+                  EstimateSection(job: j),
+                ],
+                SectionLabel(needsEstimate ? 'Work done' : 'Parts & labor'),
                 if (items.isEmpty)
                   const EmptyState(
                     icon: Icons.build_outlined,
@@ -740,7 +765,15 @@ class JobCardDetailScreen extends ConsumerWidget {
                       ],
                     ),
                   ),
-                if (!closed) ...[
+                if (!closed && needsEstimate) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        markEstimateWorkDone(context, ref, jobId, items),
+                    icon: const Icon(Icons.playlist_add_check),
+                    label: const Text('Add approved work'),
+                  ),
+                ] else if (!closed) ...[
                   const SizedBox(height: 8),
                   Row(
                     children: [
@@ -807,6 +840,8 @@ class JobCardDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                const SectionLabel('Photos'),
+                JobPhotosSection(job: j),
                 const SectionLabel('Status history'),
                 Card(
                   child: Column(
@@ -863,15 +898,15 @@ class JobCardDetailScreen extends ConsumerWidget {
 }
 
 /// Bottom sheet to pick a product (+ variant) to add as a job card part.
-class _PartPicker extends ConsumerStatefulWidget {
-  const _PartPicker({required this.searchController});
+class PartPicker extends ConsumerStatefulWidget {
+  const PartPicker({super.key, required this.searchController});
   final TextEditingController searchController;
 
   @override
-  ConsumerState<_PartPicker> createState() => _PartPickerState();
+  ConsumerState<PartPicker> createState() => PartPickerState();
 }
 
-class _PartPickerState extends ConsumerState<_PartPicker> {
+class PartPickerState extends ConsumerState<PartPicker> {
   List<Map<String, dynamic>> _products = [];
   bool _loading = true;
 

@@ -89,6 +89,67 @@ final jobCardsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   return List<Map<String, dynamic>>.from(rows);
 });
 
+/// Estimate versions of a job, newest first, with their lines and the
+/// customer's recorded answer (D37/D38).
+final jobEstimatesProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, jobId) async {
+      final rows = await ref
+          .watch(supabaseProvider)
+          .from('job_estimates')
+          .select('*, job_estimate_lines(*), job_estimate_approvals(*)')
+          .eq('job_card_id', jobId)
+          .order('version', ascending: false);
+      return List<Map<String, dynamic>>.from(rows);
+    });
+
+/// Photos and screenshots stored against a job.
+final jobAttachmentsProvider = FutureProvider.autoDispose
+    .family<List<Map<String, dynamic>>, String>((ref, jobId) async {
+      final rows = await ref
+          .watch(supabaseProvider)
+          .from('job_attachments')
+          .select()
+          .eq('job_card_id', jobId)
+          .order('created_at');
+      return List<Map<String, dynamic>>.from(rows);
+    });
+
+String estimateStatusLabel(String status) => switch (status) {
+  'awaiting_approval' => 'Awaiting customer',
+  'approved' => 'Approved',
+  'partially_approved' => 'Partly approved',
+  'rejected' => 'Rejected',
+  'superseded' => 'Replaced',
+  _ => status,
+};
+
+Color estimateStatusColor(String status) => switch (status) {
+  'awaiting_approval' => AppColors.orange,
+  'approved' => AppColors.green,
+  'partially_approved' => AppColors.teal,
+  'rejected' => AppColors.red,
+  _ => AppColors.inkSoft,
+};
+
+String fuelLevelLabel(String level) => switch (level) {
+  'empty' => 'Empty',
+  'quarter' => '¼',
+  'half' => '½',
+  'three_quarter' => '¾',
+  'full' => 'Full',
+  _ => level,
+};
+
+const approvalChannels = ['in_person', 'phone', 'whatsapp', 'other'];
+
+String approvalChannelLabel(String channel) => switch (channel) {
+  'in_person' => 'In person',
+  'phone' => 'Phone call',
+  'whatsapp' => 'WhatsApp',
+  'other' => 'Other',
+  _ => channel,
+};
+
 /// Job card + its parts/labor line items, status history, and linked invoice.
 final jobCardDetailProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, id) async {

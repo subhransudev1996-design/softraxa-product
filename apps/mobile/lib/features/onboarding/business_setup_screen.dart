@@ -64,6 +64,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   late final _grace = TextEditingController(
     text: '${(widget.existing?['overdue_grace_days'] as num?)?.toInt() ?? 0}',
   );
+  // D37: repair work waits for the customer's approval of an estimate.
+  late bool _requireEstimate =
+      widget.existing?['require_repair_estimate'] as bool? ?? true;
   late String _type = widget.existing?['business_type'] ?? 'mobile';
   late String _taxPref = widget.existing?['tax_preference'] ?? 'gst';
   XFile? _logo;
@@ -114,6 +117,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'return_window_days': int.tryParse(_returnWindow.text.trim()) ?? 30,
         'payment_terms_days': int.tryParse(_terms.text.trim()) ?? 30,
         'overdue_grace_days': int.tryParse(_grace.text.trim()) ?? 0,
+        'require_repair_estimate': _requireEstimate,
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -284,9 +288,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     label: 'State *',
                     helperText: 'Decides CGST + SGST vs IGST on invoices',
                     onChanged: (v) => setState(() => _state = v),
-                    validator: (v) => (v ?? '').isEmpty
-                        ? 'Required for GST billing'
-                        : null,
+                    validator: (v) =>
+                        (v ?? '').isEmpty ? 'Required for GST billing' : null,
                   ),
                 ),
               TextFormField(
@@ -311,7 +314,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 ),
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
-                  return n == null || n < 0 || n > 3650 ? 'Enter 0–3650 days' : null;
+                  return n == null || n < 0 || n > 3650
+                      ? 'Enter 0–3650 days'
+                      : null;
                 },
               ),
               const SizedBox(height: 12),
@@ -347,6 +352,16 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     ),
                   ),
                 ],
+              ),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: _requireEstimate,
+                onChanged: (v) => setState(() => _requireEstimate = v),
+                title: const Text('Repairs need an approved estimate'),
+                subtitle: const Text(
+                  'Job card work starts only after the customer approves the '
+                  'estimate. Turn off if you don\'t do repairs.',
+                ),
               ),
               const SizedBox(height: 12),
               TextFormField(
