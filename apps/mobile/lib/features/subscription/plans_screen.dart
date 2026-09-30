@@ -433,10 +433,10 @@ class _PlanCard extends StatelessWidget {
               _LimitChip(
                 icon: Icons.badge_outlined,
                 label: users == null
-                    ? 'Unlimited logins'
+                    ? 'Unlimited staff'
                     : users == 1
-                    ? 'Owner login only'
-                    : '$users logins',
+                    ? 'Owner only, no staff'
+                    : 'Owner + ${users - 1} staff',
               ),
               _LimitChip(
                 icon: Icons.inventory_2_outlined,

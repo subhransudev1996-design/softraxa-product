@@ -35,7 +35,7 @@ const numOrNull = (v: string) => (v.trim() === "" ? null : Number(v));
 
 const limitsText = (p: { user_limit: any; product_limit: any; invoice_limit: any }) =>
   [
-    p.user_limit == null ? "Unlimited logins" : Number(p.user_limit) === 1 ? "Owner login only" : `${p.user_limit} logins`,
+    p.user_limit == null ? "Unlimited staff" : Number(p.user_limit) === 1 ? "Owner only, no staff" : `Owner + ${Number(p.user_limit) - 1} staff`,
     p.product_limit == null ? "Unlimited products" : `${p.product_limit} products`,
     p.invoice_limit == null ? "Unlimited bills" : `${p.invoice_limit} bills a month`,
   ];
@@ -213,8 +213,8 @@ export default function PlansPage() {
                     {" · "}
                     {Number(p.yearly_price) > 0 ? `${inr(p.yearly_price)}/year` : "—"}
                   </span>
-                  <Link href="/clients" className="text-zinc-500 hover:underline">
-                    {count} shop{count === 1 ? "" : "s"}
+                  <Link href="/clients" title="Clients whose current subscription is on this plan" className="text-zinc-500 hover:underline">
+                    {count === 0 ? "No clients on it" : `Used by ${count} client${count === 1 ? "" : "s"}`}
                   </Link>
                   <span className="space-x-3">
                     <button className="font-medium text-brand hover:underline" onClick={() => startEdit(p)}>Edit</button>
@@ -274,8 +274,11 @@ export default function PlansPage() {
             <Section title="Limits — leave empty for unlimited">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div>
-                  <Label>Logins (owner + staff)</Label>
+                  <Label>Logins, counting the owner</Label>
                   <Input type="number" min={1} value={form.user_limit} onChange={(e) => set("user_limit", e.target.value)} placeholder="Unlimited" />
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {form.user_limit.trim() === "" ? "Any number of staff" : Number(form.user_limit) <= 1 ? "Owner only, no staff" : `Owner + ${Number(form.user_limit) - 1} staff`}
+                  </p>
                 </div>
                 <div>
                   <Label>Products</Label>
