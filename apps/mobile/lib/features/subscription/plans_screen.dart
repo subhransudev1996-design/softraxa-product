@@ -258,7 +258,7 @@ class _CurrentPlanCard extends StatelessWidget {
               children: [
                 _UsageRow(
                   icon: Icons.badge_outlined,
-                  label: 'Logins (owner + staff)',
+                  label: 'Users (owner + staff)',
                   used: (usage['users'] as num?)?.toInt() ?? 0,
                   limit: (usage['user_limit'] as num?)?.toInt(),
                 ),
@@ -433,10 +433,10 @@ class _PlanCard extends StatelessWidget {
               _LimitChip(
                 icon: Icons.badge_outlined,
                 label: users == null
-                    ? 'Unlimited staff'
+                    ? 'Unlimited users'
                     : users == 1
-                    ? 'Owner only, no staff'
-                    : 'Owner + ${users - 1} staff',
+                    ? '1 user (owner only)'
+                    : '$users users (owner + ${users - 1} staff)',
               ),
               _LimitChip(
                 icon: Icons.inventory_2_outlined,
