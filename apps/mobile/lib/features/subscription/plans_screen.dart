@@ -7,27 +7,15 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 
-final activePlansProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
-  final client = ref.watch(supabaseProvider);
-  final rows = await client
-      .from('plans')
-      .select('*, software:software_products(name)')
-      .eq('is_active', true)
-      .order('monthly_price');
-  return List<Map<String, dynamic>>.from(rows);
+/// This shop's plan with its usage, and the plans it can ask for
+/// (get_plans_for_app, migration 0055). Prices never reach the app:
+/// SOFTRAXA agrees them with each shop.
+final plansForAppProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
+  ref,
+) async {
+  final res = await ref.watch(supabaseProvider).rpc('get_plans_for_app');
+  return Map<String, dynamic>.from((res ?? const {}) as Map);
 });
-
-const kFeatureLabels = <String, String>{
-  'gst_billing': 'GST Billing',
-  'reports': 'Reports & Analytics',
-  'pdf_invoice': 'PDF Invoices',
-  'a4_print': 'A4 Printing',
-  'thermal_print': 'Thermal Printing',
-  'offline_billing': 'Offline Billing',
-  'expense_module': 'Expense Tracking',
-  'excel_import': 'Excel Product Import',
-  'service_module': 'Services & Job Cards',
-};
 
 class PlansScreen extends ConsumerStatefulWidget {
   const PlansScreen({super.key});
@@ -37,357 +25,113 @@ class PlansScreen extends ConsumerStatefulWidget {
 }
 
 class _PlansScreenState extends ConsumerState<PlansScreen> {
-  bool _isYearly = false;
+  String? _busyPlan;
+
+  /// Sends the request to SOFTRAXA as a support request (request_plan_change).
+  Future<void> _ask(Map<String, dynamic> plan) async {
+    final id = plan['id'] as String;
+    setState(() => _busyPlan = id);
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc('request_plan_change', params: {'p_plan': id});
+      ref.invalidate(plansForAppProvider);
+      if (mounted) {
+        showSuccess(
+          context,
+          'Request sent — SOFTRAXA will contact you about the ${plan['name']} plan',
+        );
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _busyPlan = null);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final plansAsync = ref.watch(activePlansProvider);
+    final plans = ref.watch(plansForAppProvider);
     final appContext = ref.watch(appContextProvider).value;
-    final currentPlanId = appContext?.subscription?['plan_id'] as String?;
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Subscription Plans'),
+        title: const Text('Your plan'),
         actions: [
           IconButton(
+            tooltip: 'Refresh',
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.invalidate(activePlansProvider),
+            onPressed: () => ref.invalidate(plansForAppProvider),
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(activePlansProvider),
+        onRefresh: () async => ref.invalidate(plansForAppProvider),
         child: AsyncView(
-          value: plansAsync,
-          onRetry: () => ref.invalidate(activePlansProvider),
-          builder: (plans) {
-            if (plans.isEmpty) {
-              return const EmptyState(
-                icon: Icons.workspace_premium_outlined,
-                message: 'No subscription plans published yet.\nContact support for custom pricing.',
-              );
-            }
+          value: plans,
+          onRetry: () => ref.invalidate(plansForAppProvider),
+          builder: (d) {
+            final current = Map<String, dynamic>.from(
+              (d['current'] as Map?) ?? const {},
+            );
+            final others = [
+              for (final p in (d['plans'] as List? ?? const []))
+                Map<String, dynamic>.from(p as Map),
+            ];
+            final requested = d['requested_plan_id'] as String?;
+            final support = d['support_whatsapp'] as String? ?? '';
 
             return ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Header card
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primary, AppColors.primaryDark],
-                    ),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: const Icon(
-                              Icons.verified_outlined,
-                              color: Colors.white,
-                              size: 24,
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 640),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        _CurrentPlanCard(
+                          current: current,
+                          state: appContext?.subscriptionState ?? 'active',
+                        ),
+                        if (others.isNotEmpty) ...[
+                          const SizedBox(height: 24),
+                          Text(
+                            'Other plans',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.ink,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Choose Your Plan',
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                                Text(
-                                  appContext?.businessName.isNotEmpty == true
-                                      ? 'Selected plan will be configured for ${appContext!.businessName}'
-                                      : 'Select a plan to upgrade your store',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.white.withValues(alpha: 0.8),
-                                  ),
-                                ),
-                              ],
+                          const SizedBox(height: 10),
+                          for (final p in others)
+                            _PlanCard(
+                              plan: p,
+                              requested: requested == p['id'],
+                              busy: _busyPlan == p['id'],
+                              onAsk: () => _ask(p),
                             ),
-                          ),
                         ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Billing cycle toggle
-                      Container(
-                        padding: const EdgeInsets.all(4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12),
+                        const SizedBox(height: 8),
+                        OutlinedButton.icon(
+                          onPressed: () => launchWhatsAppContact(
+                            context,
+                            appContext,
+                            number: support,
+                            customReason:
+                                'I would like to know more about the Dukania plans for my shop.',
+                          ),
+                          icon: const Icon(Icons.chat_outlined),
+                          label: const Text('Talk to SOFTRAXA on WhatsApp'),
                         ),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() => _isYearly = false),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: !_isYearly ? Colors.white : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(9),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Monthly Billing',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        color: !_isYearly ? AppColors.primaryDark : Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                onTap: () => setState(() => _isYearly = true),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8),
-                                  decoration: BoxDecoration(
-                                    color: _isYearly ? Colors.white : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(9),
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'Yearly Billing 🌟',
-                                      style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 13,
-                                        color: _isYearly ? AppColors.primaryDark : Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                        const SizedBox(height: 24),
+                      ],
+                    ),
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // Plans list
-                ...plans.map((p) {
-                  final isCurrent = currentPlanId == p['id'];
-                  final monthlyPrice = (p['monthly_price'] as num?)?.toDouble() ?? 0;
-                  final yearlyPrice = (p['yearly_price'] as num?)?.toDouble() ?? 0;
-                  final displayPrice = _isYearly ? yearlyPrice : monthlyPrice;
-                  final userLimit = (p['user_limit'] as num?)?.toInt();
-                  final incFeatures = List<String>.from(p['included_features'] as List? ?? []);
-
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      color: AppColors.card,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isCurrent
-                            ? AppColors.primary
-                            : (p['is_custom'] == true ? Colors.amber.shade400 : AppColors.line),
-                        width: isCurrent ? 2 : 1,
-                      ),
-                      boxShadow: softShadow(),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          p['name'] as String? ?? 'Plan',
-                                          style: const TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        if (isCurrent) ...[
-                                          const SizedBox(width: 8),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: Colors.green.shade50,
-                                              borderRadius: BorderRadius.circular(12),
-                                              border: Border.all(color: Colors.green.shade300),
-                                            ),
-                                            child: Text(
-                                              'CURRENT PLAN',
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.green.shade800,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                    if (p['notes'] != null && (p['notes'] as String).isNotEmpty)
-                                      Text(
-                                        p['notes'] as String,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.inkSoft,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    displayPrice > 0 ? money(displayPrice) : 'Custom',
-                                    style: TextStyle(
-                                      fontSize: 22,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  Text(
-                                    _isYearly ? '/ year' : '/ month',
-                                    style: TextStyle(
-                                      fontSize: 11,
-                                      color: AppColors.inkSoft,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          const Divider(height: 24),
-
-                          // Specs summary
-                          Row(
-                            children: [
-                              _SpecBadge(
-                                icon: Icons.badge_outlined,
-                                label: userLimit == null
-                                    ? 'Unlimited Staff'
-                                    : 'Up to $userLimit Staff',
-                              ),
-                              const SizedBox(width: 8),
-                              _SpecBadge(
-                                icon: Icons.inventory_2_outlined,
-                                label: p['product_limit'] == null
-                                    ? 'Unlimited Products'
-                                    : '${p['product_limit']} Products',
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-
-                          // Included features checklist
-                          Text(
-                            'Included Features:',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.inkSoft,
-                            ),
-                          ),
-                          const SizedBox(height: 6),
-                          if (incFeatures.isEmpty)
-                            const Text('All features included')
-                          else
-                            Wrap(
-                              spacing: 8,
-                              runSpacing: 6,
-                              children: incFeatures.map((fKey) {
-                                final label = kFeatureLabels[fKey] ?? fKey;
-                                return Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.check_circle,
-                                      size: 14,
-                                      color: Colors.green,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      label,
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              }).toList(),
-                            ),
-                          const SizedBox(height: 18),
-
-                          // Action button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: isCurrent ? Colors.grey.shade200 : const Color(0xFF25D366),
-                                foregroundColor: isCurrent ? Colors.black87 : Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                              ),
-                              icon: Icon(
-                                isCurrent ? Icons.check : Icons.chat,
-                                size: 18,
-                              ),
-                              label: Text(
-                                isCurrent
-                                    ? 'Active Subscription'
-                                    : 'Subscribe to ${p['name']} on WhatsApp',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13.5,
-                                ),
-                              ),
-                              onPressed: () {
-                                final cycleStr = _isYearly ? 'Yearly (${money(yearlyPrice)}/yr)' : 'Monthly (${money(monthlyPrice)}/mo)';
-                                launchWhatsAppContact(
-                                  context,
-                                  appContext,
-                                  customReason: 'I would like to subscribe to the *${p['name']}* plan ($cycleStr) for my store.',
-                                );
-                              },
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
               ],
             );
           },
@@ -397,8 +141,426 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
   }
 }
 
-class _SpecBadge extends StatelessWidget {
-  const _SpecBadge({required this.icon, required this.label});
+/// The shop's own plan: name, validity, how much of each limit is used and
+/// what is included.
+class _CurrentPlanCard extends StatelessWidget {
+  const _CurrentPlanCard({required this.current, required this.state});
+  final Map<String, dynamic> current;
+
+  /// active | trial | expired | suspended, with grace days applied.
+  final String state;
+
+  @override
+  Widget build(BuildContext context) {
+    final plan = current['plan'] == null
+        ? null
+        : Map<String, dynamic>.from(current['plan'] as Map);
+    final usage = Map<String, dynamic>.from(
+      (current['usage'] as Map?) ?? const {},
+    );
+    final expiry = current['expiry_date'];
+    final name =
+        plan?['name'] as String? ??
+        (state == 'trial' ? 'Free trial' : 'No plan');
+    final description = plan?['description'] as String? ?? '';
+    final (label, color) = switch (state) {
+      'trial' => ('TRIAL', AppColors.orange),
+      'expired' => ('EXPIRED', AppColors.red),
+      'suspended' => ('SUSPENDED', AppColors.red),
+      _ => ('ACTIVE', AppColors.green),
+    };
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.primary, width: 1.5),
+        boxShadow: softShadow(),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(18),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [AppColors.primary, AppColors.primaryDark],
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        name,
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: color,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (description.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    description,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white.withValues(alpha: 0.85),
+                    ),
+                  ),
+                ],
+                if (expiry != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    state == 'expired'
+                        ? 'Expired on ${dateStr(expiry)}'
+                        : 'Valid until ${dateStr(expiry)}',
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _UsageRow(
+                  icon: Icons.badge_outlined,
+                  label: 'Logins (owner + staff)',
+                  used: (usage['users'] as num?)?.toInt() ?? 0,
+                  limit: (usage['user_limit'] as num?)?.toInt(),
+                ),
+                _UsageRow(
+                  icon: Icons.inventory_2_outlined,
+                  label: 'Products',
+                  used: (usage['products'] as num?)?.toInt() ?? 0,
+                  limit: (usage['product_limit'] as num?)?.toInt(),
+                ),
+                _UsageRow(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Bills this month',
+                  used: (usage['bills_this_month'] as num?)?.toInt() ?? 0,
+                  limit: (usage['invoice_limit'] as num?)?.toInt(),
+                ),
+                if (plan != null) ...[
+                  const Divider(height: 24),
+                  _PlanDetails(plan: plan),
+                ],
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Products — 120 of 500" with a bar; no bar when the limit is unlimited.
+class _UsageRow extends StatelessWidget {
+  const _UsageRow({
+    required this.icon,
+    required this.label,
+    required this.used,
+    required this.limit,
+  });
+  final IconData icon;
+  final String label;
+  final int used;
+  final int? limit;
+
+  @override
+  Widget build(BuildContext context) {
+    final max = limit;
+    final full = max != null && used >= max;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: AppColors.primary),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                max == null ? '$used · unlimited' : '$used of $max',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: full ? AppColors.red : AppColors.inkSoft,
+                ),
+              ),
+            ],
+          ),
+          if (max != null) ...[
+            const SizedBox(height: 6),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(4),
+              child: LinearProgressIndicator(
+                value: max == 0 ? 1 : (used / max).clamp(0, 1).toDouble(),
+                minHeight: 6,
+                backgroundColor: AppColors.line,
+                color: full ? AppColors.red : AppColors.primary,
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// A plan the shop can ask for.
+class _PlanCard extends StatelessWidget {
+  const _PlanCard({
+    required this.plan,
+    required this.requested,
+    required this.busy,
+    required this.onAsk,
+  });
+  final Map<String, dynamic> plan;
+  final bool requested;
+  final bool busy;
+  final VoidCallback onAsk;
+
+  @override
+  Widget build(BuildContext context) {
+    final recommended = plan['is_recommended'] == true;
+    final description = plan['description'] as String? ?? '';
+    final users = (plan['user_limit'] as num?)?.toInt();
+    final products = (plan['product_limit'] as num?)?.toInt();
+    final bills = (plan['invoice_limit'] as num?)?.toInt();
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: recommended ? AppColors.primary : AppColors.line,
+          width: recommended ? 1.5 : 1,
+        ),
+        boxShadow: softShadow(),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  plan['name'] as String? ?? 'Plan',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (recommended)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 3,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primarySoft,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'RECOMMENDED',
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          if (description.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            Text(
+              description,
+              style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+            ),
+          ],
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _LimitChip(
+                icon: Icons.badge_outlined,
+                label: users == null
+                    ? 'Unlimited logins'
+                    : users == 1
+                    ? 'Owner login only'
+                    : '$users logins',
+              ),
+              _LimitChip(
+                icon: Icons.inventory_2_outlined,
+                label: products == null
+                    ? 'Unlimited products'
+                    : '$products products',
+              ),
+              _LimitChip(
+                icon: Icons.receipt_long_outlined,
+                label: bills == null
+                    ? 'Unlimited bills'
+                    : '$bills bills a month',
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          _PlanDetails(plan: plan),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: requested
+                ? OutlinedButton.icon(
+                    onPressed: null,
+                    icon: const Icon(Icons.hourglass_top, size: 18),
+                    label: const Text('Requested — SOFTRAXA will contact you'),
+                  )
+                : FilledButton.icon(
+                    onPressed: busy ? null : onAsk,
+                    icon: const Icon(Icons.north_east, size: 18),
+                    label: Text(busy ? 'Sending…' : 'Ask for this plan'),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The highlight lines SOFTRAXA wrote for the plan, then every feature of
+/// the app marked included or not.
+class _PlanDetails extends StatelessWidget {
+  const _PlanDetails({required this.plan});
+  final Map<String, dynamic> plan;
+
+  @override
+  Widget build(BuildContext context) {
+    final highlights = [
+      for (final h in (plan['highlights'] as List? ?? const [])) h.toString(),
+    ];
+    final features = [
+      for (final f in (plan['features'] as List? ?? const []))
+        Map<String, dynamic>.from(f as Map),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final h in highlights)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 6),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(top: 2),
+                  child: Icon(Icons.star, size: 14, color: AppColors.orange),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    h,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        if (highlights.isNotEmpty && features.isNotEmpty)
+          const SizedBox(height: 6),
+        Wrap(
+          spacing: 14,
+          runSpacing: 8,
+          children: [
+            for (final f in features)
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    f['included'] == true
+                        ? Icons.check_circle
+                        : Icons.remove_circle_outline,
+                    size: 15,
+                    color: f['included'] == true
+                        ? AppColors.green
+                        : AppColors.hint,
+                  ),
+                  const SizedBox(width: 5),
+                  Text(
+                    f['label'] as String? ?? '',
+                    style: TextStyle(
+                      fontSize: 12.5,
+                      fontWeight: FontWeight.w500,
+                      color: f['included'] == true
+                          ? AppColors.ink
+                          : AppColors.hint,
+                      decoration: f['included'] == true
+                          ? null
+                          : TextDecoration.lineThrough,
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _LimitChip extends StatelessWidget {
+  const _LimitChip({required this.icon, required this.label});
   final IconData icon;
   final String label;
 
@@ -418,10 +580,7 @@ class _SpecBadge extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w600,
-            ),
+            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
           ),
         ],
       ),

@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Button, Card, CardBody, Spinner } from "@/components/ui";
+import { Badge, Button, Card, Spinner } from "@/components/ui";
 import { Modal, Notice, waLink } from "@/components/ops";
 import { dateTimeStr } from "@/lib/format";
 
@@ -118,6 +118,12 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [refresh, setRefresh] = useState(0);
   const b = ticket.businesses ?? {};
+  const thread = useRef<HTMLDivElement>(null);
+
+  // Keep the newest message in view.
+  useEffect(() => {
+    thread.current?.scrollTo({ top: thread.current.scrollHeight });
+  }, [messages]);
 
   useEffect(() => {
     supabase.from("support_messages").select("*").eq("ticket_id", ticket.id).order("created_at")
@@ -181,8 +187,15 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
           </div>
         </div>
         <Notice notice={notice} />
+        {ticket.requested_plan_id && status !== "resolved" && (
+          <p className="rounded-xl bg-blue-50 px-4 py-3 text-blue-800">
+            This shop is asking for a plan change. Agree the price with them, then open{" "}
+            <Link href={`/clients/${b.id}`} className="font-semibold underline">the client</Link> and press Renew with
+            the new plan — this request then answers and closes itself.
+          </p>
+        )}
 
-        <div className="max-h-[38vh] space-y-2 overflow-y-auto rounded-xl bg-zinc-50 p-3">
+        <div ref={thread} className="max-h-[36dvh] min-h-24 space-y-2 overflow-y-auto rounded-xl bg-zinc-50 p-3">
           <Bubble mine={false} body={ticket.message || ticket.subject} at={ticket.created_at} />
           {messages === null ? <Spinner /> : messages.map((m) => (
             <Bubble key={m.id} mine={m.from_softraxa} body={m.body} at={m.created_at} />
@@ -203,8 +216,7 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
           </div>
         </div>
 
-        <Card>
-          <CardBody className="space-y-2">
+        <div className="space-y-2 rounded-xl border border-dashed border-zinc-300 p-3">
             <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Private notes — only you see these</p>
             {notes.map((n) => (
               <p key={n.id} className="text-sm"><span className="text-xs text-zinc-400">{dateTimeStr(n.created_at)}</span> · {n.note}</p>
@@ -219,8 +231,7 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
               />
               <Button variant="outline" onClick={addNote} disabled={!note.trim()}>Add</Button>
             </div>
-          </CardBody>
-        </Card>
+        </div>
       </div>
     </Modal>
   );

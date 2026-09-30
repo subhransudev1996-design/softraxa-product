@@ -113,6 +113,8 @@ export default function HealthPage() {
       lastRecon ? `Last run ${dateTimeStr(lastRecon.finished_at)} · ${lastRecon.unexplained} unexplained of ${lastRecon.issues}` : "Never run — press Run now on the Reconciliation page"],
     [db.imagekit_key, "ImageKit key for shop logos and product photos",
       db.imagekit_key === null ? "Couldn't read Vault" : db.imagekit_key ? "Stored in Vault" : "Missing — photo uploads fail. Create a new private key in ImageKit and store it with vault.create_secret(…, 'imagekit_private_key')"],
+    [db.trial_plan_set ?? null, "Trial plan for new shops",
+      db.trial_plan_set == null ? "Needs migration 0055" : db.trial_plan_set ? "Set — new shops start on it" : "Not set — new shops get no plan. Mark one on the Plans page"],
     [Boolean(db.payment_upi_set), "Your UPI ID for renewals", db.payment_upi_set ? "Set — expired shops can pay you" : "Not set — add it in Settings"],
     [db.last_bill_at ? true : null, "Shops are billing",
       db.last_bill_at ? `Last bill ${dateTimeStr(db.last_bill_at)} · ${db.bills_today} today · ${db.shops_active} active shops` : "No bills yet"],

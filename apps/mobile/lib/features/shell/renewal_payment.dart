@@ -9,8 +9,9 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 
-/// SOFTRAXA's UPI details, this shop's plan prices and any payment still
-/// being checked (get_payment_info, migration 0053). Works while blocked.
+/// SOFTRAXA's UPI details, this shop's plan name and any payment still
+/// being checked (get_payment_info, migrations 0053 and 0055). Works while
+/// blocked. No prices: SOFTRAXA tells each shop its renewal amount.
 final paymentInfoProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   ref,
 ) async {
@@ -19,8 +20,8 @@ final paymentInfoProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
 });
 
 /// Renewal without a payment gateway: the owner pays SOFTRAXA by UPI (QR or
-/// UPI ID), then reports it with the UTR. SOFTRAXA checks its UPI app and
-/// renews; "Check again" unlocks the app.
+/// UPI ID) the amount SOFTRAXA told them, then reports it with the UTR.
+/// SOFTRAXA checks its UPI app and renews; "Check again" unlocks the app.
 class RenewalPaymentCard extends ConsumerStatefulWidget {
   const RenewalPaymentCard({super.key});
 
@@ -29,24 +30,20 @@ class RenewalPaymentCard extends ConsumerStatefulWidget {
 }
 
 class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
-  bool _yearly = false;
-
-  String _upiLink(String upi, String payee, double amount, String shop) => Uri(
+  // No amount in the link: the owner types what SOFTRAXA asked for.
+  String _upiLink(String upi, String payee, String shop) => Uri(
     scheme: 'upi',
     host: 'pay',
     queryParameters: {
       'pa': upi,
       'pn': payee,
-      if (amount > 0) 'am': amount.toStringAsFixed(2),
       'cu': 'INR',
       'tn': 'Dukania $shop',
     },
   ).toString();
 
-  Future<void> _reportPayment(double suggested) async {
-    final amount = TextEditingController(
-      text: suggested > 0 ? suggested.toStringAsFixed(0) : '',
-    );
+  Future<void> _reportPayment() async {
+    final amount = TextEditingController();
     final utr = TextEditingController();
     final note = TextEditingController();
     final ok = await showDialog<bool>(
@@ -59,15 +56,15 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
             children: [
               TextField(
                 controller: amount,
+                autofocus: true,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Amount paid ₹'),
+                decoration: const InputDecoration(labelText: 'Amount paid ₹ *'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: utr,
-                autofocus: true,
                 decoration: const InputDecoration(
                   labelText: 'UPI reference (UTR) *',
                   helperText:
@@ -139,10 +136,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
         final upi = d['upi_id'] as String? ?? '';
         final payee = d['payee_name'] as String? ?? 'SOFTRAXA';
         final support = d['support_whatsapp'] as String? ?? '';
-        final plan = d['plan'] as Map?;
-        final monthly = toDouble(plan?['monthly_price']);
-        final yearly = toDouble(plan?['yearly_price']);
-        final amount = _yearly && yearly > 0 ? yearly : monthly;
+        final planName = (d['plan'] as Map?)?['name'] as String?;
         final pending = d['pending_claim'] as Map?;
         final rejected = d['last_rejected'] as Map?;
         final shop = appContext?.businessName ?? '';
@@ -181,22 +175,11 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                     style: const TextStyle(color: AppColors.red, fontSize: 13),
                   ),
                 ],
-                if (plan != null && monthly > 0 && yearly > 0) ...[
-                  const SizedBox(height: 12),
-                  SegmentedButton<bool>(
-                    segments: [
-                      ButtonSegment(
-                        value: false,
-                        label: Text('${money(monthly)} / month'),
-                      ),
-                      ButtonSegment(
-                        value: true,
-                        label: Text('${money(yearly)} / year'),
-                      ),
-                    ],
-                    selected: {_yearly},
-                    onSelectionChanged: (s) =>
-                        setState(() => _yearly = s.first),
+                if (planName != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    'Plan: $planName',
+                    style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 ],
                 const SizedBox(height: 12),
@@ -212,7 +195,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                       color: Colors.white,
                       padding: const EdgeInsets.all(8),
                       child: QrImageView(
-                        data: _upiLink(upi, payee, amount, shop),
+                        data: _upiLink(upi, payee, shop),
                         size: 180,
                         backgroundColor: Colors.white,
                       ),
@@ -220,9 +203,8 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    amount > 0
-                        ? 'Scan with any UPI app to pay ${money(amount)} to $payee'
-                        : 'Scan with any UPI app to pay $payee',
+                    'Scan with any UPI app and pay $payee the renewal amount '
+                    'SOFTRAXA shared with you',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 13),
                   ),
@@ -246,7 +228,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                   ),
                   const SizedBox(height: 8),
                   FilledButton.icon(
-                    onPressed: () => _reportPayment(amount),
+                    onPressed: _reportPayment,
                     icon: const Icon(Icons.check_circle_outline),
                     label: const Text('I\'ve paid'),
                   ),
@@ -258,11 +240,11 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                     appContext,
                     number: support,
                     customReason:
-                        'I have paid ${amount > 0 ? money(amount) : ''} for my Dukania renewal. '
-                        'Sending the payment screenshot.',
+                        'I want to renew my Dukania subscription. '
+                        'Please tell me the renewal amount.',
                   ),
                   icon: const Icon(Icons.chat_outlined),
-                  label: const Text('Send screenshot on WhatsApp'),
+                  label: const Text('Ask SOFTRAXA the amount on WhatsApp'),
                 ),
               ],
             ),

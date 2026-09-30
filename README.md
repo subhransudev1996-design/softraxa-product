@@ -33,6 +33,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0052** adds the repair diagnostic fee, owner due-date changes, approval push support and unit snapshots on bill lines. Test with `supabase/tests/r1_leftovers.sql`; apply before the matching app build.
    - Migration **0053** powers the admin panel's Today page, one-step manual renewals with receipts, payment claims from expired shops (UPI QR in the app), logged corrections and System health. Test with `supabase/tests/admin_operations.sql`; apply before the matching admin panel and app builds.
    - Migration **0054** adds two-way support (SOFTRAXA replies in the admin panel, the shop reads and answers in the app) and moves private notes out of ticket rows that shops could read. Test with `supabase/tests/admin_support.sql`; apply before the matching admin panel and app builds.
+   - Migration **0055** makes plans manageable from the admin panel (description, highlights, order, trial plan, logged changes) and hides prices from the app: shops can no longer read the plans table and see only a plan's name, details, limits and their own usage. Test with `supabase/tests/admin_plans.sql`; apply before the matching admin panel and app builds.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**

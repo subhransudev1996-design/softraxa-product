@@ -427,7 +427,7 @@ class AppSidebar extends ConsumerWidget {
                   ),
                   railTile(
                     icon: Icons.workspace_premium_outlined,
-                    label: 'Subscription plans',
+                    label: 'Your plan',
                     route: '/subscription/plans',
                   ),
                 ],

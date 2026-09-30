@@ -243,11 +243,11 @@ class MoreScreen extends ConsumerWidget {
                 children: [
                   tile(
                     Icons.workspace_premium_outlined,
-                    'Subscription Plans',
+                    'Your Plan',
                     '/subscription/plans',
                     color: AppColors.primary,
                     enabled: true,
-                    subtitle: 'View active plans & upgrade subscription',
+                    subtitle: 'What your plan includes, usage and other plans',
                   ),
                   const Divider(),
                   tile(
