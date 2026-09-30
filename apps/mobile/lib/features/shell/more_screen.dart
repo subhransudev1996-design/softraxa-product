@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 import '../approvals/approvals_screen.dart';
+import '../support/ticket_thread_screen.dart';
 
 class MoreScreen extends ConsumerWidget {
   const MoreScreen({super.key});
@@ -320,11 +321,20 @@ class MoreScreen extends ConsumerWidget {
                   onTap: () => launchWhatsAppContact(context, appContext),
                 ),
                 const Divider(),
-                tile(
-                  Icons.support_agent_outlined,
-                  'Support tickets',
-                  '/support',
-                  color: AppColors.indigo,
+                // Shows when SOFTRAXA has answered (migration 0054).
+                Builder(
+                  builder: (context) {
+                    final unread = ref.watch(supportUnreadProvider).value ?? 0;
+                    return tile(
+                      Icons.support_agent_outlined,
+                      'Support tickets',
+                      '/support',
+                      color: unread > 0 ? AppColors.red : AppColors.indigo,
+                      subtitle: unread > 0
+                          ? '$unread new repl${unread == 1 ? 'y' : 'ies'} from SOFTRAXA'
+                          : null,
+                    );
+                  },
                 ),
                 const Divider(),
                 if (kDebugMode && crashReportingEnabled) ...[

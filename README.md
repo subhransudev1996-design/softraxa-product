@@ -31,6 +31,8 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    - Migration **0050** adds the nightly reconciliation (admin panel → Reconciliation) and the owner's full data export. Enable **pg_cron** first (Dashboard → Integrations → Cron) so the migration can schedule the run for 02:00 IST. Test with `supabase/tests/r1_reconciliation.sql`.
    - Migration **0051** adds opening balances (customer dues and advances, supplier dues) and Excel import of customers and suppliers. Run it on its own ('opening' is a new bill type), then `supabase/tests/r1_opening_imports.sql`. Apply before the matching app build.
    - Migration **0052** adds the repair diagnostic fee, owner due-date changes, approval push support and unit snapshots on bill lines. Test with `supabase/tests/r1_leftovers.sql`; apply before the matching app build.
+   - Migration **0053** powers the admin panel's Today page, one-step manual renewals with receipts, payment claims from expired shops (UPI QR in the app), logged corrections and System health. Test with `supabase/tests/admin_operations.sql`; apply before the matching admin panel and app builds.
+   - Migration **0054** adds two-way support (SOFTRAXA replies in the admin panel, the shop reads and answers in the app) and moves private notes out of ticket rows that shops could read. Test with `supabase/tests/admin_support.sql`; apply before the matching admin panel and app builds.
    - After 0037: create a **new** ImageKit private key (the old one was published) and store it in Vault:
      `select vault.create_secret('<new private key>', 'imagekit_private_key');`
 2. **Mobile app:**
@@ -48,7 +50,7 @@ A mobile-first inventory, billing, and stock management system for local Indian 
    npm run dev
    ```
    New clients receive an email link to set their own password. Without `RESEND_API_KEY`, the panel says the email wasn't sent and shows the link to share instead.
-4. **Push alerts (optional):** set the `FIREBASE_SERVICE_ACCOUNT` and `PUSH_ALERTS_SECRET` secrets, deploy `push-alerts` (`--no-verify-jwt`) and schedule a daily `POST` with `Authorization: Bearer <PUSH_ALERTS_SECRET>` (see the function's header comment). Deploy `approval-push` too (with JWT verification on): it tells the owner's phone when staff ask for an approval.
+4. **Push alerts (optional):** set the `FIREBASE_SERVICE_ACCOUNT` and `PUSH_ALERTS_SECRET` secrets, deploy `push-alerts` (`--no-verify-jwt`) and schedule a daily `POST` with `Authorization: Bearer <PUSH_ALERTS_SECRET>` (see the function's header comment). Deploy `approval-push` and `support-push` too (both with JWT verification on): the first tells the owner's phone when staff ask for an approval, the second tells a shop when SOFTRAXA answers its support request.
 
 ## Checks
 

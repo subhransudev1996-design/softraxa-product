@@ -6,6 +6,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import 'ticket_thread_screen.dart';
 
 final ticketsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
   ref,
@@ -139,7 +140,9 @@ class SupportScreen extends ConsumerWidget {
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 15,
-                                  color: isTrial ? const Color(0xFF8C5400) : Colors.green.shade900,
+                                  color: isTrial
+                                      ? const Color(0xFF8C5400)
+                                      : Colors.green.shade900,
                                 ),
                               ),
                               const SizedBox(height: 2),
@@ -149,7 +152,9 @@ class SupportScreen extends ConsumerWidget {
                                     : 'Get instant assistance on WhatsApp for your store.',
                                 style: TextStyle(
                                   fontSize: 12.5,
-                                  color: isTrial ? const Color(0xFF996300) : Colors.green.shade800,
+                                  color: isTrial
+                                      ? const Color(0xFF996300)
+                                      : Colors.green.shade800,
                                 ),
                               ),
                             ],
@@ -172,9 +177,13 @@ class SupportScreen extends ConsumerWidget {
                         icon: const Icon(Icons.chat, size: 18),
                         label: const Text(
                           'Chat on WhatsApp',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
                         ),
-                        onPressed: () => launchWhatsAppContact(context, appContext),
+                        onPressed: () =>
+                            launchWhatsAppContact(context, appContext),
                       ),
                     ),
                   ],
@@ -199,8 +208,23 @@ class SupportScreen extends ConsumerWidget {
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, i) {
                         final t = rows[i];
+                        // SOFTRAXA answered and the shop hasn't opened it.
+                        final reply = DateTime.tryParse(
+                          t['last_reply_at'] as String? ?? '',
+                        );
+                        final seen = DateTime.tryParse(
+                          t['shop_seen_at'] as String? ?? '',
+                        );
+                        final unread =
+                            reply != null &&
+                            (seen == null || reply.isAfter(seen));
                         return Card(
                           child: ListTile(
+                            onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => TicketThreadScreen(ticket: t),
+                              ),
+                            ),
                             leading: const IconChip(
                               Icons.support_agent_outlined,
                               color: AppColors.indigo,
@@ -222,14 +246,22 @@ class SupportScreen extends ConsumerWidget {
                                 fontSize: 12,
                               ),
                             ),
-                            trailing: StatusChip(
-                              (t['status'] as String).replaceAll('_', ' '),
-                              color: switch (t['status']) {
-                                'resolved' => AppColors.green,
-                                'in_progress' => AppColors.orange,
-                                _ => AppColors.inkSoft,
-                              },
-                            ),
+                            trailing: unread
+                                ? const StatusChip(
+                                    'new reply',
+                                    color: AppColors.indigo,
+                                  )
+                                : StatusChip(
+                                    (t['status'] as String).replaceAll(
+                                      '_',
+                                      ' ',
+                                    ),
+                                    color: switch (t['status']) {
+                                      'resolved' => AppColors.green,
+                                      'in_progress' => AppColors.orange,
+                                      _ => AppColors.inkSoft,
+                                    },
+                                  ),
                           ),
                         );
                       },

@@ -15,13 +15,19 @@ Future<void> launchWhatsAppContact(
   BuildContext context,
   AppContext? ctx, {
   String? customReason,
+  // SOFTRAXA's number from the admin panel settings, when known.
+  String? number,
 }) async {
-  final storeName = ctx?.businessName.isNotEmpty == true ? ctx!.businessName : 'My Store';
-  final ownerName = (ctx?.business?['owner_name'] as String?)?.isNotEmpty == true
+  final storeName = ctx?.businessName.isNotEmpty == true
+      ? ctx!.businessName
+      : 'My Store';
+  final ownerName =
+      (ctx?.business?['owner_name'] as String?)?.isNotEmpty == true
       ? (ctx!.business!['owner_name'] as String)
       : ((ctx?.profile?['full_name'] as String?) ?? 'Owner');
   final phone = (ctx?.business?['phone'] as String?) ?? '';
-  final email = (ctx?.business?['email'] as String?) ??
+  final email =
+      (ctx?.business?['email'] as String?) ??
       (ctx?.profile?['email'] as String?) ??
       '';
   final subState = (ctx?.subscriptionState ?? 'trial').toUpperCase();
@@ -32,7 +38,9 @@ Future<void> launchWhatsAppContact(
   if (customReason != null && customReason.isNotEmpty) {
     buffer.writeln(customReason);
   } else {
-    buffer.writeln('I am currently on $subState subscription and would like to get assistance / upgrade my plan.');
+    buffer.writeln(
+      'I am currently on $subState subscription and would like to get assistance / upgrade my plan.',
+    );
   }
   buffer.writeln();
   buffer.writeln('📋 *Store & User Details:*');
@@ -43,15 +51,20 @@ Future<void> launchWhatsAppContact(
   buffer.writeln('• *Current Status:* $subState');
 
   final message = buffer.toString();
-  final number = supportWhatsAppNumber;
+  final configured = (number ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+  final number0 = configured.isNotEmpty ? configured : supportWhatsAppNumber;
   final encodedMsg = Uri.encodeComponent(message);
 
   // 1. Native WhatsApp App URI scheme
-  final whatsappAppUri = Uri.parse('whatsapp://send?phone=$number&text=$encodedMsg');
+  final whatsappAppUri = Uri.parse(
+    'whatsapp://send?phone=$number0&text=$encodedMsg',
+  );
   // 2. Short Web URL (wa.me)
-  final waMeUri = Uri.parse('https://wa.me/$number?text=$encodedMsg');
+  final waMeUri = Uri.parse('https://wa.me/$number0?text=$encodedMsg');
   // 3. Direct API Web URL (api.whatsapp.com)
-  final apiUri = Uri.parse('https://api.whatsapp.com/send?phone=$number&text=$encodedMsg');
+  final apiUri = Uri.parse(
+    'https://api.whatsapp.com/send?phone=$number0&text=$encodedMsg',
+  );
 
   try {
     if (await canLaunchUrl(whatsappAppUri)) {
@@ -71,7 +84,10 @@ Future<void> launchWhatsAppContact(
     await launchUrl(apiUri, mode: LaunchMode.externalApplication);
   } catch (e) {
     if (context.mounted) {
-      showError(context, 'Could not open WhatsApp ($e). Support phone: +$number');
+      showError(
+        context,
+        'Could not open WhatsApp ($e). Support phone: +$number0',
+      );
     }
   }
 }

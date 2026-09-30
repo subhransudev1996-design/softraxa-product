@@ -9,6 +9,7 @@ import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../approvals/approvals_screen.dart';
+import '../support/ticket_thread_screen.dart';
 
 /// App shell.
 ///
@@ -268,6 +269,7 @@ class AppSidebar extends ConsumerWidget {
     final appContext = ref.watch(appContextProvider).value;
     final features = appContext;
     final pendingApprovals = ref.watch(pendingApprovalCountProvider).value ?? 0;
+    final supportUnread = ref.watch(supportUnreadProvider).value ?? 0;
     // Prefix match so a detail/edit page (e.g. /invoices/abc123) still
     // highlights its parent section (/invoices) in the sidebar.
     bool isActive(String route) =>
@@ -437,8 +439,11 @@ class AppSidebar extends ConsumerWidget {
                 ),
                 railTile(
                   icon: Icons.support_agent_outlined,
-                  label: 'Support',
+                  label: supportUnread > 0
+                      ? 'Support ($supportUnread new)'
+                      : 'Support',
                   route: '/support',
+                  color: supportUnread > 0 ? AppColors.red : null,
                 ),
                 railTile(
                   icon: Icons.settings_outlined,
