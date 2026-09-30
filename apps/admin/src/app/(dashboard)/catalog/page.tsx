@@ -10,6 +10,49 @@ import { BUSINESS_TYPES, businessTypeLabel } from "@/lib/business-types";
 
 const GST_RATES = ["0", "3", "5", "12", "18", "28"];
 
+// name, short name, sold in fractions. The first eight are the units every
+// new shop starts with (create_business), spelt the same way so a picked
+// product uses the shop's own unit instead of creating a second one.
+const UNITS: [string, string, boolean][] = [
+  ["Piece", "pcs", false],
+  ["Kg", "kg", true],
+  ["Gram", "g", true],
+  ["Metre", "m", true],
+  ["Litre", "L", true],
+  ["Box", "box", false],
+  ["Dozen", "dz", false],
+  ["Set", "set", false],
+  ["Pair", "pr", false],
+  ["Packet", "pkt", false],
+  ["Bag", "bag", false],
+  ["Bundle", "bdl", false],
+  ["Roll", "roll", false],
+  ["Carton", "ctn", false],
+  ["Bottle", "btl", false],
+  ["Can", "can", false],
+  ["Tube", "tube", false],
+  ["Sheet", "sht", false],
+  ["Rod", "rod", false],
+  ["Coil", "coil", false],
+  ["Strip", "strip", false],
+  ["Unit", "unit", false],
+  ["Number", "nos", false],
+  ["Millilitre", "ml", true],
+  ["Centimetre", "cm", true],
+  ["Millimetre", "mm", true],
+  ["Foot", "ft", true],
+  ["Inch", "in", true],
+  ["Yard", "yd", true],
+  ["Square foot", "sqft", true],
+  ["Square metre", "sqm", true],
+  ["Running foot", "rft", true],
+  ["Running metre", "rmt", true],
+  ["Cubic foot", "cft", true],
+  ["Cubic metre", "cbm", true],
+  ["Quintal", "qtl", true],
+  ["Tonne", "t", true],
+];
+
 const FILTERS = [
   ["", "All", "all"],
   ["pending", "Waiting for you", "pending"],
@@ -273,13 +316,36 @@ export default function CatalogPage() {
                 <Label>Category</Label>
                 <Input value={form.category} onChange={(e) => set("category", e.target.value)} />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <Label>Unit</Label>
-                <Input value={form.unit_name} onChange={(e) => set("unit_name", e.target.value)} placeholder="Piece" />
-              </div>
-              <div>
-                <Label>Unit short name</Label>
-                <Input value={form.unit_short} onChange={(e) => set("unit_short", e.target.value)} placeholder="pcs" />
+                <Select
+                  value={form.unit_name}
+                  onChange={(e) => {
+                    const unit = UNITS.find(([name]) => name === e.target.value);
+                    setForm({
+                      ...form,
+                      unit_name: e.target.value,
+                      unit_short: unit ? unit[1] : "",
+                      allow_decimal: unit ? unit[2] : false,
+                    });
+                  }}
+                >
+                  <option value="">— no unit —</option>
+                  {/* A unit a shop made up stays selectable on its own entry. */}
+                  {form.unit_name && !UNITS.some(([name]) => name === form.unit_name) && (
+                    <option value={form.unit_name}>
+                      {form.unit_name}{form.unit_short ? ` (${form.unit_short})` : ""} — from a shop
+                    </option>
+                  )}
+                  {UNITS.map(([name, short]) => (
+                    <option key={name} value={name}>{name} ({short})</option>
+                  ))}
+                </Select>
+                <p className="mt-1 text-xs text-zinc-500">
+                  {form.unit_name
+                    ? form.allow_decimal ? "Sold in fractions, like 1.5." : "Sold in whole numbers only."
+                    : "The shop chooses its own unit."}
+                </p>
               </div>
               <div>
                 <Label>HSN code</Label>
@@ -322,10 +388,6 @@ export default function CatalogPage() {
               <Input value={form.description} onChange={(e) => set("description", e.target.value)} />
             </div>
             <div className="space-y-2 text-sm">
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={form.allow_decimal} onChange={(e) => set("allow_decimal", e.target.checked)} />
-                Sold in fractions (kg, metre, litre)
-              </label>
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={form.track_serial} onChange={(e) => set("track_serial", e.target.checked)} />
                 Track IMEI / serial numbers
