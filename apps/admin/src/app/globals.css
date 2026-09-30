@@ -48,13 +48,15 @@ body {
   }
 }
 
+/* "backwards", not "both": once finished, no transform may remain on the
+   element — a transformed ancestor traps position:fixed children (dialogs). */
 .animate-rise {
-  animation: rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 
 /* stagger direct children of a .stagger-rise container (first 8) */
 .stagger-rise > * {
-  animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: rise 0.4s cubic-bezier(0.22, 1, 0.36, 1) backwards;
 }
 .stagger-rise > *:nth-child(1) { animation-delay: 0.03s; }
 .stagger-rise > *:nth-child(2) { animation-delay: 0.08s; }

@@ -1,14 +1,25 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
+import { X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { dateStr, inr } from "@/lib/format";
 import { Button, Input, Label, Select } from "@/components/ui";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-/** Centered dialog; closes on Escape or a click outside the panel. */
+/**
+ * Dialog over the whole window. Closes with the × button, Escape, or a
+ * click on the dark area. The title bar stays put while the content
+ * scrolls.
+ *
+ * Rendered into <body> (a portal): the page content sits inside an
+ * animated wrapper, and a transformed ancestor would trap a
+ * `position: fixed` dialog inside it — the top, with the close button,
+ * ended up off-screen.
+ */
 export function Modal({
   title,
   onClose,
@@ -23,28 +34,41 @@ export function Modal({
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // The page behind must not scroll while the dialog is open.
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = previous;
+    };
   }, [onClose]);
-  return (
+
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/40 p-0 sm:items-center sm:p-4"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 backdrop-blur-[2px] sm:items-center sm:p-6"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white p-5 shadow-xl sm:rounded-2xl ${wide ? "sm:max-w-2xl" : "sm:max-w-lg"}`}
+        className={`flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[88dvh] sm:rounded-2xl ${wide ? "sm:max-w-2xl" : "sm:max-w-lg"}`}
       >
-        <div className="mb-4 flex items-start justify-between gap-4">
-          <h2 className="text-lg font-bold text-ink">{title}</h2>
-          <button onClick={onClose} className="rounded-lg px-2 text-xl leading-none text-zinc-400 hover:text-zinc-700" aria-label="Close">
-            ×
+        <div className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
+          <h2 className="min-w-0 truncate text-lg font-bold text-ink">{title}</h2>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-zinc-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+          >
+            <X size={18} strokeWidth={2.4} />
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
