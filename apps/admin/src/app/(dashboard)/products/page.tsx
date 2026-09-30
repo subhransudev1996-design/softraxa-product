@@ -65,8 +65,8 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900">Products</h1>
-          <p className="mt-1 text-sm text-zinc-500">The software Softraxa sells. Each product defines its own feature list.</p>
+          <h1 className="text-2xl font-bold text-zinc-900">Software</h1>
+          <p className="mt-1 text-sm text-zinc-500">The software Softraxa sells (Dukania and the ones to come). Each one defines its own feature list. For the products shops sell, see Master products.</p>
         </div>
         <Button onClick={() => startEdit(null)}>+ New product</Button>
       </div>

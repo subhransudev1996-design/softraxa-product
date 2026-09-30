@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -80,6 +82,20 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final TextEditingController _singleImeiInput = TextEditingController();
   bool _busy = false;
 
+  // The shared product list (migration 0057): while a NEW product's name is
+  // typed, matching products are offered; picking one fills in everything
+  // except prices and stock.
+  static const _gstRates = [0.0, 3.0, 5.0, 12.0, 18.0, 28.0];
+  Timer? _searchTimer;
+  List<Map<String, dynamic>> _suggestions = [];
+  String? _masterProductId;
+  bool _filling = false;
+
+  static String _pct(dynamic v) {
+    final n = (v as num?) ?? 0;
+    return n == n.roundToDouble() ? n.toStringAsFixed(0) : n.toString();
+  }
+
   static String _num(dynamic v) =>
       v == null || (v is num && v == 0) ? '' : v.toString();
 
@@ -91,6 +107,99 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _categoryId = widget.existing?['category_id'] as String?;
     _brandId = widget.existing?['brand_id'] as String?;
     _unitId = widget.existing?['unit_id'] as String?;
+    if (!isEdit) {
+      _name.addListener(_onNameChanged);
+      final code = widget.initialBarcode ?? '';
+      if (code.isNotEmpty) _searchMaster(code);
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onNameChanged() {
+    if (_filling || _masterProductId != null) return;
+    _searchTimer?.cancel();
+    final text = _name.text.trim();
+    if (text.length < 3) {
+      if (_suggestions.isNotEmpty) setState(() => _suggestions = []);
+      return;
+    }
+    _searchTimer = Timer(
+      const Duration(milliseconds: 350),
+      () => _searchMaster(text),
+    );
+  }
+
+  Future<void> _searchMaster(String query) async {
+    try {
+      final res = await ref
+          .read(supabaseProvider)
+          .rpc(
+            'search_master_products',
+            params: {'p_query': query, 'p_limit': 6},
+          );
+      if (!mounted || _masterProductId != null) return;
+      setState(() {
+        _suggestions = [
+          for (final m in (res as List? ?? const []))
+            Map<String, dynamic>.from(m as Map),
+        ];
+      });
+    } catch (_) {
+      // Offline, or a database without the shared list: just no suggestions.
+    }
+  }
+
+  /// Fill the form from a product in the shared list. The shop's category,
+  /// brand and unit are created if missing (use_master_product).
+  Future<void> _pickMaster(Map<String, dynamic> m) async {
+    try {
+      final res = await ref
+          .read(supabaseProvider)
+          .rpc('use_master_product', params: {'p_master': m['id']});
+      final d = Map<String, dynamic>.from(res as Map);
+      ref.invalidate(categoriesProvider);
+      ref.invalidate(brandsProvider);
+      ref.invalidate(unitsProvider);
+      await Future.wait([
+        ref.read(categoriesProvider.future),
+        ref.read(brandsProvider.future),
+        ref.read(unitsProvider.future),
+      ]);
+      if (!mounted) return;
+      final gst = (d['gst_rate'] as num?)?.toDouble();
+      _filling = true;
+      setState(() {
+        _masterProductId = d['master_product_id'] as String?;
+        _suggestions = [];
+        _name.text = d['name'] as String? ?? _name.text;
+        if (_barcode.text.trim().isEmpty) {
+          _barcode.text = d['barcode'] as String? ?? '';
+        }
+        _hsn.text = d['hsn_code'] as String? ?? '';
+        if (gst != null && _gstRates.contains(gst)) _gstRate = gst;
+        _categoryId = d['category_id'] as String?;
+        _brandId = d['brand_id'] as String?;
+        _unitId = d['unit_id'] as String?;
+        _secondaryUnitName.text = d['secondary_unit_name'] as String? ?? '';
+        _conversionFactor.text = _num(d['conversion_factor']);
+        _trackSerial = d['track_serial'] == true;
+        _trackPieces = d['track_pieces'] == true;
+        _warranty.text = _num(d['warranty_months']);
+        if (_description.text.trim().isEmpty) {
+          _description.text = d['description'] as String? ?? '';
+        }
+      });
+      _filling = false;
+      showSuccess(context, 'Details filled in — add your prices and stock');
+    } catch (e) {
+      _filling = false;
+      if (mounted) showError(context, e);
+    }
   }
 
   Future<void> _quickAddMaster(
@@ -267,6 +376,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       final businessId = ref.read(appContextProvider).value?.businessId;
       final row = {
         'business_id': businessId,
+        if (!isEdit && _masterProductId != null)
+          'master_product_id': _masterProductId,
         'name': _name.text.trim(),
         'sku': _sku.text.trim(),
         'barcode': _barcode.text.trim(),
@@ -402,6 +513,59 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               validator: (v) =>
                   v == null || v.trim().isEmpty ? 'Required' : null,
             ),
+            if (_suggestions.isNotEmpty)
+              Card(
+                margin: const EdgeInsets.only(top: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 10, 4, 0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'In the product list — tap to fill in the details',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.inkSoft,
+                              ),
+                            ),
+                          ),
+                          IconButton(
+                            tooltip: 'Not in the list',
+                            visualDensity: VisualDensity.compact,
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () => setState(() => _suggestions = []),
+                          ),
+                        ],
+                      ),
+                    ),
+                    for (final m in _suggestions)
+                      ListTile(
+                        dense: true,
+                        leading: const Icon(
+                          Icons.inventory_2_outlined,
+                          color: AppColors.primary,
+                        ),
+                        title: Text(m['name'] as String? ?? ''),
+                        subtitle: Text(
+                          [
+                            if ((m['brand'] as String? ?? '').isNotEmpty)
+                              m['brand'],
+                            if ((m['category'] as String? ?? '').isNotEmpty)
+                              m['category'],
+                            if ((m['hsn_code'] as String? ?? '').isNotEmpty)
+                              'HSN ${m['hsn_code']}',
+                            'GST ${_pct(m['gst_rate'])}%',
+                          ].join(' · '),
+                        ),
+                        onTap: () => _pickMaster(m),
+                      ),
+                  ],
+                ),
+              ),
             const SectionLabel('Classification'),
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,

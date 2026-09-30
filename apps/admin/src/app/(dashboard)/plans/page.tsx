@@ -307,7 +307,7 @@ export default function PlansPage() {
               {productFeatures.length === 0 ? (
                 <p className="text-sm text-zinc-500">
                   This product has no features listed yet. Add them on the{" "}
-                  <Link href="/products" className="text-brand hover:underline">Products</Link> page.
+                  <Link href="/products" className="text-brand hover:underline">Software</Link> page.
                 </p>
               ) : (
                 <>

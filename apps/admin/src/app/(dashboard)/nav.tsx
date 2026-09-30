@@ -10,6 +10,7 @@ import {
   IndianRupee,
   Layers,
   LifeBuoy,
+  ListChecks,
   Menu,
   ScanSearch,
   ScrollText,
@@ -31,7 +32,8 @@ const daily = [
 ];
 const setup = [
   { href: "/plans", label: "Plans", icon: Layers },
-  { href: "/products", label: "Products", icon: Boxes },
+  { href: "/catalog", label: "Master products", icon: ListChecks },
+  { href: "/products", label: "Software", icon: Boxes },
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/health", label: "System health", icon: HeartPulse },
   { href: "/audit", label: "Audit logs", icon: ScrollText },
