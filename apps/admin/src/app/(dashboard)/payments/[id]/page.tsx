@@ -38,8 +38,12 @@ export default function ReceiptPage() {
   const { id } = useParams<{ id: string }>();
   const [p, setP] = useState<any>(null);
   const [missing, setMissing] = useState(false);
+  // SOFTRAXA's own details, from Settings (migration 0056).
+  const [us, setUs] = useState<any>({});
 
   useEffect(() => {
+    createClient().from("platform_settings").select("*").maybeSingle()
+      .then(({ data }) => setUs(data ?? {}));
     createClient()
       .from("subscription_payments")
       .select("*, businesses(id, name, owner_name, phone, address, gst_number), plans(name)")
@@ -52,8 +56,9 @@ export default function ReceiptPage() {
   if (!p) return <Spinner />;
 
   const b = p.businesses ?? {};
+  const seller = us.business_name || "SOFTRAXA";
   const msg =
-    `Receipt ${p.receipt_no ?? ""} — SOFTRAXA\n` +
+    `Receipt ${p.receipt_no ?? ""} — ${seller}\n` +
     `Received ${inr(p.amount)} from ${b.name} on ${dateStr(p.payment_date)} (${MODE_LABEL[p.payment_mode] ?? p.payment_mode}` +
     `${p.reference ? `, ref ${p.reference}` : ""}).\n` +
     (p.period_end ? `Dukania${p.plans?.name ? ` ${p.plans.name}` : ""} subscription: ${dateStr(p.period_start)} to ${dateStr(p.period_end)}.\n` : "") +
@@ -72,8 +77,13 @@ export default function ReceiptPage() {
       <article className="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-ink print:max-w-none print:rounded-none print:border-0 print:p-0">
         <header className="flex items-start justify-between border-b border-zinc-200 pb-4">
           <div>
-            <p className="text-xl font-extrabold">SOFTRAXA</p>
+            <p className="text-xl font-extrabold">{seller}</p>
             <p className="text-xs text-zinc-500">Dukania — billing and stock software</p>
+            {us.business_address && <p className="mt-1 max-w-xs text-xs text-zinc-600">{us.business_address}</p>}
+            {(us.business_phone || us.business_email) && (
+              <p className="text-xs text-zinc-600">{[us.business_phone, us.business_email].filter(Boolean).join(" · ")}</p>
+            )}
+            {us.business_gstin && <p className="text-xs text-zinc-600">GSTIN {us.business_gstin}</p>}
           </div>
           <div className="text-right">
             <p className="text-base font-bold uppercase tracking-wide">Payment receipt</p>
@@ -103,7 +113,8 @@ export default function ReceiptPage() {
         </table>
         <p className="pt-2 text-xs text-zinc-600">Rupees {inWords(Number(p.amount))} only</p>
         {p.note && <p className="pt-2 text-xs text-zinc-500">Note: {p.note}</p>}
-        <p className="pt-8 text-xs text-zinc-400">This is a payment receipt, not a tax invoice.</p>
+        {us.receipt_footer && <p className="pt-6 text-xs text-zinc-600">{us.receipt_footer}</p>}
+        <p className={`${us.receipt_footer ? "pt-2" : "pt-8"} text-xs text-zinc-400`}>This is a payment receipt, not a tax invoice.</p>
       </article>
     </div>
   );

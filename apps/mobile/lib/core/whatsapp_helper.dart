@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import 'supabase_providers.dart';
 import 'widgets.dart';
 
+/// Used only until the number set in the admin panel is known (older
+/// database, or before the first sign-in).
 String get supportWhatsAppNumber {
   final num = dotenv.env['SUPPORT_WHATSAPP_NUMBER'] ?? '917437988568';
   return num.replaceAll(RegExp(r'[^0-9]'), '');
@@ -15,7 +17,7 @@ Future<void> launchWhatsAppContact(
   BuildContext context,
   AppContext? ctx, {
   String? customReason,
-  // SOFTRAXA's number from the admin panel settings, when known.
+  // Overrides the number from the admin panel settings (ctx.supportWhatsApp).
   String? number,
 }) async {
   final storeName = ctx?.businessName.isNotEmpty == true
@@ -51,7 +53,10 @@ Future<void> launchWhatsAppContact(
   buffer.writeln('• *Current Status:* $subState');
 
   final message = buffer.toString();
-  final configured = (number ?? '').replaceAll(RegExp(r'[^0-9]'), '');
+  final fromSettings = (number ?? '').isNotEmpty
+      ? number!
+      : (ctx?.supportWhatsApp ?? '');
+  final configured = fromSettings.replaceAll(RegExp(r'[^0-9]'), '');
   final number0 = configured.isNotEmpty ? configured : supportWhatsAppNumber;
   final encodedMsg = Uri.encodeComponent(message);
 

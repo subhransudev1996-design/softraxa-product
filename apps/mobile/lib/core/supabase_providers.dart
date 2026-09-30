@@ -44,6 +44,7 @@ class AppContext {
     required this.features,
     required this.subscription,
     required this.permissions,
+    this.support,
     this.offlineSince,
   });
 
@@ -57,6 +58,7 @@ class AppContext {
     features: data['features'] as Map<String, dynamic>?,
     subscription: data['subscription'] as Map<String, dynamic>?,
     permissions: data['permissions'] as Map<String, dynamic>?,
+    support: data['support'] as Map<String, dynamic>?,
     offlineSince: offlineSince,
   );
 
@@ -70,6 +72,12 @@ class AppContext {
   final Map<String, dynamic>? features;
   final Map<String, dynamic>? subscription;
   final Map<String, dynamic>? permissions;
+
+  /// How to reach SOFTRAXA, set in the admin panel (migration 0056).
+  final Map<String, dynamic>? support;
+
+  /// SOFTRAXA's WhatsApp number from the admin panel; empty when not set.
+  String get supportWhatsApp => support?['whatsapp'] as String? ?? '';
 
   bool get hasBusiness => business != null;
 
