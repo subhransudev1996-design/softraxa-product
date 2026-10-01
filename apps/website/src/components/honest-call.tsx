@@ -2,17 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { ThumbsUp, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Reveal from "./reveal";
 
-const TEAM = [
-  { name: "Team 1", image: "/images/avatars/team-1.png", shape: "rounded-2xl rounded-tl-none bg-[#FEF3C7]" },
-  { name: "Team 2", image: "/images/avatars/team-2.png", shape: "rounded-2xl bg-[#E9D5FF]" },
-  { name: "Team 3", image: "/images/avatars/team-3.png", shape: "rounded-2xl rounded-tr-none bg-[#CCFBF1]" },
-  { name: "Team 4", image: "/images/avatars/team-4.png", shape: "rounded-2xl rounded-bl-none bg-[#CCFBF1]" },
-  { name: "Team 5", image: "/images/avatars/team-5.png", shape: "rounded-2xl bg-[#FFEDD5]" },
-  { name: "Team 6", image: "/images/avatars/team-6.png", shape: "rounded-2xl rounded-br-none bg-[#FEF3C7]" },
-];
 
 export default function HonestCall() {
   return (
@@ -37,28 +29,15 @@ export default function HonestCall() {
               <path d="M12 6L8 2" />
             </svg>
 
-            <div className="grid grid-cols-3 gap-3">
-              {TEAM.map((member, i) => (
-                <div
-                  key={i}
-                  className={`relative h-20 w-20 overflow-hidden shadow-md transition-transform hover:scale-105 ${member.shape}`}
-                >
-                  <Image
-                    src={member.image}
-                    width={80}
-                    height={80}
-                    alt={member.name}
-                    className="h-full w-full object-cover"
-                    priority
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* thumbs-up bubble overlay */}
-            <span className="absolute left-[33%] top-[50%] z-10 inline-flex h-9 w-9 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full rounded-bl-sm bg-[#1A1A1A] text-white shadow-lg ring-2 ring-white">
-              <ThumbsUp className="h-4 w-4 fill-white text-white" />
-            </span>
+            {/* The Dukania app icon (not stock photos of people who aren't us). */}
+            <Image
+              src="/images/dukania/icon.png"
+              width={112}
+              height={112}
+              alt="Dukania"
+              className="h-28 w-28 rounded-[28px] shadow-xl"
+              priority
+            />
 
             {/* curved yellow/amber arrow */}
             <svg

@@ -20,6 +20,8 @@ import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
 import type { Metadata } from "next";
 import type { CmsItem } from "@/lib/cms-types";
 
+const SHOW_TESTIMONIALS = false;
+
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/");
   return buildPageMetadata(seo);
@@ -44,7 +46,46 @@ export default async function HomePage() {
       
       <Hero content={heroContent} />
 
-      <Marquee items={["Offline-first", "Flutter", "Supabase", "Real-time sync", "Android", "Windows", "Postgres", "Row-level security"]} />
+      <Marquee items={["Works without internet", "GST billing", "Android & Windows", "Barcode scanning", "Thermal & A4 printing", "Staff logins", "Stock & expiry alerts", "Bills on WhatsApp"]} />
+
+      {/* Dukania spotlight */}
+      <section className="mx-auto max-w-7xl px-6 py-20">
+        <div className="glass overflow-hidden rounded-3xl">
+          <div className="grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
+            <Reveal>
+              <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber">Flagship product</p>
+              <h2 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">Dukania</h2>
+              <p className="mt-4 text-dim">
+                Billing, stock, expiry tracking and reporting for real shops — built
+                offline-first so a patchy connection never stops a sale.
+              </p>
+              <ul className="mt-6 space-y-2.5 text-sm text-paper">
+                {[
+                  "Bill customers online or completely offline",
+                  "GST bills, GSTR-1 and GSTR-3B reports",
+                  "Stock, expiry and low-stock alerts",
+                  "Staff logins with permissions and approvals",
+                  "Runs on Android phones and Windows PCs",
+                ].map((p) => (
+                  <li key={p} className="flex items-start gap-2.5">
+                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-violet to-sky" />
+                    {p}
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-8 flex flex-wrap gap-3">
+                <MagneticButton href="/dukania">Explore Dukania <ArrowRight className="h-4 w-4" /></MagneticButton>
+                <MagneticButton href="/download" variant="ghost">Try it free</MagneticButton>
+              </div>
+            </Reveal>
+            <Reveal delay={0.15}>
+              <Parallax amount={36}>
+                <DesktopShot shot={desktopShots.invoices} label="Dukania · invoices" />
+              </Parallax>
+            </Reveal>
+          </div>
+        </div>
+      </section>
 
       {/* services overview */}
       <section className="mx-auto max-w-7xl px-6 py-20">
@@ -67,38 +108,6 @@ export default async function HomePage() {
         />
         <div className="mt-12">
           <AppsSuite />
-        </div>
-      </section>
-
-      {/* Dukania spotlight */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <div className="glass overflow-hidden rounded-3xl">
-          <div className="grid items-center gap-10 p-8 sm:p-12 lg:grid-cols-2">
-            <Reveal>
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-amber">Flagship product</p>
-              <h2 className="mt-4 font-display text-3xl font-bold tracking-tight sm:text-4xl">Dukania</h2>
-              <p className="mt-4 text-dim">
-                Billing, stock, expiry tracking and reporting for real shops — built
-                offline-first so a patchy connection never stops a sale.
-              </p>
-              <ul className="mt-6 space-y-2.5 text-sm text-paper">
-                {["Bill customers online or completely offline", "Track stock and expiry with automatic low-stock alerts", "Reports and multi-user roles built in"].map((p) => (
-                  <li key={p} className="flex items-start gap-2.5">
-                    <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-violet to-sky" />
-                    {p}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-8">
-                <MagneticButton href="/dukania">Explore Dukania <ArrowRight className="h-4 w-4" /></MagneticButton>
-              </div>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <Parallax amount={36}>
-                <DesktopShot shot={desktopShots.dashboard} label="Dukania · dashboard" />
-              </Parallax>
-            </Reveal>
-          </div>
         </div>
       </section>
 
@@ -132,13 +141,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* testimonials */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <SectionHeading eyebrow="In their words" title="What shop owners say." align="center" />
-        <div className="mt-14">
-          <Testimonials />
-        </div>
-      </section>
+      {/* testimonials — hidden until real shops give quotes (the old ones
+          were placeholders). Set SHOW_TESTIMONIALS once Testimonials holds
+          real quotes. */}
+      {SHOW_TESTIMONIALS && (
+        <section className="mx-auto max-w-7xl px-6 py-20">
+          <SectionHeading eyebrow="In their words" title="What shop owners say." align="center" />
+          <div className="mt-14">
+            <Testimonials />
+          </div>
+        </section>
+      )}
 
       <HonestCall />
     </>

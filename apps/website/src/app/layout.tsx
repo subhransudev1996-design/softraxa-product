@@ -25,7 +25,11 @@ const jetbrainsMono = JetBrains_Mono({
 // immediately through /api/revalidate.
 export const revalidate = 3600;
 
+// The live address; relative canonical and share-image URLs resolve against it.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.softraxa.in";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: "Softraxa — software for businesses that don't stop moving",
   description:
     "Softraxa is a software agency building practical, offline-first business software. Dukania, our flagship product, runs billing, stock and reporting for real shops across India.",

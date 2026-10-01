@@ -1,13 +1,26 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, WifiOff, ReceiptText, Smartphone, Monitor } from "lucide-react";
 import AuroraBg from "./aurora-bg";
 import MagneticButton from "./magnetic-button";
-import HeroCollage from "./hero-collage";
+import { DesktopShot, MobileShot } from "./app-shot";
+import { desktopShots, mobileShots } from "@/lib/shots";
 
 const ease = [0.22, 1, 0.36, 1] as const;
 
+const POINTS = [
+  { icon: WifiOff, label: "Works without internet" },
+  { icon: ReceiptText, label: "GST-ready billing" },
+  { icon: Smartphone, label: "Android app" },
+  { icon: Monitor, label: "Windows software" },
+];
+
+/**
+ * Home hero: who Softraxa is in one short, two-line headline, then the
+ * product it makes — the real Dukania screens rise into view above the fold.
+ * The headline's second line (after "\n") is the coloured one.
+ */
 export default function Hero({ content }: { content?: { badge?: string; title?: string; description?: string; primary_cta?: string; secondary_cta?: string } }) {
   const reduced = useReducedMotion();
 
@@ -22,74 +35,81 @@ export default function Hero({ content }: { content?: { badge?: string; title?: 
         show: { opacity: 1, y: 0, transition: { duration: 0.6, ease } },
       };
 
-  const badgeText = content?.badge || "Software agency · India";
-  
-  // Format title with line break if it contains \n, otherwise render standard
-  const titleText = content?.title || "Software that runs\nthe business, not just the browser.";
-  const titleParts = titleText.split("\n");
-
-  const descriptionText = content?.description || "Softraxa builds practical, offline-first business software. Our flagship product, Dukania, handles billing, stock and reporting for real shops across India — online or off.";
-  const primaryCta = content?.primary_cta || "Book a free demo";
-  const secondaryCta = content?.secondary_cta || "See Dukania";
+  const badgeText = content?.badge || "Made in India · for Indian shops";
+  const titleText = content?.title || "Software that runs\nyour shop, online or off.";
+  const [firstLine, ...rest] = titleText.split("\n");
+  const descriptionText =
+    content?.description ||
+    "Softraxa makes Dukania — billing, stock and GST software that keeps working when the internet doesn't. On the phone you already have and the counter PC.";
+  const primaryCta = content?.primary_cta || "Explore Dukania";
+  const secondaryCta = content?.secondary_cta || "Book a free demo";
 
   return (
     <section className="relative overflow-hidden border-b border-hairline">
       <AuroraBg />
 
-      <div className="relative mx-auto max-w-7xl px-6 pt-16 sm:pt-24">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="mx-auto max-w-3xl text-center"
-        >
+      <div className="relative mx-auto max-w-7xl px-6 pt-14 sm:pt-20">
+        <motion.div variants={container} initial="hidden" animate="show" className="mx-auto max-w-4xl text-center">
           <motion.p
             variants={item}
-            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper/4 px-3 py-1 font-mono text-xs uppercase tracking-[0.15em] text-sky"
+            className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper/4 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-sky"
           >
             <span className="h-1.5 w-1.5 rounded-full bg-teal" /> {badgeText}
           </motion.p>
 
           <motion.h1
             variants={item}
-            className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-6xl"
+            className="mt-6 text-balance font-display text-4xl font-bold leading-[1.06] tracking-tight sm:text-6xl lg:text-[4.1rem]"
           >
-            {titleParts.length > 1 ? (
+            {rest.length ? (
               <>
-                <span className="gradient-text">{titleParts[0]}</span>
+                {firstLine}
                 <br />
-                {titleParts.slice(1).join("\n")}
+                <span className="gradient-text">{rest.join(" ")}</span>
               </>
             ) : (
               <span className="gradient-text">{titleText}</span>
             )}
           </motion.h1>
 
-          <motion.p variants={item} className="mx-auto mt-6 max-w-xl text-lg text-dim">
+          <motion.p variants={item} className="mx-auto mt-6 max-w-2xl text-pretty text-lg text-dim">
             {descriptionText}
           </motion.p>
 
-          <motion.div variants={item} className="mt-9 flex flex-wrap items-center justify-center gap-4">
-            <MagneticButton href="/contact">
+          <motion.div variants={item} className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <MagneticButton href="/dukania">
               {primaryCta} <ArrowRight className="h-4 w-4" />
             </MagneticButton>
-            <MagneticButton href="/dukania" variant="ghost">{secondaryCta}</MagneticButton>
+            <MagneticButton href="/contact" variant="ghost">{secondaryCta}</MagneticButton>
           </motion.div>
 
-          <motion.p variants={item} className="mt-4 font-mono text-xs text-dim">
-            Free demo · No credit card needed
-          </motion.p>
+          <motion.ul variants={item} className="mx-auto mt-8 flex max-w-2xl flex-wrap items-center justify-center gap-x-6 gap-y-3 text-sm text-dim">
+            {POINTS.map(({ icon: Icon, label }) => (
+              <li key={label} className="inline-flex items-center gap-2">
+                <Icon className="h-4 w-4 text-teal" aria-hidden="true" /> {label}
+              </li>
+            ))}
+          </motion.ul>
         </motion.div>
       </div>
 
-      {/* Full-width marquee loop of localized cards */}
+      {/* The real app rises into view: tilted back, fading into the page. */}
       <motion.div
-        initial={reduced ? false : { opacity: 0, y: 28 }}
+        initial={reduced ? false : { opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.9, delay: 0.25, ease }}
-        className="relative mt-16 w-full pb-20"
+        transition={{ duration: 0.9, delay: 0.3, ease }}
+        className="relative mx-auto mt-12 max-h-[300px] w-full max-w-6xl overflow-hidden px-6 pt-2 sm:mt-14 sm:max-h-[520px] lg:max-h-[600px]"
       >
-        <HeroCollage />
+        <div className="[perspective:2200px]">
+          <div className="relative origin-top [transform:rotateX(9deg)]">
+            <DesktopShot shot={desktopShots.newBill} label="Dukania · New Bill" priority />
+            <div className="absolute -right-2 top-[18%] hidden w-[22%] max-w-[230px] sm:block lg:right-2">
+              <MobileShot shot={mobileShots.dashboard} priority />
+            </div>
+          </div>
+        </div>
+        {/* fade the bottom of the screenshots into the page */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-bg via-bg/80 to-transparent" />
       </motion.div>
     </section>
   );

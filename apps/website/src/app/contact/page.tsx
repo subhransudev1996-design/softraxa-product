@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ContactPageClient from "./contact-client";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
+import { getSiteInfo } from "@/lib/site-info";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/contact");
@@ -10,6 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function ContactPage() {
   const content = await getPageContentMap("contact");
   const seo = await getPageSeo("/contact");
+  const info = await getSiteInfo();
 
   return (
     <>
@@ -19,7 +21,7 @@ export default async function ContactPage() {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(seo.structured_data) }}
         />
       )}
-      <ContactPageClient content={content} />
+      <ContactPageClient content={content} info={info} />
     </>
   );
 }

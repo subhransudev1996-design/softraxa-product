@@ -11,6 +11,12 @@ export type Shot = {
 };
 
 export const desktopShots = {
+  newBill: {
+    src: "/images/dukania/desktop/new-bill.png",
+    width: 1920,
+    height: 1020,
+    alt: "Dukania desktop billing screen: items as a table with quantity, rate, GST and amount, and the bill total with a Checkout button",
+  },
   dashboardDark: {
     src: "/images/dukania/desktop/dashboard-dark.png",
     width: 1920,
@@ -44,7 +50,7 @@ export const desktopShots = {
   invoices: {
     src: "/images/dukania/desktop/invoices.png",
     width: 1920,
-    height: 1017,
+    height: 1020,
     alt: "Dukania invoice list filtered by paid, partial, credit, estimates and cash memos",
   },
   stock: {
@@ -96,7 +102,7 @@ export const mobileShots = {
     src: "/images/dukania/mobile/checkout.jpeg",
     width: 576,
     height: 1280,
-    alt: "Dukania mobile checkout with GST, bill discount, round off and split payment options",
+    alt: "Dukania mobile checkout with GST, bill discount, payment modes and the Create bill button",
   },
   products: {
     src: "/images/dukania/mobile/products.jpeg",

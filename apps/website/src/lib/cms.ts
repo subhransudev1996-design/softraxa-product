@@ -7,11 +7,11 @@ const DEFAULTS: Record<string, Record<string, CmsJson>> = {
   home: {
     hero: {
       content: {
-        badge: "Software agency · India",
-        title: "Software that runs\nthe business, not just the browser.",
-        description: "Softraxa builds practical, offline-first business software. Our flagship product, Dukania, handles billing, stock and reporting for real shops across India — online or off.",
-        primary_cta: "Book a free demo",
-        secondary_cta: "See Dukania",
+        badge: "Made in India · for Indian shops",
+        title: "Software that runs\nyour shop, online or off.",
+        description: "Softraxa makes Dukania — billing, stock and GST software that keeps working when the internet doesn't. On the phone you already have and the counter PC.",
+        primary_cta: "Explore Dukania",
+        secondary_cta: "Book a free demo",
       }
     },
     stats: {

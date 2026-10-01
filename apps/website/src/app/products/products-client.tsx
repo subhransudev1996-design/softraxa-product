@@ -367,10 +367,10 @@ export default function CustomSolutionsPageClient() {
         <Reveal>
           <div className="grid grid-cols-2 gap-8 rounded-2xl border border-hairline bg-paper/4 px-8 py-10 text-center sm:grid-cols-4">
             {[
-              ["5+", "Years building business software"],
               ["100%", "Code ownership — you keep everything"],
-              ["< 4 wks", "Average time to first working build"],
-              ["24/7", "Offline-first — works without internet"],
+              ["Offline", "Keeps working without internet"],
+              ["Weekly", "You review working software every week"],
+              ["1 team", "The people who build it support it"],
             ].map(([n, l]) => (
               <div key={n}>
                 <p className="font-display text-3xl font-extrabold bg-gradient-to-r from-violet to-sky bg-clip-text text-transparent">{n}</p>

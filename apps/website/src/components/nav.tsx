@@ -103,6 +103,21 @@ export default function Nav() {
             )}
           </div>
 
+          {/* Pricing */}
+          <Link href="/dukania#pricing" className="relative transition-colors hover:text-paper">
+            Pricing
+          </Link>
+
+          {/* Download */}
+          <Link
+            href="/download"
+            className={`relative transition-colors hover:text-paper ${
+              pathname === "/download" ? "text-paper" : ""
+            }`}
+          >
+            Download
+          </Link>
+
           {/* About */}
           <Link
             href="/about"
@@ -189,6 +204,26 @@ export default function Nav() {
                 </Link>
               </div>
             </div>
+
+            {/* Pricing */}
+            <Link
+              href="/dukania#pricing"
+              onClick={() => setOpen(false)}
+              className="border-b border-hairline py-3 text-base text-dim"
+            >
+              Pricing
+            </Link>
+
+            {/* Download */}
+            <Link
+              href="/download"
+              onClick={() => setOpen(false)}
+              className={`border-b border-hairline py-3 text-base ${
+                pathname === "/download" ? "text-paper" : "text-dim"
+              }`}
+            >
+              Download
+            </Link>
 
             {/* About */}
             <Link

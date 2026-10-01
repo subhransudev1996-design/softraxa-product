@@ -10,17 +10,19 @@ import { BrowserFrame, PhoneFrame } from "./device-frame";
 type TabId = "desktop" | "mobile";
 
 const DESKTOP_VIEWS: { label: string; shot: Shot }[] = [
+  { label: "Billing", shot: desktopShots.newBill },
   { label: "Invoices", shot: desktopShots.invoices },
-  { label: "Products", shot: desktopShots.products },
+  { label: "Stock", shot: desktopShots.stock },
   { label: "Reports", shot: desktopShots.reports },
   { label: "Expenses", shot: desktopShots.expenses },
   { label: "Service catalog", shot: desktopShots.serviceCatalog },
 ];
 
 const MOBILE_VIEWS: { label: string; shot: Shot }[] = [
+  { label: "Home", shot: mobileShots.dashboard },
   { label: "New bill", shot: mobileShots.newBill },
+  { label: "Checkout", shot: mobileShots.checkout },
   { label: "Products", shot: mobileShots.products },
-  { label: "Product detail", shot: mobileShots.productDetail },
   { label: "Reports", shot: mobileShots.reports },
   { label: "Job card", shot: mobileShots.jobCard },
 ];

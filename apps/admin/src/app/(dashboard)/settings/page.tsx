@@ -14,6 +14,7 @@ const GSTIN_PATTERN = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/;
 const FIELDS = [
   "payment_upi_id", "payment_payee_name", "support_whatsapp", "business_name",
   "business_address", "business_phone", "business_email", "business_gstin", "receipt_footer",
+  "android_download_url", "windows_download_url",
 ] as const;
 type Field = (typeof FIELDS)[number];
 type Form = Record<Field, string>;
@@ -21,7 +22,10 @@ type Form = Record<Field, string>;
 const EMPTY: Form = {
   payment_upi_id: "", payment_payee_name: "SOFTRAXA", support_whatsapp: "", business_name: "SOFTRAXA",
   business_address: "", business_phone: "", business_email: "", business_gstin: "", receipt_footer: "",
+  android_download_url: "", windows_download_url: "",
 };
+
+const isHttps = (v: string) => /^https:\/\/\S+$/.test(v.trim());
 
 // Same rule as admin_save_settings: digits only, 10 digits get India's 91.
 const waDigits = (v: string) => {
@@ -44,6 +48,8 @@ export default function SettingsPage() {
   const [saved, setSaved] = useState<Form>(EMPTY);
   const [updatedAt, setUpdatedAt] = useState<string | null>(null);
   const [needsMigration, setNeedsMigration] = useState(false);
+  // Download links arrived with migration 0059.
+  const [needsWebsiteMigration, setNeedsWebsiteMigration] = useState(false);
   const [trial, setTrial] = useState<{ plan: string | null; days: number | null }>({ plan: null, days: null });
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
@@ -59,6 +65,7 @@ export default function SettingsPage() {
       setSaved(next);
       setUpdatedAt(data?.updated_at ?? null);
       setNeedsMigration(Boolean(data) && !("business_name" in data));
+      setNeedsWebsiteMigration(Boolean(data) && !("android_download_url" in data));
     });
     supabase.from("plans").select("name").eq("is_trial", true).limit(1)
       .then(({ data }) => setTrial((t) => ({ ...t, plan: data?.[0]?.name ?? null })));
@@ -99,6 +106,11 @@ export default function SettingsPage() {
     if (gstin && !GSTIN_PATTERN.test(gstin)) {
       return setNotice({ ok: false, text: "That doesn't look like a GSTIN (15 characters, like 27ABCDE1234F1Z5)" });
     }
+    for (const key of ["android_download_url", "windows_download_url"] as const) {
+      if (form[key].trim() && !isHttps(form[key])) {
+        return setNotice({ ok: false, text: "Download links must start with https://" });
+      }
+    }
     // Money goes wherever this ID points: make the change deliberate.
     if (saved.payment_upi_id && upi !== saved.payment_upi_id) {
       const ok = window.confirm(
@@ -117,7 +129,7 @@ export default function SettingsPage() {
         text: error.message.includes("admin_save_settings") ? "Migration 0056 isn't applied to this database yet." : error.message,
       });
     }
-    setNotice({ ok: true, text: "Saved — shops see the new details the next time they open the app." });
+    setNotice({ ok: true, text: "Saved — shops see the new details the next time they open the app, and the website within the hour." });
     setRefresh((n) => n + 1);
   }
 
@@ -211,6 +223,32 @@ export default function SettingsPage() {
               <Label>Line at the bottom of the receipt</Label>
               <Input value={form.receipt_footer} onChange={(e) => set("receipt_footer", e.target.value)} maxLength={200} placeholder="e.g. Thank you for choosing Dukania" />
             </div>
+          </div>
+        </Section>
+
+        <Section title="On the website" hint="softraxa.in shows your WhatsApp number, phone and email from above, Dukania's starting price from your cheapest plan, and these download links.">
+          {needsWebsiteMigration && (
+            <Notice notice={{ ok: false, text: "Migration 0059 isn't applied yet — the download links can't be saved until it is." }} />
+          )}
+          <div className="grid gap-4">
+            <div>
+              <Label>Android app download link</Label>
+              <Input value={form.android_download_url} onChange={(e) => set("android_download_url", e.target.value)} placeholder="https://github.com/…/releases/download/v1.0.0/Dukania.apk" className="font-mono" />
+              {form.android_download_url.trim() && !isHttps(form.android_download_url) && (
+                <p className="mt-1 text-xs font-medium text-red-600">The link must start with https://</p>
+              )}
+            </div>
+            <div>
+              <Label>Windows installer download link</Label>
+              <Input value={form.windows_download_url} onChange={(e) => set("windows_download_url", e.target.value)} placeholder="https://github.com/…/releases/download/v1.0.0/Dukania-Setup-1.0.0.exe" className="font-mono" />
+              {form.windows_download_url.trim() && !isHttps(form.windows_download_url) && (
+                <p className="mt-1 text-xs font-medium text-red-600">The link must start with https://</p>
+              )}
+            </div>
+            <p className="text-xs text-zinc-500">
+              Empty: the website&apos;s Download page says &ldquo;message us on WhatsApp for the app&rdquo; instead of a download button.
+              Paste a new link here whenever you publish a new version.
+            </p>
           </div>
         </Section>
 

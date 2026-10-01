@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { getSiteInfo, whatsappLink } from "@/lib/site-info";
 
 const COLS = [
   {
@@ -8,8 +9,9 @@ const COLS = [
     links: [
       { href: "/dukania", label: "Dukania" },
       { href: "/dukania#features", label: "Features" },
+      { href: "/dukania#pricing", label: "Pricing" },
+      { href: "/download", label: "Download" },
       { href: "/dukania#faq", label: "FAQ" },
-      { href: "/contact", label: "Book a demo" },
     ],
   },
   {
@@ -17,7 +19,7 @@ const COLS = [
     links: [
       { href: "/about", label: "About" },
       { href: "/services", label: "Services" },
-      { href: "/products", label: "Work" },
+      { href: "/products", label: "Custom software" },
       { href: "/contact", label: "Contact" },
       { href: "/privacy", label: "Privacy" },
       { href: "/terms", label: "Terms" },
@@ -64,7 +66,13 @@ function BrandMark() {
   );
 }
 
-export default function Footer() {
+export default async function Footer() {
+  // Only real profiles get an icon; WhatsApp comes from the admin Settings.
+  const info = await getSiteInfo();
+  const wa = whatsappLink(info, "Hi, I want to know more about Dukania.");
+  const socials = SOCIALS.map((s) => (s.label === "WhatsApp" ? { ...s, href: wa } : s)).filter(
+    (s) => s.href && s.href !== "#",
+  );
   return (
     <footer className="relative mt-10 border-t border-hairline">
       {/* link columns */}
@@ -106,11 +114,11 @@ export default function Footer() {
           </div>
           <div className="flex items-center gap-5">
             <div className="text-right">
-              <p className="text-sm font-semibold text-paper">Book a free demo</p>
-              <p className="text-xs text-dim">No credit card needed.</p>
+              <p className="text-sm font-semibold text-paper">Try Dukania free</p>
+              <p className="text-xs text-dim">No card, no payment to start.</p>
             </div>
             <Link
-              href="/contact"
+              href="/download"
               className="stamp-press inline-flex min-h-11 items-center gap-2 rounded-lg bg-paper px-5 text-sm font-semibold text-bg hover:bg-paper/90"
             >
               Get started <ArrowRight className="h-4 w-4" />
@@ -124,16 +132,17 @@ export default function Footer() {
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-6 text-xs text-dim sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
             <span>© {new Date().getFullYear()} Softraxa. All rights reserved.</span>
-            {/* placeholder legal links — wire up real pages when ready */}
-            <Link href="#" className="hover:text-paper">Privacy</Link>
-            <Link href="#" className="hover:text-paper">Terms</Link>
+            <Link href="/privacy" className="hover:text-paper">Privacy</Link>
+            <Link href="/terms" className="hover:text-paper">Terms</Link>
           </div>
 
           <div className="flex items-center gap-3">
-            {SOCIALS.map((s) => (
+            {socials.map((s) => (
               <a
                 key={s.label}
                 href={s.href}
+                target="_blank"
+                rel="noreferrer"
                 aria-label={s.label}
                 className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-hairline text-dim transition-colors hover:border-white/15 hover:text-paper"
               >
