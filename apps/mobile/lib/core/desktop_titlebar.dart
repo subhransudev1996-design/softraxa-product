@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'branding.dart';
 import 'notifications.dart';
 import 'router.dart';
 import 'supabase_providers.dart';
@@ -18,7 +19,7 @@ const _barFg = Color(0xFF9A9FC0);
 /// Custom window title bar for desktop builds. Replaces the native
 /// Windows caption bar (hidden via `TitleBarStyle.hidden` in main.dart):
 /// drag-to-move, double-click to maximize/restore, and min/max/close
-/// buttons. Shows the shop's own name instead of a generic app title.
+/// buttons. Shows the Dukania mark and name, then the shop's name.
 class DesktopTitleBar extends ConsumerStatefulWidget {
   const DesktopTitleBar({super.key});
 
@@ -78,37 +79,42 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                 child: Row(
                   children: [
                     const SizedBox(width: 14),
-                    Container(
+                    Image.asset(
+                      'assets/brand/icon_1024.png',
                       width: 22,
                       height: 22,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(6),
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [AppColors.primary, AppColors.primaryDark],
-                        ),
-                      ),
-                      child: const Icon(
-                        Icons.storefront,
+                      filterQuality: FilterQuality.medium,
+                    ),
+                    const SizedBox(width: 9),
+                    const Text(
+                      kAppName,
+                      style: TextStyle(
                         color: Colors.white,
-                        size: 14,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.2,
                       ),
                     ),
-                    const SizedBox(width: 10),
-                    if (businessName.isNotEmpty)
+                    if (businessName.isNotEmpty) ...[
+                      Container(
+                        width: 1,
+                        height: 14,
+                        margin: const EdgeInsets.symmetric(horizontal: 12),
+                        color: Colors.white.withValues(alpha: 0.18),
+                      ),
                       Expanded(
                         child: Text(
                           businessName,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Colors.white,
+                            color: _barFg,
                             fontSize: 12.5,
-                            fontWeight: FontWeight.w700,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ),
+                    ],
                   ],
                 ),
               ),

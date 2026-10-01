@@ -270,6 +270,7 @@ class AppSidebar extends ConsumerWidget {
     final features = appContext;
     final pendingApprovals = ref.watch(pendingApprovalCountProvider).value ?? 0;
     final supportUnread = ref.watch(supportUnreadProvider).value ?? 0;
+    final collapsed = ref.watch(sidebarCollapsedProvider);
     // Prefix match so a detail/edit page (e.g. /invoices/abc123) still
     // highlights its parent section (/invoices) in the sidebar.
     bool isActive(String route) =>
@@ -295,13 +296,38 @@ class AppSidebar extends ConsumerWidget {
       );
     }
 
+    // A group of links under a heading that folds away. A group holding
+    // the current page always shows it.
+    List<Widget> section(String label, List<(String, Widget)> tiles) {
+      if (tiles.isEmpty) return const [];
+      final open =
+          !collapsed.contains(label) || tiles.any((t) => isActive(t.$1));
+      return [
+        _SidebarSectionLabel(
+          label,
+          open: open,
+          onTap: () =>
+              ref.read(sidebarCollapsedProvider.notifier).toggle(label),
+        ),
+        if (open) ...tiles.map((t) => t.$2),
+      ];
+    }
+
+    (String, Widget) link({
+      required IconData icon,
+      required String label,
+      required String route,
+      Color? color,
+    }) =>
+        (route, railTile(icon: icon, label: label, route: route, color: color));
+
     return Container(
-      width: 264,
+      width: 236,
       color: _sidebarBg,
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+            padding: const EdgeInsets.fromLTRB(14, 16, 14, 4),
             child: SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
@@ -309,15 +335,14 @@ class AppSidebar extends ConsumerWidget {
                 icon: const Icon(Icons.receipt_long, size: 18),
                 label: const Text('New Bill'),
                 style: FilledButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  minimumSize: const Size.fromHeight(40),
                 ),
               ),
             ),
           ),
-          const SizedBox(height: 8),
           Expanded(
             child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+              padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
               children: [
                 railTile(
                   icon: Icons.home_outlined,
@@ -337,119 +362,123 @@ class AppSidebar extends ConsumerWidget {
                   label: 'Reports',
                   route: '/reports',
                 ),
-                const _SidebarSectionLabel('Sales'),
-                railTile(
-                  icon: Icons.receipt_long_outlined,
-                  label: 'All invoices',
-                  route: '/invoices',
-                ),
-                railTile(
-                  icon: Icons.assignment_return_outlined,
-                  label: 'Sale returns',
-                  route: '/sale-returns',
-                ),
-                railTile(
-                  icon: Icons.people_outline,
-                  label: 'Customers',
-                  route: '/customers',
-                ),
-                // D18: the owner's approval inbox; staff see their requests.
-                railTile(
-                  icon: Icons.verified_user_outlined,
-                  label: (appContext?.isOwner ?? false)
-                      ? (pendingApprovals > 0
-                            ? 'Approvals ($pendingApprovals)'
-                            : 'Approvals')
-                      : 'My approval requests',
-                  route: '/approvals',
-                  color: pendingApprovals > 0 ? AppColors.red : null,
-                ),
-                const _SidebarSectionLabel('Inventory'),
-                railTile(
-                  icon: Icons.warehouse_outlined,
-                  label: 'Stock',
-                  route: '/stock',
-                ),
-                railTile(
-                  icon: Icons.shopping_cart_outlined,
-                  label: 'Purchases',
-                  route: '/purchases',
-                ),
-                railTile(
-                  icon: Icons.assignment_return_outlined,
-                  label: 'Purchase returns',
-                  route: '/purchase-returns',
-                ),
-                railTile(
-                  icon: Icons.local_shipping_outlined,
-                  label: 'Suppliers',
-                  route: '/suppliers',
-                ),
-                if (features?.featureOn('excel_import') ?? true)
-                  railTile(
-                    icon: Icons.upload_file_outlined,
-                    label: 'Import products',
-                    route: '/import',
+                ...section('Sales', [
+                  link(
+                    icon: Icons.receipt_long_outlined,
+                    label: 'All invoices',
+                    route: '/invoices',
                   ),
+                  link(
+                    icon: Icons.assignment_return_outlined,
+                    label: 'Sale returns',
+                    route: '/sale-returns',
+                  ),
+                  link(
+                    icon: Icons.people_outline,
+                    label: 'Customers',
+                    route: '/customers',
+                  ),
+                  // D18: the owner's approval inbox; staff see their requests.
+                  link(
+                    icon: Icons.verified_user_outlined,
+                    label: (appContext?.isOwner ?? false)
+                        ? (pendingApprovals > 0
+                              ? 'Approvals ($pendingApprovals)'
+                              : 'Approvals')
+                        : 'My approval requests',
+                    route: '/approvals',
+                    color: pendingApprovals > 0 ? AppColors.red : null,
+                  ),
+                ]),
+                ...section('Inventory', [
+                  link(
+                    icon: Icons.warehouse_outlined,
+                    label: 'Stock',
+                    route: '/stock',
+                  ),
+                  link(
+                    icon: Icons.shopping_cart_outlined,
+                    label: 'Purchases',
+                    route: '/purchases',
+                  ),
+                  link(
+                    icon: Icons.assignment_return_outlined,
+                    label: 'Purchase returns',
+                    route: '/purchase-returns',
+                  ),
+                  link(
+                    icon: Icons.local_shipping_outlined,
+                    label: 'Suppliers',
+                    route: '/suppliers',
+                  ),
+                  if (features?.featureOn('excel_import') ?? true)
+                    link(
+                      icon: Icons.upload_file_outlined,
+                      label: 'Import products',
+                      route: '/import',
+                    ),
+                ]),
                 if ((features?.featureOn('service_module') ?? true) &&
-                    (appContext?.category.jobCards ?? true)) ...[
-                  const _SidebarSectionLabel('Services'),
-                  railTile(
-                    icon: Icons.build_outlined,
-                    label: 'Service catalog',
-                    route: '/services',
+                    (appContext?.category.jobCards ?? true))
+                  ...section('Services', [
+                    link(
+                      icon: Icons.build_outlined,
+                      label: 'Service catalog',
+                      route: '/services',
+                    ),
+                    link(
+                      icon: Icons.assignment_outlined,
+                      label: 'Job cards',
+                      route: '/job-cards',
+                    ),
+                  ]),
+                ...section('Money', [
+                  if (appContext?.canManageCash ?? false)
+                    link(
+                      icon: Icons.point_of_sale_outlined,
+                      label: 'Cashbook & day closing',
+                      route: '/cashbook',
+                    ),
+                  if (features?.featureOn('expense_module') ?? true)
+                    link(
+                      icon: Icons.payments_outlined,
+                      label: 'Expenses',
+                      route: '/expenses',
+                    ),
+                ]),
+                if (appContext?.isOwner == true)
+                  ...section('Store management', [
+                    link(
+                      icon: Icons.badge_outlined,
+                      label: 'Staff & permissions',
+                      route: '/staff',
+                    ),
+                    link(
+                      icon: Icons.workspace_premium_outlined,
+                      label: 'Your plan',
+                      route: '/subscription/plans',
+                    ),
+                  ]),
+                ...section('Other', [
+                  link(
+                    icon: Icons.sync_outlined,
+                    label: 'Pending offline bills',
+                    route: '/offline-bills',
                   ),
-                  railTile(
-                    icon: Icons.assignment_outlined,
-                    label: 'Job cards',
-                    route: '/job-cards',
+                  link(
+                    icon: Icons.support_agent_outlined,
+                    label: supportUnread > 0
+                        ? 'Support ($supportUnread new)'
+                        : 'Support',
+                    route: '/support',
+                    color: supportUnread > 0 ? AppColors.red : null,
                   ),
-                ],
-                const _SidebarSectionLabel('Money'),
-                if (appContext?.canManageCash ?? false)
-                  railTile(
-                    icon: Icons.point_of_sale_outlined,
-                    label: 'Cashbook & day closing',
-                    route: '/cashbook',
+                  link(
+                    icon: Icons.settings_outlined,
+                    label: 'Business settings',
+                    route: '/settings/business',
                   ),
-                if (features?.featureOn('expense_module') ?? true)
-                  railTile(
-                    icon: Icons.payments_outlined,
-                    label: 'Expenses',
-                    route: '/expenses',
-                  ),
-                if (appContext?.isOwner == true) ...[
-                  const _SidebarSectionLabel('Store management'),
-                  railTile(
-                    icon: Icons.badge_outlined,
-                    label: 'Staff & permissions',
-                    route: '/staff',
-                  ),
-                  railTile(
-                    icon: Icons.workspace_premium_outlined,
-                    label: 'Your plan',
-                    route: '/subscription/plans',
-                  ),
-                ],
-                const _SidebarSectionLabel('Other'),
-                railTile(
-                  icon: Icons.sync_outlined,
-                  label: 'Pending offline bills',
-                  route: '/offline-bills',
-                ),
-                railTile(
-                  icon: Icons.support_agent_outlined,
-                  label: supportUnread > 0
-                      ? 'Support ($supportUnread new)'
-                      : 'Support',
-                  route: '/support',
-                  color: supportUnread > 0 ? AppColors.red : null,
-                ),
-                railTile(
-                  icon: Icons.settings_outlined,
-                  label: 'Business settings',
-                  route: '/settings/business',
-                ),
+                ]),
                 if (kDebugMode && crashReportingEnabled)
                   _RailTile(
                     icon: Icons.bug_report_outlined,
@@ -465,29 +494,161 @@ class AppSidebar extends ConsumerWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
+          if (appContext != null) _SidebarFooter(appContext: appContext),
         ],
       ),
     );
   }
 }
 
+/// Sidebar groups the user folded away (in memory; all open at start
+/// except the rarely used ones).
+final sidebarCollapsedProvider =
+    NotifierProvider<SidebarCollapsedNotifier, Set<String>>(
+      SidebarCollapsedNotifier.new,
+    );
+
+class SidebarCollapsedNotifier extends Notifier<Set<String>> {
+  @override
+  Set<String> build() => {'Services', 'Money', 'Store management', 'Other'};
+
+  void toggle(String label) => state = state.contains(label)
+      ? ({...state}..remove(label))
+      : {...state, label};
+}
+
+/// Who is logged in, the shop and its plan — at the bottom of the sidebar.
+class _SidebarFooter extends StatelessWidget {
+  const _SidebarFooter({required this.appContext});
+
+  final AppContext appContext;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = (appContext.profile?['full_name'] as String?)?.trim() ?? '';
+    final roleLabel = switch (appContext.role) {
+      'owner' => 'Owner',
+      'admin' => 'Admin',
+      _ => 'Staff',
+    };
+    final state = appContext.subscriptionState;
+    final plan =
+        ((appContext.subscription?['plan'] as Map?)?['name'] as String?) ??
+        (state == 'trial' ? 'Free trial' : '');
+    final expiry = DateTime.tryParse(
+      appContext.subscription?['expiry_date'] as String? ?? '',
+    );
+    final daysLeft = expiry?.difference(DateTime.now()).inDays;
+    final planLine = [
+      if (plan.isNotEmpty) plan,
+      if (daysLeft != null && daysLeft >= 0 && daysLeft <= 30)
+        '$daysLeft ${daysLeft == 1 ? 'day' : 'days'} left',
+    ].join(' · ');
+    final shop = appContext.businessName;
+    return Material(
+      color: Colors.white.withValues(alpha: 0.04),
+      child: InkWell(
+        onTap: appContext.isOwner
+            ? () => context.go('/subscription/plans')
+            : null,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(color: Colors.white.withValues(alpha: 0.08)),
+            ),
+          ),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: AppColors.primary,
+                child: Text(
+                  (name.isNotEmpty ? name : shop).characters.firstOrNull
+                          ?.toUpperCase() ??
+                      '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      name.isNotEmpty ? name : shop,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      planLine.isEmpty ? roleLabel : '$roleLabel · $planLine',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: state == 'trial' || (daysLeft ?? 99) <= 7
+                            ? const Color(0xFFFBBF24)
+                            : _sidebarMuted,
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SidebarSectionLabel extends StatelessWidget {
-  const _SidebarSectionLabel(this.label);
+  const _SidebarSectionLabel(this.label, {this.open = true, this.onTap});
 
   final String label;
+  final bool open;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 18, 12, 6),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 11.5,
-          fontWeight: FontWeight.w700,
-          letterSpacing: 0.4,
-          color: _sidebarMuted,
+      padding: const EdgeInsets.only(top: 10),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 6, 8, 6),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 10.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.8,
+                    color: _sidebarMuted,
+                  ),
+                ),
+              ),
+              Icon(
+                open ? Icons.expand_less : Icons.expand_more,
+                size: 16,
+                color: _sidebarMuted,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -525,29 +686,29 @@ class _RailTile extends StatelessWidget {
     final baseFg = foregroundColor ?? AppColors.ink;
     final fg = color ?? (selected ? selFg : baseFg);
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
       child: Material(
         color: selected
             ? (selectedBackground ?? AppColors.primarySoft)
             : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(8),
         child: InkWell(
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(8),
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Row(
               children: [
                 Icon(
                   selected ? (activeIcon ?? icon) : icon,
-                  size: 20,
+                  size: 19,
                   color: fg,
                 ),
-                const SizedBox(width: 14),
+                const SizedBox(width: 12),
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13.5,
+                    fontSize: 13,
                     fontWeight: selected ? FontWeight.w700 : FontWeight.w600,
                     color: fg,
                   ),

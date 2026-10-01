@@ -11,6 +11,7 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 import '../shell/renewal_payment.dart';
+import 'dashboard_desktop.dart';
 
 final dashboardStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
   (ref) async {
@@ -49,6 +50,8 @@ class DashboardScreen extends ConsumerWidget {
         onRefresh: () async {
           ref.invalidate(dashboardStatsProvider);
           ref.invalidate(recentInvoicesProvider);
+          ref.invalidate(salesTrendProvider);
+          ref.invalidate(topProductsProvider);
         },
         child: ListView(
           padding: EdgeInsets.zero,
@@ -76,6 +79,22 @@ class DashboardScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Desktop KPI cards: all in one row, equal widths.
+Widget _statRow(List<Widget> cards) {
+  return SizedBox(
+    height: 84,
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (final (i, c) in cards.indexed) ...[
+          if (i > 0) const SizedBox(width: 12),
+          Expanded(child: c),
+        ],
+      ],
+    ),
+  );
 }
 
 /// Responsive stat-tile grid: picks a column count (2..[maxColumns]) from
@@ -236,9 +255,6 @@ class _DesktopDashboard extends StatelessWidget {
                           onPressed: () => context.push('/products/new'),
                           icon: const Icon(Icons.add_box_outlined, size: 18),
                           label: const Text('Add Product'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 44),
-                          ),
                         ),
                         OutlinedButton.icon(
                           onPressed: () => context.push('/purchases/new'),
@@ -247,9 +263,6 @@ class _DesktopDashboard extends StatelessWidget {
                             size: 18,
                           ),
                           label: const Text('New Purchase'),
-                          style: OutlinedButton.styleFrom(
-                            minimumSize: const Size(0, 44),
-                          ),
                         ),
                         CoachTarget(
                           page: 'home',
@@ -258,9 +271,6 @@ class _DesktopDashboard extends StatelessWidget {
                             onPressed: () => context.go('/pos'),
                             icon: const Icon(Icons.receipt_long, size: 18),
                             label: const Text('New Bill'),
-                            style: FilledButton.styleFrom(
-                              minimumSize: const Size(0, 44),
-                            ),
                           ),
                         ),
                       ],
@@ -305,7 +315,7 @@ class _DesktopDashboard extends StatelessWidget {
                   : CoachTarget(
                       page: 'home',
                       id: 'stats',
-                      child: _statGrid(maxColumns: 6, [
+                      child: _statRow([
                         _StatCard(
                           title: "Today's Sale",
                           value: s == null
@@ -366,25 +376,25 @@ class _DesktopDashboard extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Recent invoices',
-                    style: Theme.of(context).textTheme.titleMedium,
+              // ---- sales trend + best sellers (report viewers only) ----
+              if (appContext?.canViewReports ?? false) ...[
+                const SizedBox(
+                  height: 320,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(flex: 2, child: SalesTrendPanel()),
+                      SizedBox(width: 16),
+                      Expanded(child: TopProductsPanel()),
+                    ],
                   ),
-                  TextButton(
-                    onPressed: () => context.push('/invoices'),
-                    child: const Text('View all'),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
+                ),
+                const SizedBox(height: 16),
+              ],
               CoachTarget(
                 page: 'home',
                 id: 'recent',
-                child: _recentInvoicesCard(
-                  context,
+                child: RecentInvoicesPanel(
                   invoices: invoices,
                   onRetry: onRetryInvoices,
                 ),
@@ -994,14 +1004,14 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: AppColors.card,
-      borderRadius: BorderRadius.circular(18),
+      borderRadius: BorderRadius.circular(isDesktopPlatform ? 10 : 18),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(isDesktopPlatform ? 10 : 18),
         child: Container(
           padding: const EdgeInsets.all(14),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(isDesktopPlatform ? 10 : 18),
             border: Border.all(color: AppColors.line),
           ),
           child: Row(

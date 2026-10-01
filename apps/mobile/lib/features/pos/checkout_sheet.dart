@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/data_refresh.dart';
@@ -514,7 +515,30 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     final paid = _computePaid(cart);
     final due = (payable - paid).clamp(0, double.infinity);
 
-    return DraggableScrollableSheet(
+    final confirm = FilledButton.icon(
+      onPressed: _busy
+          ? null
+          : editing != null
+          ? () => _saveEdit(editing)
+          : _createBill,
+      icon: _busy
+          ? const SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.check),
+      label: Text(
+        editing != null
+            ? 'Save changes • ${money(cart.total)}'
+            : exchange != null
+            ? 'Complete exchange • collect ${money(payable)}'
+            : _docType == 'estimate'
+            ? 'Save estimate'
+            : 'Create bill • ${money(cart.total)}',
+      ),
+    );
+    final sheet = DraggableScrollableSheet(
       expand: false,
       initialChildSize: widget.dialog ? 1 : 0.85,
       minChildSize: widget.dialog ? 1 : 0.25,
@@ -1124,32 +1148,45 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             controller: _notes,
             decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: _busy
-                ? null
-                : editing != null
-                ? () => _saveEdit(editing)
-                : _createBill,
-            icon: _busy
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : const Icon(Icons.check),
-            label: Text(
-              editing != null
-                  ? 'Save changes • ${money(cart.total)}'
-                  : exchange != null
-                  ? 'Complete exchange • collect ${money(payable)}'
-                  : _docType == 'estimate'
-                  ? 'Save estimate'
-                  : 'Create bill • ${money(cart.total)}',
-            ),
-          ),
-          const SizedBox(height: 24),
+          if (!widget.dialog) ...[
+            const SizedBox(height: 20),
+            confirm,
+            const SizedBox(height: 24),
+          ],
         ],
+      ),
+    );
+    if (!widget.dialog) return sheet;
+    // Desktop dialog: the button stays in view below the scrolling form,
+    // and F12 (the key that opened checkout) confirms.
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.f12): () =>
+            confirm.onPressed?.call(),
+      },
+      child: Focus(
+        autofocus: true,
+        child: Column(
+          children: [
+            Expanded(child: sheet),
+            Container(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.line)),
+              ),
+              child: Row(
+                children: [
+                  TextButton(
+                    onPressed: _busy ? null : () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(child: confirm),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
