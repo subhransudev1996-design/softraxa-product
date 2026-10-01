@@ -16,19 +16,84 @@ typedef StaffPermission = ({
 });
 
 const List<StaffPermission> staffPermissions = [
-  (key: 'can_create_invoice', label: 'Create bills (POS)', chip: 'Billing', byDefault: true),
-  (key: 'can_edit_prices', label: 'Change prices & give discounts', chip: 'Prices', byDefault: false),
-  (key: 'can_record_payments', label: 'Receive customer payments', chip: 'Payments', byDefault: true),
-  (key: 'can_edit_invoices', label: 'Edit or cancel bills', chip: 'Edit bills', byDefault: false),
-  (key: 'can_manage_returns', label: 'Sale returns & refunds', chip: 'Returns', byDefault: false),
-  (key: 'can_manage_products', label: 'Add & edit products', chip: 'Products', byDefault: true),
-  (key: 'can_manage_stock', label: 'Stock adjustments & cut pieces', chip: 'Stock', byDefault: false),
-  (key: 'can_manage_purchases', label: 'Purchases, suppliers & supplier payments', chip: 'Purchases', byDefault: false),
-  (key: 'can_manage_expenses', label: 'Expenses', chip: 'Expenses', byDefault: false),
-  (key: 'can_manage_cash', label: 'Cash drawer & day closing', chip: 'Cash', byDefault: false),
-  (key: 'can_manage_services', label: 'Services & job cards', chip: 'Services', byDefault: true),
-  (key: 'can_view_reports', label: 'View reports', chip: 'Reports', byDefault: false),
-  (key: 'can_view_profit', label: 'See cost prices & profit', chip: 'Profit', byDefault: false),
+  (
+    key: 'can_create_invoice',
+    label: 'Create bills (POS)',
+    chip: 'Billing',
+    byDefault: true,
+  ),
+  (
+    key: 'can_edit_prices',
+    label: 'Change prices & give discounts',
+    chip: 'Prices',
+    byDefault: false,
+  ),
+  (
+    key: 'can_record_payments',
+    label: 'Receive customer payments',
+    chip: 'Payments',
+    byDefault: true,
+  ),
+  (
+    key: 'can_edit_invoices',
+    label: 'Edit or cancel bills',
+    chip: 'Edit bills',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_returns',
+    label: 'Sale returns & refunds',
+    chip: 'Returns',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_products',
+    label: 'Add & edit products',
+    chip: 'Products',
+    byDefault: true,
+  ),
+  (
+    key: 'can_manage_stock',
+    label: 'Stock adjustments & cut pieces',
+    chip: 'Stock',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_purchases',
+    label: 'Purchases, suppliers & supplier payments',
+    chip: 'Purchases',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_expenses',
+    label: 'Expenses',
+    chip: 'Expenses',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_cash',
+    label: 'Cash drawer & day closing',
+    chip: 'Cash',
+    byDefault: false,
+  ),
+  (
+    key: 'can_manage_services',
+    label: 'Services & job cards',
+    chip: 'Services',
+    byDefault: true,
+  ),
+  (
+    key: 'can_view_reports',
+    label: 'View reports',
+    chip: 'Reports',
+    byDefault: false,
+  ),
+  (
+    key: 'can_view_profit',
+    label: 'See cost prices & profit',
+    chip: 'Profit',
+    byDefault: false,
+  ),
 ];
 
 /// Checkbox list shared by the add and edit dialogs.
@@ -56,9 +121,10 @@ class _PermissionChecklist extends StatelessWidget {
   }
 }
 
-final staffListProvider =AsyncNotifierProvider<StaffListNotifier, List<Map<String, dynamic>>>(
-  StaffListNotifier.new,
-);
+final staffListProvider =
+    AsyncNotifierProvider<StaffListNotifier, List<Map<String, dynamic>>>(
+      StaffListNotifier.new,
+    );
 
 class StaffListNotifier extends AsyncNotifier<List<Map<String, dynamic>>> {
   @override
@@ -113,6 +179,21 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     final ctx = ref.watch(appContextProvider).value;
     final staffAsync = ref.watch(staffListProvider);
 
+    final mainAction = ScreenAction(
+      label: 'Add staff',
+      icon: Icons.person_add,
+      onPressed: () {
+        if (ctx?.isStaffLimitReached ?? false) {
+          showError(
+            context,
+            'Staff limit reached for your plan (${ctx?.userLimit} allowed).',
+          );
+        } else {
+          _showAddStaffDialog();
+        }
+      },
+    );
+    final isOwner = ctx?.isOwner ?? false;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Staff & Permissions'),
@@ -122,6 +203,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.read(staffListProvider.notifier).refresh(),
           ),
+          if (isOwner) mainAction.inAppBar(context),
         ],
       ),
       body: staffAsync.when(
@@ -136,12 +218,18 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
-                color: isLimitReached ? Colors.orange.shade50 : AppColors.primary.withValues(alpha: 0.08),
+                color: isLimitReached
+                    ? Colors.orange.shade50
+                    : AppColors.primary.withValues(alpha: 0.08),
                 child: Row(
                   children: [
                     Icon(
-                      isLimitReached ? Icons.warning_amber_rounded : Icons.people_outline,
-                      color: isLimitReached ? Colors.orange.shade900 : AppColors.primary,
+                      isLimitReached
+                          ? Icons.warning_amber_rounded
+                          : Icons.people_outline,
+                      color: isLimitReached
+                          ? Colors.orange.shade900
+                          : AppColors.primary,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
@@ -159,7 +247,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                 : 'Store owners can create accounts and assign permissions.',
                             style: TextStyle(
                               fontSize: 12,
-                              color: isLimitReached ? Colors.orange.shade900 : AppColors.inkSoft,
+                              color: isLimitReached
+                                  ? Colors.orange.shade900
+                                  : AppColors.inkSoft,
                             ),
                           ),
                         ],
@@ -172,7 +262,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                 child: staffList.isEmpty
                     ? const EmptyState(
                         icon: Icons.person_off_outlined,
-                        message: 'No staff members registered.\nTap + to add a staff account.',
+                        message:
+                            'No staff members registered.\nTap + to add a staff account.',
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
@@ -180,8 +271,11 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                         separatorBuilder: (_, __) => const SizedBox(height: 12),
                         itemBuilder: (context, index) {
                           final staff = staffList[index];
-                          final isOwner = staff['role'] == 'owner' || staff['role'] == 'admin';
-                          final perms = staff['permissions'] as Map<String, dynamic>;
+                          final isOwner =
+                              staff['role'] == 'owner' ||
+                              staff['role'] == 'admin';
+                          final perms =
+                              staff['permissions'] as Map<String, dynamic>;
 
                           return Card(
                             elevation: 0,
@@ -197,24 +291,31 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                   Row(
                                     children: [
                                       CircleAvatar(
-                                        backgroundColor: isOwner ? AppColors.primary : Colors.teal,
+                                        backgroundColor: isOwner
+                                            ? AppColors.primary
+                                            : Colors.teal,
                                         child: Text(
                                           (staff['full_name'] as String? ?? 'S')
                                               .characters
                                               .first
                                               .toUpperCase(),
-                                          style: const TextStyle(color: Colors.white),
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                       const SizedBox(width: 12),
                                       Expanded(
                                         child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
                                           children: [
                                             Row(
                                               children: [
                                                 Text(
-                                                  staff['full_name'] as String? ?? 'Staff User',
+                                                  staff['full_name']
+                                                          as String? ??
+                                                      'Staff User',
                                                   style: const TextStyle(
                                                     fontWeight: FontWeight.bold,
                                                     fontSize: 16,
@@ -222,17 +323,33 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                                 ),
                                                 const SizedBox(width: 8),
                                                 Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                        vertical: 2,
+                                                      ),
                                                   decoration: BoxDecoration(
-                                                    color: isOwner ? Colors.blue.shade50 : Colors.teal.shade50,
-                                                    borderRadius: BorderRadius.circular(12),
+                                                    color: isOwner
+                                                        ? Colors.blue.shade50
+                                                        : Colors.teal.shade50,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          12,
+                                                        ),
                                                   ),
                                                   child: Text(
-                                                    (staff['role'] as String? ?? 'staff').toUpperCase(),
+                                                    (staff['role'] as String? ??
+                                                            'staff')
+                                                        .toUpperCase(),
                                                     style: TextStyle(
                                                       fontSize: 10,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: isOwner ? Colors.blue.shade900 : Colors.teal.shade900,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: isOwner
+                                                          ? Colors.blue.shade900
+                                                          : Colors
+                                                                .teal
+                                                                .shade900,
                                                     ),
                                                   ),
                                                 ),
@@ -262,7 +379,10 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                               value: 'edit',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.lock_person_outlined, size: 18),
+                                                  Icon(
+                                                    Icons.lock_person_outlined,
+                                                    size: 18,
+                                                  ),
                                                   SizedBox(width: 8),
                                                   Text('Edit Permissions'),
                                                 ],
@@ -272,9 +392,18 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                               value: 'delete',
                                               child: Row(
                                                 children: [
-                                                  Icon(Icons.delete_outline, color: Colors.red, size: 18),
+                                                  Icon(
+                                                    Icons.delete_outline,
+                                                    color: Colors.red,
+                                                    size: 18,
+                                                  ),
                                                   SizedBox(width: 8),
-                                                  Text('Remove User', style: TextStyle(color: Colors.red)),
+                                                  Text(
+                                                    'Remove User',
+                                                    style: TextStyle(
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
                                                 ],
                                               ),
                                             ),
@@ -291,7 +420,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                         for (final p in staffPermissions)
                                           _PermissionChip(
                                             p.chip,
-                                            (perms[p.key] as bool?) ?? p.byDefault,
+                                            (perms[p.key] as bool?) ??
+                                                p.byDefault,
                                           ),
                                       ],
                                     ),
@@ -307,30 +437,12 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
           );
         },
       ),
-      floatingActionButton: (ctx?.isOwner ?? false)
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                if (ctx?.isStaffLimitReached ?? false) {
-                  showError(
-                    context,
-                    'Staff limit reached for your plan (${ctx?.userLimit} allowed).',
-                  );
-                } else {
-                  _showAddStaffDialog();
-                }
-              },
-              icon: const Icon(Icons.person_add),
-              label: const Text('Add Staff'),
-            )
-          : null,
+      floatingActionButton: isOwner ? mainAction.fab(context) : null,
     );
   }
 
   void _showAddStaffDialog() {
-    showDialog(
-      context: context,
-      builder: (ctx) => const _AddStaffDialog(),
-    );
+    showDialog(context: context, builder: (ctx) => const _AddStaffDialog());
   }
 
   void _showEditPermissionsDialog(Map<String, dynamic> staff) {
@@ -345,7 +457,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remove Staff Member'),
-        content: Text('Are you sure you want to remove ${staff['full_name']} (${staff['email']})? They will immediately lose access to this store.'),
+        content: Text(
+          'Are you sure you want to remove ${staff['full_name']} (${staff['email']})? They will immediately lose access to this store.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
@@ -357,9 +471,10 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               Navigator.pop(ctx);
               try {
                 final client = ref.read(supabaseProvider);
-                await client.rpc('delete_staff_user', params: {
-                  'p_profile_id': staff['id'],
-                });
+                await client.rpc(
+                  'delete_staff_user',
+                  params: {'p_profile_id': staff['id']},
+                );
                 if (mounted) {
                   showSuccess(context, 'Staff member removed successfully.');
                   ref.read(staffListProvider.notifier).refresh();
@@ -450,17 +565,22 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
 
     try {
       final client = ref.read(supabaseProvider);
-      final created = await client.rpc('create_staff_user', params: {
-        'p_email': _emailCtrl.text.trim(),
-        'p_password': _passwordCtrl.text,
-        'p_full_name': _nameCtrl.text.trim(),
-        'p_permissions': _perms,
-      });
+      final created = await client.rpc(
+        'create_staff_user',
+        params: {
+          'p_email': _emailCtrl.text.trim(),
+          'p_password': _passwordCtrl.text,
+          'p_full_name': _nameCtrl.text.trim(),
+          'p_permissions': _perms,
+        },
+      );
       // The cash permission (0045) is set by its own owner-only call.
       final userId = (created as Map?)?['user_id'] as String?;
       if (userId != null && _perms['can_manage_cash'] == true) {
-        await client.rpc('set_staff_cash_permission',
-            params: {'p_profile': userId, 'p_value': true});
+        await client.rpc(
+          'set_staff_cash_permission',
+          params: {'p_profile': userId, 'p_value': true},
+        );
       }
 
       if (mounted) {
@@ -491,24 +611,32 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
               TextFormField(
                 controller: _nameCtrl,
                 decoration: const InputDecoration(labelText: 'Full Name *'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Required' : null,
+                validator: (v) =>
+                    (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(labelText: 'Email Address *'),
-                validator: (v) => (v == null || !v.contains('@')) ? 'Valid email required' : null,
+                validator: (v) => (v == null || !v.contains('@'))
+                    ? 'Valid email required'
+                    : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _passwordCtrl,
                 obscureText: true,
                 decoration: const InputDecoration(labelText: 'Password *'),
-                validator: (v) => (v == null || v.length < 8) ? 'At least 8 characters' : null,
+                validator: (v) => (v == null || v.length < 8)
+                    ? 'At least 8 characters'
+                    : null,
               ),
               const SizedBox(height: 16),
-              const Text('Staff Access Permissions', style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Staff Access Permissions',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               const SizedBox(height: 8),
               _PermissionChecklist(
                 values: _perms,
@@ -526,7 +654,11 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
         ElevatedButton(
           onPressed: _busy ? null : _submit,
           child: _busy
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Create Account'),
         ),
       ],
@@ -539,10 +671,12 @@ class _EditPermissionsDialog extends ConsumerStatefulWidget {
   final Map<String, dynamic> staff;
 
   @override
-  ConsumerState<_EditPermissionsDialog> createState() => _EditPermissionsDialogState();
+  ConsumerState<_EditPermissionsDialog> createState() =>
+      _EditPermissionsDialogState();
 }
 
-class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> {
+class _EditPermissionsDialogState
+    extends ConsumerState<_EditPermissionsDialog> {
   late final Map<String, bool> _perms;
   late final TextEditingController _limit;
   bool _busy = false;
@@ -557,8 +691,10 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
     };
     // PD07/PD08: percent of the bill's default total; new staff start at 0.
     _limit = TextEditingController(
-      text: '${(p['discount_limit_pct'] as num?)?.toDouble() ?? 0}'
-          .replaceAll(RegExp(r'\.0$'), ''),
+      text: '${(p['discount_limit_pct'] as num?)?.toDouble() ?? 0}'.replaceAll(
+        RegExp(r'\.0$'),
+        '',
+      ),
     );
   }
 
@@ -577,18 +713,24 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
     setState(() => _busy = true);
     try {
       final client = ref.read(supabaseProvider);
-      await client.rpc('update_staff_permissions', params: {
-        'p_profile_id': widget.staff['id'],
-        'p_permissions': _perms,
-      });
-      await client.rpc('set_staff_discount_limit', params: {
-        'p_profile': widget.staff['id'],
-        'p_pct': _perms['can_edit_prices'] == true ? limit : 0,
-      });
-      await client.rpc('set_staff_cash_permission', params: {
-        'p_profile': widget.staff['id'],
-        'p_value': _perms['can_manage_cash'] == true,
-      });
+      await client.rpc(
+        'update_staff_permissions',
+        params: {'p_profile_id': widget.staff['id'], 'p_permissions': _perms},
+      );
+      await client.rpc(
+        'set_staff_discount_limit',
+        params: {
+          'p_profile': widget.staff['id'],
+          'p_pct': _perms['can_edit_prices'] == true ? limit : 0,
+        },
+      );
+      await client.rpc(
+        'set_staff_cash_permission',
+        params: {
+          'p_profile': widget.staff['id'],
+          'p_value': _perms['can_manage_cash'] == true,
+        },
+      );
 
       if (mounted) {
         Navigator.pop(context);
@@ -620,7 +762,9 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
                 padding: const EdgeInsets.only(top: 8),
                 child: TextField(
                   controller: _limit,
-                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
                   decoration: const InputDecoration(
                     labelText: 'Discount limit %',
                     helperText:
@@ -641,7 +785,11 @@ class _EditPermissionsDialogState extends ConsumerState<_EditPermissionsDialog> 
         ElevatedButton(
           onPressed: _busy ? null : _save,
           child: _busy
-              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
               : const Text('Save Permissions'),
         ),
       ],

@@ -18,6 +18,13 @@ class ProductsScreen extends ConsumerWidget {
     final products = ref.watch(productsProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'Add product',
+      icon: Icons.add,
+      onPressed: () => context.push('/products/new'),
+      coachPage: 'products',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -38,17 +45,10 @@ class ProductsScreen extends ConsumerWidget {
               onPressed: () => context.push('/import'),
             ),
           ),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'products',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => context.push('/products/new'),
-          icon: const Icon(Icons.add),
-          label: const Text('Add product'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

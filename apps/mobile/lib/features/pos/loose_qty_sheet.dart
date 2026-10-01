@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/formatters.dart';
 import '../../core/theme.dart';
+import '../../core/widgets.dart';
 import 'cart.dart';
 
 /// Result of the loose-quantity sheet: the quantity in BASE units, plus the
@@ -28,6 +29,26 @@ Future<LooseQtyResult?> showLooseQtySheet(
   String? secondaryUnitName,
   double? conversionFactor,
 }) {
+  // Desktop: a small dialog; the quantity is pre-selected so typing
+  // replaces it, and Enter adds.
+  if (isWideLayout(context)) {
+    return showDialog<LooseQtyResult>(
+      context: context,
+      builder: (ctx) => Dialog(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 480),
+          child: _LooseQtySheet(
+            name: name,
+            rate: rate,
+            unitName: unitName,
+            secondaryUnitName: secondaryUnitName,
+            conversionFactor: conversionFactor,
+            dialog: true,
+          ),
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<LooseQtyResult>(
     context: context,
     isScrollControlled: true,
@@ -51,8 +72,10 @@ class _LooseQtySheet extends StatefulWidget {
     required this.unitName,
     this.secondaryUnitName,
     this.conversionFactor,
+    this.dialog = false,
   });
 
+  final bool dialog;
   final String name;
   final double rate; // per base unit, GST-inclusive
   final String unitName;
@@ -86,6 +109,12 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
     _amountC.text = widget.rate > 0 ? _activeRate.toStringAsFixed(2) : '';
     _qtyC.addListener(_onQtyChanged);
     _amountC.addListener(_onAmountChanged);
+    if (widget.dialog) {
+      _qtyC.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _qtyC.text.length,
+      );
+    }
   }
 
   @override
@@ -136,7 +165,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
     final valid = parsedQty != null && parsedQty > 0;
 
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(widget.dialog ? 24 : 16),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -229,7 +258,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                   : 'Add',
             ),
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: widget.dialog ? 4 : 24),
         ],
       ),
     );

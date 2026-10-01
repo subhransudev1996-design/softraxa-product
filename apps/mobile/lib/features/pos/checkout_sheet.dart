@@ -22,6 +22,23 @@ import 'pos_providers.dart';
 import '../../core/theme.dart';
 
 Future<void> showCheckoutSheet(BuildContext context) {
+  // Desktop: a centred dialog, the way desktop software asks for payment.
+  if (isWideLayout(context)) {
+    return showDialog(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => Dialog(
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 600,
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+          ),
+          child: const _CheckoutSheet(dialog: true),
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -37,7 +54,10 @@ Future<void> showCheckoutSheet(BuildContext context) {
 }
 
 class _CheckoutSheet extends ConsumerStatefulWidget {
-  const _CheckoutSheet();
+  const _CheckoutSheet({this.dialog = false});
+
+  /// Shown in a desktop dialog: fills it instead of being a draggable sheet.
+  final bool dialog;
 
   @override
   ConsumerState<_CheckoutSheet> createState() => _CheckoutSheetState();
@@ -496,7 +516,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
 
     return DraggableScrollableSheet(
       expand: false,
-      initialChildSize: 0.85,
+      initialChildSize: widget.dialog ? 1 : 0.85,
+      minChildSize: widget.dialog ? 1 : 0.25,
+      maxChildSize: 1,
       builder: (ctx, scrollController) => ListView(
         controller: scrollController,
         padding: const EdgeInsets.all(16),

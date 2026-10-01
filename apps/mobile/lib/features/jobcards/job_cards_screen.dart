@@ -19,22 +19,21 @@ class JobCardsScreen extends ConsumerWidget {
     final filter = ref.watch(jobCardFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'New job card',
+      icon: Icons.add,
+      onPressed: () => context.push('/job-cards/new'),
+      coachPage: 'job_cards',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Job cards'),
-        actions: const [GuideButton('job_cards')],
+        actions: [const GuideButton('job_cards'), mainAction.inAppBar(context)],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'job_cards',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => context.push('/job-cards/new'),
-          icon: const Icon(Icons.add),
-          label: const Text('New job card'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

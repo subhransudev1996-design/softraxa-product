@@ -376,6 +376,13 @@ class SuppliersScreen extends ConsumerWidget {
     final balanceFilter = ref.watch(supplierBalanceFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'Add supplier',
+      icon: Icons.add,
+      onPressed: () => showSupplierForm(context, ref),
+      coachPage: 'suppliers',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -390,17 +397,10 @@ class SuppliersScreen extends ConsumerWidget {
               onPressed: () => context.push('/import/suppliers'),
             ),
           const GuideButton('suppliers'),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'suppliers',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => showSupplierForm(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('Add supplier'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

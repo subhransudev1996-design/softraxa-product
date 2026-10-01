@@ -410,6 +410,13 @@ class ExpensesScreen extends ConsumerWidget {
     final preset = ref.watch(expensePresetProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'Add expense',
+      icon: Icons.add,
+      onPressed: () => _addOrEdit(context, ref),
+      coachPage: 'expenses',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -422,17 +429,10 @@ class ExpensesScreen extends ConsumerWidget {
             tooltip: 'Custom date range',
             onPressed: () => _pickRange(context, ref),
           ),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'expenses',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => _addOrEdit(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('Add expense'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
@@ -17,6 +18,7 @@ import '../stock/piece_picker.dart';
 import 'cart.dart';
 import 'checkout_sheet.dart';
 import 'loose_qty_sheet.dart';
+import 'pos_desktop.dart';
 import 'pos_providers.dart';
 
 /// Shared "not enough stock" dialog: message + three evenly-sized, full-width,
@@ -180,6 +182,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   final _searchController = TextEditingController();
   final _searchFocus = FocusNode();
 
+  /// Desktop: the search result ↑/↓ point at; Enter adds it.
+  int _highlight = 0;
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -204,31 +209,18 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (variant == null &&
         product['has_variants'] == true &&
         variants.isNotEmpty) {
-      variant = await showModalBottomSheet<Map<String, dynamic>>(
-        context: context,
-        builder: (ctx) => SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Select variant — ${product['name']}',
-                        style: Theme.of(ctx).textTheme.titleMedium,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Flexible(
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    for (final v in variants)
-                      ListTile(
+      // Desktop: a dialog; ↑/↓ and Enter pick (the first is focused).
+      variant = isWideLayout(context)
+          ? await showDialog<Map<String, dynamic>>(
+              context: context,
+              builder: (ctx) => SimpleDialog(
+                title: Text('Select variant — ${product['name']}'),
+                children: [
+                  for (final (i, v) in variants.indexed)
+                    SizedBox(
+                      width: 480,
+                      child: ListTile(
+                        autofocus: i == 0,
                         title: Text(
                           v['name'] as String,
                           style: const TextStyle(fontWeight: FontWeight.w700),
@@ -247,14 +239,64 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         ),
                         onTap: () => Navigator.pop(ctx, v),
                       ),
+                    ),
+                ],
+              ),
+            )
+          : await showModalBottomSheet<Map<String, dynamic>>(
+              context: context,
+              builder: (ctx) => SafeArea(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              'Select variant — ${product['name']}',
+                              style: Theme.of(ctx).textTheme.titleMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Flexible(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          for (final v in variants)
+                            ListTile(
+                              title: Text(
+                                v['name'] as String,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                              subtitle: Text(
+                                money(
+                                  (v['selling_price'] ??
+                                          product['selling_price'])
+                                      as num?,
+                                ),
+                              ),
+                              trailing: StatusChip(
+                                'Stock ${qty(toDouble(v['current_stock']))}',
+                                color: toDouble(v['current_stock']) <= 0
+                                    ? AppColors.red
+                                    : AppColors.green,
+                              ),
+                              onTap: () => Navigator.pop(ctx, v),
+                            ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                   ],
                 ),
               ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      );
+            );
       if (variant == null) return;
     }
 
@@ -457,6 +499,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     // single search result -> add it
     if (products.length == 1) {
       await _addToCart(products.first);
+      return;
+    }
+    // Desktop: the results table shows which one is highlighted.
+    if (products.length > 1 && mounted && isWideLayout(context)) {
+      await _addToCart(products[_highlight.clamp(0, products.length - 1)]);
       return;
     }
     // Nothing matched (or the code is ambiguous against 2+ results still
@@ -719,6 +766,137 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     }
     final guarded = editing != null || exchange != null;
 
+    final wide = isWideLayout(context);
+    final searchRow = Padding(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      child: Row(
+        children: [
+          Expanded(
+            child: CoachTarget(
+              page: 'pos',
+              id: 'search',
+              child: SearchField(
+                controller: _searchController,
+                focusNode: _searchFocus,
+                hint: wide
+                    ? 'Search product name, barcode or SKU  (F2)'
+                    : 'Search or scan barcode…',
+                autofocus: wide,
+                onChanged: (v) {
+                  _highlight = 0;
+                  ref.read(posSearchProvider.notifier).set(v);
+                },
+                onSubmitted: _onSubmitted,
+                suffix: search.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: _clearSearch,
+                      )
+                    : null,
+              ),
+            ),
+          ),
+          if (!isDesktopPlatform) ...[
+            const SizedBox(width: 8),
+            CoachTarget(
+              page: 'pos',
+              id: 'scan',
+              child: Material(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(14),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(14),
+                  onTap: () => context.push('/scan'),
+                  child: const Padding(
+                    padding: EdgeInsets.all(14),
+                    child: Icon(
+                      Icons.qr_code_scanner,
+                      color: Colors.white,
+                      size: 22,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+    final customerTile = CoachTarget(
+      page: 'pos',
+      id: 'customer',
+      child: Material(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          // Editing an existing bill never changes who it was billed
+          // to (update_invoice doesn't touch customer_id) — the
+          // customer here is just shown for context, not editable.
+          onTap: editing != null || exchange != null
+              ? null
+              : () async {
+                  final customer = await showCustomerPicker(context);
+                  if (customer != null) {
+                    await setCartCustomer(ref, customer);
+                  }
+                },
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: AppColors.line),
+            ),
+            child: Row(
+              children: [
+                cart.customer == null
+                    ? const IconChip(
+                        Icons.person_add_alt_1,
+                        color: AppColors.indigo,
+                        size: 34,
+                      )
+                    : InitialsAvatar(
+                        cart.customer!['name'] as String? ?? '',
+                        radius: 17,
+                      ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    cart.customer == null
+                        ? (wide
+                              ? 'Walk-in customer  (F4 to choose)'
+                              : 'Walk-in customer (tap to select)')
+                        : '${cart.customer!['name']}'
+                              '${(cart.customer!['phone'] as String? ?? '').isNotEmpty ? ' • ${cart.customer!['phone']}' : ''}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 13.5,
+                      color: cart.customer == null
+                          ? AppColors.inkSoft
+                          : AppColors.ink,
+                      fontWeight: cart.customer == null
+                          ? FontWeight.w500
+                          : FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (editing != null)
+                  const SizedBox.shrink()
+                else if (cart.customer != null)
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 18),
+                    onPressed: () => setCartCustomer(ref, null),
+                  )
+                else
+                  Icon(Icons.chevron_right, color: AppColors.inkSoft, size: 20),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
     final scaffold = Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -775,369 +953,335 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             ),
         ],
       ),
-      body: Column(
-        children: [
-          if (exchange != null) _ExchangeBanner(exchange: exchange),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-            child: Row(
+      body: wide
+          ? Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  child: CoachTarget(
-                    page: 'pos',
-                    id: 'search',
-                    child: SearchField(
-                      controller: _searchController,
-                      focusNode: _searchFocus,
-                      hint: 'Search or scan barcode…',
-                      onChanged: (v) =>
-                          ref.read(posSearchProvider.notifier).set(v),
-                      onSubmitted: _onSubmitted,
-                      suffix: search.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.close),
-                              onPressed: _clearSearch,
-                            )
-                          : null,
-                    ),
-                  ),
-                ),
-                if (!isDesktopPlatform) ...[
-                  const SizedBox(width: 8),
-                  CoachTarget(
-                    page: 'pos',
-                    id: 'scan',
-                    child: Material(
-                      color: AppColors.primary,
-                      borderRadius: BorderRadius.circular(14),
-                      child: InkWell(
-                        borderRadius: BorderRadius.circular(14),
-                        onTap: () => context.push('/scan'),
-                        child: const Padding(
-                          padding: EdgeInsets.all(14),
-                          child: Icon(
-                            Icons.qr_code_scanner,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          // customer row
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
-            child: CoachTarget(
-              page: 'pos',
-              id: 'customer',
-              child: Material(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(14),
-                child: InkWell(
-                  borderRadius: BorderRadius.circular(14),
-                  // Editing an existing bill never changes who it was billed
-                  // to (update_invoice doesn't touch customer_id) — the
-                  // customer here is just shown for context, not editable.
-                  onTap: editing != null || exchange != null
-                      ? null
-                      : () async {
-                          final customer = await showCustomerPicker(context);
-                          if (customer != null) {
-                            await setCartCustomer(ref, customer);
-                          }
-                        },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: AppColors.line),
-                    ),
-                    child: Row(
-                      children: [
-                        cart.customer == null
-                            ? const IconChip(
-                                Icons.person_add_alt_1,
-                                color: AppColors.indigo,
-                                size: 34,
-                              )
-                            : InitialsAvatar(
-                                cart.customer!['name'] as String? ?? '',
-                                radius: 17,
-                              ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            cart.customer == null
-                                ? 'Walk-in customer (tap to select)'
-                                : '${cart.customer!['name']}'
-                                      '${(cart.customer!['phone'] as String? ?? '').isNotEmpty ? ' • ${cart.customer!['phone']}' : ''}',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 13.5,
-                              color: cart.customer == null
-                                  ? AppColors.inkSoft
-                                  : AppColors.ink,
-                              fontWeight: cart.customer == null
-                                  ? FontWeight.w500
-                                  : FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (editing != null)
-                          const SizedBox.shrink()
-                        else if (cart.customer != null)
-                          IconButton(
-                            icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => setCartCustomer(ref, null),
-                          )
-                        else
-                          Icon(
-                            Icons.chevron_right,
-                            color: AppColors.inkSoft,
-                            size: 20,
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Expanded(
-            child: search.isNotEmpty
-                // ---- search results ----
-                ? AsyncView(
-                    value: products,
-                    onRetry: () => ref.invalidate(posProductsProvider),
-                    builder: (rows) => rows.isEmpty
-                        ? EmptyState(
-                            icon: Icons.search_off,
-                            message: 'No product found for "$search"',
-                            action: OutlinedButton.icon(
-                              onPressed: () => context.push('/products/new'),
-                              icon: const Icon(Icons.add),
-                              label: const Text('Add product'),
-                            ),
-                          )
-                        : ListView.separated(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                            itemCount: rows.length,
-                            separatorBuilder: (_, _) =>
-                                const SizedBox(height: 8),
-                            itemBuilder: (context, i) {
-                              final p = rows[i];
-                              final stock = toDouble(p['current_stock']);
-                              return Card(
-                                child: ListTile(
-                                  leading: const IconChip(
-                                    Icons.inventory_2_outlined,
-                                    color: AppColors.indigo,
-                                    size: 38,
-                                  ),
-                                  title: Text(
-                                    p['name'] as String,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                  subtitle: Text(
-                                    money(p['selling_price'] as num?),
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  trailing: StatusChip(
-                                    'Stock ${qty(stock)}',
-                                    color: stock <= 0
-                                        ? AppColors.red
-                                        : AppColors.green,
-                                  ),
-                                  onTap: () => _addToCart(p),
-                                ),
-                              );
-                            },
-                          ),
-                  )
-                // ---- cart lines ----
-                : cart.lines.isEmpty
-                ? const EmptyState(
-                    icon: Icons.shopping_cart_outlined,
-                    message:
-                        'Bill is empty.\nSearch or scan products to add them.',
-                  )
-                : CoachTarget(
-                    page: 'pos',
-                    id: 'cart',
-                    child: ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
-                      itemCount: cart.lines.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 8),
-                      itemBuilder: (context, i) {
-                        final line = cart.lines[i];
-                        return Card(
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(18),
-                            onTap: () => _editLine(line),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Row(
-                                children: [
-                                  IconChip(
-                                    line.trackSerial
-                                        ? Icons.smartphone
-                                        : Icons.inventory_2_outlined,
-                                    color: AppColors.accentFor(line.name),
-                                    size: 42,
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}',
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        Text(
-                                          '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}'
-                                          '${line.priceSource == 'retail' || line.priceSource == 'manual' ? '' : '  • ${priceSourceLabel(line.priceSource)}'}',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.inkSoft,
-                                          ),
-                                        ),
-                                        if (line.trackSerial)
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                              top: 2,
-                                            ),
-                                            child: Text(
-                                              line.serialNo.isEmpty
-                                                  ? 'Tap to add IMEI/serial'
-                                                  : 'S/N: ${line.serialNo}',
-                                              style: TextStyle(
-                                                fontSize: 11,
-                                                fontWeight: FontWeight.w600,
-                                                color: line.serialNo.isEmpty
-                                                    ? AppColors.orange
-                                                    : AppColors.inkSoft,
-                                              ),
-                                            ),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text(
-                                        money(line.gross),
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.w800,
-                                          fontSize: 14,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      _QtyStepper(
-                                        qty: line.qty,
-                                        onDecrement: () => ref
-                                            .read(cartProvider.notifier)
-                                            .changeQty(line, line.qty - 1),
-                                        onIncrement: () =>
-                                            _changeQty(line, line.qty + 1),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-          ),
-          // ---- bottom bar ----
-          if (cart.lines.isNotEmpty)
-            SafeArea(
-              top: false,
-              child: CoachTarget(
-                page: 'pos',
-                id: 'charge',
-                child: Container(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    boxShadow: softShadow(20),
-                  ),
-                  child: Row(
+                  child: Column(
                     children: [
+                      if (exchange != null) _ExchangeBanner(exchange: exchange),
+                      searchRow,
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} • Qty ${qty(cart.totalQty)}',
-                              style: TextStyle(
-                                fontSize: 11.5,
-                                color: AppColors.inkSoft,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            Text(
-                              money(cart.total),
-                              style: const TextStyle(
-                                fontSize: 21,
-                                fontWeight: FontWeight.w800,
-                                letterSpacing: -0.3,
-                              ),
-                            ),
-                            if (cart.taxTotal > 0)
-                              Text(
-                                'incl. GST ${money(cart.billTaxTotal)}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.inkSoft,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                          child: search.isNotEmpty
+                              ? AsyncView(
+                                  value: products,
+                                  onRetry: () =>
+                                      ref.invalidate(posProductsProvider),
+                                  builder: (rows) => rows.isEmpty
+                                      ? EmptyState(
+                                          icon: Icons.search_off,
+                                          message:
+                                              'No product found for "$search"',
+                                          action: OutlinedButton.icon(
+                                            onPressed: () =>
+                                                context.push('/products/new'),
+                                            icon: const Icon(Icons.add),
+                                            label: const Text('Add product'),
+                                          ),
+                                        )
+                                      : PosResultsTable(
+                                          rows: rows,
+                                          highlight: _highlight.clamp(
+                                            0,
+                                            rows.length - 1,
+                                          ),
+                                          onPick: _addToCart,
+                                        ),
+                                )
+                              : CoachTarget(
+                                  page: 'pos',
+                                  id: 'cart',
+                                  child: PosCartTable(
+                                    lines: cart.lines,
+                                    onEdit: _editLine,
+                                    onChangeQty: (line, q) => q < line.qty
+                                        ? ref
+                                              .read(cartProvider.notifier)
+                                              .changeQty(line, q)
+                                        : _changeQty(line, q),
+                                    onRemove: (line) => ref
+                                        .read(cartProvider.notifier)
+                                        .remove(line),
+                                  ),
                                 ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      FilledButton.icon(
-                        onPressed: () => showCheckoutSheet(context),
-                        icon: const Icon(Icons.arrow_forward, size: 18),
-                        label: Text(
-                          editing == null ? 'Checkout' : 'Review changes',
-                        ),
-                        style: FilledButton.styleFrom(
-                          minimumSize: const Size(150, 52),
-                          padding: const EdgeInsets.symmetric(horizontal: 20),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
+                CoachTarget(
+                  page: 'pos',
+                  id: 'charge',
+                  child: PosBillPanel(
+                    cart: cart,
+                    customerTile: customerTile,
+                    checkoutLabel: editing == null
+                        ? 'Checkout'
+                        : 'Review changes',
+                    onCheckout: cart.lines.isEmpty
+                        ? null
+                        : () => showCheckoutSheet(context),
+                  ),
+                ),
+              ],
+            )
+          : Column(
+              children: [
+                if (exchange != null) _ExchangeBanner(exchange: exchange),
+                searchRow,
+                // customer row
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
+                  child: customerTile,
+                ),
+                Expanded(
+                  child: search.isNotEmpty
+                      // ---- search results ----
+                      ? AsyncView(
+                          value: products,
+                          onRetry: () => ref.invalidate(posProductsProvider),
+                          builder: (rows) => rows.isEmpty
+                              ? EmptyState(
+                                  icon: Icons.search_off,
+                                  message: 'No product found for "$search"',
+                                  action: OutlinedButton.icon(
+                                    onPressed: () =>
+                                        context.push('/products/new'),
+                                    icon: const Icon(Icons.add),
+                                    label: const Text('Add product'),
+                                  ),
+                                )
+                              : ListView.separated(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    0,
+                                    16,
+                                    12,
+                                  ),
+                                  itemCount: rows.length,
+                                  separatorBuilder: (_, _) =>
+                                      const SizedBox(height: 8),
+                                  itemBuilder: (context, i) {
+                                    final p = rows[i];
+                                    final stock = toDouble(p['current_stock']);
+                                    return Card(
+                                      child: ListTile(
+                                        leading: const IconChip(
+                                          Icons.inventory_2_outlined,
+                                          color: AppColors.indigo,
+                                          size: 38,
+                                        ),
+                                        title: Text(
+                                          p['name'] as String,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w700,
+                                            fontSize: 14,
+                                          ),
+                                        ),
+                                        subtitle: Text(
+                                          money(p['selling_price'] as num?),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        trailing: StatusChip(
+                                          'Stock ${qty(stock)}',
+                                          color: stock <= 0
+                                              ? AppColors.red
+                                              : AppColors.green,
+                                        ),
+                                        onTap: () => _addToCart(p),
+                                      ),
+                                    );
+                                  },
+                                ),
+                        )
+                      // ---- cart lines ----
+                      : cart.lines.isEmpty
+                      ? const EmptyState(
+                          icon: Icons.shopping_cart_outlined,
+                          message:
+                              'Bill is empty.\nSearch or scan products to add them.',
+                        )
+                      : CoachTarget(
+                          page: 'pos',
+                          id: 'cart',
+                          child: ListView.separated(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                            itemCount: cart.lines.length,
+                            separatorBuilder: (_, _) =>
+                                const SizedBox(height: 8),
+                            itemBuilder: (context, i) {
+                              final line = cart.lines[i];
+                              return Card(
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(18),
+                                  onTap: () => _editLine(line),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Row(
+                                      children: [
+                                        IconChip(
+                                          line.trackSerial
+                                              ? Icons.smartphone
+                                              : Icons.inventory_2_outlined,
+                                          color: AppColors.accentFor(line.name),
+                                          size: 42,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w700,
+                                                  fontSize: 14,
+                                                ),
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}'
+                                                '${line.priceSource == 'retail' || line.priceSource == 'manual' ? '' : '  • ${priceSourceLabel(line.priceSource)}'}',
+                                                style: TextStyle(
+                                                  fontSize: 12,
+                                                  color: AppColors.inkSoft,
+                                                ),
+                                              ),
+                                              if (line.trackSerial)
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 2,
+                                                      ),
+                                                  child: Text(
+                                                    line.serialNo.isEmpty
+                                                        ? 'Tap to add IMEI/serial'
+                                                        : 'S/N: ${line.serialNo}',
+                                                    style: TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                      color:
+                                                          line.serialNo.isEmpty
+                                                          ? AppColors.orange
+                                                          : AppColors.inkSoft,
+                                                    ),
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.end,
+                                          children: [
+                                            Text(
+                                              money(line.gross),
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.w800,
+                                                fontSize: 14,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 4),
+                                            _QtyStepper(
+                                              qty: line.qty,
+                                              onDecrement: () => ref
+                                                  .read(cartProvider.notifier)
+                                                  .changeQty(
+                                                    line,
+                                                    line.qty - 1,
+                                                  ),
+                                              onIncrement: () => _changeQty(
+                                                line,
+                                                line.qty + 1,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                ),
+                // ---- bottom bar ----
+                if (cart.lines.isNotEmpty)
+                  SafeArea(
+                    top: false,
+                    child: CoachTarget(
+                      page: 'pos',
+                      id: 'charge',
+                      child: Container(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                        decoration: BoxDecoration(
+                          color: AppColors.card,
+                          boxShadow: softShadow(20),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} • Qty ${qty(cart.totalQty)}',
+                                    style: TextStyle(
+                                      fontSize: 11.5,
+                                      color: AppColors.inkSoft,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  Text(
+                                    money(cart.total),
+                                    style: const TextStyle(
+                                      fontSize: 21,
+                                      fontWeight: FontWeight.w800,
+                                      letterSpacing: -0.3,
+                                    ),
+                                  ),
+                                  if (cart.taxTotal > 0)
+                                    Text(
+                                      'incl. GST ${money(cart.billTaxTotal)}',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppColors.inkSoft,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            FilledButton.icon(
+                              onPressed: () => showCheckoutSheet(context),
+                              icon: const Icon(Icons.arrow_forward, size: 18),
+                              label: Text(
+                                editing == null ? 'Checkout' : 'Review changes',
+                              ),
+                              style: FilledButton.styleFrom(
+                                minimumSize: const Size(150, 52),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
-        ],
-      ),
     );
 
     // Editing an existing invoice is the only case that needs interception —
@@ -1147,7 +1291,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     // confirming is the pattern Flutter's own docs recommend for this exact
     // "confirm before leaving" case — a re-check of `canPop` itself would
     // otherwise re-block the very pop the confirmation just approved.
-    if (!guarded) return scaffold;
+    final screen = wide
+        ? _withShortcuts(scaffold, cart, editing, exchange)
+        : scaffold;
+    if (!guarded) return screen;
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) async {
@@ -1156,7 +1303,44 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           Navigator.pop(context);
         }
       },
-      child: scaffold,
+      child: screen,
+    );
+  }
+
+  /// Desktop keys: F2 search, ↑/↓ pick a result, Esc clears the search,
+  /// F4 customer, F12 checkout.
+  Widget _withShortcuts(
+    Widget child,
+    CartState cart,
+    EditingInvoice? editing,
+    ExchangeDraft? exchange,
+  ) {
+    void move(int by) {
+      if (ref.read(posSearchProvider).isEmpty) return;
+      final count = ref.read(posProductsProvider).value?.length ?? 0;
+      if (count == 0) return;
+      setState(() => _highlight = (_highlight + by).clamp(0, count - 1));
+    }
+
+    return CallbackShortcuts(
+      bindings: {
+        const SingleActivator(LogicalKeyboardKey.f2): () =>
+            _searchFocus.requestFocus(),
+        const SingleActivator(LogicalKeyboardKey.arrowDown): () => move(1),
+        const SingleActivator(LogicalKeyboardKey.arrowUp): () => move(-1),
+        const SingleActivator(LogicalKeyboardKey.escape): _clearSearch,
+        const SingleActivator(LogicalKeyboardKey.f4): () async {
+          if (editing != null || exchange != null) return;
+          final customer = await showCustomerPicker(context);
+          if (customer != null) await setCartCustomer(ref, customer);
+        },
+        const SingleActivator(LogicalKeyboardKey.f12): () {
+          if (ref.read(cartProvider).lines.isNotEmpty) {
+            showCheckoutSheet(context);
+          }
+        },
+      },
+      child: child,
     );
   }
 }

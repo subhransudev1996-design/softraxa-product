@@ -129,7 +129,7 @@ class _AppState extends ConsumerState<App> {
     return MaterialApp.router(
       title: kAppName,
       debugShowCheckedModeBanner: false,
-      theme: buildTheme(dark: dark),
+      theme: buildTheme(dark: dark, desktop: isDesktopPlatform),
       routerConfig: router,
       // AppColors' mode-dependent neutrals are plain static fields — no
       // widget depends on them reactively — so a theme toggle must force

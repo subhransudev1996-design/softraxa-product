@@ -363,6 +363,13 @@ class CustomersScreen extends ConsumerWidget {
     final balanceFilter = ref.watch(customerBalanceFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'Add customer',
+      icon: Icons.person_add,
+      onPressed: () => showCustomerForm(context, ref),
+      coachPage: 'customers',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -377,17 +384,10 @@ class CustomersScreen extends ConsumerWidget {
               onPressed: () => context.push('/import/customers'),
             ),
           const GuideButton('customers'),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'customers',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => showCustomerForm(context, ref),
-          icon: const Icon(Icons.person_add),
-          label: const Text('Add customer'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

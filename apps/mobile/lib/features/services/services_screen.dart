@@ -237,22 +237,21 @@ class ServicesScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final services = ref.watch(servicesProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
+    final mainAction = ScreenAction(
+      label: 'Add service',
+      icon: Icons.add,
+      onPressed: () => _addOrEdit(context, ref),
+      coachPage: 'services',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Service catalog'),
-        actions: const [GuideButton('services')],
+        actions: [const GuideButton('services'), mainAction.inAppBar(context)],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'services',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => _addOrEdit(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('Add service'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: AsyncView(
         value: services,
         onRetry: () => ref.invalidate(servicesProvider),

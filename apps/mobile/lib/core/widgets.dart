@@ -4,8 +4,64 @@ import 'package:go_router/go_router.dart';
 
 import 'approvals.dart';
 import 'formatters.dart';
+import 'platform.dart';
 import 'supabase_providers.dart';
 import 'theme.dart';
+import 'walkthrough.dart';
+
+/// True when the window is wide enough for the desktop layout (sidebar,
+/// tables, header buttons).
+bool isWideLayout(BuildContext context) =>
+    MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
+
+/// A screen's main action ("Add product", "New bill"). On a phone it is the
+/// floating button; on desktop it is a button at the end of the app bar,
+/// where desktop software keeps it. Use [fab] for the Scaffold's
+/// floatingActionButton and put [inAppBar] last in the app bar's actions.
+class ScreenAction {
+  const ScreenAction({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+    this.coachPage,
+    this.coachId,
+  });
+
+  final String label;
+  final IconData icon;
+  final VoidCallback? onPressed;
+
+  /// The walkthrough step that points at this action, if any.
+  final String? coachPage;
+  final String? coachId;
+
+  Widget _coach(Widget child) => coachPage == null || coachId == null
+      ? child
+      : CoachTarget(page: coachPage!, id: coachId!, child: child);
+
+  Widget? fab(BuildContext context) => isWideLayout(context)
+      ? null
+      : _coach(
+          FloatingActionButton.extended(
+            onPressed: onPressed,
+            icon: Icon(icon),
+            label: Text(label),
+          ),
+        );
+
+  Widget inAppBar(BuildContext context) => !isWideLayout(context)
+      ? const SizedBox.shrink()
+      : Padding(
+          padding: const EdgeInsets.only(left: 8, right: 16),
+          child: _coach(
+            FilledButton.icon(
+              onPressed: onPressed,
+              icon: Icon(icon, size: 18),
+              label: Text(label),
+            ),
+          ),
+        );
+}
 
 /// Explicit AppBar back button for screens living under the secondary
 /// ShellRoute (invoices, customers, purchases, …). Those pages sit in the

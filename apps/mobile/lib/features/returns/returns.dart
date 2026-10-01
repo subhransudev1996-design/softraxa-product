@@ -259,6 +259,13 @@ class SaleReturnsScreen extends ConsumerWidget {
     final returns = ref.watch(saleReturnsProvider);
     final filter = ref.watch(saleReturnFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
+    final mainAction = ScreenAction(
+      label: 'New return',
+      icon: Icons.add,
+      onPressed: () => _newReturn(context, ref),
+      coachPage: 'sale_returns',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -276,17 +283,10 @@ class SaleReturnsScreen extends ConsumerWidget {
             tooltip: 'Filter by date',
             onPressed: () => _pickRange(context, ref, filter),
           ),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'sale_returns',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => _newReturn(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('New return'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(
@@ -1514,6 +1514,13 @@ class PurchaseReturnsScreen extends ConsumerWidget {
     final returns = ref.watch(purchaseReturnsProvider);
     final filter = ref.watch(purchaseReturnFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
+    final mainAction = ScreenAction(
+      label: 'New return',
+      icon: Icons.add,
+      onPressed: () => _newReturn(context, ref),
+      coachPage: 'purchase_returns',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -1526,17 +1533,10 @@ class PurchaseReturnsScreen extends ConsumerWidget {
             tooltip: 'Filter by date',
             onPressed: () => _pickRange(context, ref, filter),
           ),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'purchase_returns',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => _newReturn(context, ref),
-          icon: const Icon(Icons.add),
-          label: const Text('New return'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

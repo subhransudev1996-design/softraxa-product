@@ -133,7 +133,14 @@ List<BoxShadow> softShadow([double blur = 16]) => [
 
 const seedColor = AppColors.primary;
 
-ThemeData buildTheme({bool dark = false}) {
+/// [desktop]: Windows/macOS/Linux builds get a mouse-sized, denser look —
+/// 40 px buttons that size to their label, 8 px corners, compact lists,
+/// side sheets no wider than a dialog. Phones keep the large touch targets.
+ThemeData buildTheme({bool dark = false, bool desktop = false}) {
+  // Corner radii: fields/buttons, cards, dialogs.
+  final r = desktop ? 8.0 : 14.0;
+  final cardR = desktop ? 10.0 : 18.0;
+  final dialogR = desktop ? 12.0 : 20.0;
   final base = ColorScheme.fromSeed(
     seedColor: AppColors.primary,
     brightness: dark ? Brightness.dark : Brightness.light,
@@ -156,6 +163,7 @@ ThemeData buildTheme({bool dark = false}) {
   return ThemeData(
     colorScheme: scheme,
     useMaterial3: true,
+    visualDensity: desktop ? VisualDensity.compact : null,
     scaffoldBackgroundColor: AppColors.canvas,
     textTheme: textTheme.copyWith(
       headlineSmall: textTheme.headlineSmall?.copyWith(
@@ -176,8 +184,9 @@ ThemeData buildTheme({bool dark = false}) {
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: false,
+      toolbarHeight: desktop ? 60 : null,
       titleTextStyle: GoogleFonts.manrope(
-        fontSize: 19,
+        fontSize: desktop ? 18 : 19,
         fontWeight: FontWeight.w800,
         color: AppColors.ink,
         letterSpacing: -0.3,
@@ -187,53 +196,60 @@ ThemeData buildTheme({bool dark = false}) {
       isDense: true,
       filled: true,
       fillColor: AppColors.card,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding: EdgeInsets.symmetric(
+        horizontal: desktop ? 12 : 14,
+        vertical: desktop ? 12 : 14,
+      ),
       hintStyle: TextStyle(color: AppColors.hint, fontSize: 14),
       labelStyle: TextStyle(color: AppColors.inkSoft, fontSize: 14),
       border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(r),
         borderSide: BorderSide(color: AppColors.line),
       ),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(r),
         borderSide: BorderSide(color: AppColors.line),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(r),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(r),
         borderSide: const BorderSide(color: AppColors.red),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(r),
         borderSide: const BorderSide(color: AppColors.red, width: 1.6),
       ),
     ),
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        minimumSize: const Size.fromHeight(52),
+        // Phones: full-width 52 px. Desktop: sized to the label, so two
+        // buttons sit side by side (dialogs, toolbars).
+        minimumSize: desktop ? const Size(64, 40) : const Size.fromHeight(52),
+        padding: desktop ? const EdgeInsets.symmetric(horizontal: 18) : null,
         backgroundColor: AppColors.primary,
         foregroundColor: Colors.white,
         textStyle: GoogleFonts.manrope(
-          fontSize: 15,
+          fontSize: desktop ? 14 : 15,
           fontWeight: FontWeight.w700,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r)),
         elevation: 0,
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        minimumSize: const Size(48, 48),
+        minimumSize: desktop ? const Size(40, 40) : const Size(48, 48),
+        padding: desktop ? const EdgeInsets.symmetric(horizontal: 16) : null,
         foregroundColor: AppColors.ink,
         side: BorderSide(color: AppColors.line),
         textStyle: GoogleFonts.manrope(
           fontSize: 14,
           fontWeight: FontWeight.w700,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(r)),
       ),
     ),
     textButtonTheme: TextButtonThemeData(
@@ -257,7 +273,7 @@ ThemeData buildTheme({bool dark = false}) {
       elevation: 0,
       color: AppColors.card,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(cardR),
         side: BorderSide(color: AppColors.line),
       ),
       margin: EdgeInsets.zero,
@@ -274,7 +290,9 @@ ThemeData buildTheme({bool dark = false}) {
         color: AppColors.ink,
       ),
       side: BorderSide(color: AppColors.line),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(desktop ? 6 : 10),
+      ),
     ),
     segmentedButtonTheme: SegmentedButtonThemeData(
       style: SegmentedButton.styleFrom(
@@ -291,7 +309,9 @@ ThemeData buildTheme({bool dark = false}) {
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: AppColors.card,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(dialogR),
+      ),
       titleTextStyle: GoogleFonts.manrope(
         fontSize: 18,
         fontWeight: FontWeight.w800,
@@ -301,13 +321,21 @@ ThemeData buildTheme({bool dark = false}) {
     bottomSheetTheme: BottomSheetThemeData(
       backgroundColor: AppColors.card,
       surfaceTintColor: Colors.transparent,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      // Desktop: a panel the width of a dialog, not a strip across the
+      // whole window.
+      constraints: desktop ? const BoxConstraints(maxWidth: 640) : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(desktop ? 16 : 24),
+        ),
       ),
     ),
     snackBarTheme: SnackBarThemeData(
       behavior: SnackBarBehavior.floating,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      width: desktop ? 460 : null,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(desktop ? 8 : 12),
+      ),
     ),
     tabBarTheme: TabBarThemeData(
       labelColor: AppColors.primary,

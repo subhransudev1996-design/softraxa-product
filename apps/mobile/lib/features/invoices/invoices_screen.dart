@@ -38,6 +38,11 @@ class InvoicesScreen extends ConsumerWidget {
     final filter = ref.watch(invoiceFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'New bill',
+      icon: Icons.add,
+      onPressed: () => context.go('/pos'),
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
@@ -50,13 +55,10 @@ class InvoicesScreen extends ConsumerWidget {
             tooltip: 'Filter by date',
             onPressed: () => _pickRange(context, ref, filter),
           ),
+          mainAction.inAppBar(context),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.go('/pos'),
-        icon: const Icon(Icons.add),
-        label: const Text('New bill'),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(

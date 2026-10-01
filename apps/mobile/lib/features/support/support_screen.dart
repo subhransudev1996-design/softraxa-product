@@ -83,17 +83,19 @@ class SupportScreen extends ConsumerWidget {
     final appContext = ref.watch(appContextProvider).value;
     final isTrial = appContext?.subscriptionState == 'trial';
 
+    final mainAction = ScreenAction(
+      label: 'New request',
+      icon: Icons.add,
+      onPressed: () => _newTicket(context, ref),
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Support'),
+        actions: [mainAction.inAppBar(context)],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _newTicket(context, ref),
-        icon: const Icon(Icons.add),
-        label: const Text('New request'),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(ticketsProvider),
         child: ListView(

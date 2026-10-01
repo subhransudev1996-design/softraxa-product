@@ -18,22 +18,21 @@ class PurchasesScreen extends ConsumerWidget {
     final filter = ref.watch(purchaseFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
+    final mainAction = ScreenAction(
+      label: 'Add purchase',
+      icon: Icons.add,
+      onPressed: () => context.push('/purchases/new'),
+      coachPage: 'purchases',
+      coachId: 'add',
+    );
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Purchases'),
-        actions: const [GuideButton('purchases')],
+        actions: [const GuideButton('purchases'), mainAction.inAppBar(context)],
       ),
-      floatingActionButton: CoachTarget(
-        page: 'purchases',
-        id: 'add',
-        child: FloatingActionButton.extended(
-          onPressed: () => context.push('/purchases/new'),
-          icon: const Icon(Icons.add),
-          label: const Text('Add purchase'),
-        ),
-      ),
+      floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
           Padding(
