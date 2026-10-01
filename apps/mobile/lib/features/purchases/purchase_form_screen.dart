@@ -615,7 +615,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                           'This purchase exceeds the supplier\'s credit limit of ${money(creditLimit)} '
                           '(due would be ${money(projectedDue)}).',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: AppColors.orange,
                           ),
                         ),

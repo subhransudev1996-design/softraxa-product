@@ -246,7 +246,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                 ? 'Plan limit reached. Upgrade plan to add more staff.'
                                 : 'Store owners can create accounts and assign permissions.',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               color: isLimitReached
                                   ? Colors.orange.shade900
                                   : AppColors.inkSoft,
@@ -342,7 +342,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                                             'staff')
                                                         .toUpperCase(),
                                                     style: TextStyle(
-                                                      fontSize: 10,
+                                                      fontSize: 11,
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: isOwner
@@ -522,7 +522,7 @@ class _PermissionChip extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: enabled ? Colors.green.shade900 : Colors.grey.shade600,
             ),

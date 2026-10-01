@@ -217,7 +217,7 @@ class _CurrentPlanCard extends StatelessWidget {
                       child: Text(
                         label,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           fontWeight: FontWeight.bold,
                           color: color,
                         ),
@@ -410,7 +410,7 @@ class _PlanCard extends StatelessWidget {
                   child: const Text(
                     'RECOMMENDED',
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 11,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
                     ),
@@ -580,7 +580,7 @@ class _LimitChip extends StatelessWidget {
           const SizedBox(width: 6),
           Text(
             label,
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600),
+            style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
           ),
         ],
       ),

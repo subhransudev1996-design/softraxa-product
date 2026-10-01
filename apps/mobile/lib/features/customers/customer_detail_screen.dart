@@ -122,7 +122,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                                       Text(
                                         c['address'] as String,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: AppColors.inkSoft,
                                         ),
                                       ),
@@ -171,7 +171,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                               child: Text(
                                 'Unlimited credit',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
@@ -184,14 +184,14 @@ class CustomerDetailScreen extends ConsumerWidget {
                                 Text(
                                   'Credit limit',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 ),
                                 Text(
                                   money(creditLimit),
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 ),
@@ -212,7 +212,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                                   child: Text(
                                     'Over credit limit by ${money(due - creditLimit)}',
                                     style: const TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       color: AppColors.orange,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -388,7 +388,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                 children: [
                   Text(e['label'] as String),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(fontSize: 12)),
+                  Text(subtitle, style: const TextStyle(fontSize: 13)),
                 ],
               ),
             ),

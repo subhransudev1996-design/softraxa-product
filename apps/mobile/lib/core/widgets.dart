@@ -421,7 +421,7 @@ class StatusChip extends StatelessWidget {
       child: Text(
         label.toUpperCase(),
         style: TextStyle(
-          fontSize: 10,
+          fontSize: 11,
           fontWeight: FontWeight.w700,
           color: _color,
         ),
@@ -803,14 +803,14 @@ class PartyCard extends StatelessWidget {
                     Text(
                       'Credit limit',
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         color: AppColors.inkSoft,
                       ),
                     ),
                     Text(
                       money(creditLimit),
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         color: AppColors.inkSoft,
                       ),
                     ),
@@ -833,7 +833,7 @@ class PartyCard extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
-                          fontSize: 11,
+                          fontSize: 12,
                           color: AppColors.orange,
                           fontWeight: FontWeight.w600,
                         ),

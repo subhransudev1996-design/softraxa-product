@@ -437,7 +437,8 @@ class ExpensesScreen extends ConsumerWidget {
       floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
-          Padding(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: CoachTarget(
               page: 'expenses',
@@ -550,7 +551,7 @@ class ExpensesScreen extends ConsumerWidget {
                                       overflow: TextOverflow.ellipsis,
                                       style: TextStyle(
                                         color: AppColors.inkSoft,
-                                        fontSize: 12,
+                                        fontSize: 13,
                                       ),
                                     ),
                                     trailing: Row(

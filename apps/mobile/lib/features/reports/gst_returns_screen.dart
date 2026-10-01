@@ -162,7 +162,7 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
                         'HSN summary, documents), GSTR-3B and the purchase register. '
                         'Your accountant should review it before filing. '
                         'E-invoice (IRN) and e-way bills are not supported yet.',
-                        style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                        style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                       ),
                       const SizedBox(height: 24),
                     ],
@@ -260,7 +260,7 @@ class _Gstr3bCard extends StatelessWidget {
             Text(
               'A negative figure is credit to carry forward. Your accountant applies '
               'credits across IGST, CGST and SGST in the order the GST portal requires.',
-              style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
+              style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
             ),
           ],
         ),

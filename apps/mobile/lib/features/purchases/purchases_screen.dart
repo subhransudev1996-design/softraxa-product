@@ -73,33 +73,38 @@ class PurchasesScreen extends ConsumerWidget {
               ),
             ),
           ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-            child: CoachTarget(
-              page: 'purchases',
-              id: 'status',
-              child: Row(
-                children: [
-                  for (final s in const [
-                    (null, 'All'),
-                    ('paid', 'Paid'),
-                    ('partial', 'Partial'),
-                    // DB value is still 'unpaid' — labeled "Credit" to match the
-                    // "Credit (Due)" terminology used at checkout/sales.
-                    ('unpaid', 'Credit'),
-                  ])
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(s.$2),
-                        selected: filter.status == s.$1,
-                        onSelected: (_) => ref
-                            .read(purchaseFilterProvider.notifier)
-                            .set(filter.copyWith(status: s.$1)),
+          // Full width, so a short row starts at the left instead of
+          // being centred.
+          SizedBox(
+            width: double.infinity,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+              child: CoachTarget(
+                page: 'purchases',
+                id: 'status',
+                child: Row(
+                  children: [
+                    for (final s in const [
+                      (null, 'All'),
+                      ('paid', 'Paid'),
+                      ('partial', 'Partial'),
+                      // DB value is still 'unpaid' — labeled "Credit" to match the
+                      // "Credit (Due)" terminology used at checkout/sales.
+                      ('unpaid', 'Credit'),
+                    ])
+                      Padding(
+                        padding: const EdgeInsets.only(right: 8),
+                        child: ChoiceChip(
+                          label: Text(s.$2),
+                          selected: filter.status == s.$1,
+                          onSelected: (_) => ref
+                              .read(purchaseFilterProvider.notifier)
+                              .set(filter.copyWith(status: s.$1)),
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -281,7 +286,7 @@ class _PurchaseTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       dateStr(p['purchase_date']),
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),

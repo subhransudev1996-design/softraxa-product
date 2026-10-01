@@ -27,6 +27,24 @@ String dateTimeStr(dynamic v) {
   return d == null ? '' : _dateTime.format(d.toLocal());
 }
 
+/// Short form for lists: "Today, 10:51 AM", "Yesterday, 6:30 PM", else
+/// "25 Jul, 8:12 PM" (with the year only when it isn't this year).
+String shortDateTimeStr(dynamic v) {
+  final d0 = v is DateTime ? v : DateTime.tryParse(v?.toString() ?? '');
+  if (d0 == null) return '';
+  final d = d0.toLocal();
+  final now = DateTime.now();
+  final day = DateTime(d.year, d.month, d.day);
+  final today = DateTime(now.year, now.month, now.day);
+  final time = DateFormat('h:mm a').format(d);
+  if (day == today) return 'Today, $time';
+  if (day == today.subtract(const Duration(days: 1))) return 'Yesterday, $time';
+  final date = DateFormat(
+    d.year == now.year ? 'd MMM' : 'd MMM yyyy',
+  ).format(d);
+  return '$date, $time';
+}
+
 String ymd(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 
 double toDouble(dynamic v) => (v as num?)?.toDouble() ?? 0;

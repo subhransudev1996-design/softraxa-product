@@ -331,7 +331,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                             : 'Opening ${money(r.values['opening_balance'] as num?)}'
                                   '${(r.values['phone'] as String).isEmpty ? '' : ' • ${r.values['phone']}'}',
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 13,
                           color: r.errors.isEmpty
                               ? AppColors.inkSoft
                               : AppColors.red,

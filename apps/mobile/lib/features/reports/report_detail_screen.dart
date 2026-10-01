@@ -636,7 +636,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 padding: const EdgeInsets.only(top: 8),
                 child: Text(
                   'Showing top ${shown.length} of ${points.length} — see full list below.',
-                  style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
+                  style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
               ),
           ],
@@ -682,7 +682,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 pw.Text(
                   '${(s as (String, String)).$1}: ${_pdfSafe(s.$2)}',
                   style: pw.TextStyle(
-                    fontSize: 10,
+                    fontSize: 11,
                     fontWeight: pw.FontWeight.bold,
                   ),
                 ),
@@ -864,9 +864,9 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                                 child: DataTable(
                                   headingTextStyle: const TextStyle(
                                     fontWeight: FontWeight.bold,
-                                    fontSize: 12,
+                                    fontSize: 13,
                                   ),
-                                  dataTextStyle: const TextStyle(fontSize: 12),
+                                  dataTextStyle: const TextStyle(fontSize: 13),
                                   columns: [
                                     for (final h in table['headers'] as List)
                                       DataColumn(label: Text('$h')),

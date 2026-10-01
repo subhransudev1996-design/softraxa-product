@@ -432,7 +432,7 @@ class PiecesCard extends ConsumerWidget {
                           'Pieces total ${qty(piecesTotal)} $_unit, stock is '
                           '${qty(currentStock)} $_unit — update pieces or adjust stock.',
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: AppColors.orange,
                             fontWeight: FontWeight.w600,
                           ),

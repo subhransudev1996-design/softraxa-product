@@ -93,7 +93,7 @@ class OfflineBillsScreen extends ConsumerWidget {
                               maxLines: 3,
                               style: TextStyle(
                                 color: AppColors.inkSoft,
-                                fontSize: 12,
+                                fontSize: 13,
                               ),
                             ),
                             trailing: failed

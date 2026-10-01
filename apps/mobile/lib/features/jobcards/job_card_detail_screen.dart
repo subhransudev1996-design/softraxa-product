@@ -755,7 +755,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                             subtitle: Text(
                               'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: AppColors.inkSoft,
                               ),
                             ),
@@ -899,7 +899,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                           subtitle: Text(
                             '${dateTimeStr(history[i]['created_at'])}'
                             '${(history[i]['note'] as String? ?? '').isNotEmpty ? '\n${history[i]['note']}' : ''}',
-                            style: const TextStyle(fontSize: 12),
+                            style: const TextStyle(fontSize: 13),
                           ),
                         ),
                       ],

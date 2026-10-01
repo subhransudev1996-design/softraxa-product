@@ -328,14 +328,14 @@ class _StockTile extends StatelessWidget {
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               color: AppColors.inkSoft,
                             ),
                           )
                         : Text(
                             'Value: ${money(stock * toDouble(p['purchase_price']))}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               color: AppColors.inkSoft,
                             ),
                           ),
@@ -454,7 +454,7 @@ class StockMovementsScreen extends ConsumerWidget {
                     subtitle: Text(
                       '${dateTimeStr(m['created_at'])}'
                       '${(m['note'] as String? ?? '').isNotEmpty ? '\n${m['note']}' : ''}',
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                     trailing: Text(
                       '${q > 0 ? '+' : ''}${qty(q)}',

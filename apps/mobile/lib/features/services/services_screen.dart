@@ -435,7 +435,7 @@ class _ServiceTile extends StatelessWidget {
                       (s['category'] as String? ?? '').isNotEmpty
                           ? s['category'] as String
                           : 'Service',
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),

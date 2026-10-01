@@ -212,7 +212,7 @@ class _EstimateCard extends ConsumerWidget {
             ),
             Text(
               dateTimeStr(estimate['created_at']),
-              style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+              style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             const SizedBox(height: 6),
             for (final l in lines)
@@ -290,7 +290,7 @@ class _EstimateCard extends ConsumerWidget {
                     ),
                     Text(
                       '${dateTimeStr(answer['customer_decided_at'])} · staff-recorded',
-                      style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                      style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                     if ((answer['notes'] as String? ?? '').isNotEmpty)
                       Text(
@@ -1045,7 +1045,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
               Text(
                 'Saved as a staff-recorded answer with your name — not a digital '
                 'signature by the customer.',
-                style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ],
           ),

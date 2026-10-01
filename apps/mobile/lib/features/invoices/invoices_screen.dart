@@ -358,7 +358,7 @@ class _InvoiceTile extends StatelessWidget {
                       ' • ${dateTimeStr(inv['invoice_date'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),

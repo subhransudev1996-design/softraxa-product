@@ -110,7 +110,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
             Text(
               softraxa ? 'SOFTRAXA' : 'You',
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 color: softraxa ? AppColors.indigo : AppColors.inkSoft,
               ),
@@ -118,7 +118,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
             Text(body, style: const TextStyle(fontSize: 14)),
             Text(
               dateTimeStr(at),
-              style: TextStyle(fontSize: 10.5, color: AppColors.inkSoft),
+              style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
             ),
           ],
         ),

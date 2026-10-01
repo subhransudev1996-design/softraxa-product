@@ -503,12 +503,12 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                   subtitle: row.valid
                       ? Text(
                           '₹${row.values['selling_price']} • GST ${row.values['gst_rate']}% • Stock ${row.values['opening_stock']}',
-                          style: const TextStyle(fontSize: 12),
+                          style: const TextStyle(fontSize: 13),
                         )
                       : Text(
                           row.errors.join('\n'),
                           style: const TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: AppColors.red,
                           ),
                         ),

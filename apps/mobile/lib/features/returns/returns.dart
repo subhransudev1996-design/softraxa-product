@@ -492,7 +492,7 @@ class _SaleReturnTile extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       'Against ${(r['invoices'] as Map?)?['invoice_no'] ?? '—'} • ${dateStr(r['return_date'])}',
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),
@@ -748,7 +748,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                             '${(items[i]['serial_no'] as String? ?? '').isNotEmpty ? '\nIMEI/Serial: ${items[i]['serial_no']}' : ''}'
                             '${(items[i]['condition'] ?? 'sellable') != 'sellable' ? '\nCondition: ${returnConditions[items[i]['condition']] ?? items[i]['condition']} (held, not in stock)' : ''}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               color: AppColors.inkSoft,
                             ),
                           ),
@@ -1136,7 +1136,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                               Text(
                                 'Sold: ${qty(it['quantity'] as num?)} @ ${money(_lineInclRate(it))}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
@@ -1144,7 +1144,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 Text(
                                   'Checking earlier returns…',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 )
@@ -1154,7 +1154,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                       ? 'Already fully returned'
                                       : '${qty(already)} already returned — ${qty(maxReturnable)} left to return',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     fontWeight: FontWeight.w600,
                                     color: maxReturnable <= 0
                                         ? AppColors.red
@@ -1354,7 +1354,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 '${money(_total - _refundAmount)} will be adjusted against the customer\'s due.',
-                style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
           const SizedBox(height: 12),
@@ -1761,7 +1761,7 @@ class _PurchaseReturnTile extends StatelessWidget {
                       'Against ${(r['purchases'] as Map?)?['purchase_no'] ?? '—'}'
                       '${(r['suppliers'] as Map?)?['name'] != null ? ' • ${(r['suppliers'] as Map)['name']}' : ''}'
                       ' • ${dateStr(r['return_date'])}',
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),
@@ -1924,7 +1924,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                           subtitle: Text(
                             'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 13,
                               color: AppColors.inkSoft,
                             ),
                           ),
@@ -2309,7 +2309,7 @@ class _PurchaseReturnFormScreenState
                               Text(
                                 'Bought: ${qty(it['quantity'] as num?)} @ ${money(_lineRate(it))}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
@@ -2324,7 +2324,7 @@ class _PurchaseReturnFormScreenState
                                     ? '${qty(already)} already returned — in stock: ${qty(available)} returnable'
                                     : 'In stock: ${qty(available)} returnable',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: maxReturnable <= 0
                                       ? AppColors.red

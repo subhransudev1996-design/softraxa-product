@@ -121,7 +121,7 @@ Future<String?> showImeiPicker(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     'No in-stock IMEIs found in database. Type or scan an IMEI above.',
-                    style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                    style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 )
               else
@@ -1153,7 +1153,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                 '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}'
                                                 '${line.priceSource == 'retail' || line.priceSource == 'manual' ? '' : '  • ${priceSourceLabel(line.priceSource)}'}',
                                                 style: TextStyle(
-                                                  fontSize: 12,
+                                                  fontSize: 13,
                                                   color: AppColors.inkSoft,
                                                 ),
                                               ),
@@ -1168,7 +1168,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                         ? 'Tap to add IMEI/serial'
                                                         : 'S/N: ${line.serialNo}',
                                                     style: TextStyle(
-                                                      fontSize: 11,
+                                                      fontSize: 12,
                                                       fontWeight:
                                                           FontWeight.w600,
                                                       color:
@@ -1247,7 +1247,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                   Text(
                                     '${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} • Qty ${qty(cart.totalQty)}',
                                     style: TextStyle(
-                                      fontSize: 11.5,
+                                      fontSize: 12.5,
                                       color: AppColors.inkSoft,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -1264,7 +1264,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                     Text(
                                       'incl. GST ${money(cart.billTaxTotal)}',
                                       style: TextStyle(
-                                        fontSize: 11,
+                                        fontSize: 12,
                                         color: AppColors.inkSoft,
                                       ),
                                     ),

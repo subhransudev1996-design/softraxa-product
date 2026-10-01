@@ -130,6 +130,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 }
 
+/// Stock is valued at purchase price; ₹0 usually means purchase prices
+/// are missing, so the card says so. Staff who may not see costs get
+/// null from the server and see a dash, not a misleading ₹0.
+String _stockValue(Map<String, dynamic>? s) => s == null
+    ? '…'
+    : s['stock_value'] == null
+    ? '—'
+    : moneyCompact(s['stock_value'] as num?);
+
+String _stockValueTitle(Map<String, dynamic>? s) =>
+    s != null && s['stock_value'] != null && toDouble(s['stock_value']) == 0
+    ? 'Stock value · add costs'
+    : 'Stock value (cost)';
+
 /// Desktop KPI cards: all in one row, equal widths.
 Widget _statRow(List<Widget> cards) {
   return SizedBox(
@@ -388,10 +402,8 @@ class _DesktopDashboard extends StatelessWidget {
                             onTap: () => context.push('/invoices'),
                           ),
                         _StatCard(
-                          title: 'Stock Value',
-                          value: s == null
-                              ? '…'
-                              : moneyCompact(s!['stock_value'] as num?),
+                          title: _stockValueTitle(s),
+                          value: _stockValue(s),
                           icon: Icons.warehouse_rounded,
                           color: AppColors.indigo,
                           onTap: () => context.push('/stock'),
@@ -536,7 +548,7 @@ class _MobileDashboard extends StatelessWidget {
                             dateStr(DateTime.now()),
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.75),
-                              fontSize: 12,
+                              fontSize: 13,
                             ),
                           ),
                         ],
@@ -585,7 +597,7 @@ class _MobileDashboard extends StatelessWidget {
                   "TODAY'S SALE",
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.72),
-                    fontSize: 11,
+                    fontSize: 12,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 1.2,
                   ),
@@ -630,7 +642,7 @@ class _MobileDashboard extends StatelessWidget {
                               'Profit ${moneyCompact(s!['today_profit'] as num?)}',
                               style: const TextStyle(
                                 color: Colors.white,
-                                fontSize: 12,
+                                fontSize: 13,
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
@@ -646,7 +658,7 @@ class _MobileDashboard extends StatelessWidget {
                       '${s!['today_invoice_count']} ${s!['today_invoice_count'] == 1 ? 'invoice' : 'invoices'} today',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
-                        fontSize: 12,
+                        fontSize: 13,
                       ),
                     ),
                   ),
@@ -740,10 +752,8 @@ class _MobileDashboard extends StatelessWidget {
                   id: 'stats',
                   child: _statGrid([
                     _StatCard(
-                      title: 'Stock Value',
-                      value: s == null
-                          ? '…'
-                          : moneyCompact(s!['stock_value'] as num?),
+                      title: _stockValueTitle(s),
+                      value: _stockValue(s),
                       icon: Icons.warehouse_rounded,
                       color: AppColors.indigo,
                       onTap: () => context.push('/stock'),
@@ -911,7 +921,7 @@ class _ExpiryBanner extends ConsumerWidget {
                 const SizedBox(height: 2),
                 Text(
                   'Renew now so billing doesn\'t stop.',
-                  style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                  style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ],
             ),
@@ -1060,10 +1070,11 @@ class _StatCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       title,
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12.5,
+                        height: 1.2,
                         fontWeight: FontWeight.w600,
                         color: AppColors.inkSoft,
                       ),
@@ -1108,7 +1119,7 @@ class _QuickAction extends StatelessWidget {
                 label,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 11.5,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -1159,10 +1170,10 @@ class _InvoiceTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    '${invoice['invoice_no']}  •  ${dateTimeStr(invoice['invoice_date'])}',
+                    '${invoice['invoice_no']}  •  ${shortDateTimeStr(invoice['invoice_date'])}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
+                    style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                   ),
                 ],
               ),

@@ -554,7 +554,7 @@ class _SupplierTile extends StatelessWidget {
                     ),
                     Text(
                       s['phone'] as String? ?? '',
-                      style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                      style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                   ],
                 ),
@@ -585,7 +585,7 @@ class _SupplierTile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const Text('we owe', style: TextStyle(fontSize: 11)),
+                        const Text('we owe', style: TextStyle(fontSize: 12)),
                       ],
                     )
                   : const Icon(Icons.chevron_right),
@@ -706,7 +706,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                                       Text(
                                         s['address'] as String,
                                         style: TextStyle(
-                                          fontSize: 12,
+                                          fontSize: 13,
                                           color: AppColors.inkSoft,
                                         ),
                                       ),
@@ -740,14 +740,14 @@ class SupplierDetailScreen extends ConsumerWidget {
                                 Text(
                                   'Credit limit',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 ),
                                 Text(
                                   money(creditLimit),
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 ),
@@ -768,7 +768,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                                   child: Text(
                                     'Over credit limit by ${money(due - creditLimit)}',
                                     style: const TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       color: AppColors.orange,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -883,7 +883,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                 children: [
                   Text(e['label'] as String),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(fontSize: 12)),
+                  Text(subtitle, style: const TextStyle(fontSize: 13)),
                 ],
               ),
             ),

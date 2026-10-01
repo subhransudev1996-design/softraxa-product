@@ -166,7 +166,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                 Text(
                   'After closing, the day is locked. Cash taken later counts in the next day. '
                   'Only the owner can reopen it.',
-                  style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                  style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ],
             ),
@@ -344,7 +344,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                           child: Text(
                             'Earlier closing (v${h['version']}): counted ${money(toDouble(h['counted_cash']))}, '
                             '${varianceLabel(toDouble(h['variance']))} — reopened: ${h['reopen_reason']}',
-                            style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                            style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                           ),
                         ),
                       const SectionLabel('Cash movements'),
@@ -447,7 +447,7 @@ class _ClosingCard extends StatelessWidget {
               Text('Reason: ${closing['reason']}', style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             Text(
               'Closed at ${dateTimeStr(closing['submitted_at'])}',
-              style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+              style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             if (isOwner) ...[
               const SizedBox(height: 8),

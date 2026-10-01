@@ -41,7 +41,7 @@ class MoreScreen extends ConsumerWidget {
         ),
         subtitle: subtitle == null
             ? null
-            : Text(subtitle, style: const TextStyle(fontSize: 12)),
+            : Text(subtitle, style: const TextStyle(fontSize: 13)),
         trailing: enabled
             ? const Icon(Icons.chevron_right, size: 20)
             : const Icon(Icons.lock_outline, size: 18),
@@ -273,36 +273,31 @@ class MoreScreen extends ConsumerWidget {
                   color: AppColors.orange,
                 ),
                 const Divider(),
-                Card(
-                  child: ListTile(
-                    leading: const IconChip(
-                      Icons.help_outline,
-                      color: AppColors.purple,
-                      size: 38,
-                    ),
-                    title: const Text(
-                      'App walkthrough',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                      ),
-                    ),
-                    subtitle: const Text(
-                      'Replay the guided tour anytime',
-                      style: TextStyle(fontSize: 12),
-                    ),
-                    trailing: const Icon(Icons.chevron_right, size: 20),
-                    onTap: () async {
-                      // Welcome tour anchors live on the dashboard tab.
-                      context.go('/home');
-                      await Future<void>.delayed(
-                        const Duration(milliseconds: 250),
-                      );
-                      if (context.mounted) showWalkthrough(context, 'home');
-                    },
+                ListTile(
+                  leading: const IconChip(
+                    Icons.help_outline,
+                    color: AppColors.purple,
+                    size: 38,
                   ),
+                  title: const Text(
+                    'App walkthrough',
+                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                  ),
+                  subtitle: const Text(
+                    'Replay the guided tour anytime',
+                    style: TextStyle(fontSize: 13),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () async {
+                    // Welcome tour anchors live on the dashboard tab.
+                    context.go('/home');
+                    await Future<void>.delayed(
+                      const Duration(milliseconds: 250),
+                    );
+                    if (context.mounted) showWalkthrough(context, 'home');
+                  },
                 ),
-                const SizedBox(height: 10),
+                const Divider(),
                 ListTile(
                   leading: const IconChip(
                     Icons.chat,
@@ -315,7 +310,7 @@ class MoreScreen extends ConsumerWidget {
                   ),
                   subtitle: const Text(
                     'Get instant help or upgrade plan on WhatsApp',
-                    style: TextStyle(fontSize: 12),
+                    style: TextStyle(fontSize: 13),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
                   onTap: () => launchWhatsAppContact(context, appContext),
@@ -346,7 +341,7 @@ class MoreScreen extends ConsumerWidget {
                     title: const Text('Verify Sentry setup'),
                     subtitle: const Text(
                       'Debug builds only: throws a test error',
-                      style: TextStyle(fontSize: 12),
+                      style: TextStyle(fontSize: 13),
                     ),
                     onTap: () => throw StateError('This is test exception'),
                   ),

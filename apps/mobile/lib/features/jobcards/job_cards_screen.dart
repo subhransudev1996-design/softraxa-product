@@ -249,7 +249,7 @@ class _JobCardTile extends StatelessWidget {
                       ' • ${dateStr(j['created_at'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+                      style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
                 ),
@@ -266,7 +266,7 @@ class _JobCardTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Text(
                     money(j['estimated_cost'] as num?),
-                    style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                    style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 ],
               ),

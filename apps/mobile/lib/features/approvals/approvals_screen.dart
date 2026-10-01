@@ -404,7 +404,7 @@ class _ApprovalCard extends StatelessWidget {
                 if (requester != null) 'by $requester',
                 dateTimeStr(r['created_at']),
               ].join(' • '),
-              style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w600),
+              style: TextStyle(fontSize: 13, color: color, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             for (final e in exceptions)

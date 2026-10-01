@@ -535,7 +535,7 @@ class _CustomerTile extends StatelessWidget {
                     ),
                     Text(
                       c['phone'] as String? ?? '',
-                      style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                      style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                   ],
                 ),
@@ -566,7 +566,7 @@ class _CustomerTile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const Text('due', style: TextStyle(fontSize: 11)),
+                        const Text('due', style: TextStyle(fontSize: 12)),
                       ],
                     )
                   : const Icon(Icons.chevron_right),

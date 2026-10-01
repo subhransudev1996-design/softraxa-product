@@ -246,7 +246,7 @@ class SupportScreen extends ConsumerWidget {
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 color: AppColors.inkSoft,
-                                fontSize: 12,
+                                fontSize: 13,
                               ),
                             ),
                             trailing: unread

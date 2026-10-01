@@ -614,7 +614,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         'Estimates do not deduct stock or record payment.',
-                        style: TextStyle(fontSize: 12, color: AppColors.orange),
+                        style: TextStyle(fontSize: 13, color: AppColors.orange),
                       ),
                     ),
                 ],
@@ -667,7 +667,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       color: AppColors.inkSoft,
                                     ),
                                   ),
@@ -691,7 +691,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                           Text(
                                             'Current due: ${money(existingDue)}',
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                               color: existingDue > 0
                                                   ? AppColors.red
@@ -702,7 +702,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                             Text(
                                               'Credit limit: ${money(creditLimit)}',
                                               style: TextStyle(
-                                                fontSize: 12,
+                                                fontSize: 13,
                                                 color: AppColors.inkSoft,
                                               ),
                                             ),
@@ -715,7 +715,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                 Text(
                                   'No customer selected',
                                   style: TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.inkSoft,
                                   ),
                                 ),
@@ -799,7 +799,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               child: Text(
                                 '− ${money(cart.billDiscountAmount)}',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
@@ -970,7 +970,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               Text(
                                 'Due',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
@@ -1076,7 +1076,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             Text(
                               'Collected',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: AppColors.inkSoft,
                               ),
                             ),
@@ -1095,7 +1095,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             Text(
                               'Due',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: AppColors.inkSoft,
                               ),
                             ),
@@ -1119,7 +1119,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       padding: const EdgeInsets.only(top: 8),
                       child: Text(
                         'Select a customer on the bill to track this due.',
-                        style: TextStyle(fontSize: 12, color: AppColors.red),
+                        style: TextStyle(fontSize: 13, color: AppColors.red),
                       ),
                     ),
                   if (due > 0 && cart.customer?['credit_limit'] != null)
@@ -1148,7 +1148,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   'This bill exceeds the credit limit of ${money(creditLimit)} '
                                   '(due would be ${money(projectedDue)}).',
                                   style: const TextStyle(
-                                    fontSize: 12,
+                                    fontSize: 13,
                                     color: AppColors.orange,
                                   ),
                                 ),
@@ -1184,7 +1184,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     child: Text(
                       'Payments already recorded on this bill are unaffected — only the items and total change.',
                       style: TextStyle(
-                        fontSize: 11.5,
+                        fontSize: 12.5,
                         color: AppColors.inkSoft,
                       ),
                     ),

@@ -140,7 +140,7 @@ Future<Map<String, double>?> showConditionSplitDialog(
               if (!ok)
                 Text(
                   'The quantities must add up to ${qty(total)} (now ${qty(sum)}).',
-                  style: const TextStyle(color: AppColors.red, fontSize: 12),
+                  style: const TextStyle(color: AppColors.red, fontSize: 13),
                 ),
             ],
           ),

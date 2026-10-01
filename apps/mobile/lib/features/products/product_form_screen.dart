@@ -557,7 +557,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               child: Text(
                                 'In the product list — tap to fill in the details',
                                 style: TextStyle(
-                                  fontSize: 12,
+                                  fontSize: 13,
                                   fontWeight: FontWeight.w600,
                                   color: AppColors.inkSoft,
                                 ),
@@ -941,7 +941,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         Text(
                           'Add or scan unique IMEI numbers for individual stock units.',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: AppColors.inkSoft,
                           ),
                         ),
@@ -1012,7 +1012,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                   avatar: const Icon(Icons.qr_code, size: 14),
                                   label: Text(
                                     imei,
-                                    style: const TextStyle(fontSize: 12),
+                                    style: const TextStyle(fontSize: 13),
                                   ),
                                   onDeleted: () =>
                                       setState(() => _serials.remove(imei)),

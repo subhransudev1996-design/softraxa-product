@@ -113,7 +113,7 @@ Future<String?> showRequestApproval(
             Text(
               'The sale is kept as a pending request — nothing is sold yet. '
               'Complete it once the owner approves (Approvals screen).',
-              style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+              style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             const SizedBox(height: 8),
             TextField(

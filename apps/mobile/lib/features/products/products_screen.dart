@@ -230,7 +230,7 @@ class _ProductRow extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 11.5,
+                          fontSize: 12.5,
                           color: AppColors.inkSoft,
                         ),
                       ),
@@ -394,7 +394,7 @@ class _ProductTile extends ConsumerWidget {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 13,
                                 color: AppColors.inkSoft,
                               ),
                             ),

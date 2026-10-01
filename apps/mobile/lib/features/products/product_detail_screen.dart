@@ -346,7 +346,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                   Text(
                                     'Purchase: ${money(p['purchase_price'] as num?)}  •  GST ${qty(p['gst_rate'] as num?)}%',
                                     style: TextStyle(
-                                      fontSize: 12,
+                                      fontSize: 13,
                                       color: AppColors.inkSoft,
                                     ),
                                   ),
@@ -404,7 +404,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                           child: Text(
                                             '1 ${p['secondary_unit_name']} = ${qty(toDouble(p['conversion_factor']))} $unit',
                                             style: TextStyle(
-                                              fontSize: 12,
+                                              fontSize: 13,
                                               color: AppColors.inkSoft,
                                             ),
                                           ),
@@ -450,7 +450,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                 ? Text(
                                     'Choose a variant to adjust',
                                     style: TextStyle(
-                                      fontSize: 11.5,
+                                      fontSize: 12.5,
                                       color: AppColors.inkSoft,
                                     ),
                                   )
@@ -558,7 +558,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                   '${(v['barcode'] as String? ?? '').isNotEmpty ? '  •  ${v['barcode']}' : ''}',
                                   style: TextStyle(
                                     color: AppColors.inkSoft,
-                                    fontSize: 12,
+                                    fontSize: 13,
                                   ),
                                 ),
                                 trailing: Row(
@@ -733,7 +733,7 @@ class _SerialsCard extends ConsumerWidget {
                     Text(
                       'In Stock (${inStock.length})  •  Sold (${sold.length})',
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                         color: AppColors.inkSoft,
                       ),
@@ -742,7 +742,7 @@ class _SerialsCard extends ConsumerWidget {
                     if (inStock.isNotEmpty) ...[
                       const Text(
                         'Available In Stock',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.green),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.green),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -752,7 +752,7 @@ class _SerialsCard extends ConsumerWidget {
                           for (final s in inStock)
                             Chip(
                               avatar: const Icon(Icons.check_circle_outline, size: 14, color: AppColors.green),
-                              label: Text(s['serial_no'] as String? ?? '', style: const TextStyle(fontSize: 12)),
+                              label: Text(s['serial_no'] as String? ?? '', style: const TextStyle(fontSize: 13)),
                               backgroundColor: AppColors.green.withAlpha(20),
                             ),
                         ],
@@ -762,7 +762,7 @@ class _SerialsCard extends ConsumerWidget {
                     if (sold.isNotEmpty) ...[
                       Text(
                         'Sold Units',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.inkSoft),
+                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.inkSoft),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -774,7 +774,7 @@ class _SerialsCard extends ConsumerWidget {
                               avatar: Icon(Icons.sell_outlined, size: 14, color: AppColors.inkSoft),
                               label: Text(
                                 '${s['serial_no']}${s['invoice'] != null ? ' (${s['invoice']['invoice_no']})' : ''}',
-                                style: const TextStyle(fontSize: 12),
+                                style: const TextStyle(fontSize: 13),
                               ),
                               backgroundColor: AppColors.canvas,
                             ),
