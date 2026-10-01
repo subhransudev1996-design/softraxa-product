@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/branding.dart';
 
+import '../../core/auth_links.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -79,9 +80,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _resendVerification(String email) async {
     try {
-      await ref.read(supabaseProvider).auth.resend(
+      await ref
+          .read(supabaseProvider)
+          .auth
+          .resend(
             type: OtpType.signup,
             email: email,
+            emailRedirectTo: authCallbackUrl,
           );
       if (mounted) {
         showSuccess(context, 'Verification email sent to $email.');

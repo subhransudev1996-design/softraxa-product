@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/auth_links.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
@@ -32,7 +33,10 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     }
     setState(() => _busy = true);
     try {
-      await ref.read(supabaseProvider).auth.resetPasswordForEmail(email);
+      await ref
+          .read(supabaseProvider)
+          .auth
+          .resetPasswordForEmail(email, redirectTo: authCallbackUrl);
       if (mounted) setState(() => _sent = true);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -114,8 +118,11 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.mark_email_read_outlined,
-            size: 64, color: AppColors.primary),
+        const Icon(
+          Icons.mark_email_read_outlined,
+          size: 64,
+          color: AppColors.primary,
+        ),
         const SizedBox(height: 20),
         Text(
           'Check your email',
@@ -176,12 +183,18 @@ Future<void> showSetNewPasswordDialog(
                     if (controller.text.length < 6) return;
                     setLocal(() => busy = true);
                     try {
-                      await ref.read(supabaseProvider).auth.updateUser(
+                      await ref
+                          .read(supabaseProvider)
+                          .auth
+                          .updateUser(
                             UserAttributes(password: controller.text),
                           );
                       if (ctx.mounted) {
                         Navigator.pop(ctx);
-                        showSuccess(ctx, 'Password updated. You\'re signed in.');
+                        showSuccess(
+                          ctx,
+                          'Password updated. You\'re signed in.',
+                        );
                       }
                     } catch (e) {
                       if (ctx.mounted) showError(ctx, e);

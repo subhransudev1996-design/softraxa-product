@@ -68,6 +68,44 @@ export default function CallbackClient() {
         return;
       }
 
+      // Links the Dukania app asks for carry the session in the fragment:
+      // #access_token=…&refresh_token=…&type=recovery (implicit flow).
+      const hash = new URLSearchParams(url.hash.replace(/^#/, ""));
+      const hashError = hash.get("error_description");
+      if (hashError) {
+        fail(
+          hashError.replace(/\+/g, " ").toLowerCase().includes("expired")
+            ? "This link has expired. Please request a new one from the app."
+            : decodeURIComponent(hashError.replace(/\+/g, " ")),
+        );
+        return;
+      }
+      const accessToken = hash.get("access_token");
+      const refreshToken = hash.get("refresh_token");
+      if (accessToken && refreshToken) {
+        // The tokens must not stay in the address bar or the history.
+        window.history.replaceState(null, "", url.pathname);
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+          { auth: { detectSessionInUrl: false, persistSession: false, autoRefreshToken: false } }
+        );
+        const { error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        if (!active) return;
+        if (error) {
+          fail("This link has expired. Please request a new one from the app.");
+        } else if (hash.get("type") === "recovery") {
+          clientRef.current = supabase;
+          setStatus("reset");
+        } else {
+          setStatus("success");
+        }
+        return;
+      }
+
       if (!tokenHash && !code) {
         fail("This link is missing its verification token. It may have already been used.");
         return;

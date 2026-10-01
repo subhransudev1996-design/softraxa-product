@@ -19,7 +19,7 @@ export async function createSetPasswordLink(service: SupabaseClient, email: stri
   if (error) throw error;
   const tokenHash = data.properties?.hashed_token;
   if (!tokenHash) throw new Error("Could not create a set-password link");
-  const site = (process.env.WEBSITE_URL || "https://dukania.softraxa.com").replace(/\/$/, "");
+  const site = (process.env.WEBSITE_URL || "https://www.softraxa.in").replace(/\/$/, "");
   return `${site}/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`;
 }
 

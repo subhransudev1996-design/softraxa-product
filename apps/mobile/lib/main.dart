@@ -35,6 +35,13 @@ Future<void> _start() async {
         dotenv.env['SUPABASE_PUBLISHABLE_KEY'] ??
         dotenv.env['SUPABASE_ANON_KEY'] ??
         '',
+    // Implicit flow: password-reset and signup links carry the session in
+    // the link itself, so the website can finish them in any browser. With
+    // the default (PKCE) a link only works on the phone that asked for it,
+    // and opening it in the browser failed.
+    authOptions: const FlutterAuthClientOptions(
+      authFlowType: AuthFlowType.implicit,
+    ),
   );
   if (isDesktopPlatform) {
     await windowManager.ensureInitialized();

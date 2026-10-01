@@ -7,8 +7,10 @@ export const metadata: Metadata = {
 };
 
 // Auth callback landing page. Supabase confirmation & password-reset links
-// redirect here with a `?code=...` (PKCE). The client component exchanges it
-// for a session, completing verification, then tells the user to open the app.
+// land here as ?token_hash=… (custom email template), #access_token=… (what
+// the Dukania app asks for) or ?code=…. The client component verifies the
+// link, asks for the new password when it is a reset, then tells the user
+// to open the app.
 export default function AuthCallbackPage() {
   return <CallbackClient />;
 }

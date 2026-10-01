@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../core/auth_links.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
@@ -37,6 +38,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             email: email,
             password: _password.text,
             data: {'full_name': _name.text.trim()},
+            emailRedirectTo: authCallbackUrl,
           );
       if (mounted && res.session == null) {
         // Email confirmation is enabled — show the verify panel.
@@ -55,9 +57,13 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     if (email == null) return;
     setState(() => _busy = true);
     try {
-      await ref.read(supabaseProvider).auth.resend(
+      await ref
+          .read(supabaseProvider)
+          .auth
+          .resend(
             type: OtpType.signup,
             email: email,
+            emailRedirectTo: authCallbackUrl,
           );
       if (mounted) showSuccess(context, 'Verification email sent to $email.');
     } catch (e) {
@@ -86,65 +92,70 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       onGoToLogin: () => context.go('/login'),
                     )
                   : Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      controller: _name,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Your name',
-                        prefixIcon: Icon(Icons.person_outline),
-                      ),
-                      validator: (v) => v == null || v.trim().isEmpty
-                          ? 'Enter your name'
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _email,
-                      keyboardType: TextInputType.emailAddress,
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
-                      validator: (v) => v == null || !v.contains('@')
-                          ? 'Enter a valid email'
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _password,
-                      obscureText: _obscure,
-                      decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscure ? Icons.visibility_off : Icons.visibility,
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          TextFormField(
+                            controller: _name,
+                            textCapitalization: TextCapitalization.words,
+                            decoration: const InputDecoration(
+                              labelText: 'Your name',
+                              prefixIcon: Icon(Icons.person_outline),
+                            ),
+                            validator: (v) => v == null || v.trim().isEmpty
+                                ? 'Enter your name'
+                                : null,
                           ),
-                          onPressed: () => setState(() => _obscure = !_obscure),
-                        ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _email,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Email',
+                              prefixIcon: Icon(Icons.email_outlined),
+                            ),
+                            validator: (v) => v == null || !v.contains('@')
+                                ? 'Enter a valid email'
+                                : null,
+                          ),
+                          const SizedBox(height: 16),
+                          TextFormField(
+                            controller: _password,
+                            obscureText: _obscure,
+                            decoration: InputDecoration(
+                              labelText: 'Password',
+                              prefixIcon: const Icon(Icons.lock_outline),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  _obscure
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () =>
+                                    setState(() => _obscure = !_obscure),
+                              ),
+                            ),
+                            validator: (v) => v == null || v.length < 6
+                                ? 'Minimum 6 characters'
+                                : null,
+                          ),
+                          const SizedBox(height: 24),
+                          FilledButton(
+                            onPressed: _busy ? null : _signup,
+                            child: _busy
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text('Sign up'),
+                          ),
+                        ],
                       ),
-                      validator: (v) => v == null || v.length < 6
-                          ? 'Minimum 6 characters'
-                          : null,
                     ),
-                    const SizedBox(height: 24),
-                    FilledButton(
-                      onPressed: _busy ? null : _signup,
-                      child: _busy
-                          ? const SizedBox(
-                              height: 20,
-                              width: 20,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Text('Sign up'),
-                    ),
-                  ],
-                ),
-              ),
             ),
           ),
         ),
@@ -174,8 +185,11 @@ class _VerifyPanel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Icon(Icons.mark_email_read_outlined,
-            size: 64, color: AppColors.primary),
+        const Icon(
+          Icons.mark_email_read_outlined,
+          size: 64,
+          color: AppColors.primary,
+        ),
         const SizedBox(height: 20),
         Text(
           'Check your email',

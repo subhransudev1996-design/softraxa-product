@@ -70,7 +70,7 @@ export async function GET() {
 
   // The website page that opens set-password and signup links.
   if (!website) {
-    checks.push({ key: "website", ok: false, detail: "WEBSITE_URL is not set — links fall back to https://dukania.softraxa.com" });
+    checks.push({ key: "website", ok: false, detail: "WEBSITE_URL is not set — links fall back to https://www.softraxa.in" });
   } else {
     const status = await probe(`${website}/auth/callback`);
     checks.push({
