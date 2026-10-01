@@ -257,6 +257,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                         ),
                       const Spacer(),
                       FilledButton(
+                        // The theme makes filled buttons full width, which a
+                        // Row can't lay out: the whole screen stayed blank.
+                        style: FilledButton.styleFrom(
+                          minimumSize: const Size(140, 52),
+                        ),
                         onPressed: _busy ? null : _next,
                         child: _busy
                             ? const SizedBox(
