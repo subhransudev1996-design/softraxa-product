@@ -19,6 +19,9 @@ const COLS = [
       { href: "/services", label: "Services" },
       { href: "/products", label: "Work" },
       { href: "/contact", label: "Contact" },
+      { href: "/privacy", label: "Privacy" },
+      { href: "/terms", label: "Terms" },
+      { href: "/delete-account", label: "Delete account" },
     ],
   },
   {
