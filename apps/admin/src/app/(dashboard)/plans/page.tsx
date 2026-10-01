@@ -26,6 +26,9 @@ type Form = {
   sort_order: string;
   is_custom: boolean;
   is_trial: boolean;
+  /** The product's trial length (software_products.trial_days), edited
+   *  here with the trial plan because that's where it is looked for. */
+  trial_days: string;
   is_recommended: boolean;
   notes: string;
 };
@@ -61,7 +64,7 @@ export default function PlansPage() {
   useEffect(() => {
     supabase.from("plans").select("*, software_products(name)").order("sort_order").order("name")
       .then(({ data }) => setPlans(data ?? []));
-    supabase.from("software_products").select("id, name, slug, status, features")
+    supabase.from("software_products").select("id, name, slug, status, features, trial_days")
       .eq("is_active", true).order("sort_order")
       .then(({ data }) => setProducts(data ?? []));
     // Shops per plan, by each shop's latest subscription.
@@ -99,6 +102,7 @@ export default function PlansPage() {
       sort_order: str(p?.sort_order ?? (plans?.length ?? 0) + 1),
       is_custom: Boolean(p?.is_custom),
       is_trial: Boolean(p?.is_trial),
+      trial_days: str(products.find((x) => x.id === (p?.software_id ?? defaultProduct()))?.trial_days ?? 14),
       is_recommended: Boolean(p?.is_recommended),
       notes: p?.notes ?? "",
     });
@@ -118,6 +122,10 @@ export default function PlansPage() {
     if (!form) return;
     setFormError(null);
     if (!form.name.trim()) return setFormError("Give the plan a name");
+    const trialDays = Number(form.trial_days);
+    if (form.is_trial && !(Number.isInteger(trialDays) && trialDays >= 1 && trialDays <= 90)) {
+      return setFormError("The trial length must be 1 to 90 days");
+    }
     const valid = new Set(productFeatures.map((f) => f.key));
     setBusy(true);
     const { error } = await supabase.rpc("admin_save_plan", {
@@ -145,6 +153,12 @@ export default function PlansPage() {
       return setFormError(
         error.message.includes("admin_save_plan") ? "Migration 0055 isn't applied to this database yet." : error.message,
       );
+    }
+    // New shops get the product's trial length on this plan.
+    if (form.is_trial && form.software_id) {
+      const { error: daysError } = await supabase
+        .from("software_products").update({ trial_days: trialDays }).eq("id", form.software_id);
+      if (daysError) return setFormError(`Plan saved, but the trial length wasn't: ${daysError.message}`);
     }
     setNotice({
       ok: true,
@@ -199,7 +213,11 @@ export default function PlansPage() {
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold text-ink">{p.name}</span>
-                    {p.is_trial && <Badge color="blue">trial plan</Badge>}
+                    {p.is_trial && (
+                      <Badge color="blue">
+                        trial plan · {products.find((x) => x.id === p.software_id)?.trial_days ?? "?"} days
+                      </Badge>
+                    )}
                     {p.is_recommended && <Badge color="purple">recommended</Badge>}
                     {p.is_custom && <Badge color="orange">custom</Badge>}
                     {!p.is_active && <Badge>hidden</Badge>}
@@ -346,6 +364,13 @@ export default function PlansPage() {
               <Check checked={form.is_recommended} onChange={(v) => set("is_recommended", v)} label="Recommended" hint="Marked “Recommended” in the app." />
               <Check checked={form.is_custom} onChange={(v) => set("is_custom", v)} label="Custom plan" hint="Made for one client — not offered to other shops in the app." />
               <Check checked={form.is_trial} onChange={(v) => set("is_trial", v)} label="New shops start on this plan" hint="The free trial. Only one plan can have this; ticking it here moves it from the other plan." />
+              {form.is_trial && (
+                <div className="ml-6 max-w-xs">
+                  <Label>Trial length (days)</Label>
+                  <Input type="number" min={1} max={90} value={form.trial_days} onChange={(e) => set("trial_days", e.target.value)} />
+                  <p className="mt-1 text-xs text-zinc-500">How long a new shop can use the app free. Shops already on trial keep their date.</p>
+                </div>
+              )}
               <div>
                 <Label>Private notes — only you see these</Label>
                 <Input value={form.notes} onChange={(e) => set("notes", e.target.value)} />
