@@ -69,43 +69,48 @@ class _MobileShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final current = navigationShell.currentIndex;
+    // The bottom bar hides under the keyboard; the round New Bill button
+    // must too, or it floats over the screen (and the bill's totals).
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return Scaffold(
       body: navigationShell,
       extendBody: false,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: SizedBox(
-        width: 64,
-        height: 64,
-        child: CoachTarget(
-          page: 'home',
-          id: 'new_bill',
-          child: FloatingActionButton(
-            heroTag: 'new_bill_fab',
-            onPressed: () => _go(1),
-            tooltip: 'New Bill',
-            elevation: current == 1 ? 1 : 4,
-            shape: const CircleBorder(),
-            child: Container(
+      floatingActionButton: keyboardOpen
+          ? null
+          : SizedBox(
               width: 64,
               height: 64,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.primary, AppColors.primaryDark],
+              child: CoachTarget(
+                page: 'home',
+                id: 'new_bill',
+                child: FloatingActionButton(
+                  heroTag: 'new_bill_fab',
+                  onPressed: () => _go(1),
+                  tooltip: 'New Bill',
+                  elevation: current == 1 ? 1 : 4,
+                  shape: const CircleBorder(),
+                  child: Container(
+                    width: 64,
+                    height: 64,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppColors.primary, AppColors.primaryDark],
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.receipt_long,
+                      size: 28,
+                      color: Colors.white,
+                    ),
+                  ),
                 ),
               ),
-              child: const Icon(
-                Icons.receipt_long,
-                size: 28,
-                color: Colors.white,
-              ),
             ),
-          ),
-        ),
-      ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           color: AppColors.card,

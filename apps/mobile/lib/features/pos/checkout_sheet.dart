@@ -543,616 +543,678 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       initialChildSize: widget.dialog ? 1 : 0.85,
       minChildSize: widget.dialog ? 1 : 0.25,
       maxChildSize: 1,
-      builder: (ctx, scrollController) => ListView(
-        controller: scrollController,
-        padding: const EdgeInsets.all(16),
+      builder: (ctx, scrollController) => Column(
         children: [
-          Text(
-            editing == null ? 'Checkout' : 'Save bill changes',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 12),
-          // ---- document type ----
-          if (editing != null)
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.indigo.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.edit_note,
-                    size: 18,
-                    color: AppColors.indigo,
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.all(16),
+              children: [
+                Text(
+                  editing == null ? 'Checkout' : 'Save bill changes',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                // ---- document type ----
+                if (editing != null)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.indigo.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.edit_note,
+                          size: 18,
+                          color: AppColors.indigo,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Editing ${editing.invoiceNo} — ${editing.invoiceType.toUpperCase()}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.indigo,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                else ...[
+                  SegmentedButton<String>(
+                    segments: [
+                      if (appContext?.gstEnabled ?? true)
+                        const ButtonSegment(value: 'gst', label: Text('GST')),
+                      const ButtonSegment(
+                        value: 'non_gst',
+                        label: Text('Non-GST'),
+                      ),
+                      const ButtonSegment(
+                        value: 'cash_memo',
+                        label: Text('Cash memo'),
+                      ),
+                      if (exchange == null)
+                        const ButtonSegment(
+                          value: 'estimate',
+                          label: Text('Estimate'),
+                        ),
+                    ],
+                    selected: {_docType},
+                    onSelectionChanged: (s) =>
+                        setState(() => _docType = s.first),
                   ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Editing ${editing.invoiceNo} — ${editing.invoiceType.toUpperCase()}',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.indigo,
+                  if (_docType == 'estimate')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Estimates do not deduct stock or record payment.',
+                        style: TextStyle(fontSize: 12, color: AppColors.orange),
                       ),
                     ),
-                  ),
                 ],
-              ),
-            )
-          else ...[
-            SegmentedButton<String>(
-              segments: [
-                if (appContext?.gstEnabled ?? true)
-                  const ButtonSegment(value: 'gst', label: Text('GST')),
-                const ButtonSegment(value: 'non_gst', label: Text('Non-GST')),
-                const ButtonSegment(
-                  value: 'cash_memo',
-                  label: Text('Cash memo'),
-                ),
-                if (exchange == null)
-                  const ButtonSegment(
-                    value: 'estimate',
-                    label: Text('Estimate'),
-                  ),
-              ],
-              selected: {_docType},
-              onSelectionChanged: (s) => setState(() => _docType = s.first),
-            ),
-            if (_docType == 'estimate')
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  'Estimates do not deduct stock or record payment.',
-                  style: TextStyle(fontSize: 12, color: AppColors.orange),
-                ),
-              ),
-          ],
-          const SectionLabel('Customer'),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                children: [
-                  InitialsAvatar(
-                    (cart.customer?['name'] as String?)?.isNotEmpty == true
-                        ? cart.customer!['name'] as String
-                        : 'Walk-in Customer',
-                    radius: 20,
-                    icon: cart.customer == null ? Icons.person_outline : null,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                const SectionLabel('Customer'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Row(
                       children: [
-                        Text(
+                        InitialsAvatar(
                           (cart.customer?['name'] as String?)?.isNotEmpty ==
                                   true
                               ? cart.customer!['name'] as String
-                              : 'Walk-in customer',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w700,
-                            fontSize: 14,
+                              : 'Walk-in Customer',
+                          radius: 20,
+                          icon: cart.customer == null
+                              ? Icons.person_outline
+                              : null,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                (cart.customer?['name'] as String?)
+                                            ?.isNotEmpty ==
+                                        true
+                                    ? cart.customer!['name'] as String
+                                    : 'Walk-in customer',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              if (cart.customer != null) ...[
+                                if ((cart.customer!['phone'] as String? ?? '')
+                                    .isNotEmpty)
+                                  Text(
+                                    cart.customer!['phone'] as String,
+                                    style: TextStyle(
+                                      fontSize: 12.5,
+                                      color: AppColors.inkSoft,
+                                    ),
+                                  ),
+                                if ((cart.customer!['address'] as String? ?? '')
+                                    .isNotEmpty)
+                                  Text(
+                                    cart.customer!['address'] as String,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.inkSoft,
+                                    ),
+                                  ),
+                                Builder(
+                                  builder: (context) {
+                                    final existingDue = toDouble(
+                                      cart.customer?['due_amount'],
+                                    );
+                                    final creditLimit =
+                                        cart.customer?['credit_limit'] == null
+                                        ? null
+                                        : toDouble(
+                                            cart.customer!['credit_limit'],
+                                          );
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 4),
+                                      child: Wrap(
+                                        spacing: 10,
+                                        runSpacing: 2,
+                                        children: [
+                                          Text(
+                                            'Current due: ${money(existingDue)}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w600,
+                                              color: existingDue > 0
+                                                  ? AppColors.red
+                                                  : AppColors.green,
+                                            ),
+                                          ),
+                                          if (creditLimit != null)
+                                            Text(
+                                              'Credit limit: ${money(creditLimit)}',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: AppColors.inkSoft,
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ] else
+                                Text(
+                                  'No customer selected',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.inkSoft,
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
-                        if (cart.customer != null) ...[
-                          if ((cart.customer!['phone'] as String? ?? '')
-                              .isNotEmpty)
+                        // Editing an existing bill never changes who it was
+                        // billed to (update_invoice doesn't touch customer_id);
+                        // an exchange stays with the original bill's customer.
+                        if (editing == null && exchange == null)
+                          Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                onPressed: () async {
+                                  final picked = await showCustomerPicker(
+                                    context,
+                                  );
+                                  if (picked != null) {
+                                    await setCartCustomer(ref, picked);
+                                  }
+                                },
+                                child: Text(
+                                  cart.customer == null ? 'Select' : 'Change',
+                                ),
+                              ),
+                              if (cart.customer != null)
+                                TextButton(
+                                  onPressed: () => setCartCustomer(ref, null),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: AppColors.inkSoft,
+                                  ),
+                                  child: const Text('Remove'),
+                                ),
+                            ],
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SectionLabel('Bill summary'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      children: [
+                        _row(
+                          'Items (${cart.itemCount})',
+                          money(cart.itemsGross),
+                        ),
+                        if (_docType == 'gst' && cart.taxTotal > 0)
+                          _row(
+                            'Included GST',
+                            money(cart.billTaxTotal),
+                            dim: true,
+                          ),
+                        // Bill discounts need price permission (enforced by the
+                        // server's invoice guard, migration 0037).
+                        if (appContext?.canEditPrices ?? false) ...[
+                          const SizedBox(height: 10),
+                          AmountOrPercentField(
+                            label: 'Bill discount',
+                            controller: _discount,
+                            isPercent: _discountIsPercent,
+                            onModeChanged: (v) => setState(() {
+                              _discountIsPercent = v;
+                              ref
+                                  .read(cartProvider.notifier)
+                                  .setBillDiscountMode(v);
+                            }),
+                            onChanged: (v) => ref
+                                .read(cartProvider.notifier)
+                                .setBillDiscount(double.tryParse(v) ?? 0),
+                          ),
+                        ],
+                        if (cart.billDiscount > 0)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                '− ${money(cart.billDiscountAmount)}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkSoft,
+                                ),
+                              ),
+                            ),
+                          ),
+                        if (cart.priceReduction > 0.05)
+                          Builder(
+                            builder: (context) {
+                              final rights = ref
+                                  .watch(pricingRightsProvider)
+                                  .value;
+                              final over =
+                                  rights != null &&
+                                  pricingProblem(cart, rights) != null;
+                              return _row(
+                                'Below default prices',
+                                '${money(cart.priceReduction)} (${qty(cart.priceReductionPct)}%)'
+                                    '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
+                                dim: !over,
+                                color: over ? AppColors.red : null,
+                              );
+                            },
+                          ),
+                        const Divider(height: 20),
+                        _row('Round off', money(cart.roundOff), dim: true),
+                        _row('Total', money(cart.total), bold: true),
+                        if (exchange != null) ...[
+                          _row(
+                            'Exchange credit (≈)',
+                            '− ${money(exchange.credit < cart.total ? exchange.credit : cart.total)}',
+                            color: AppColors.indigo,
+                          ),
+                          _row('To collect', money(payable), bold: true),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                if (exchange != null && excess > 0.005) ...[
+                  const SizedBox(height: 8),
+                  Card(
+                    color: AppColors.green.withValues(alpha: 0.06),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'About ${money(excess)} of credit is left after this bill.',
+                            style: const TextStyle(fontWeight: FontWeight.w600),
+                          ),
+                          const SizedBox(height: 8),
+                          if (exchange.hasCustomer)
+                            SegmentedButton<String>(
+                              segments: const [
+                                ButtonSegment(
+                                  value: 'advance',
+                                  label: Text('Keep as advance'),
+                                ),
+                                ButtonSegment(
+                                  value: 'refund',
+                                  label: Text('Refund now'),
+                                ),
+                              ],
+                              selected: {_excess},
+                              onSelectionChanged: (s) =>
+                                  setState(() => _excess = s.first),
+                            )
+                          else
                             Text(
-                              cart.customer!['phone'] as String,
+                              'Walk-in customer: it will be refunded.',
                               style: TextStyle(
                                 fontSize: 12.5,
                                 color: AppColors.inkSoft,
                               ),
                             ),
-                          if ((cart.customer!['address'] as String? ?? '')
-                              .isNotEmpty)
+                          if (!exchange.hasCustomer || _excess == 'refund') ...[
+                            const SizedBox(height: 8),
+                            Wrap(
+                              spacing: 8,
+                              children: [
+                                for (final m in const [
+                                  ('cash', 'Cash'),
+                                  ('upi', 'UPI'),
+                                ])
+                                  ChoiceChip(
+                                    label: Text('Refund by ${m.$2}'),
+                                    selected: _refundMode == m.$1,
+                                    onSelected: (_) =>
+                                        setState(() => _refundMode = m.$1),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 8),
+                _ProfitBanner(
+                  profit: cart.estimatedProfit,
+                  costMissing: cart.lines.any((l) => l.costPrice <= 0),
+                ),
+                if (editing == null && _docType != 'estimate') ...[
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SectionLabel('Payment'),
+                      TextButton.icon(
+                        onPressed: () => _toggleSplit(payable),
+                        icon: Icon(
+                          _splitMode ? Icons.close : Icons.call_split,
+                          size: 16,
+                        ),
+                        label: Text(
+                          _splitMode ? 'Single method' : 'Split payment',
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (!_splitMode) ...[
+                    Wrap(
+                      spacing: 8,
+                      children: [
+                        for (final mode in const [
+                          ('cash', 'Cash', Icons.payments_outlined),
+                          ('upi', 'UPI', Icons.qr_code),
+                          ('card', 'Card', Icons.credit_card),
+                          ('credit', 'Credit (Due)', Icons.schedule),
+                        ])
+                          ChoiceChip(
+                            avatar: Icon(mode.$3, size: 16),
+                            label: Text(mode.$2),
+                            selected: _paymentMode == mode.$1,
+                            onSelected: (_) => setState(() {
+                              _paymentMode = mode.$1;
+                              _paidTouched = false;
+                              _paid.text = mode.$1 == 'credit'
+                                  ? '0'
+                                  : payable.toStringAsFixed(2);
+                            }),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextField(
+                            controller: _paid,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              decimal: true,
+                            ),
+                            decoration: InputDecoration(
+                              labelText: 'Paid amount ₹',
+                              hintText: payable.toStringAsFixed(2),
+                            ),
+                            onChanged: (_) =>
+                                setState(() => _paidTouched = true),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Due',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkSoft,
+                                ),
+                              ),
+                              Text(
+                                money(due),
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: due > 0
+                                      ? AppColors.red
+                                      : AppColors.green,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ] else ...[
+                    for (var i = 0; i < _splits.length; i++)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              flex: 5,
+                              child: DropdownButtonFormField<String>(
+                                initialValue: _splits[i].mode,
+                                decoration: const InputDecoration(
+                                  labelText: 'Mode',
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'cash',
+                                    child: Text('Cash'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'upi',
+                                    child: Text('UPI'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'card',
+                                    child: Text('Card'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'other',
+                                    child: Text('Bank/Other'),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'credit',
+                                    child: Text('Credit (Due)'),
+                                  ),
+                                ],
+                                onChanged: (v) => setState(
+                                  () => _splits[i].mode = v ?? 'cash',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              flex: 5,
+                              child: TextField(
+                                controller: _splits[i].amount,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                      decimal: true,
+                                    ),
+                                textAlign: TextAlign.right,
+                                decoration: const InputDecoration(
+                                  labelText: 'Amount',
+                                  prefixText: '₹ ',
+                                ),
+                                onChanged: (_) => setState(() {}),
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(
+                                Icons.remove_circle_outline,
+                                color: AppColors.red,
+                              ),
+                              onPressed: _splits.length > 1
+                                  ? () => setState(() => _splits.removeAt(i))
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(
+                        onPressed: () => _addSplit(payable),
+                        icon: const Icon(Icons.add, size: 16),
+                        label: const Text('Add payment method'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              cart.customer!['address'] as String,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                              'Collected',
                               style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.inkSoft,
                               ),
                             ),
-                          Builder(
-                            builder: (context) {
-                              final existingDue = toDouble(
-                                cart.customer?['due_amount'],
-                              );
-                              final creditLimit =
-                                  cart.customer?['credit_limit'] == null
-                                  ? null
-                                  : toDouble(cart.customer!['credit_limit']);
-                              return Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Wrap(
-                                  spacing: 10,
-                                  runSpacing: 2,
-                                  children: [
-                                    Text(
-                                      'Current due: ${money(existingDue)}',
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.w600,
-                                        color: existingDue > 0
-                                            ? AppColors.red
-                                            : AppColors.green,
-                                      ),
-                                    ),
-                                    if (creditLimit != null)
-                                      Text(
-                                        'Credit limit: ${money(creditLimit)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: AppColors.inkSoft,
-                                        ),
-                                      ),
-                                  ],
-                                ),
-                              );
-                            },
-                          ),
-                        ] else
-                          Text(
-                            'No customer selected',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.inkSoft,
+                            Text(
+                              money(paid),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                                fontSize: 16,
+                              ),
                             ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  // Editing an existing bill never changes who it was
-                  // billed to (update_invoice doesn't touch customer_id);
-                  // an exchange stays with the original bill's customer.
-                  if (editing == null && exchange == null)
-                    Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextButton(
-                          onPressed: () async {
-                            final picked = await showCustomerPicker(context);
-                            if (picked != null) {
-                              await setCartCustomer(ref, picked);
-                            }
-                          },
-                          child: Text(
-                            cart.customer == null ? 'Select' : 'Change',
-                          ),
+                          ],
                         ),
-                        if (cart.customer != null)
-                          TextButton(
-                            onPressed: () => setCartCustomer(ref, null),
-                            style: TextButton.styleFrom(
-                              foregroundColor: AppColors.inkSoft,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Due',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: AppColors.inkSoft,
+                              ),
                             ),
-                            child: const Text('Remove'),
-                          ),
+                            Text(
+                              money(due),
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: due > 0
+                                    ? AppColors.red
+                                    : AppColors.green,
+                              ),
+                            ),
+                          ],
+                        ),
                       ],
-                    ),
-                ],
-              ),
-            ),
-          ),
-          const SectionLabel('Bill summary'),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                children: [
-                  _row('Items (${cart.itemCount})', money(cart.itemsGross)),
-                  if (_docType == 'gst' && cart.taxTotal > 0)
-                    _row('Included GST', money(cart.billTaxTotal), dim: true),
-                  // Bill discounts need price permission (enforced by the
-                  // server's invoice guard, migration 0037).
-                  if (appContext?.canEditPrices ?? false) ...[
-                    const SizedBox(height: 4),
-                    const Text('Bill discount', style: TextStyle(fontSize: 13)),
-                    const SizedBox(height: 4),
-                    AmountOrPercentField(
-                      controller: _discount,
-                      isPercent: _discountIsPercent,
-                      onModeChanged: (v) => setState(() {
-                        _discountIsPercent = v;
-                        ref.read(cartProvider.notifier).setBillDiscountMode(v);
-                      }),
-                      onChanged: (v) => ref
-                          .read(cartProvider.notifier)
-                          .setBillDiscount(double.tryParse(v) ?? 0),
                     ),
                   ],
-                  if (cart.billDiscount > 0)
+                  if (due > 0 && cart.customer == null)
                     Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Align(
-                        alignment: Alignment.centerRight,
-                        child: Text(
-                          '− ${money(cart.billDiscountAmount)}',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.inkSoft,
-                          ),
-                        ),
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        'Select a customer on the bill to track this due.',
+                        style: TextStyle(fontSize: 12, color: AppColors.red),
                       ),
                     ),
-                  if (cart.priceReduction > 0.05)
+                  if (due > 0 && cart.customer?['credit_limit'] != null)
                     Builder(
                       builder: (context) {
-                        final rights = ref.watch(pricingRightsProvider).value;
-                        final over =
-                            rights != null &&
-                            pricingProblem(cart, rights) != null;
-                        return _row(
-                          'Below default prices',
-                          '${money(cart.priceReduction)} (${qty(cart.priceReductionPct)}%)'
-                              '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
-                          dim: !over,
-                          color: over ? AppColors.red : null,
+                        final creditLimit = toDouble(
+                          cart.customer!['credit_limit'],
+                        );
+                        final projectedDue =
+                            toDouble(cart.customer?['due_amount']) + due;
+                        if (projectedDue <= creditLimit) {
+                          return const SizedBox.shrink();
+                        }
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 8),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.warning_amber,
+                                size: 16,
+                                color: AppColors.orange,
+                              ),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'This bill exceeds the credit limit of ${money(creditLimit)} '
+                                  '(due would be ${money(projectedDue)}).',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.orange,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         );
                       },
                     ),
-                  const Divider(height: 20),
-                  _row('Round off', money(cart.roundOff), dim: true),
-                  _row('Total', money(cart.total), bold: true),
-                  if (exchange != null) ...[
-                    _row(
-                      'Exchange credit (≈)',
-                      '− ${money(exchange.credit < cart.total ? exchange.credit : cart.total)}',
-                      color: AppColors.indigo,
-                    ),
-                    _row('To collect', money(payable), bold: true),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (exchange != null && excess > 0.005) ...[
-            const SizedBox(height: 8),
-            Card(
-              color: AppColors.green.withValues(alpha: 0.06),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'About ${money(excess)} of credit is left after this bill.',
-                      style: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 8),
-                    if (exchange.hasCustomer)
-                      SegmentedButton<String>(
-                        segments: const [
-                          ButtonSegment(
-                            value: 'advance',
-                            label: Text('Keep as advance'),
-                          ),
-                          ButtonSegment(
-                            value: 'refund',
-                            label: Text('Refund now'),
-                          ),
-                        ],
-                        selected: {_excess},
-                        onSelectionChanged: (s) =>
-                            setState(() => _excess = s.first),
-                      )
-                    else
-                      Text(
-                        'Walk-in customer: it will be refunded.',
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          color: AppColors.inkSoft,
-                        ),
-                      ),
-                    if (!exchange.hasCustomer || _excess == 'refund') ...[
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
+                ] else if (editing != null) ...[
+                  const SectionLabel('Payment'),
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
                         children: [
-                          for (final m in const [
-                            ('cash', 'Cash'),
-                            ('upi', 'UPI'),
-                          ])
-                            ChoiceChip(
-                              label: Text('Refund by ${m.$2}'),
-                              selected: _refundMode == m.$1,
-                              onSelected: (_) =>
-                                  setState(() => _refundMode = m.$1),
-                            ),
+                          _row('Already paid', money(editing.paidAmount)),
+                          _row('New bill total', money(cart.total), bold: true),
+                          _row(
+                            'Due after changes',
+                            money(cart.total - editing.paidAmount),
+                            bold: true,
+                            color: (cart.total - editing.paidAmount) > 0
+                                ? AppColors.red
+                                : AppColors.green,
+                          ),
                         ],
                       ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ],
-          const SizedBox(height: 8),
-          _ProfitBanner(
-            profit: cart.estimatedProfit,
-            costMissing: cart.lines.any((l) => l.costPrice <= 0),
-          ),
-          if (editing == null && _docType != 'estimate') ...[
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const SectionLabel('Payment'),
-                TextButton.icon(
-                  onPressed: () => _toggleSplit(payable),
-                  icon: Icon(
-                    _splitMode ? Icons.close : Icons.call_split,
-                    size: 16,
+                    ),
                   ),
-                  label: Text(_splitMode ? 'Single method' : 'Split payment'),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Text(
+                      'Payments already recorded on this bill are unaffected — only the items and total change.',
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        color: AppColors.inkSoft,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _notes,
+                  decoration: const InputDecoration(
+                    labelText: 'Note (optional)',
+                  ),
                 ),
+                const SizedBox(height: 16),
               ],
             ),
-            if (!_splitMode) ...[
-              Wrap(
-                spacing: 8,
-                children: [
-                  for (final mode in const [
-                    ('cash', 'Cash', Icons.payments_outlined),
-                    ('upi', 'UPI', Icons.qr_code),
-                    ('card', 'Card', Icons.credit_card),
-                    ('credit', 'Credit (Due)', Icons.schedule),
-                  ])
-                    ChoiceChip(
-                      avatar: Icon(mode.$3, size: 16),
-                      label: Text(mode.$2),
-                      selected: _paymentMode == mode.$1,
-                      onSelected: (_) => setState(() {
-                        _paymentMode = mode.$1;
-                        _paidTouched = false;
-                        _paid.text = mode.$1 == 'credit'
-                            ? '0'
-                            : payable.toStringAsFixed(2);
-                      }),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _paid,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
-                      decoration: InputDecoration(
-                        labelText: 'Paid amount ₹',
-                        hintText: payable.toStringAsFixed(2),
-                      ),
-                      onChanged: (_) => setState(() => _paidTouched = true),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Due',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.inkSoft,
-                          ),
-                        ),
-                        Text(
-                          money(due),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: due > 0 ? AppColors.red : AppColors.green,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ] else ...[
-              for (var i = 0; i < _splits.length; i++)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 5,
-                        child: DropdownButtonFormField<String>(
-                          initialValue: _splits[i].mode,
-                          decoration: const InputDecoration(labelText: 'Mode'),
-                          items: const [
-                            DropdownMenuItem(
-                              value: 'cash',
-                              child: Text('Cash'),
-                            ),
-                            DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                            DropdownMenuItem(
-                              value: 'card',
-                              child: Text('Card'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'other',
-                              child: Text('Bank/Other'),
-                            ),
-                            DropdownMenuItem(
-                              value: 'credit',
-                              child: Text('Credit (Due)'),
-                            ),
-                          ],
-                          onChanged: (v) =>
-                              setState(() => _splits[i].mode = v ?? 'cash'),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        flex: 5,
-                        child: TextField(
-                          controller: _splits[i].amount,
-                          keyboardType: const TextInputType.numberWithOptions(
-                            decimal: true,
-                          ),
-                          textAlign: TextAlign.right,
-                          decoration: const InputDecoration(
-                            labelText: 'Amount',
-                            prefixText: '₹ ',
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.remove_circle_outline,
-                          color: AppColors.red,
-                        ),
-                        onPressed: _splits.length > 1
-                            ? () => setState(() => _splits.removeAt(i))
-                            : null,
-                      ),
-                    ],
-                  ),
-                ),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => _addSplit(payable),
-                  icon: const Icon(Icons.add, size: 16),
-                  label: const Text('Add payment method'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Collected',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.inkSoft,
-                        ),
-                      ),
-                      Text(
-                        money(paid),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        'Due',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.inkSoft,
-                        ),
-                      ),
-                      Text(
-                        money(due),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: due > 0 ? AppColors.red : AppColors.green,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ],
-            if (due > 0 && cart.customer == null)
-              Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Text(
-                  'Select a customer on the bill to track this due.',
-                  style: TextStyle(fontSize: 12, color: AppColors.red),
-                ),
-              ),
-            if (due > 0 && cart.customer?['credit_limit'] != null)
-              Builder(
-                builder: (context) {
-                  final creditLimit = toDouble(cart.customer!['credit_limit']);
-                  final projectedDue =
-                      toDouble(cart.customer?['due_amount']) + due;
-                  if (projectedDue <= creditLimit) {
-                    return const SizedBox.shrink();
-                  }
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 8),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.warning_amber,
-                          size: 16,
-                          color: AppColors.orange,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            'This bill exceeds the credit limit of ${money(creditLimit)} '
-                            '(due would be ${money(projectedDue)}).',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.orange,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-              ),
-          ] else if (editing != null) ...[
-            const SectionLabel('Payment'),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(12),
-                child: Column(
-                  children: [
-                    _row('Already paid', money(editing.paidAmount)),
-                    _row('New bill total', money(cart.total), bold: true),
-                    _row(
-                      'Due after changes',
-                      money(cart.total - editing.paidAmount),
-                      bold: true,
-                      color: (cart.total - editing.paidAmount) > 0
-                          ? AppColors.red
-                          : AppColors.green,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 6),
-              child: Text(
-                'Payments already recorded on this bill are unaffected — only the items and total change.',
-                style: TextStyle(fontSize: 11.5, color: AppColors.inkSoft),
-              ),
-            ),
-          ],
-          const SizedBox(height: 12),
-          TextField(
-            controller: _notes,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
           ),
-          if (!widget.dialog) ...[
-            const SizedBox(height: 20),
-            confirm,
-            const SizedBox(height: 24),
-          ],
+          // Phones: Create bill stays in view under the scrolling form,
+          // instead of at the very bottom of it.
+          if (!widget.dialog)
+            SafeArea(
+              top: false,
+              child: Container(
+                padding: const EdgeInsets.fromLTRB(16, 10, 16, 12),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  border: Border(top: BorderSide(color: AppColors.line)),
+                ),
+                child: SizedBox(width: double.infinity, child: confirm),
+              ),
+            ),
         ],
       ),
     );

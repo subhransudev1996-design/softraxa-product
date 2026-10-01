@@ -9,6 +9,13 @@ import 'supabase_providers.dart';
 import 'theme.dart';
 import 'walkthrough.dart';
 
+/// Filled buttons in dialog actions: sized to their label, so they sit
+/// beside Cancel. (The phone theme makes filled buttons full width, which
+/// pushed them onto their own line under Cancel.)
+final dialogActionStyle = FilledButton.styleFrom(
+  minimumSize: const Size(88, 44),
+);
+
 /// True when the window is wide enough for the desktop layout (sidebar,
 /// tables, header buttons).
 bool isWideLayout(BuildContext context) =>
@@ -277,6 +284,7 @@ Future<bool> confirmDialog(
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, true),
           child: Text(confirmText),
         ),
@@ -311,6 +319,7 @@ Future<String?> promptBarcode(
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, controller.text),
           child: const Text('Use code'),
         ),

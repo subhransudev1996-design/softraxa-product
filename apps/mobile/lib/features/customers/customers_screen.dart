@@ -128,6 +128,7 @@ Future<Map<String, dynamic>?> showCustomerForm(
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: gstinError(gst.text) == null
                 ? () => Navigator.pop(ctx, true)
                 : null,
@@ -322,6 +323,7 @@ Future<void> showReversePayment(
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: reason.text.trim().length >= 3 ? () => Navigator.pop(ctx, true) : null,
             child: const Text('Reverse'),
           ),

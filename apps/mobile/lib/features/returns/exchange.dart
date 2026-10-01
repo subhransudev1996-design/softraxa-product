@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/formatters.dart';
 import '../../core/theme.dart';
+import '../../core/widgets.dart';
 
 /// Condition of a returned item (D28, migration 0042). Only sellable goods
 /// go back into stock; the rest are held out of sale.
@@ -146,6 +147,7 @@ Future<Map<String, double>?> showConditionSplitDialog(
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: ok
                   ? () => Navigator.pop(ctx, {
                       for (final e in split.entries)

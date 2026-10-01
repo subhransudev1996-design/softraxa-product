@@ -85,6 +85,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Save'),
           ),
@@ -151,6 +152,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Record'),
             ),
@@ -217,6 +219,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () {
               if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },

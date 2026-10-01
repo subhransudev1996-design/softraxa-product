@@ -85,6 +85,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Send'),
           ),

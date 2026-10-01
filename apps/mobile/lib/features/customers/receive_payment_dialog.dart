@@ -244,6 +244,7 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: _canSave
               ? () => Navigator.pop(
                   context,

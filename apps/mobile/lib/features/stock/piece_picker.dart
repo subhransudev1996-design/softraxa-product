@@ -216,6 +216,7 @@ Future<PiecePick?> _override(
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: () {
             if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
           },

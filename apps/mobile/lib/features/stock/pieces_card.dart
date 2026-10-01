@@ -73,6 +73,7 @@ class PiecesCard extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Add'),
           ),
@@ -143,6 +144,7 @@ class PiecesCard extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Save'),
           ),
@@ -196,6 +198,7 @@ class PiecesCard extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () {
               if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },
@@ -292,6 +295,7 @@ class PiecesCard extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Save'),
             ),

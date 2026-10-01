@@ -69,6 +69,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: const Text('Close'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Resend email'),
           ),
@@ -115,17 +116,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    // The app icon itself, so login matches the home screen
+                    // icon and the splash.
                     Center(
                       child: Container(
                         width: 84,
                         height: 84,
                         decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [AppColors.primary, AppColors.primaryDark],
-                          ),
-                          borderRadius: BorderRadius.circular(24),
+                          borderRadius: BorderRadius.circular(22),
                           boxShadow: [
                             BoxShadow(
                               color: AppColors.primary.withValues(alpha: 0.35),
@@ -134,10 +132,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ],
                         ),
-                        child: const Icon(
-                          Icons.storefront,
-                          size: 42,
-                          color: Colors.white,
+                        child: Image.asset(
+                          'assets/brand/icon_1024.png',
+                          width: 84,
+                          height: 84,
+                          filterQuality: FilterQuality.medium,
                         ),
                       ),
                     ),

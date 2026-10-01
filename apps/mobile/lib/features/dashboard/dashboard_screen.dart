@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
@@ -33,47 +34,95 @@ final recentInvoicesProvider =
       return List<Map<String, dynamic>>.from(rows);
     });
 
-class DashboardScreen extends ConsumerWidget {
+class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends ConsumerState<DashboardScreen> {
+  /// Phone: once the purple header scrolls up, a purple strip covers the
+  /// status bar so the cards don't slide under the clock and battery.
+  final _scrolled = ValueNotifier(false);
+
+  @override
+  void dispose() {
+    _scrolled.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final stats = ref.watch(dashboardStatsProvider);
     final invoices = ref.watch(recentInvoicesProvider);
     final appContext = ref.watch(appContextProvider).value;
     final s = stats.value;
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
-    return Scaffold(
-      backgroundColor: AppColors.canvas,
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(dashboardStatsProvider);
-          ref.invalidate(recentInvoicesProvider);
-          ref.invalidate(salesTrendProvider);
-          ref.invalidate(topProductsProvider);
-        },
-        child: ListView(
-          padding: EdgeInsets.zero,
+    final list = RefreshIndicator(
+      onRefresh: () async {
+        ref.invalidate(dashboardStatsProvider);
+        ref.invalidate(recentInvoicesProvider);
+        ref.invalidate(salesTrendProvider);
+        ref.invalidate(topProductsProvider);
+      },
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          if (isDesktop)
+            _DesktopDashboard(
+              appContext: appContext,
+              stats: stats,
+              invoices: invoices,
+              s: s,
+              onRetryStats: () => ref.invalidate(dashboardStatsProvider),
+              onRetryInvoices: () => ref.invalidate(recentInvoicesProvider),
+            )
+          else
+            _MobileDashboard(
+              appContext: appContext,
+              stats: stats,
+              invoices: invoices,
+              s: s,
+              onRetryStats: () => ref.invalidate(dashboardStatsProvider),
+              onRetryInvoices: () => ref.invalidate(recentInvoicesProvider),
+            ),
+        ],
+      ),
+    );
+    if (isDesktop) {
+      return Scaffold(backgroundColor: AppColors.canvas, body: list);
+    }
+    final statusBar = MediaQuery.paddingOf(context).top;
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      // White status-bar icons on the purple header.
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: AppColors.canvas,
+        body: Stack(
           children: [
-            if (isDesktop)
-              _DesktopDashboard(
-                appContext: appContext,
-                stats: stats,
-                invoices: invoices,
-                s: s,
-                onRetryStats: () => ref.invalidate(dashboardStatsProvider),
-                onRetryInvoices: () => ref.invalidate(recentInvoicesProvider),
-              )
-            else
-              _MobileDashboard(
-                appContext: appContext,
-                stats: stats,
-                invoices: invoices,
-                s: s,
-                onRetryStats: () => ref.invalidate(dashboardStatsProvider),
-                onRetryInvoices: () => ref.invalidate(recentInvoicesProvider),
+            NotificationListener<ScrollNotification>(
+              onNotification: (n) {
+                if (n.depth == 0) _scrolled.value = n.metrics.pixels > 8;
+                return false;
+              },
+              child: list,
+            ),
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              height: statusBar,
+              child: ValueListenableBuilder<bool>(
+                valueListenable: _scrolled,
+                builder: (context, scrolled, _) => AnimatedOpacity(
+                  opacity: scrolled ? 1 : 0,
+                  duration: const Duration(milliseconds: 150),
+                  child: const ColoredBox(color: AppColors.primaryDark),
+                ),
               ),
+            ),
           ],
         ),
       ),
@@ -116,6 +165,9 @@ Widget _statGrid(List<Widget> cards, {int maxColumns = 4}) {
       final aspectRatio = cardWidth / targetHeight;
       return GridView.count(
         crossAxisCount: crossAxisCount,
+        // A GridView adds the status bar height as top padding unless told
+        // not to — that was the empty gap above the stat cards.
+        padding: EdgeInsets.zero,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         mainAxisSpacing: spacing,
@@ -890,94 +942,66 @@ class _TrialBanner extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final appContext = ref.watch(appContextProvider).value;
-    final expiry = subscription?['expiry_date'];
+    final expiry = DateTime.tryParse(
+      subscription?['expiry_date'] as String? ?? '',
+    );
+    final daysLeft = expiry?.difference(DateTime.now()).inDays;
+    const ink = Color(0xFF8C5400);
+    // One compact row: the trial shouldn't push the shop's numbers down.
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.fromLTRB(12, 10, 6, 10),
       decoration: BoxDecoration(
         color: const Color(0xFFFFF7E6),
         borderRadius: BorderRadius.circular(14),
         border: Border.all(color: const Color(0xFFFFE1A8)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              const IconChip(
-                Icons.timer_outlined,
-                color: AppColors.orange,
-                size: 36,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Trial plan active — expires ${dateStr(expiry)}',
-                      style: const TextStyle(
-                        fontSize: 13.5,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF8C5400),
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    const Text(
-                      'Upgrade your plan to unlock full features & staff logins.',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF996300)),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          const IconChip(
+            Icons.timer_outlined,
+            color: AppColors.orange,
+            size: 34,
           ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: const Color(0xFF8C5400),
-                    side: const BorderSide(color: Color(0xFFFFD180)),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  daysLeft == null
+                      ? 'Free trial'
+                      : daysLeft <= 0
+                      ? 'Free trial ends today'
+                      : 'Free trial · $daysLeft ${daysLeft == 1 ? 'day' : 'days'} left',
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w800,
+                    color: ink,
                   ),
-                  icon: const Icon(Icons.workspace_premium_outlined, size: 18),
-                  label: const Text(
-                    'View Plans',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                  onPressed: () => context.push('/subscription/plans'),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF25D366),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                Text(
+                  'Ends ${dateStr(subscription?['expiry_date'])}',
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: Color(0xFF996300),
                   ),
-                  icon: const Icon(Icons.chat, size: 18),
-                  label: const Text(
-                    'WhatsApp',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 12.5,
-                    ),
-                  ),
-                  onPressed: () => launchWhatsAppContact(context, appContext),
                 ),
-              ),
-            ],
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: 'Ask on WhatsApp',
+            onPressed: () => launchWhatsAppContact(context, appContext),
+            icon: const Icon(
+              Icons.chat_outlined,
+              size: 20,
+              color: Color(0xFF128C3E),
+            ),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: ink),
+            onPressed: () => context.push('/subscription/plans'),
+            child: const Text('View plans'),
           ),
         ],
       ),

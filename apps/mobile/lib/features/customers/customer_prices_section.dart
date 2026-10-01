@@ -164,6 +164,7 @@ class CustomerPricesSection extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Save'),
           ),

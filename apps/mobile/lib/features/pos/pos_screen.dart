@@ -156,6 +156,7 @@ Future<String?> showImeiPicker(
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () {
               final val = controller.text.trim();
               if (val.isNotEmpty) Navigator.pop(ctx, val);
@@ -676,6 +677,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Save'),
             ),
@@ -1224,7 +1226,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       page: 'pos',
                       id: 'charge',
                       child: Container(
-                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                        // Extra bottom space: the round New Bill button
+                        // rises into this bar from the tab bar below.
+                        padding: EdgeInsets.fromLTRB(
+                          16,
+                          14,
+                          16,
+                          MediaQuery.viewInsetsOf(context).bottom > 0 ? 14 : 30,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.card,
                           boxShadow: softShadow(20),

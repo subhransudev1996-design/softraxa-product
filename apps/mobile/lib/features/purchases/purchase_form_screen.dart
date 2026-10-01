@@ -319,6 +319,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Save'),
             ),

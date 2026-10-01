@@ -177,6 +177,7 @@ Future<void> showSetNewPasswordDialog(
         ),
         actions: [
           FilledButton(
+            style: dialogActionStyle,
             onPressed: busy
                 ? null
                 : () async {

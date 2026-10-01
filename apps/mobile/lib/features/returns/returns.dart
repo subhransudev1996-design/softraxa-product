@@ -108,6 +108,7 @@ Future<double?> _promptReturnQty(
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, double.tryParse(c.text)),
           child: const Text('Set'),
         ),

@@ -132,7 +132,9 @@ class _OwnerInbox extends ConsumerWidget {
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
               FilledButton(
-                style: approve ? null : FilledButton.styleFrom(backgroundColor: AppColors.red),
+                style: approve
+                    ? dialogActionStyle
+                    : dialogActionStyle.merge(FilledButton.styleFrom(backgroundColor: AppColors.red)),
                 onPressed: !approve || all ? () => Navigator.pop(ctx, true) : null,
                 child: Text(approve ? 'Approve' : 'Reject'),
               ),

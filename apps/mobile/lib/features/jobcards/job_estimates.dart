@@ -566,6 +566,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Add'),
             ),
@@ -1056,6 +1057,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
           child: const Text('Cancel'),
         ),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: _busy ? null : _save,
           child: _busy
               ? const SizedBox(
@@ -1165,6 +1167,7 @@ Future<void> markEstimateWorkDone(
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Add'),
           ),

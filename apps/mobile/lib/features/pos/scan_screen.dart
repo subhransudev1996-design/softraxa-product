@@ -115,6 +115,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                 child: const Text('Skip'),
               ),
               FilledButton(
+                style: dialogActionStyle,
                 onPressed: () => Navigator.pop(ctx, true),
                 child: const Text('Add product'),
               ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/approvals.dart';
 import '../../core/theme.dart';
+import '../../core/widgets.dart';
 
 /// One exception with a tick box — every one must be ticked (PD15).
 class ExceptionCheckList extends StatelessWidget {
@@ -68,6 +69,7 @@ Future<bool> showOwnerAcknowledge(
           actions: [
             TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Change the sale')),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: all ? () => Navigator.pop(ctx, true) : null,
               child: const Text('Acknowledge & bill'),
             ),
@@ -127,6 +129,7 @@ Future<String?> showRequestApproval(
       actions: [
         TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Change the sale')),
         FilledButton(
+          style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, reason.text.trim()),
           child: const Text('Ask the owner'),
         ),

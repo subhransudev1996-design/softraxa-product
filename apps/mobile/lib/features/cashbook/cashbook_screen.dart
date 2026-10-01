@@ -173,6 +173,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
             actions: [
               TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
               FilledButton(
+                style: dialogActionStyle,
                 onPressed: c != null && (!needsReason || reason.text.trim().length >= 3)
                     ? () => Navigator.pop(ctx, true)
                     : null,

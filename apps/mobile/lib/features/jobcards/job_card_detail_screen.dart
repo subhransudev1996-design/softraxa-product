@@ -67,6 +67,7 @@ class JobCardDetailScreen extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Update'),
             ),
@@ -157,6 +158,7 @@ class JobCardDetailScreen extends ConsumerWidget {
             child: const Text('Cancel'),
           ),
           FilledButton(
+            style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
             child: const Text('Add'),
           ),
@@ -281,6 +283,7 @@ class JobCardDetailScreen extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Add'),
             ),
@@ -433,6 +436,7 @@ class JobCardDetailScreen extends ConsumerWidget {
               child: const Text('Cancel'),
             ),
             FilledButton(
+              style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
               child: const Text('Generate invoice'),
             ),
