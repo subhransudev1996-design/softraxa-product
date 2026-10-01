@@ -13,8 +13,10 @@ final customerPricesProvider = FutureProvider.autoDispose
       final rows = await ref
           .watch(supabaseProvider)
           .from('customer_prices')
-          .select('id, price, note, product_id, variant_id, products(name, selling_price), '
-              'product_variants(name, selling_price)')
+          .select(
+            'id, price, note, product_id, variant_id, products(name, selling_price), '
+            'product_variants(name, selling_price)',
+          )
           .eq('customer_id', customerId)
           .order('created_at');
       return List<Map<String, dynamic>>.from(rows);
@@ -92,16 +94,25 @@ class CustomerPricesSection extends ConsumerWidget {
     return v == null ? '$p' : '$p ($v)';
   }
 
-  Future<void> _remove(BuildContext context, WidgetRef ref, Map<String, dynamic> r) async {
+  Future<void> _remove(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> r,
+  ) async {
     final ok = await confirmDialog(
       context,
       title: 'Remove agreed price?',
-      message: '${_name(r)} will go back to the normal price for this customer.',
+      message:
+          '${_name(r)} will go back to the normal price for this customer.',
       confirmText: 'Remove',
     );
     if (!ok) return;
     try {
-      await ref.read(supabaseProvider).from('customer_prices').delete().eq('id', r['id'] as String);
+      await ref
+          .read(supabaseProvider)
+          .from('customer_prices')
+          .delete()
+          .eq('id', r['id'] as String);
       ref.invalidate(customerPricesProvider(customerId));
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -109,12 +120,14 @@ class CustomerPricesSection extends ConsumerWidget {
   }
 
   Future<void> _add(BuildContext context, WidgetRef ref) async {
-    final picked = await showDialog<({Map<String, dynamic> product, Map<String, dynamic>? variant})>(
-      context: context,
-      builder: (_) => const _ProductChooser(),
-    );
+    final picked =
+        await showDialog<
+          ({Map<String, dynamic> product, Map<String, dynamic>? variant})
+        >(context: context, builder: (_) => const _ProductChooser());
     if (picked == null || !context.mounted) return;
-    final normal = toDouble(picked.variant?['selling_price'] ?? picked.product['selling_price']);
+    final normal = toDouble(
+      picked.variant?['selling_price'] ?? picked.product['selling_price'],
+    );
     final price = TextEditingController();
     final note = TextEditingController();
     final ok = await showDialog<bool>(
@@ -129,10 +142,13 @@ class CustomerPricesSection extends ConsumerWidget {
             TextField(
               controller: price,
               autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: InputDecoration(
                 labelText: 'Agreed price ₹',
-                helperText: 'Normal price ${money(normal)} — same basis (incl. GST)',
+                helperText:
+                    'Normal price ${money(normal)} — same basis (incl. GST)',
               ),
             ),
             const SizedBox(height: 8),
@@ -143,25 +159,28 @@ class CustomerPricesSection extends ConsumerWidget {
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Save'),
+          ),
         ],
       ),
     );
     final value = double.tryParse(price.text.trim()) ?? 0;
     if (ok != true || value <= 0) return;
     try {
-      await ref.read(supabaseProvider).from('customer_prices').upsert(
-        {
-          'business_id': ref.read(appContextProvider).value?.businessId,
-          'customer_id': customerId,
-          'product_id': picked.product['id'],
-          'variant_id': picked.variant?['id'],
-          'price': value,
-          'note': note.text.trim(),
-        },
-        onConflict: 'customer_id,product_id,variant_id',
-      );
+      await ref.read(supabaseProvider).from('customer_prices').upsert({
+        'business_id': ref.read(appContextProvider).value?.businessId,
+        'customer_id': customerId,
+        'product_id': picked.product['id'],
+        'variant_id': picked.variant?['id'],
+        'price': value,
+        'note': note.text.trim(),
+      }, onConflict: 'customer_id,product_id,variant_id');
       ref.invalidate(customerPricesProvider(customerId));
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -185,12 +204,16 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
     final rows = await ref
         .read(supabaseProvider)
         .from('products')
-        .select('id, name, selling_price, has_variants, product_variants(id, name, selling_price, is_active)')
+        .select(
+          'id, name, selling_price, has_variants, product_variants(id, name, selling_price, is_active)',
+        )
         .eq('is_active', true)
         .ilike('name', '%${q.trim()}%')
-        .order('name')
+        .order('name', ascending: true)
         .limit(30);
-    if (mounted) setState(() => _results = List<Map<String, dynamic>>.from(rows));
+    if (mounted) {
+      setState(() => _results = List<Map<String, dynamic>>.from(rows));
+    }
   }
 
   @override
@@ -205,7 +228,9 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
     final variants = product == null
         ? const <Map<String, dynamic>>[]
         : [
-            for (final v in List<Map<String, dynamic>>.from(product['product_variants'] as List? ?? const []))
+            for (final v in List<Map<String, dynamic>>.from(
+              product['product_variants'] as List? ?? const [],
+            ))
               if (v['is_active'] != false) v,
           ];
     return AlertDialog(
@@ -233,12 +258,17 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
                             title: Text('${p['name']}'),
                             trailing: Text(money(p['selling_price'] as num?)),
                             onTap: () {
-                              final hasVariants = p['has_variants'] == true &&
-                                  (p['product_variants'] as List? ?? const []).isNotEmpty;
+                              final hasVariants =
+                                  p['has_variants'] == true &&
+                                  (p['product_variants'] as List? ?? const [])
+                                      .isNotEmpty;
                               if (hasVariants) {
                                 setState(() => _product = p);
                               } else {
-                                Navigator.pop(context, (product: p, variant: null));
+                                Navigator.pop(context, (
+                                  product: p,
+                                  variant: null,
+                                ));
                               }
                             },
                           ),
@@ -253,14 +283,25 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
                     ListTile(
                       dense: true,
                       title: Text('${v['name']}'),
-                      trailing: Text(money((v['selling_price'] ?? product['selling_price']) as num?)),
-                      onTap: () => Navigator.pop(context, (product: product, variant: v)),
+                      trailing: Text(
+                        money(
+                          (v['selling_price'] ?? product['selling_price'])
+                              as num?,
+                        ),
+                      ),
+                      onTap: () => Navigator.pop(context, (
+                        product: product,
+                        variant: v,
+                      )),
                     ),
                 ],
               ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
       ],
     );
   }

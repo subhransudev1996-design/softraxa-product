@@ -49,7 +49,7 @@ final stockListProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>
     );
   }
   final rows = List<Map<String, dynamic>>.from(
-    await query.order('name').limit(500),
+    await query.order('name', ascending: true).limit(500),
   );
 
   bool isLow(num stock, num low) => low > 0 && stock <= low && stock > 0;

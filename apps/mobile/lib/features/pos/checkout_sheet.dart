@@ -25,6 +25,10 @@ Future<void> showCheckoutSheet(BuildContext context) {
   return showModalBottomSheet(
     context: context,
     isScrollControlled: true,
+    // Root navigator: over the bottom bar, not under it. Safe area: the
+    // sheet stops below the status bar.
+    useRootNavigator: true,
+    useSafeArea: true,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
       child: const _CheckoutSheet(),
@@ -197,7 +201,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     final paid = _computePaid(cart);
     if (!mounted) return;
     final payable = _payable(cart);
-    if (paid < payable - 0.005 && cart.customer == null && _docType != 'estimate') {
+    if (paid < payable - 0.005 &&
+        cart.customer == null &&
+        _docType != 'estimate') {
       showError(
         context,
         _exchange != null
@@ -311,15 +317,17 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (reason == null || !mounted) return;
     setState(() => _busy = true);
     try {
-      await ref.read(billingServiceProvider).requestApproval(
-        cart: cart,
-        invoiceType: _docType,
-        paidAmount: paid,
-        paymentMode: paymentMode,
-        payments: payments,
-        notes: _notes.text.trim(),
-        reason: reason,
-      );
+      await ref
+          .read(billingServiceProvider)
+          .requestApproval(
+            cart: cart,
+            invoiceType: _docType,
+            paidAmount: paid,
+            paymentMode: paymentMode,
+            payments: payments,
+            notes: _notes.text.trim(),
+            reason: reason,
+          );
       ref.read(cartProvider.notifier).clear();
       ref.invalidate(myApprovalsProvider);
       if (!mounted) return;
@@ -360,18 +368,21 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         ...extra,
       };
       final res = Map<String, dynamic>.from(
-        await ref.read(supabaseProvider).rpc(
-          'create_exchange',
-          params: {
-            'payload': {
-              'request_id': exchange.requestId,
-              'return': exchange.returnPayload,
-              'sale': sale,
-              'excess': exchange.hasCustomer ? _excess : 'refund',
-              'refund_mode': _refundMode,
-            },
-          },
-        ) as Map,
+        await ref
+                .read(supabaseProvider)
+                .rpc(
+                  'create_exchange',
+                  params: {
+                    'payload': {
+                      'request_id': exchange.requestId,
+                      'return': exchange.returnPayload,
+                      'sale': sale,
+                      'excess': exchange.hasCustomer ? _excess : 'refund',
+                      'refund_mode': _refundMode,
+                    },
+                  },
+                )
+            as Map,
       );
       ref.read(cartProvider.notifier).clear();
       ref.read(exchangeDraftProvider.notifier).set(null);
@@ -391,9 +402,14 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       if (exceptions != null && isOwner && extra.isEmpty && mounted) {
         setState(() => _busy = false);
         if (await showOwnerAcknowledge(context, exceptions) && mounted) {
-          await _createExchange(cart, exchange,
-              paid: paid, paymentMode: paymentMode, payments: payments,
-              extra: const {'owner_ack': true});
+          await _createExchange(
+            cart,
+            exchange,
+            paid: paid,
+            paymentMode: paymentMode,
+            payments: payments,
+            extra: const {'owner_ack': true},
+          );
         }
         return;
       }
@@ -529,7 +545,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   label: Text('Cash memo'),
                 ),
                 if (exchange == null)
-                  const ButtonSegment(value: 'estimate', label: Text('Estimate')),
+                  const ButtonSegment(
+                    value: 'estimate',
+                    label: Text('Estimate'),
+                  ),
               ],
               selected: {_docType},
               onSelectionChanged: (s) => setState(() => _docType = s.first),
@@ -718,11 +737,13 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     Builder(
                       builder: (context) {
                         final rights = ref.watch(pricingRightsProvider).value;
-                        final over = rights != null && pricingProblem(cart, rights) != null;
+                        final over =
+                            rights != null &&
+                            pricingProblem(cart, rights) != null;
                         return _row(
                           'Below default prices',
                           '${money(cart.priceReduction)} (${qty(cart.priceReductionPct)}%)'
-                          '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
+                              '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
                           dim: !over,
                           color: over ? AppColors.red : null,
                         );
@@ -760,27 +781,41 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     if (exchange.hasCustomer)
                       SegmentedButton<String>(
                         segments: const [
-                          ButtonSegment(value: 'advance', label: Text('Keep as advance')),
-                          ButtonSegment(value: 'refund', label: Text('Refund now')),
+                          ButtonSegment(
+                            value: 'advance',
+                            label: Text('Keep as advance'),
+                          ),
+                          ButtonSegment(
+                            value: 'refund',
+                            label: Text('Refund now'),
+                          ),
                         ],
                         selected: {_excess},
-                        onSelectionChanged: (s) => setState(() => _excess = s.first),
+                        onSelectionChanged: (s) =>
+                            setState(() => _excess = s.first),
                       )
                     else
                       Text(
                         'Walk-in customer: it will be refunded.',
-                        style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          color: AppColors.inkSoft,
+                        ),
                       ),
                     if (!exchange.hasCustomer || _excess == 'refund') ...[
                       const SizedBox(height: 8),
                       Wrap(
                         spacing: 8,
                         children: [
-                          for (final m in const [('cash', 'Cash'), ('upi', 'UPI')])
+                          for (final m in const [
+                            ('cash', 'Cash'),
+                            ('upi', 'UPI'),
+                          ])
                             ChoiceChip(
                               label: Text('Refund by ${m.$2}'),
                               selected: _refundMode == m.$1,
-                              onSelected: (_) => setState(() => _refundMode = m.$1),
+                              onSelected: (_) =>
+                                  setState(() => _refundMode = m.$1),
                             ),
                         ],
                       ),
@@ -791,7 +826,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             ),
           ],
           const SizedBox(height: 8),
-          _ProfitBanner(profit: cart.estimatedProfit),
+          _ProfitBanner(
+            profit: cart.estimatedProfit,
+            costMissing: cart.lines.any((l) => l.costPrice <= 0),
+          ),
           if (editing == null && _docType != 'estimate') ...[
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1122,9 +1160,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
 /// goods. Shown solely in this checkout sheet, never on a printed
 /// receipt/invoice PDF, since customers shouldn't see the shop's margin.
 class _ProfitBanner extends StatelessWidget {
-  const _ProfitBanner({required this.profit});
+  const _ProfitBanner({required this.profit, this.costMissing = false});
 
   final double profit;
+
+  /// Some items have no purchase price, so the profit is overstated.
+  final bool costMissing;
 
   @override
   Widget build(BuildContext context) {
@@ -1145,14 +1186,17 @@ class _ProfitBanner extends StatelessWidget {
           const SizedBox(width: 8),
           Expanded(
             child: Text(
-              'Your profit (not shown to customer)',
+              costMissing
+                  ? 'Profit unknown — add purchase prices to see it'
+                  : 'Your profit (not shown to customer)',
               style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
             ),
           ),
-          Text(
-            money(profit),
-            style: TextStyle(fontWeight: FontWeight.bold, color: color),
-          ),
+          if (!costMissing)
+            Text(
+              money(profit),
+              style: TextStyle(fontWeight: FontWeight.bold, color: color),
+            ),
         ],
       ),
     );

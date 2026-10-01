@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'approvals.dart';
 import 'formatters.dart';
+import 'supabase_providers.dart';
 import 'theme.dart';
 
 /// Explicit AppBar back button for screens living under the secondary
@@ -177,6 +178,17 @@ String friendlyError(Object e) {
 
 void showError(BuildContext context, Object e) {
   if (!context.mounted) return;
+  final text = friendlyError(e);
+  if (text.contains('subscription has expired or is suspended') ||
+      text.contains('is not included in your plan') ||
+      text.contains('Staff limit')) {
+    try {
+      ProviderScope.containerOf(
+        context,
+        listen: false,
+      ).read(appContextProvider.notifier).refreshSilently();
+    } catch (_) {}
+  }
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Text(friendlyError(e)),

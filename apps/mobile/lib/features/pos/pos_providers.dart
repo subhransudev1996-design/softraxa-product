@@ -28,39 +28,41 @@ const posProductColumns =
 
 /// Products for the POS search. Online: queries Supabase and refreshes the
 /// offline cache. Offline: searches the local cache (PRD 7.10).
-final posProductsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
-  ref,
-) async {
-  final search = ref.watch(posSearchProvider).trim();
-  final offline = ref.read(offlineServiceProvider);
+final posProductsProvider =
+    FutureProvider.autoDispose<List<Map<String, dynamic>>>((ref) async {
+      final search = ref.watch(posSearchProvider).trim();
+      final offline = ref.read(offlineServiceProvider);
 
-  try {
-    final client = ref.watch(supabaseProvider);
-    var query = client
-        .from('products')
-        .select(posProductColumns)
-        .eq('is_active', true);
-    if (search.isNotEmpty) {
-      query = query.or(
-        'name.ilike.%$search%,sku.ilike.%$search%,barcode.ilike.%$search%',
-      );
-    }
-    final rows = List<Map<String, dynamic>>.from(
-      await query.order('name').limit(100),
-    );
-    // Keep the whole catalogue cached for offline billing (throttled,
-    // paged, removes stale rows) — not just this first page of results.
-    unawaited(offline.syncCatalog());
-    return rows;
-  } catch (_) {
-    return offline.searchCachedProducts(search);
-  }
-});
+      try {
+        final client = ref.watch(supabaseProvider);
+        var query = client
+            .from('products')
+            .select(posProductColumns)
+            .eq('is_active', true);
+        if (search.isNotEmpty) {
+          query = query.or(
+            'name.ilike.%$search%,sku.ilike.%$search%,barcode.ilike.%$search%',
+          );
+        }
+        final rows = List<Map<String, dynamic>>.from(
+          await query.order('name', ascending: true).limit(100),
+        );
+        // Keep the whole catalogue cached for offline billing (throttled,
+        // paged, removes stale rows) — not just this first page of results.
+        unawaited(offline.syncCatalog());
+        return rows;
+      } catch (_) {
+        return offline.searchCachedProducts(search);
+      }
+    });
 
 /// Sets the bill's customer and applies their agreed prices and wholesale
 /// status to the cart (D15, migration 0043). Offline, agreed prices can't
 /// be fetched, so lines fall back to wholesale/retail.
-Future<void> setCartCustomer(WidgetRef ref, Map<String, dynamic>? customer) async {
+Future<void> setCartCustomer(
+  WidgetRef ref,
+  Map<String, dynamic>? customer,
+) async {
   final notifier = ref.read(cartProvider.notifier);
   notifier.setCustomer(customer);
   if (customer == null) {

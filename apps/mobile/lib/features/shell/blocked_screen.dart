@@ -16,6 +16,10 @@ class BlockedScreen extends ConsumerWidget {
     final appContext = ref.watch(appContextProvider).value;
     final state = appContext?.subscriptionState ?? 'expired';
     final suspended = state == 'suspended';
+    // The shop is fine, but this staff login is over the plan's user limit.
+    final overLimit =
+        (appContext?.overUserLimit ?? false) &&
+        !(appContext?.isBlocked ?? false);
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
@@ -30,25 +34,36 @@ class BlockedScreen extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Icon(
-                    suspended ? Icons.block : Icons.timer_off_outlined,
+                    overLimit
+                        ? Icons.group_off_outlined
+                        : suspended
+                        ? Icons.block
+                        : Icons.timer_off_outlined,
                     size: 56,
                     color: AppColors.red,
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    suspended ? 'Account suspended' : 'Subscription expired',
+                    overLimit
+                        ? 'Your login is paused'
+                        : suspended
+                        ? 'Account suspended'
+                        : 'Subscription expired',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    suspended
+                    overLimit
+                        ? 'The shop\'s plan allows ${appContext?.userLimit} users, owner included. '
+                              'Ask the owner to move to a bigger plan or remove a staff login.'
+                        : suspended
                         ? 'Your account has been suspended. Please contact support to reactivate it.'
                         : 'Renew to continue billing. Your data is safe.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.inkSoft),
                   ),
-                  if (!suspended) ...[
+                  if (!suspended && !overLimit) ...[
                     const SizedBox(height: 20),
                     const RenewalPaymentCard(),
                   ],

@@ -1094,7 +1094,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${cart.itemCount} items • Qty ${qty(cart.totalQty)}',
+                              '${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} • Qty ${qty(cart.totalQty)}',
                               style: TextStyle(
                                 fontSize: 11.5,
                                 color: AppColors.inkSoft,

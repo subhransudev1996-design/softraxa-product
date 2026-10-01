@@ -34,7 +34,7 @@ final customersProvider =
       }
       if (balanceFilter == 'balance') query = query.gt('due_amount', 0);
       if (balanceFilter == 'clear') query = query.lte('due_amount', 0);
-      final rows = await query.order('name').limit(200);
+      final rows = await query.order('name', ascending: true).limit(200);
       return List<Map<String, dynamic>>.from(rows);
     });
 

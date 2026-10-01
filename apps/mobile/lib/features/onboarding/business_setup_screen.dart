@@ -158,6 +158,61 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     }
   }
 
+  /// Ask SOFTRAXA to delete the shop's account and data (migration 0058).
+  Future<void> _requestDeletion() async {
+    final reason = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete your account?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'SOFTRAXA will delete your shop, its logins and its data, and '
+              'confirm on WhatsApp or by email. Bills may be kept for as long '
+              'as GST law requires. Export your data first if you want a copy.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reason,
+              decoration: const InputDecoration(labelText: 'Reason (optional)'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            style: TextButton.styleFrom(foregroundColor: AppColors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Ask to delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'request_account_deletion',
+            params: {'p_reason': reason.text.trim()},
+          );
+      if (mounted) {
+        showSuccess(
+          context,
+          'Request sent — SOFTRAXA will confirm when your account is deleted',
+        );
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -443,6 +498,13 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   onPressed: () => exportAllData(context, ref),
                   icon: const Icon(Icons.download_outlined),
                   label: const Text('Export all data (Excel)'),
+                ),
+                const SizedBox(height: 12),
+                TextButton.icon(
+                  style: TextButton.styleFrom(foregroundColor: AppColors.red),
+                  onPressed: _requestDeletion,
+                  icon: const Icon(Icons.delete_forever_outlined),
+                  label: const Text('Delete my account'),
                 ),
               ],
               const SizedBox(height: 24),

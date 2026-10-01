@@ -45,13 +45,15 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
       final client = ref.read(supabaseProvider);
       var query = client
           .from('customers')
-          .select('id, name, phone, address, due_amount, advance_amount, credit_limit, is_wholesale')
+          .select(
+            'id, name, phone, address, due_amount, advance_amount, credit_limit, is_wholesale',
+          )
           .eq('is_active', true);
       if (_search.isNotEmpty) {
         query = query.or('name.ilike.%$_search%,phone.ilike.%$_search%');
       }
       final rows = List<Map<String, dynamic>>.from(
-        await query.order('name').limit(50),
+        await query.order('name', ascending: true).limit(50),
       );
       if (_search.isEmpty) offline.cacheCustomers(rows);
       if (mounted) {
@@ -118,7 +120,9 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
             'name': name.text.trim(),
             'phone': phone.text.trim(),
           })
-          .select('id, name, phone, address, due_amount, advance_amount, credit_limit, is_wholesale')
+          .select(
+            'id, name, phone, address, due_amount, advance_amount, credit_limit, is_wholesale',
+          )
           .single();
       ref.invalidate(customersProvider);
       if (mounted) Navigator.pop(context, Map<String, dynamic>.from(row));

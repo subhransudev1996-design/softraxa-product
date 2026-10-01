@@ -961,7 +961,7 @@ class PartPickerState extends ConsumerState<PartPicker> {
         );
       }
       final rows = List<Map<String, dynamic>>.from(
-        await query.order('name').limit(100),
+        await query.order('name', ascending: true).limit(100),
       );
       if (mounted) {
         setState(() {

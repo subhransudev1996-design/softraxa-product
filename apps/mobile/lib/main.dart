@@ -65,6 +65,8 @@ class App extends ConsumerStatefulWidget {
 
 class _AppState extends ConsumerState<App> {
   StreamSubscription<AuthState>? _authSub;
+  late final AppLifecycleListener _lifecycle;
+  Timer? _contextTimer;
 
   @override
   void initState() {
@@ -73,13 +75,23 @@ class _AppState extends ConsumerState<App> {
     final offline = ref.read(offlineServiceProvider);
     Future.microtask(offline.syncPendingBills);
 
+    // Changes made in the admin panel (renewal, suspension, plan, features)
+    // reach an app that stays open: on return to the app and every 30 min.
+    _lifecycle = AppLifecycleListener(
+      onResume: () => ref
+          .read(appContextProvider.notifier)
+          .refreshSilently(ifOlderThan: const Duration(minutes: 2)),
+    );
+    _contextTimer = Timer.periodic(
+      const Duration(minutes: 30),
+      (_) => ref.read(appContextProvider.notifier).refreshSilently(),
+    );
+
     // When the user opens a password-reset link, Supabase fires a
     // passwordRecovery event — prompt them to set a new password.
-    _authSub = ref
-        .read(supabaseProvider)
-        .auth
-        .onAuthStateChange
-        .listen((state) {
+    _authSub = ref.read(supabaseProvider).auth.onAuthStateChange.listen((
+      state,
+    ) {
       if (state.event == AuthChangeEvent.passwordRecovery) {
         final ctx = rootNavigatorKey.currentContext;
         if (ctx != null && ctx.mounted) showSetNewPasswordDialog(ctx, ref);
@@ -90,6 +102,8 @@ class _AppState extends ConsumerState<App> {
   @override
   void dispose() {
     _authSub?.cancel();
+    _lifecycle.dispose();
+    _contextTimer?.cancel();
     super.dispose();
   }
 

@@ -10,6 +10,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import '../shell/renewal_payment.dart';
 
 final dashboardStatsProvider = FutureProvider.autoDispose<Map<String, dynamic>>(
   (ref) async {
@@ -272,6 +273,11 @@ class _DesktopDashboard extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(top: 16),
                   child: _TrialBanner(subscription: appContext.subscription),
+                ),
+              if (appContext != null && _daysLeft(appContext) != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 16),
+                  child: _ExpiryBanner(daysLeft: _daysLeft(appContext)!),
                 ),
 
               const SizedBox(height: 24),
@@ -575,7 +581,7 @@ class _MobileDashboard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      '${s!['today_invoice_count']} invoices today',
+                      '${s!['today_invoice_count']} ${s!['today_invoice_count'] == 1 ? 'invoice' : 'invoices'} today',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 12,
@@ -592,6 +598,11 @@ class _MobileDashboard extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
             child: _TrialBanner(subscription: appContext.subscription),
+          ),
+        if (appContext != null && _daysLeft(appContext) != null)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+            child: _ExpiryBanner(daysLeft: _daysLeft(appContext)!),
           ),
 
         // ============ quick actions ============
@@ -782,6 +793,86 @@ class _HeaderIconButton extends StatelessWidget {
   }
 }
 
+/// Days until a PAID subscription ends, when 7 or fewer (null otherwise).
+/// Trials have their own banner.
+int? _daysLeft(AppContext ctx) {
+  if (ctx.subscriptionState != 'active') return null;
+  final expiry = DateTime.tryParse(
+    ctx.subscription?['expiry_date'] as String? ?? '',
+  );
+  if (expiry == null) return null;
+  final now = DateTime.now();
+  final days = DateTime(
+    expiry.year,
+    expiry.month,
+    expiry.day,
+  ).difference(DateTime(now.year, now.month, now.day)).inDays;
+  return days >= 0 && days <= 7 ? days : null;
+}
+
+/// "Your subscription ends in 3 days" with a way to pay now (the same UPI
+/// card the expired screen shows).
+class _ExpiryBanner extends ConsumerWidget {
+  const _ExpiryBanner({required this.daysLeft});
+  final int daysLeft;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final when = daysLeft == 0
+        ? 'today'
+        : daysLeft == 1
+        ? 'tomorrow'
+        : 'in $daysLeft days';
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.redSoft,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.red.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          const IconChip(Icons.event_busy, color: AppColors.red, size: 36),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your subscription ends $when',
+                  style: const TextStyle(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.red,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Renew now so billing doesn\'t stop.',
+                  style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+                ),
+              ],
+            ),
+          ),
+          TextButton(
+            onPressed: () => showModalBottomSheet<void>(
+              context: context,
+              isScrollControlled: true,
+              useRootNavigator: true,
+              useSafeArea: true,
+              builder: (_) => const SingleChildScrollView(
+                padding: EdgeInsets.all(16),
+                child: RenewalPaymentCard(),
+              ),
+            ),
+            child: const Text('Renew'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _TrialBanner extends ConsumerWidget {
   const _TrialBanner({this.subscription});
   final Map<String, dynamic>? subscription;
@@ -823,10 +914,7 @@ class _TrialBanner extends ConsumerWidget {
                     const SizedBox(height: 2),
                     const Text(
                       'Upgrade your plan to unlock full features & staff logins.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF996300),
-                      ),
+                      style: TextStyle(fontSize: 12, color: Color(0xFF996300)),
                     ),
                   ],
                 ),
@@ -849,7 +937,10 @@ class _TrialBanner extends ConsumerWidget {
                   icon: const Icon(Icons.workspace_premium_outlined, size: 18),
                   label: const Text(
                     'View Plans',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                    ),
                   ),
                   onPressed: () => context.push('/subscription/plans'),
                 ),
@@ -868,7 +959,10 @@ class _TrialBanner extends ConsumerWidget {
                   icon: const Icon(Icons.chat, size: 18),
                   label: const Text(
                     'WhatsApp',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12.5,
+                    ),
                   ),
                   onPressed: () => launchWhatsAppContact(context, appContext),
                 ),

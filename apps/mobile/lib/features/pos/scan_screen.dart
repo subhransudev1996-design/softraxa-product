@@ -198,7 +198,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                   label: Text(
                     cart.lines.isEmpty
                         ? 'Back to bill'
-                        : 'Done — ${cart.itemCount} items in bill',
+                        : 'Done — ${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} in bill',
                   ),
                 ),
               ),

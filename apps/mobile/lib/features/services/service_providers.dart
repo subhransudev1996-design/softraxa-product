@@ -11,7 +11,7 @@ final servicesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
         .from('services')
         .select()
         .eq('is_active', true)
-        .order('name');
+        .order('name', ascending: true);
     return List<Map<String, dynamic>>.from(rows);
   },
 );

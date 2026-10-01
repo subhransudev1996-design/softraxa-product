@@ -48,7 +48,7 @@ final suppliersProvider =
       }
       if (balanceFilter == 'balance') query = query.gt('due_amount', 0);
       if (balanceFilter == 'clear') query = query.lte('due_amount', 0);
-      final rows = await query.order('name').limit(200);
+      final rows = await query.order('name', ascending: true).limit(200);
       return List<Map<String, dynamic>>.from(rows);
     });
 
@@ -478,14 +478,19 @@ class SuppliersScreen extends ConsumerWidget {
                                             context,
                                             s['phone'] as String,
                                           ),
-                                    onPay: !(ref.watch(appContextProvider).value?.canManagePurchases ?? false)
+                                    onPay:
+                                        !(ref
+                                                .watch(appContextProvider)
+                                                .value
+                                                ?.canManagePurchases ??
+                                            false)
                                         ? null
                                         : () => showRecordSupplierPayment(
-                                      context,
-                                      ref,
-                                      supplierId: s['id'] as String,
-                                      due: toDouble(s['due_amount']),
-                                    ),
+                                            context,
+                                            ref,
+                                            supplierId: s['id'] as String,
+                                            due: toDouble(s['due_amount']),
+                                          ),
                                     payLabel: 'Pay supplier',
                                   ),
                               ]),
@@ -691,7 +696,8 @@ class SupplierDetailScreen extends ConsumerWidget {
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                    if ((s['phone'] as String? ?? '').isNotEmpty)
+                                    if ((s['phone'] as String? ?? '')
+                                        .isNotEmpty)
                                       Text(s['phone'] as String),
                                     if ((s['address'] as String? ?? '')
                                         .isNotEmpty)
@@ -799,8 +805,9 @@ class SupplierDetailScreen extends ConsumerWidget {
                         page: 'supplier_detail',
                         id: 'new_purchase',
                         child: OutlinedButton.icon(
-                          onPressed: () =>
-                              context.push('/purchases/new?supplier=$supplierId'),
+                          onPressed: () => context.push(
+                            '/purchases/new?supplier=$supplierId',
+                          ),
                           icon: const Icon(Icons.add_shopping_cart),
                           label: const Text('New purchase'),
                         ),

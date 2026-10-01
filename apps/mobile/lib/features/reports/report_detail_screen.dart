@@ -221,7 +221,7 @@ final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic
             'units(short_name), product_variants(name, current_stock, purchase_price, is_active)',
           )
           .eq('is_active', true)
-          .order('name')
+          .order('name', ascending: true)
           .limit(1000);
       double totalValue = 0;
       final table = <List<String>>[];
@@ -285,7 +285,7 @@ final reportDataProvider = FutureProvider.autoDispose.family<Map<String, dynamic
             'product_variants(name, current_stock, low_stock_qty, is_active)',
           )
           .eq('is_active', true)
-          .order('name')
+          .order('name', ascending: true)
           .limit(1000);
       // (name, unit, stock, alert)
       final low = <(String, String?, num?, num?)>[];

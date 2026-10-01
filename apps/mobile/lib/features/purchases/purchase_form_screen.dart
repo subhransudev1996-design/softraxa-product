@@ -117,7 +117,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               .from('suppliers')
               .select()
               .eq('is_active', true)
-              .order('name'),
+              .order('name', ascending: true),
         );
     if (!mounted) return;
     final selected = await showModalBottomSheet<Map<String, dynamic>>(
@@ -692,7 +692,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
         );
       }
       final rows = List<Map<String, dynamic>>.from(
-        await query.order('name').limit(100),
+        await query.order('name', ascending: true).limit(100),
       );
       if (mounted) {
         setState(() {

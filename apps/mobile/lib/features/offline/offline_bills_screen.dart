@@ -97,27 +97,47 @@ class OfflineBillsScreen extends ConsumerWidget {
                               ),
                             ),
                             trailing: failed
-                                ? IconButton(
-                                    icon: const Icon(
-                                      Icons.delete_outline,
-                                      color: AppColors.red,
-                                    ),
-                                    tooltip: 'Discard bill',
-                                    onPressed: () async {
-                                      final ok = await confirmDialog(
-                                        context,
-                                        title: 'Discard bill?',
-                                        message:
-                                            'This offline bill will be permanently deleted. Stock was never deducted for it.',
-                                        confirmText: 'Discard',
-                                      );
-                                      if (!ok) return;
-                                      await ref
-                                          .read(offlineServiceProvider)
-                                          .deletePendingBill(b.localId);
-                                      ref.invalidate(_pendingBillsProvider);
-                                      ref.invalidate(pendingBillCountProvider);
-                                    },
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      IconButton(
+                                        icon: const Icon(Icons.refresh),
+                                        tooltip: 'Try again',
+                                        onPressed: () async {
+                                          await ref
+                                              .read(offlineServiceProvider)
+                                              .syncPendingBills();
+                                          ref.invalidate(_pendingBillsProvider);
+                                          ref.invalidate(
+                                            pendingBillCountProvider,
+                                          );
+                                        },
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.delete_outline,
+                                          color: AppColors.red,
+                                        ),
+                                        tooltip: 'Discard bill',
+                                        onPressed: () async {
+                                          final ok = await confirmDialog(
+                                            context,
+                                            title: 'Discard bill?',
+                                            message:
+                                                'This offline bill will be permanently deleted. Stock was never deducted for it.',
+                                            confirmText: 'Discard',
+                                          );
+                                          if (!ok) return;
+                                          await ref
+                                              .read(offlineServiceProvider)
+                                              .deletePendingBill(b.localId);
+                                          ref.invalidate(_pendingBillsProvider);
+                                          ref.invalidate(
+                                            pendingBillCountProvider,
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   )
                                 : null,
                           ),

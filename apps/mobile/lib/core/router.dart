@@ -135,7 +135,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
       final appCtx = ctxAsync.value!;
       if (!appCtx.hasBusiness) return loc == '/setup' ? null : '/setup';
-      if (appCtx.isBlocked) return loc == '/blocked' ? null : '/blocked';
+      if (appCtx.isBlocked || appCtx.overUserLimit) {
+        return loc == '/blocked' ? null : '/blocked';
+      }
       if (appCtx.needsSetup) return loc == '/setup' ? null : '/setup';
       if (atAuth || loc == '/splash' || loc == '/setup' || loc == '/blocked') {
         return '/home';

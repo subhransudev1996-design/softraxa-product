@@ -45,6 +45,7 @@ class AppContext {
     required this.subscription,
     required this.permissions,
     this.support,
+    this.overUserLimit = false,
     this.offlineSince,
   });
 
@@ -59,6 +60,7 @@ class AppContext {
     subscription: data['subscription'] as Map<String, dynamic>?,
     permissions: data['permissions'] as Map<String, dynamic>?,
     support: data['support'] as Map<String, dynamic>?,
+    overUserLimit: data['over_user_limit'] == true,
     offlineSince: offlineSince,
   );
 
@@ -75,6 +77,10 @@ class AppContext {
 
   /// How to reach SOFTRAXA, set in the admin panel (migration 0056).
   final Map<String, dynamic>? support;
+
+  /// Staff login beyond the plan's user limit (migration 0058): the server
+  /// refuses it, the app shows "ask the owner".
+  final bool overUserLimit;
 
   /// SOFTRAXA's WhatsApp number from the admin panel; empty when not set.
   String get supportWhatsApp => support?['whatsapp'] as String? ?? '';
@@ -242,5 +248,31 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
     state = const AsyncLoading();
     ref.invalidateSelf();
     await future;
+  }
+
+  DateTime _lastSilentRefresh = DateTime.now();
+
+  /// Reload in the background — no loading screen, the user stays where
+  /// they are — so a renewal, suspension, plan or feature change made in
+  /// the admin panel reaches an app that is left open. Keeps the current
+  /// context if the server can't be reached. [ifOlderThan] skips calls
+  /// that come too soon after the last one.
+  Future<void> refreshSilently({Duration ifOlderThan = Duration.zero}) async {
+    if (DateTime.now().difference(_lastSilentRefresh) < ifOlderThan) return;
+    _lastSilentRefresh = DateTime.now();
+    final client = ref.read(supabaseProvider);
+    final uid = client.auth.currentUser?.id;
+    if (uid == null || !state.hasValue) return;
+    try {
+      final data =
+          await client
+                  .rpc('get_my_context')
+                  .timeout(const Duration(seconds: 15))
+              as Map<String, dynamic>;
+      unawaited(_save(uid, data));
+      state = AsyncData(AppContext.fromJson(data));
+    } catch (_) {
+      // Offline or failed: keep what we have; the next resume tries again.
+    }
   }
 }

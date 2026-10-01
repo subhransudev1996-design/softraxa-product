@@ -87,7 +87,7 @@ final expenseCategoriesProvider =
           .from('expense_categories')
           .select()
           .eq('is_active', true)
-          .order('name');
+          .order('name', ascending: true);
       return List<Map<String, dynamic>>.from(rows);
     });
 
@@ -238,9 +238,8 @@ class ExpensesScreen extends ConsumerWidget {
                           'expense_cat_${categories.any((c) => c['id'] == categoryId) ? categoryId : null}',
                         ),
                         isExpanded: true,
-                        initialValue: categories.any(
-                          (c) => c['id'] == categoryId,
-                        )
+                        initialValue:
+                            categories.any((c) => c['id'] == categoryId)
                             ? categoryId
                             : null,
                         decoration: const InputDecoration(
@@ -251,7 +250,11 @@ class ExpensesScreen extends ConsumerWidget {
                           for (final c in categories)
                             DropdownMenuItem(
                               value: c['id'] as String,
-                              child: Text(c['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis),
+                              child: Text(
+                                c['name'] as String,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                         ],
                         onChanged: (v) => setState(() => categoryId = v),

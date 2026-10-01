@@ -31,7 +31,7 @@ final productsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
       'name.ilike.%$search%,sku.ilike.%$search%,barcode.ilike.%$search%',
     );
   }
-  final rows = await query.order('name').limit(200);
+  final rows = await query.order('name', ascending: true).limit(200);
   return List<Map<String, dynamic>>.from(rows);
 });
 
@@ -120,7 +120,7 @@ final categoriesProvider =
           .from('categories')
           .select()
           .eq('is_active', true)
-          .order('name');
+          .order('name', ascending: true);
       return List<Map<String, dynamic>>.from(rows);
     });
 
@@ -132,7 +132,7 @@ final brandsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
       .from('brands')
       .select()
       .eq('is_active', true)
-      .order('name');
+      .order('name', ascending: true);
   return List<Map<String, dynamic>>.from(rows);
 });
 
@@ -143,6 +143,6 @@ final unitsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
       .watch(supabaseProvider)
       .from('units')
       .select()
-      .order('name');
+      .order('name', ascending: true);
   return List<Map<String, dynamic>>.from(rows);
 });

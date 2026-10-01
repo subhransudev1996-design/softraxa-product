@@ -91,6 +91,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   String? _masterProductId;
   bool _filling = false;
 
+  /// Something was typed or chosen and not saved yet.
+  bool _dirty = false;
+
+  Future<void> _confirmLeave() async {
+    final leave = await confirmDialog(
+      context,
+      title: 'Discard this product?',
+      message: 'What you entered has not been saved.',
+      confirmText: 'Discard',
+    );
+    if (leave && mounted) {
+      setState(() => _dirty = false);
+      context.pop();
+    }
+  }
+
   static String _pct(dynamic v) {
     final n = (v as num?) ?? 0;
     return n == n.roundToDouble() ? n.toStringAsFixed(0) : n.toString();
@@ -466,6 +482,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
 
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
+      _dirty = false;
       if (mounted) {
         showSuccess(context, isEdit ? 'Product updated' : 'Product added');
         context.pop();
@@ -495,435 +512,483 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         : null;
     final selectedUnit = units.any((u) => u['id'] == _unitId) ? _unitId : null;
 
-    return Scaffold(
-      backgroundColor: AppColors.canvas,
-      appBar: AppBar(
-        leading: appBarBack(context),
-        title: Text(isEdit ? 'Edit product' : 'Add product'),
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            TextFormField(
-              controller: _name,
-              textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Product name *'),
-              validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Required' : null,
-            ),
-            if (_suggestions.isNotEmpty)
-              Card(
-                margin: const EdgeInsets.only(top: 8),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 10, 4, 0),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'In the product list — tap to fill in the details',
-                              style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.inkSoft,
+    return PopScope(
+      canPop: !_dirty,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _confirmLeave();
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(
+          leading: GoRouter.of(context).canPop()
+              ? BackButton(
+                  onPressed: () => _dirty ? _confirmLeave() : context.pop(),
+                )
+              : null,
+          title: Text(isEdit ? 'Edit product' : 'Add product'),
+        ),
+        body: Form(
+          key: _formKey,
+          onChanged: () {
+            if (!_dirty) setState(() => _dirty = true);
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextFormField(
+                controller: _name,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Product name *'),
+                validator: (v) =>
+                    v == null || v.trim().isEmpty ? 'Required' : null,
+              ),
+              if (_suggestions.isNotEmpty)
+                Card(
+                  margin: const EdgeInsets.only(top: 8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 10, 4, 0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'In the product list — tap to fill in the details',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.inkSoft,
+                                ),
                               ),
                             ),
-                          ),
-                          IconButton(
-                            tooltip: 'Not in the list',
-                            visualDensity: VisualDensity.compact,
-                            icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => setState(() => _suggestions = []),
-                          ),
-                        ],
+                            IconButton(
+                              tooltip: 'Not in the list',
+                              visualDensity: VisualDensity.compact,
+                              icon: const Icon(Icons.close, size: 18),
+                              onPressed: () =>
+                                  setState(() => _suggestions = []),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    for (final m in _suggestions)
-                      ListTile(
-                        dense: true,
-                        leading: const Icon(
-                          Icons.inventory_2_outlined,
-                          color: AppColors.primary,
-                        ),
-                        title: Text(m['name'] as String? ?? ''),
-                        subtitle: Text(
-                          [
-                            if ((m['brand'] as String? ?? '').isNotEmpty)
-                              m['brand'],
-                            if ((m['category'] as String? ?? '').isNotEmpty)
-                              m['category'],
-                            if ((m['hsn_code'] as String? ?? '').isNotEmpty)
-                              'HSN ${m['hsn_code']}',
-                            'GST ${_pct(m['gst_rate'])}%',
-                          ].join(' · '),
-                        ),
-                        onTap: () => _pickMaster(m),
-                      ),
-                  ],
-                ),
-              ),
-            const SectionLabel('Classification'),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey('category_$selectedCategory'),
-                    // isExpanded: a dropdown sizes itself to its WIDEST menu
-                    // item, so one long name overflows the half-width field.
-                    isExpanded: true,
-                    initialValue: selectedCategory,
-                    decoration: const InputDecoration(labelText: 'Category'),
-                    items: [
-                      const DropdownMenuItem(value: null, child: Text('—')),
-                      for (final c in categories)
-                        DropdownMenuItem(
-                          value: c['id'] as String,
-                          child: Text(
-                            c['name'] as String,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                      for (final m in _suggestions)
+                        ListTile(
+                          dense: true,
+                          leading: const Icon(
+                            Icons.inventory_2_outlined,
+                            color: AppColors.primary,
                           ),
+                          title: Text(m['name'] as String? ?? ''),
+                          subtitle: Text(
+                            [
+                              if ((m['brand'] as String? ?? '').isNotEmpty)
+                                m['brand'],
+                              if ((m['category'] as String? ?? '').isNotEmpty)
+                                m['category'],
+                              if ((m['hsn_code'] as String? ?? '').isNotEmpty)
+                                'HSN ${m['hsn_code']}',
+                              'GST ${_pct(m['gst_rate'])}%',
+                            ].join(' · '),
+                          ),
+                          onTap: () => _pickMaster(m),
                         ),
                     ],
-                    onChanged: (v) => setState(() => _categoryId = v),
                   ),
                 ),
-                IconButton(
-                  tooltip: 'Add category',
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => _quickAddMaster(
-                    'categories',
-                    onAdded: (id) => setState(() => _categoryId = id),
-                  ),
-                ),
-                const SizedBox(width: 4),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey('brand_$selectedBrand'),
-                    isExpanded: true,
-                    initialValue: selectedBrand,
-                    decoration: const InputDecoration(labelText: 'Brand'),
-                    items: [
-                      const DropdownMenuItem(value: null, child: Text('—')),
-                      for (final b in brands)
-                        DropdownMenuItem(
-                          value: b['id'] as String,
-                          child: Text(
-                            b['name'] as String,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+              const SectionLabel('Classification'),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      key: ValueKey('category_$selectedCategory'),
+                      // isExpanded: a dropdown sizes itself to its WIDEST menu
+                      // item, so one long name overflows the half-width field.
+                      isExpanded: true,
+                      initialValue: selectedCategory,
+                      decoration: const InputDecoration(labelText: 'Category'),
+                      items: [
+                        const DropdownMenuItem(value: null, child: Text('—')),
+                        for (final c in categories)
+                          DropdownMenuItem(
+                            value: c['id'] as String,
+                            child: Text(
+                              c['name'] as String,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                    ],
-                    onChanged: (v) => setState(() => _brandId = v),
+                      ],
+                      onChanged: (v) => setState(() => _categoryId = v),
+                    ),
                   ),
-                ),
-                IconButton(
-                  tooltip: 'Add brand',
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => _quickAddMaster(
-                    'brands',
-                    onAdded: (id) => setState(() => _brandId = id),
+                  IconButton(
+                    tooltip: 'Add category',
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => _quickAddMaster(
+                      'categories',
+                      onAdded: (id) => setState(() => _categoryId = id),
+                    ),
                   ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    key: ValueKey('unit_$selectedUnit'),
-                    isExpanded: true,
-                    initialValue: selectedUnit,
-                    decoration: const InputDecoration(labelText: 'Unit'),
-                    items: [
-                      const DropdownMenuItem(value: null, child: Text('—')),
-                      for (final u in units)
-                        DropdownMenuItem(
-                          value: u['id'] as String,
-                          child: Text(
-                            '${u['name']} (${u['short_name']})',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      key: ValueKey('brand_$selectedBrand'),
+                      isExpanded: true,
+                      initialValue: selectedBrand,
+                      decoration: const InputDecoration(labelText: 'Brand'),
+                      items: [
+                        const DropdownMenuItem(value: null, child: Text('—')),
+                        for (final b in brands)
+                          DropdownMenuItem(
+                            value: b['id'] as String,
+                            child: Text(
+                              b['name'] as String,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                        ),
-                    ],
-                    onChanged: (v) => setState(() => _unitId = v),
-                  ),
-                ),
-                IconButton(
-                  tooltip: 'Add unit',
-                  icon: const Icon(Icons.add_circle_outline),
-                  onPressed: () => _quickAddMaster(
-                    'units',
-                    onAdded: (id) => setState(() => _unitId = id),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _secondaryUnitName,
-                    textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(
-                      labelText: 'Bulk unit (optional)',
-                      helperText: 'e.g. Bag, Box, Rod',
+                      ],
+                      onChanged: (v) => setState(() => _brandId = v),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _conversionFactor,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: '= how many units?',
-                      helperText: '1 Bag = 50 kg → 50',
+                  IconButton(
+                    tooltip: 'Add brand',
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => _quickAddMaster(
+                      'brands',
+                      onAdded: (id) => setState(() => _brandId = id),
                     ),
                   ),
-                ),
-              ],
-            ),
-            const SectionLabel('Codes'),
-            TextFormField(
-              controller: _sku,
-              decoration: const InputDecoration(
-                labelText: 'SKU / product code',
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _barcode,
-              decoration: InputDecoration(
-                labelText: 'Barcode',
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.qr_code_scanner),
-                  onPressed: _scanBarcode,
-                ),
+              const SizedBox(height: 12),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      key: ValueKey('unit_$selectedUnit'),
+                      isExpanded: true,
+                      initialValue: selectedUnit,
+                      decoration: const InputDecoration(labelText: 'Unit'),
+                      items: [
+                        const DropdownMenuItem(value: null, child: Text('—')),
+                        for (final u in units)
+                          DropdownMenuItem(
+                            value: u['id'] as String,
+                            child: Text(
+                              '${u['name']} (${u['short_name']})',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _unitId = v),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Add unit',
+                    icon: const Icon(Icons.add_circle_outline),
+                    onPressed: () => _quickAddMaster(
+                      'units',
+                      onAdded: (id) => setState(() => _unitId = id),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _hsn,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: 'HSN code (for GST invoice)',
-                helperText: 'Needed on bills to GST-registered customers',
-              ),
-              // Same rule as the database (migration 0048).
-              validator: (v) {
-                final t = (v ?? '').trim();
-                return t.isEmpty ||
-                        RegExp(r'^[0-9]{4}([0-9]{2}){0,2}$').hasMatch(t)
-                    ? null
-                    : '4, 6 or 8 digits';
-              },
-            ),
-            const SectionLabel('Pricing'),
-            Row(
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    controller: _purchase,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Purchase price ₹',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _selling,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Selling price ₹ *',
-                    ),
-                    validator: (v) =>
-                        !_hasVariants && (double.tryParse(v ?? '') == null)
-                        ? 'Required'
-                        : null,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextFormField(
-                    controller: _mrp,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(labelText: 'MRP ₹'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            DropdownButtonFormField<double>(
-              initialValue: _gstRate,
-              decoration: const InputDecoration(labelText: 'GST %'),
-              items: const [
-                DropdownMenuItem(value: 0.0, child: Text('0% (Exempt)')),
-                DropdownMenuItem(value: 3.0, child: Text('3%')),
-                DropdownMenuItem(value: 5.0, child: Text('5%')),
-                DropdownMenuItem(value: 12.0, child: Text('12%')),
-                DropdownMenuItem(value: 18.0, child: Text('18%')),
-                DropdownMenuItem(value: 28.0, child: Text('28%')),
-              ],
-              onChanged: (v) => setState(() => _gstRate = v ?? 0),
-            ),
-            if (categoryOf(businessType).bulkPricing) ...[
-              const SectionLabel('Bulk pricing (optional)'),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _wholesale,
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
-                      ),
+                      controller: _secondaryUnitName,
+                      textCapitalization: TextCapitalization.words,
                       decoration: const InputDecoration(
-                        labelText: 'Wholesale price ₹',
+                        labelText: 'Bulk unit (optional)',
+                        helperText: 'e.g. Bag, Box, Rod',
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: TextFormField(
-                      controller: _wholesaleMinQty,
+                      controller: _conversionFactor,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       decoration: const InputDecoration(
-                        labelText: 'Min qty for wholesale',
+                        labelText: '= how many units?',
+                        helperText: '1 Bag = 50 kg → 50',
                       ),
                     ),
                   ),
                 ],
               ),
-            ],
-            const SectionLabel('Stock'),
-            Row(
-              children: [
-                if (!isEdit && !_hasVariants) ...[
+              const SectionLabel('Codes'),
+              TextFormField(
+                controller: _sku,
+                decoration: const InputDecoration(
+                  labelText: 'SKU / product code',
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _barcode,
+                decoration: InputDecoration(
+                  labelText: 'Barcode',
+                  suffixIcon: IconButton(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    onPressed: _scanBarcode,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _hsn,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'HSN code (for GST invoice)',
+                  helperText: 'Needed on bills to GST-registered customers',
+                ),
+                // Same rule as the database (migration 0048).
+                validator: (v) {
+                  final t = (v ?? '').trim();
+                  return t.isEmpty ||
+                          RegExp(r'^[0-9]{4}([0-9]{2}){0,2}$').hasMatch(t)
+                      ? null
+                      : '4, 6 or 8 digits';
+                },
+              ),
+              const SectionLabel('Pricing'),
+              Row(
+                children: [
                   Expanded(
                     child: TextFormField(
-                      controller: _opening,
+                      controller: _purchase,
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
                       decoration: const InputDecoration(
-                        labelText: 'Opening stock',
+                        labelText: 'Purchase price ₹',
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
-                ],
-                Expanded(
-                  child: TextFormField(
-                    controller: _lowStock,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Low stock alert qty',
+                  Expanded(
+                    child: TextFormField(
+                      controller: _selling,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Selling price ₹ *',
+                      ),
+                      validator: (v) =>
+                          !_hasVariants && (double.tryParse(v ?? '') == null)
+                          ? 'Required'
+                          : null,
                     ),
                   ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _mrp,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(labelText: 'MRP ₹'),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<double>(
+                initialValue: _gstRate,
+                decoration: const InputDecoration(labelText: 'GST %'),
+                items: const [
+                  DropdownMenuItem(value: 0.0, child: Text('0% (Exempt)')),
+                  DropdownMenuItem(value: 3.0, child: Text('3%')),
+                  DropdownMenuItem(value: 5.0, child: Text('5%')),
+                  DropdownMenuItem(value: 12.0, child: Text('12%')),
+                  DropdownMenuItem(value: 18.0, child: Text('18%')),
+                  DropdownMenuItem(value: 28.0, child: Text('28%')),
+                ],
+                onChanged: (v) => setState(() => _gstRate = v ?? 0),
+              ),
+              if (categoryOf(businessType).bulkPricing) ...[
+                const SectionLabel('Bulk pricing (optional)'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _wholesale,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Wholesale price ₹',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _wholesaleMinQty,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: const InputDecoration(
+                          labelText: 'Min qty for wholesale',
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
-            ),
-            const SizedBox(height: 12),
-            // Optional expiry — drives the bell's expired/near-expiry alerts.
-            InkWell(
-              onTap: () async {
-                final picked = await showDatePicker(
-                  context: context,
-                  initialDate: _expiryDate ?? DateTime.now(),
-                  firstDate: DateTime(2020),
-                  lastDate: DateTime(2100),
-                );
-                if (picked != null && mounted) {
-                  setState(() => _expiryDate = picked);
-                }
-              },
-              child: InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Expiry date (optional)',
-                  helperText: 'Alerts appear when expired or within 30 days',
-                  suffixIcon: _expiryDate == null
-                      ? const Icon(Icons.event_outlined)
-                      : IconButton(
-                          tooltip: 'Clear expiry date',
-                          icon: const Icon(Icons.close, size: 18),
-                          onPressed: () => setState(() => _expiryDate = null),
+              const SectionLabel('Stock'),
+              Row(
+                children: [
+                  if (!isEdit && !_hasVariants) ...[
+                    Expanded(
+                      child: TextFormField(
+                        controller: _opening,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
                         ),
-                ),
-                child: Text(_expiryDate == null ? '—' : dateStr(_expiryDate)),
+                        decoration: const InputDecoration(
+                          labelText: 'Opening stock',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                  ],
+                  Expanded(
+                    child: TextFormField(
+                      controller: _lowStock,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: const InputDecoration(
+                        labelText: 'Low stock alert qty',
+                      ),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            const SectionLabel('Options'),
-            SwitchListTile(
-              value: _trackSerial,
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Track IMEI / serial numbers'),
-              subtitle: const Text('For mobiles & electronics'),
-              onChanged: (v) => setState(() => _trackSerial = v),
-            ),
-            SwitchListTile(
-              value: _trackPieces,
-              contentPadding: EdgeInsets.zero,
-              title: const Text('Track cut pieces'),
-              subtitle: const Text('Rods, sheets, rolls — sold as cut lengths'),
-              onChanged: (v) => setState(() => _trackPieces = v),
-            ),
-            if (_trackSerial) ...[
-              const SizedBox(height: 8),
-              Card(
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'IMEI / Serial Numbers',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Add or scan unique IMEI numbers for individual stock units.',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.inkSoft,
+              const SizedBox(height: 12),
+              // Optional expiry — drives the bell's expired/near-expiry alerts.
+              InkWell(
+                onTap: () async {
+                  final picked = await showDatePicker(
+                    context: context,
+                    initialDate: _expiryDate ?? DateTime.now(),
+                    firstDate: DateTime(2020),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null && mounted) {
+                    setState(() => _expiryDate = picked);
+                  }
+                },
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Expiry date (optional)',
+                    helperText: 'Alerts appear when expired or within 30 days',
+                    suffixIcon: _expiryDate == null
+                        ? const Icon(Icons.event_outlined)
+                        : IconButton(
+                            tooltip: 'Clear expiry date',
+                            icon: const Icon(Icons.close, size: 18),
+                            onPressed: () => setState(() => _expiryDate = null),
+                          ),
+                  ),
+                  child: Text(_expiryDate == null ? '—' : dateStr(_expiryDate)),
+                ),
+              ),
+              const SectionLabel('Options'),
+              SwitchListTile(
+                value: _trackSerial,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Track IMEI / serial numbers'),
+                subtitle: const Text('For mobiles & electronics'),
+                onChanged: (v) => setState(() => _trackSerial = v),
+              ),
+              SwitchListTile(
+                value: _trackPieces,
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Track cut pieces'),
+                subtitle: const Text(
+                  'Rods, sheets, rolls — sold as cut lengths',
+                ),
+                onChanged: (v) => setState(() => _trackPieces = v),
+              ),
+              if (_trackSerial) ...[
+                const SizedBox(height: 8),
+                Card(
+                  margin: EdgeInsets.zero,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'IMEI / Serial Numbers',
+                          style: TextStyle(fontWeight: FontWeight.bold),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _singleImeiInput,
-                              decoration: const InputDecoration(
-                                labelText: 'Enter or scan IMEI / Serial',
-                                isDense: true,
+                        const SizedBox(height: 4),
+                        Text(
+                          'Add or scan unique IMEI numbers for individual stock units.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.inkSoft,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _singleImeiInput,
+                                decoration: const InputDecoration(
+                                  labelText: 'Enter or scan IMEI / Serial',
+                                  isDense: true,
+                                ),
+                                onSubmitted: (v) {
+                                  final imei = v.trim();
+                                  if (imei.isNotEmpty &&
+                                      !_serials.contains(imei)) {
+                                    setState(() {
+                                      _serials.add(imei);
+                                      _singleImeiInput.clear();
+                                    });
+                                  }
+                                },
                               ),
-                              onSubmitted: (v) {
-                                final imei = v.trim();
+                            ),
+                            const SizedBox(width: 8),
+                            IconButton(
+                              icon: const Icon(Icons.qr_code_scanner),
+                              onPressed: () async {
+                                final code = isDesktopPlatform
+                                    ? await promptBarcode(
+                                        context,
+                                        title: 'Enter IMEI',
+                                      )
+                                    : await context.push<String>(
+                                        '/scan?mode=return',
+                                      );
+                                if (code != null &&
+                                    code.isNotEmpty &&
+                                    !_serials.contains(code)) {
+                                  setState(() => _serials.add(code));
+                                }
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () {
+                                final imei = _singleImeiInput.text.trim();
                                 if (imei.isNotEmpty &&
                                     !_serials.contains(imei)) {
                                   setState(() {
@@ -933,145 +998,114 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                 }
                               },
                             ),
-                          ),
-                          const SizedBox(width: 8),
-                          IconButton(
-                            icon: const Icon(Icons.qr_code_scanner),
-                            onPressed: () async {
-                              final code = isDesktopPlatform
-                                  ? await promptBarcode(
-                                      context,
-                                      title: 'Enter IMEI',
-                                    )
-                                  : await context.push<String>(
-                                      '/scan?mode=return',
-                                    );
-                              if (code != null &&
-                                  code.isNotEmpty &&
-                                  !_serials.contains(code)) {
-                                setState(() => _serials.add(code));
-                              }
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              final imei = _singleImeiInput.text.trim();
-                              if (imei.isNotEmpty && !_serials.contains(imei)) {
-                                setState(() {
-                                  _serials.add(imei);
-                                  _singleImeiInput.clear();
-                                });
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                      if (_serials.isNotEmpty) ...[
-                        const SizedBox(height: 10),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          children: [
-                            for (final imei in _serials)
-                              Chip(
-                                avatar: const Icon(Icons.qr_code, size: 14),
-                                label: Text(
-                                  imei,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                onDeleted: () =>
-                                    setState(() => _serials.remove(imei)),
-                              ),
                           ],
                         ),
+                        if (_serials.isNotEmpty) ...[
+                          const SizedBox(height: 10),
+                          Wrap(
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: [
+                              for (final imei in _serials)
+                                Chip(
+                                  avatar: const Icon(Icons.qr_code, size: 14),
+                                  label: Text(
+                                    imei,
+                                    style: const TextStyle(fontSize: 12),
+                                  ),
+                                  onDeleted: () =>
+                                      setState(() => _serials.remove(imei)),
+                                ),
+                            ],
+                          ),
+                        ],
                       ],
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextFormField(
-                  controller: _warranty,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Warranty (months)',
-                  ),
-                ),
-              ),
-            ],
-            if (!isEdit)
-              SwitchListTile(
-                value: _hasVariants,
-                contentPadding: EdgeInsets.zero,
-                title: const Text('This product has variants'),
-                subtitle: const Text('Size, color, RAM/storage etc.'),
-                onChanged: (v) => setState(() => _hasVariants = v),
-              ),
-            if (!isEdit && _hasVariants) ...[
-              const SectionLabel('Variants'),
-              for (var i = 0; i < _variants.length; i++)
-                Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(_variants[i].name),
-                    subtitle: Text(
-                      'Stock: ${_variants[i].openingStock}  •  ₹${_variants[i].sellingPrice ?? _selling.text}',
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: AppColors.red,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: TextFormField(
+                    controller: _warranty,
+                    keyboardType: TextInputType.number,
+                    decoration: const InputDecoration(
+                      labelText: 'Warranty (months)',
+                    ),
+                  ),
+                ),
+              ],
+              if (!isEdit)
+                SwitchListTile(
+                  value: _hasVariants,
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('This product has variants'),
+                  subtitle: const Text('Size, color, RAM/storage etc.'),
+                  onChanged: (v) => setState(() => _hasVariants = v),
+                ),
+              if (!isEdit && _hasVariants) ...[
+                const SectionLabel('Variants'),
+                for (var i = 0; i < _variants.length; i++)
+                  Card(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    child: ListTile(
+                      title: Text(_variants[i].name),
+                      subtitle: Text(
+                        'Stock: ${_variants[i].openingStock}  •  ₹${_variants[i].sellingPrice ?? _selling.text}',
                       ),
-                      onPressed: () => setState(() => _variants.removeAt(i)),
+                      trailing: IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: AppColors.red,
+                        ),
+                        onPressed: () => setState(() => _variants.removeAt(i)),
+                      ),
+                      onTap: () async {
+                        final updated = await showVariantSheet(
+                          context,
+                          businessType: businessType,
+                          existing: _variants[i],
+                        );
+                        if (updated != null) {
+                          setState(() => _variants[i] = updated);
+                        }
+                      },
                     ),
-                    onTap: () async {
-                      final updated = await showVariantSheet(
-                        context,
-                        businessType: businessType,
-                        existing: _variants[i],
-                      );
-                      if (updated != null) {
-                        setState(() => _variants[i] = updated);
-                      }
-                    },
                   ),
+                OutlinedButton.icon(
+                  onPressed: () async {
+                    final draft = await showVariantSheet(
+                      context,
+                      businessType: businessType,
+                    );
+                    if (draft != null) setState(() => _variants.add(draft));
+                  },
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add variant'),
                 ),
-              OutlinedButton.icon(
-                onPressed: () async {
-                  final draft = await showVariantSheet(
-                    context,
-                    businessType: businessType,
-                  );
-                  if (draft != null) setState(() => _variants.add(draft));
-                },
-                icon: const Icon(Icons.add),
-                label: const Text('Add variant'),
+              ],
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _description,
+                maxLines: 2,
+                decoration: const InputDecoration(
+                  labelText: 'Description (optional)',
+                ),
               ),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _busy ? null : _save,
+                child: _busy
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(isEdit ? 'Save changes' : 'Add product'),
+              ),
+              const SizedBox(height: 24),
             ],
-            const SizedBox(height: 12),
-            TextFormField(
-              controller: _description,
-              maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Description (optional)',
-              ),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: _busy ? null : _save,
-              child: _busy
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : Text(isEdit ? 'Save changes' : 'Add product'),
-            ),
-            const SizedBox(height: 24),
-          ],
+          ),
         ),
       ),
     );
