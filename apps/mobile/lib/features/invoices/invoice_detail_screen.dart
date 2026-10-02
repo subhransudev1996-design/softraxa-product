@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
+import '../../core/file_export.dart';
 import '../../core/data_refresh.dart';
 
 import '../../core/formatters.dart';
@@ -42,7 +43,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.sharePdf(
       bytes: await doc.save(),
-      filename: '${invoice['invoice_no']}.pdf',
+      filename: safeFileName('${invoice['invoice_no']}.pdf'),
     );
   }
 
@@ -58,7 +59,10 @@ class InvoiceDetailScreen extends ConsumerWidget {
     );
     final pdf = InvoicePdf(business: business, invoice: invoice, items: items);
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
-    await Printing.layoutPdf(onLayout: (_) => doc.save());
+    await Printing.layoutPdf(
+      name: safeFileName('${invoice['invoice_no']}'),
+      onLayout: (_) => doc.save(),
+    );
   }
 
   /// Place of supply defaults to the customer's state (or the store's); it

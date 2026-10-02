@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 
+import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
@@ -707,7 +708,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
     );
     await Printing.sharePdf(
       bytes: await doc.save(),
-      filename: '${widget.type}_report_${ymd(DateTime.now())}.pdf',
+      filename: safeFileName('${widget.type}_report_${ymd(DateTime.now())}.pdf'),
     );
   }
 
