@@ -149,6 +149,9 @@ class InvoicesScreen extends ConsumerWidget {
                         )
                       : isDesktop
                       ? DesktopTable<Map<String, dynamic>>(
+                          // Newest first, like the phone list.
+                          initialSortIndex: 2,
+                          initialAscending: false,
                           rows: rows,
                           trailingWidth: 110,
                           columns: [

@@ -329,6 +329,9 @@ class SaleReturnsScreen extends ConsumerWidget {
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
+                      // Newest first, like the phone list.
+                      initialSortIndex: 2,
+                      initialAscending: false,
                         rows: rows,
                         trailingWidth: 90,
                         columns: [
@@ -1579,6 +1582,9 @@ class PurchaseReturnsScreen extends ConsumerWidget {
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
+                      // Newest first, like the phone list.
+                      initialSortIndex: 3,
+                      initialAscending: false,
                         rows: rows,
                         trailingWidth: 90,
                         columns: [
