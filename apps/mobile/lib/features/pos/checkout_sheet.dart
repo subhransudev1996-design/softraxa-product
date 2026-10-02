@@ -76,6 +76,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
   bool _discountIsPercent = false;
   final _paid = TextEditingController();
   final _notes = TextEditingController();
+
+  /// Editing a bill to a higher total: how the customer pays the difference
+  /// now ('due' keeps it on the bill / khata), and how much.
+  String _collectMode = 'cash';
+  final _collect = TextEditingController();
+  bool _collectTouched = false;
   String _paymentMode = 'cash';
   late String _docType; // gst | non_gst | cash_memo | estimate
   bool _busy = false;
@@ -476,6 +482,28 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             notes: _notes.text.trim(),
             extra: extra,
           );
+      // The customer paid the difference on the spot (migration 0060).
+      final due = cart.total - editing.paidAmount;
+      final collect = _collectMode == 'due'
+          ? 0.0
+          : (double.tryParse(_collect.text) ?? 0).clamp(0, due).toDouble();
+      String? paymentError;
+      if (collect >= 0.01) {
+        try {
+          await ref
+              .read(supabaseProvider)
+              .rpc(
+                'collect_invoice_payment',
+                params: {
+                  'p_invoice_id': editing.id,
+                  'p_amount': double.parse(collect.toStringAsFixed(2)),
+                  'p_mode': _collectMode,
+                },
+              );
+        } catch (e) {
+          paymentError = friendlyError(e);
+        }
+      }
       ref.read(cartProvider.notifier).clear();
       ref.read(editingInvoiceProvider.notifier).set(null);
       invalidateStockData(ref);
@@ -483,7 +511,20 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       ref.invalidate(invoicesProvider);
       ref.invalidate(recentInvoicesProvider);
       if (!mounted) return;
-      showSuccess(context, 'Bill ${result.invoiceNo} updated');
+      if (paymentError != null) {
+        showError(
+          context,
+          'Bill ${result.invoiceNo} updated, but the payment wasn\'t recorded: '
+          '$paymentError. Record it from the bill.',
+        );
+      } else {
+        showSuccess(
+          context,
+          collect >= 0.01
+              ? 'Bill ${result.invoiceNo} updated and ${money(collect)} received'
+              : 'Bill ${result.invoiceNo} updated',
+        );
+      }
       Navigator.pop(context); // close sheet
       if (context.mounted) context.pop(); // back to invoice detail
     } catch (e) {
@@ -530,7 +571,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
           : const Icon(Icons.check),
       label: Text(
         editing != null
-            ? 'Save changes • ${money(cart.total)}'
+            ? _editLabel(cart.total, cart.total - editing.paidAmount)
             : exchange != null
             ? 'Complete exchange • collect ${money(payable)}'
             : _docType == 'estimate'
@@ -1189,6 +1230,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       ),
                     ),
                   ),
+                  if (cart.total - editing.paidAmount >= 0.01)
+                    _collectSection(cart.total - editing.paidAmount),
                 ],
                 const SizedBox(height: 12),
                 TextField(
@@ -1251,6 +1294,80 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
         ),
       ),
     );
+  }
+
+  /// What the customer pays now when an edit raises the total.
+  Widget _collectSection(double due) {
+    if (!_collectTouched) {
+      final text = due.toStringAsFixed(2);
+      if (_collect.text != text) _collect.text = text;
+    }
+    const modes = [
+      ('cash', 'Cash'),
+      ('upi', 'UPI'),
+      ('card', 'Card'),
+      ('due', 'Keep as due'),
+    ];
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Customer pays the difference now?',
+            style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (final (value, label) in modes)
+                ChoiceChip(
+                  label: Text(label),
+                  selected: _collectMode == value,
+                  onSelected: (_) => setState(() => _collectMode = value),
+                ),
+            ],
+          ),
+          if (_collectMode != 'due') ...[
+            const SizedBox(height: 10),
+            TextField(
+              controller: _collect,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(
+                labelText: 'Amount received ₹',
+                helperText: 'Up to ${money(due)}; anything left stays as due',
+              ),
+              onChanged: (_) => setState(() => _collectTouched = true),
+            ),
+          ] else
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Text(
+                '${money(due)} stays due on this bill'
+                '${ref.read(cartProvider).customer != null ? ' and the customer\'s khata' : ''}.',
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  String _editLabel(double total, double due) {
+    final amount = double.tryParse(_collect.text) ?? due;
+    if (due >= 0.01 && _collectMode != 'due' && amount >= 0.01) {
+      final mode = switch (_collectMode) {
+        'upi' => 'UPI',
+        'card' => 'card',
+        _ => 'cash',
+      };
+      return 'Save & receive ${money(amount.clamp(0, due))} $mode';
+    }
+    return 'Save changes • ${money(total)}';
   }
 
   Widget _row(
