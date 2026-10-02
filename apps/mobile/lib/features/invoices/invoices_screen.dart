@@ -243,6 +243,11 @@ class _InvoiceRow extends StatelessWidget {
                       padding: EdgeInsets.only(left: 6),
                       child: StatusChip('estimate', color: AppColors.inkSoft),
                     ),
+                  if (returnLabel(inv) case final label?)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 6),
+                      child: StatusChip(label, color: AppColors.purple),
+                    ),
                   if (inv['offline_created'] == true)
                     const Padding(
                       padding: EdgeInsets.only(left: 4),
@@ -344,6 +349,8 @@ class _InvoiceTile extends StatelessWidget {
                         const SizedBox(width: 6),
                         if (inv['invoice_type'] == 'estimate')
                           StatusChip('estimate', color: AppColors.inkSoft),
+                        if (returnLabel(inv) case final label?)
+                          StatusChip(label, color: AppColors.purple),
                         if (inv['offline_created'] == true)
                           const Padding(
                             padding: EdgeInsets.only(left: 4),
@@ -389,4 +396,18 @@ class _InvoiceTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "returned" when goods worth the whole bill came back, "part returned"
+/// when some did; null for a bill without returns.
+String? returnLabel(Map<String, dynamic> inv) {
+  final returns = inv['sale_returns'] as List? ?? const [];
+  if (returns.isEmpty) return null;
+  final returned = returns.fold<double>(
+    0,
+    (s, r) => s + toDouble((r as Map)['total']),
+  );
+  if (returned <= 0) return null;
+  // ₹1 of slack for rounding between the bill and its credit notes.
+  return returned >= toDouble(inv['total']) - 1 ? 'returned' : 'part returned';
 }

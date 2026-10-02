@@ -55,7 +55,9 @@ final invoicesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
       .from('invoices')
       .select(
         'id, invoice_no, invoice_type, invoice_date, customer_name, customer_phone, '
-        'total, paid_amount, due_amount, payment_status, payment_mode, is_cancelled, offline_created',
+        'total, paid_amount, due_amount, payment_status, payment_mode, is_cancelled, offline_created, '
+        // Returns against the bill, for the Returned / Part returned label.
+        'sale_returns(total)',
       );
   if (filter.search.isNotEmpty) {
     query = query.or(
