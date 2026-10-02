@@ -72,7 +72,16 @@ class ProductDetailScreen extends ConsumerWidget {
         ref.read(appContextProvider).value?.business?['business_type']
             as String? ??
         'other';
-    final draft = await showVariantSheet(context, businessType: businessType);
+    final draft = await showVariantSheet(
+      context,
+      businessType: businessType,
+      productName: product['name'] as String? ?? '',
+      categoryName: (product['categories'] as Map?)?['name'] as String? ?? '',
+      siblings: [
+        for (final v in (product['product_variants'] as List? ?? []))
+          VariantDraft.attributesOf(Map<String, dynamic>.from(v as Map)),
+      ],
+    );
     if (draft == null) return;
     final client = ref.read(supabaseProvider);
     try {

@@ -508,6 +508,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     final selectedCategory = categories.any((c) => c['id'] == _categoryId)
         ? _categoryId
         : null;
+    // Variant fields are suggested from the product name and category.
+    final categoryName =
+        categories.firstWhere(
+              (c) => c['id'] == _categoryId,
+              orElse: () => const <String, dynamic>{},
+            )['name']
+            as String? ??
+        '';
     final selectedBrand = brands.any((b) => b['id'] == _brandId)
         ? _brandId
         : null;
@@ -1066,6 +1074,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           context,
                           businessType: businessType,
                           existing: _variants[i],
+                          productName: _name.text,
+                          categoryName: categoryName,
+                          siblings: [for (final v in _variants) v.attributes],
                         );
                         if (updated != null) {
                           setState(() => _variants[i] = updated);
@@ -1078,6 +1089,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     final draft = await showVariantSheet(
                       context,
                       businessType: businessType,
+                      productName: _name.text,
+                      categoryName: categoryName,
+                      siblings: [for (final v in _variants) v.attributes],
                     );
                     if (draft != null) setState(() => _variants.add(draft));
                   },

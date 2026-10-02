@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/business_category.dart';
 import '../../core/theme.dart';
+import '../../core/variant_presets.dart';
 import '../../core/widgets.dart';
 
 /// Result of editing a variant in the sheet (not yet persisted).
@@ -47,32 +48,63 @@ class VariantDraft {
     name: row['name'] as String? ?? '',
     sku: row['sku'] as String? ?? '',
     barcode: row['barcode'] as String? ?? '',
-    attributes: Map<String, String>.from(
-      (row['attributes'] as Map? ?? {}).map((k, v) => MapEntry('$k', '$v')),
-    ),
+    attributes: attributesOf(row),
     purchasePrice: (row['purchase_price'] as num?)?.toDouble(),
     sellingPrice: (row['selling_price'] as num?)?.toDouble(),
     mrp: (row['mrp'] as num?)?.toDouble(),
     lowStockQty: (row['low_stock_qty'] as num?)?.toDouble(),
   );
+
+  /// A saved variant row's attributes as field → value.
+  static Map<String, String> attributesOf(Map<String, dynamic> row) =>
+      Map<String, String>.from(
+        (row['attributes'] as Map? ?? {}).map((k, v) => MapEntry('$k', '$v')),
+      );
 }
 
+/// [productName] and [categoryName] pick fields that fit the product (a
+/// washing machine gets Capacity and Type). [siblings] are the product's
+/// other variants' attributes: a new variant copies their fields and offers
+/// their values.
 Future<VariantDraft?> showVariantSheet(
   BuildContext context, {
   required String businessType,
   VariantDraft? existing,
   bool allowOpeningStock = true,
+  String productName = '',
+  String categoryName = '',
+  List<Map<String, String>> siblings = const [],
 }) {
+  final sheet = _VariantSheet(
+    businessType: businessType,
+    existing: existing,
+    allowOpeningStock: allowOpeningStock,
+    productName: productName,
+    categoryName: categoryName,
+    siblings: siblings,
+  );
+  // Desktop: a dialog, like the other pickers.
+  if (isWideLayout(context)) {
+    return showDialog<VariantDraft>(
+      context: context,
+      builder: (ctx) => Dialog(
+        clipBehavior: Clip.antiAlias,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: 680,
+            maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
+          ),
+          child: sheet,
+        ),
+      ),
+    );
+  }
   return showModalBottomSheet<VariantDraft>(
     context: context,
     isScrollControlled: true,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-      child: _VariantSheet(
-        businessType: businessType,
-        existing: existing,
-        allowOpeningStock: allowOpeningStock,
-      ),
+      child: sheet,
     ),
   );
 }
@@ -82,11 +114,17 @@ class _VariantSheet extends StatefulWidget {
     required this.businessType,
     this.existing,
     required this.allowOpeningStock,
+    this.productName = '',
+    this.categoryName = '',
+    this.siblings = const [],
   });
 
   final String businessType;
   final VariantDraft? existing;
   final bool allowOpeningStock;
+  final String productName;
+  final String categoryName;
+  final List<Map<String, String>> siblings;
 
   @override
   State<_VariantSheet> createState() => _VariantSheetState();
@@ -101,18 +139,29 @@ class _AttrRow {
 }
 
 class _VariantSheetState extends State<_VariantSheet> {
-  // Every field — including the business-type defaults — is just a starting
-  // suggestion: the name is editable and the row can be removed entirely.
+  // Every field is a suggestion: the name is editable and the row can be
+  // removed. Where the fields come from, in order:
+  //   1. editing: the variant's own fields;
+  //   2. the product already has variants: the same fields, same order;
+  //   3. the product's name or category matches a preset (washing machine…);
+  //   4. the shop type's fields (PRD 7.5).
+  late VariantPreset? _preset = suggestVariantPreset(
+    name: widget.productName,
+    category: widget.categoryName,
+  );
+  late bool _fromSiblings =
+      widget.existing == null && widget.siblings.any((m) => m.isNotEmpty);
   late final List<_AttrRow> _rows = widget.existing != null
       ? [
           for (final e in widget.existing!.attributes.entries)
             _AttrRow(name: e.key, value: e.value),
         ]
-      : [
-          // Attribute fields suggested for the shop's category (PRD 7.5).
-          for (final f in categoryOf(widget.businessType).variantFields)
-            _AttrRow(name: f),
-        ];
+      : _fromSiblings
+      ? [
+          for (final k in widget.siblings.firstWhere((m) => m.isNotEmpty).keys)
+            _AttrRow(name: k),
+        ]
+      : _rowsFor(_preset);
   late final _sku = TextEditingController(text: widget.existing?.sku ?? '');
   late final _barcode = TextEditingController(
     text: widget.existing?.barcode ?? '',
@@ -134,6 +183,67 @@ class _VariantSheetState extends State<_VariantSheet> {
   late final _lowStock = TextEditingController(
     text: widget.existing?.lowStockQty?.toString() ?? '',
   );
+
+  List<_AttrRow> _rowsFor(VariantPreset? preset) => [
+    for (final f
+        in preset?.fields.map((f) => f.name) ??
+            categoryOf(widget.businessType).variantFields)
+      _AttrRow(name: f),
+  ];
+
+  /// Switch to another product type's fields; a value already typed into a
+  /// field of the same name is kept.
+  void _usePreset(VariantPreset? preset) {
+    final typed = {
+      for (final r in _rows)
+        if (r.value.text.trim().isNotEmpty)
+          r.name.text.trim().toLowerCase(): r.value.text,
+    };
+    setState(() {
+      _preset = preset;
+      _fromSiblings = false;
+      _rows
+        ..clear()
+        ..addAll(_rowsFor(preset));
+      for (final r in _rows) {
+        r.value.text = typed[r.name.text.trim().toLowerCase()] ?? '';
+      }
+    });
+  }
+
+  /// One-tap values for a field: what this product's other variants used,
+  /// then common values for that field name.
+  List<String> _optionsFor(String fieldName) {
+    final key = fieldName.trim().toLowerCase();
+    if (key.isEmpty) return const [];
+    final out = <String>[];
+    void add(String v) {
+      if (v.trim().isNotEmpty && !out.contains(v)) out.add(v);
+    }
+
+    for (final m in widget.siblings) {
+      for (final e in m.entries) {
+        if (e.key.trim().toLowerCase() == key) add(e.value);
+      }
+    }
+    // The chosen product type's own values; other types' values only for a
+    // field it doesn't define (a washing machine's Type isn't "Split").
+    final own = (_preset?.fields ?? const <VariantField>[]).where(
+      (f) => f.name.toLowerCase() == key,
+    );
+    if (own.isNotEmpty) {
+      own.expand((f) => f.options).forEach(add);
+    } else {
+      optionsForField(fieldName).forEach(add);
+    }
+    return out.take(8).toList();
+  }
+
+  String get _sourceLabel {
+    if (_fromSiblings) return 'Same fields as this product\'s other variants';
+    if (_preset != null) return 'Fields for: ${_preset!.label}';
+    return 'Fields for your shop type';
+  }
 
   void _addField() {
     setState(() => _rows.add(_AttrRow()));
@@ -173,134 +283,251 @@ class _VariantSheetState extends State<_VariantSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final dialog = isWideLayout(context);
+    final list = ListView(
+      padding: const EdgeInsets.all(16),
+      shrinkWrap: dialog,
+      children: [
+        Text(
+          widget.existing == null ? 'Add variant' : 'Edit variant',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SectionLabel('Attributes'),
+        if (widget.existing == null) ...[
+          _FieldsSource(label: _sourceLabel, onPick: _usePreset),
+          const SizedBox(height: 12),
+        ],
+        for (var i = 0; i < _rows.length; i++)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      flex: 4,
+                      child: TextField(
+                        controller: _rows[i].name,
+                        onChanged: (_) => setState(() {}),
+                        textCapitalization: TextCapitalization.words,
+                        decoration: const InputDecoration(
+                          labelText: 'Field name',
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      flex: 5,
+                      child: TextField(
+                        controller: _rows[i].value,
+                        onChanged: (_) => setState(() {}),
+                        decoration: const InputDecoration(labelText: 'Value'),
+                      ),
+                    ),
+                    IconButton(
+                      tooltip: 'Remove field',
+                      icon: const Icon(
+                        Icons.remove_circle_outline,
+                        color: AppColors.red,
+                      ),
+                      onPressed: () => _removeField(i),
+                    ),
+                  ],
+                ),
+                _ValueChips(
+                  row: _rows[i],
+                  options: _optionsFor(_rows[i].name.text),
+                  onPicked: () => setState(() {}),
+                ),
+              ],
+            ),
+          ),
+        OutlinedButton.icon(
+          onPressed: _addField,
+          icon: const Icon(Icons.add),
+          label: const Text('Add field'),
+        ),
+        const SectionLabel('Codes'),
+        TextField(
+          controller: _sku,
+          decoration: const InputDecoration(labelText: 'SKU (optional)'),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: _barcode,
+          decoration: const InputDecoration(labelText: 'Barcode (optional)'),
+        ),
+        const SectionLabel('Pricing (leave blank to use product price)'),
+        Row(
+          children: [
+            Expanded(
+              child: TextField(
+                controller: _purchase,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(labelText: 'Purchase ₹'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _selling,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(labelText: 'Selling ₹'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _mrp,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(labelText: 'MRP ₹'),
+              ),
+            ),
+          ],
+        ),
+        const SectionLabel('Stock'),
+        Row(
+          children: [
+            if (widget.allowOpeningStock) ...[
+              Expanded(
+                child: TextField(
+                  controller: _opening,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: const InputDecoration(labelText: 'Opening stock'),
+                ),
+              ),
+              const SizedBox(width: 12),
+            ],
+            Expanded(
+              child: TextField(
+                controller: _lowStock,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Low stock alert qty',
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        FilledButton(onPressed: _save, child: const Text('Save variant')),
+        const SizedBox(height: 24),
+      ],
+    );
+    if (dialog) return list;
     return DraggableScrollableSheet(
       expand: false,
       initialChildSize: 0.85,
-      builder: (ctx, scrollController) => ListView(
-        controller: scrollController,
-        padding: const EdgeInsets.all(16),
+      builder: (ctx, scrollController) =>
+          PrimaryScrollController(controller: scrollController, child: list),
+    );
+  }
+}
+
+/// "Fields for: Washing machine · Change" — pick another product type.
+class _FieldsSource extends StatelessWidget {
+  const _FieldsSource({required this.label, required this.onPick});
+
+  final String label;
+  final ValueChanged<VariantPreset?> onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(12, 4, 4, 4),
+      decoration: BoxDecoration(
+        color: AppColors.primarySoft,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
         children: [
-          Text(
-            widget.existing == null ? 'Add variant' : 'Edit variant',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SectionLabel('Attributes'),
-          for (var i = 0; i < _rows.length; i++)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    flex: 4,
-                    child: TextField(
-                      controller: _rows[i].name,
-                      textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(
-                        labelText: 'Field name',
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    flex: 5,
-                    child: TextField(
-                      controller: _rows[i].value,
-                      decoration: const InputDecoration(labelText: 'Value'),
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.remove_circle_outline,
-                      color: AppColors.red,
-                    ),
-                    onPressed: () => _removeField(i),
-                  ),
-                ],
+          const Icon(Icons.auto_awesome, size: 16, color: AppColors.primary),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primary,
               ),
             ),
-          OutlinedButton.icon(
-            onPressed: _addField,
-            icon: const Icon(Icons.add),
-            label: const Text('Add field'),
           ),
-          const SectionLabel('Codes'),
-          TextField(
-            controller: _sku,
-            decoration: const InputDecoration(labelText: 'SKU (optional)'),
-          ),
-          const SizedBox(height: 12),
-          TextField(
-            controller: _barcode,
-            decoration: const InputDecoration(labelText: 'Barcode (optional)'),
-          ),
-          const SectionLabel('Pricing (leave blank to use product price)'),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: _purchase,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(labelText: 'Purchase ₹'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _selling,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(labelText: 'Selling ₹'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _mrp,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(labelText: 'MRP ₹'),
-                ),
+          PopupMenuButton<int>(
+            tooltip: 'Use the fields of another product type',
+            onSelected: (i) => onPick(i < 0 ? null : variantPresets[i]),
+            itemBuilder: (_) => [
+              for (var i = 0; i < variantPresets.length; i++)
+                PopupMenuItem(value: i, child: Text(variantPresets[i].label)),
+              const PopupMenuDivider(),
+              const PopupMenuItem(
+                value: -1,
+                child: Text('My shop type\'s fields'),
               ),
             ],
-          ),
-          const SectionLabel('Stock'),
-          Row(
-            children: [
-              if (widget.allowOpeningStock) ...[
-                Expanded(
-                  child: TextField(
-                    controller: _opening,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: const InputDecoration(
-                      labelText: 'Opening stock',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-              ],
-              Expanded(
-                child: TextField(
-                  controller: _lowStock,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Low stock alert qty',
-                  ),
+            child: const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              child: Text(
+                'Change',
+                style: TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w700,
+                  color: AppColors.primary,
                 ),
               ),
-            ],
+            ),
           ),
-          const SizedBox(height: 20),
-          FilledButton(onPressed: _save, child: const Text('Save variant')),
-          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+}
+
+/// Tap-to-fill values under a field.
+class _ValueChips extends StatelessWidget {
+  const _ValueChips({
+    required this.row,
+    required this.options,
+    required this.onPicked,
+  });
+
+  final _AttrRow row;
+  final List<String> options;
+  final VoidCallback onPicked;
+
+  @override
+  Widget build(BuildContext context) {
+    if (options.isEmpty) return const SizedBox.shrink();
+    final current = row.value.text.trim();
+    return Padding(
+      padding: const EdgeInsets.only(top: 6),
+      child: Wrap(
+        spacing: 6,
+        runSpacing: 6,
+        children: [
+          for (final o in options)
+            ChoiceChip(
+              label: Text(o),
+              selected: o == current,
+              showCheckmark: false,
+              visualDensity: VisualDensity.compact,
+              onSelected: (_) {
+                row.value.text = o;
+                onPicked();
+              },
+            ),
         ],
       ),
     );
