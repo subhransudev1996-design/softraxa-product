@@ -65,6 +65,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late final _conversionFactor = TextEditingController(
     text: _num(widget.existing?['conversion_factor']),
   );
+  late final _packPrice = TextEditingController(
+    text: _num(widget.existing?['pack_price']),
+  );
 
   String? _categoryId;
   String? _brandId;
@@ -373,6 +376,20 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     }
   }
 
+  /// What the pack price means, with this product's numbers.
+  String _packPriceHint() {
+    final unit = _secondaryUnitName.text.trim();
+    final size = double.tryParse(_conversionFactor.text) ?? 0;
+    final piece = double.tryParse(_selling.text) ?? 0;
+    final pack = double.tryParse(_packPrice.text);
+    if (pack != null && pack > 0) {
+      return 'Bill 1 $unit at ${money(pack)}, single units at ${money(piece)}';
+    }
+    return size > 0 && piece > 0
+        ? 'Empty = ${qty(size)} × ${money(piece)} = ${money(size * piece)}'
+        : 'Empty = price per unit × units in the $unit';
+  }
+
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_hasVariants && !isEdit && _variants.isEmpty) {
@@ -423,6 +440,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'conversion_factor': _secondaryUnitName.text.trim().isEmpty
             ? null
             : double.tryParse(_conversionFactor.text),
+        // Own price for a whole bulk unit (migration 0061): a Box of 10
+        // cigarettes at ₹95 while one piece is ₹10.
+        'pack_price': _secondaryUnitName.text.trim().isEmpty || _hasVariants
+            ? null
+            : double.tryParse(_packPrice.text),
       };
 
       late String productId;
@@ -714,6 +736,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: TextFormField(
                       controller: _secondaryUnitName,
                       textCapitalization: TextCapitalization.words,
+                      onChanged: (_) => setState(() {}),
                       decoration: const InputDecoration(
                         labelText: 'Bulk unit (optional)',
                         helperText: 'e.g. Bag, Box, Rod',
@@ -731,10 +754,27 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         labelText: '= how many units?',
                         helperText: '1 Bag = 50 kg → 50',
                       ),
+                      onChanged: (_) => setState(() {}),
                     ),
                   ),
                 ],
               ),
+              if (_secondaryUnitName.text.trim().isNotEmpty &&
+                  !_hasVariants) ...[
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _packPrice,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText:
+                        'Selling price of 1 ${_secondaryUnitName.text.trim()} ₹ (optional)',
+                    helperText: _packPriceHint(),
+                  ),
+                  onChanged: (_) => setState(() {}),
+                ),
+              ],
               const SectionLabel('Codes'),
               TextFormField(
                 controller: _sku,

@@ -301,11 +301,21 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       if (variant == null) return;
     }
 
-    // Loose/weighed goods (unit has allow_decimal): ask for the quantity —
-    // by weight/length or by ₹ amount — instead of silently adding 1.
+    // Loose/weighed goods (unit has allow_decimal), and goods also sold by
+    // the pack (Box of 10 cigarettes): ask for the quantity — loose or by
+    // the pack, or by ₹ amount — instead of silently adding 1.
     var addQty = 1.0;
+    var asPack = false;
     final unitMap = product['units'] as Map?;
-    if (unitMap?['allow_decimal'] == true) {
+    final allowDecimal = unitMap?['allow_decimal'] == true;
+    final secondaryUnit = (product['secondary_unit_name'] as String? ?? '')
+        .trim();
+    final hasPack =
+        secondaryUnit.isNotEmpty &&
+        toDouble(product['conversion_factor']) > 0 &&
+        product['track_serial'] != true &&
+        product['track_pieces'] != true;
+    if (allowDecimal || hasPack) {
       if (!mounted) return;
       final result = await showLooseQtySheet(
         context,
@@ -313,12 +323,19 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             '${product['name']}${variant != null ? ' (${variant['name']})' : ''}',
         rate: toDouble(variant?['selling_price'] ?? product['selling_price']),
         unitName: unitMap?['short_name'] as String? ?? '',
-        secondaryUnitName: product['secondary_unit_name'] as String?,
+        secondaryUnitName: secondaryUnit.isEmpty ? null : secondaryUnit,
         conversionFactor: (product['conversion_factor'] as num?)?.toDouble(),
+        packPrice: hasPack ? packOf(product, variant)?.price : null,
+        allowDecimal: allowDecimal,
       );
       if (result == null || !mounted) return;
       addQty = result.qty;
+      asPack = result.asPack;
     }
+    // Stock is checked in base units: a pack is its pieces.
+    final baseQty = asPack
+        ? toBaseQty(addQty, toDouble(product['conversion_factor']))
+        : addQty;
 
     // Cut-piece shops (wire, rods, pipe): pick which physical piece this
     // cut comes from — best fit first. The server cuts it with the sale
@@ -333,7 +350,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         ref,
         productId: product['id'] as String,
         productName: product['name'] as String,
-        needQty: addQty,
+        needQty: baseQty,
         unitName: (product['units'] as Map?)?['short_name'] as String? ?? '',
       );
       if (pick == null || !mounted) return; // cancelled
@@ -360,7 +377,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final alreadyInCart = ref
         .read(cartProvider.notifier)
         .qtyInCart(product['id'] as String, variant?['id'] as String?);
-    final projectedQty = alreadyInCart + addQty;
+    final projectedQty = alreadyInCart + baseQty;
     if (projectedQty > stock) {
       final proceed = await _confirmStockIssue(
         product,
@@ -379,6 +396,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           variant: variant,
           serialNo: serialNo,
           addQty: addQty,
+          asPack: asPack,
           pieceId: pieceId,
           keepRemnant: keepRemnant,
           remnantReason: remnantReason,
@@ -1140,7 +1158,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}',
+                                                '${line.name}${line.variantName.isNotEmpty ? ' — ${line.variantName}' : ''}'
+                                                '${line.isPack ? ' · ${line.unitName} of ${qty(line.packSize)}' : ''}',
                                                 maxLines: 1,
                                                 overflow: TextOverflow.ellipsis,
                                                 style: const TextStyle(
@@ -1150,7 +1169,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                               ),
                                               const SizedBox(height: 2),
                                               Text(
-                                                '${money(line.price)} × ${qty(line.qty)}${_lineDiscountLabel(line)}'
+                                                '${money(line.price)} × ${line.isPack ? qtyUnit(line.qty, line.unitName) : qty(line.qty)}${_lineDiscountLabel(line)}'
                                                 '${line.priceSource == 'retail' || line.priceSource == 'manual' ? '' : '  • ${priceSourceLabel(line.priceSource)}'}',
                                                 style: TextStyle(
                                                   fontSize: 13,

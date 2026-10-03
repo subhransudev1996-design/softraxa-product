@@ -562,8 +562,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           '${(it['variant_name'] as String? ?? '').isNotEmpty ? ' (${it['variant_name']})' : ''}',
                         ),
                         subtitle: Text(
-                          '${qtyUnit(it['quantity'] as num?, it['unit_name'] as String?)} × '
-                          '${money(toDouble(it['unit_price']) * (isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1))}'
+                          '${qtyUnit(billedQty(it).qty, billedQty(it).unit)} × '
+                          '${money(toDouble(it['unit_price']) * (isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1) * billedQty(it).per)}'
+                          '${billedQty(it).per != 1 ? ' (${qtyUnit(it['quantity'] as num?, it['unit_name'] as String?)})' : ''}'
                           '${(it['serial_no'] as String? ?? '').isNotEmpty ? '\nS/N: ${it['serial_no']}' : ''}',
                         ),
                         trailing: Text(

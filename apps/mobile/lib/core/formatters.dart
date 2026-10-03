@@ -52,3 +52,20 @@ double toDouble(dynamic v) => (v as num?)?.toDouble() ?? 0;
 /// "2 pcs", "1.5 kg"
 String qtyUnit(num? q, String? unit) =>
     unit == null || unit.isEmpty ? qty(q) : '${qty(q)} $unit';
+
+/// How a saved bill line was sold: a line sold by the pack (migration
+/// 0061) is stored in base units — 10 pcs at ₹9.50 — but reads as it was
+/// sold: 1 Box at ₹95. [per] is the base units per shown unit, to scale a
+/// stored per-unit rate.
+({double qty, String unit, double per}) billedQty(Map<String, dynamic> it) {
+  final q = toDouble(it['quantity']);
+  final factor = toDouble(it['alt_factor']);
+  if (it['sold_as_pack'] == true && factor > 0) {
+    return (
+      qty: q / factor,
+      unit: it['alt_unit_name'] as String? ?? '',
+      per: factor,
+    );
+  }
+  return (qty: q, unit: it['unit_name'] as String? ?? '', per: 1);
+}

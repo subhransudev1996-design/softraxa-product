@@ -39,9 +39,11 @@ class CartLine {
     this.customerPrice,
     this.wholesaleCustomer = false,
     this.priceIsDefault = true,
+    this.packSize,
+    this.baseUnitName = '',
   });
 
-  final String key; // productId:variantId
+  final String key; // productId:variantId (":pack" for a pack line)
   final String productId;
   final String? variantId;
   final String name;
@@ -86,6 +88,17 @@ class CartLine {
   /// False once someone changed the price by hand — then quantity or
   /// customer changes no longer reprice the line.
   bool priceIsDefault;
+
+  /// A line sold by the pack (migration 0061): [qty], [price], [costPrice]
+  /// and [mrp] are per pack ([unitName], e.g. Box) and [packSize] base
+  /// units ([baseUnitName], e.g. pcs) make one pack. Null for loose lines.
+  final double? packSize;
+  final String baseUnitName;
+
+  bool get isPack => packSize != null;
+
+  /// Quantity in the base unit stock is kept in.
+  double get baseQty => qty * (packSize ?? 1);
 
   bool get _wholesaleApplies =>
       (wholesalePrice ?? 0) > 0 &&
@@ -169,7 +182,31 @@ class CartLine {
     customerPrice: customerPrice,
     wholesaleCustomer: wholesaleCustomer,
     priceIsDefault: priceIsDefault,
+    packSize: packSize,
+    baseUnitName: baseUnitName,
   );
+}
+
+/// The product's pack with its own price (Box of 10 at ₹95), or null when
+/// it has none — then a pack is just [size] base units at the unit price.
+/// Products without variants only.
+({String unit, double size, double price})? packOf(
+  Map<String, dynamic> product,
+  Map<String, dynamic>? variant,
+) {
+  final unit = (product['secondary_unit_name'] as String? ?? '').trim();
+  final size = toDouble(product['conversion_factor']);
+  final price = toDouble(product['pack_price']);
+  if (variant != null || unit.isEmpty || size <= 0 || price <= 0) return null;
+  return (unit: unit, size: size, price: price);
+}
+
+/// A customer's agreed per-unit price as a pack price — only when it beats
+/// the pack price, as on the server (migration 0061).
+double? packCustomerPrice(double? perUnit, double size, double packPrice) {
+  if (perUnit == null) return null;
+  final p = perUnit * size;
+  return p < packPrice ? p : null;
 }
 
 /// Human label for a price source.
@@ -314,16 +351,20 @@ class CartNotifier extends Notifier<CartState> {
 
   /// Total quantity already in the cart for this product/variant — sums
   /// across lines, since serial-tracked items get one line per unit rather
-  /// than merging into a single line.
+  /// than merging into a single line. In base units: a pack line counts its
+  /// pieces.
   double qtyInCart(String productId, String? variantId) => state.lines
       .where((l) => l.productId == productId && l.variantId == variantId)
-      .fold(0.0, (s, l) => s + l.qty);
+      .fold(0.0, (s, l) => s + l.baseQty);
 
   /// Add a product (or variant) to the cart; merges quantity if already there.
   /// Serial-tracked items always get their own line. [addQty] supports loose
   /// quantities (e.g. 0.5 kg) for units with allow_decimal. Lines cut from a
   /// specific piece ([pieceId]) never merge — each cut is its own line so
   /// the right piece gets shortened at checkout.
+  ///
+  /// [asPack] adds whole packs at the product's pack price (migration
+  /// 0061) — [addQty] is then in packs, on a line of its own.
   void addProduct(
     Map<String, dynamic> product, {
     Map<String, dynamic>? variant,
@@ -332,9 +373,12 @@ class CartNotifier extends Notifier<CartState> {
     String? pieceId,
     bool? keepRemnant,
     String remnantReason = '',
+    bool asPack = false,
   }) {
     final variantId = variant?['id'] as String?;
-    final key = '${product['id']}:${variantId ?? ''}';
+    final priceKey = '${product['id']}:${variantId ?? ''}';
+    final pack = asPack ? packOf(product, variant) : null;
+    final key = pack != null ? '$priceKey:pack' : priceKey;
     final trackSerial = product['track_serial'] == true;
     final ownLine = trackSerial || pieceId != null;
 
@@ -344,6 +388,37 @@ class CartNotifier extends Notifier<CartState> {
         changeQty(state.lines[idx], state.lines[idx].qty + addQty);
         return;
       }
+    }
+
+    if (pack != null) {
+      final size = pack.size;
+      final baseUnit =
+          (product['units'] as Map?)?['short_name'] as String? ?? '';
+      final line = CartLine(
+        qty: addQty,
+        key: key,
+        productId: product['id'] as String,
+        name: product['name'] as String,
+        hsnCode: product['hsn_code'] as String? ?? '',
+        unitName: pack.unit,
+        baseUnitName: baseUnit,
+        packSize: size,
+        price: pack.price,
+        retailPrice: pack.price,
+        customerPrice: packCustomerPrice(
+          state.customerPrices[priceKey],
+          size,
+          pack.price,
+        ),
+        wholesaleCustomer: state.wholesaleCustomer,
+        gstRate: toDouble(product['gst_rate']),
+        costPrice: toDouble(product['purchase_price']) * size,
+        mrp: toDouble(product['mrp']) * size,
+        availableStock: toDouble(product['current_stock']) / size,
+      );
+      line.price = line.defaultPrice ?? pack.price;
+      state = state.copyWith(lines: [...state.lines, line]);
+      return;
     }
 
     final retail = toDouble(
@@ -436,7 +511,10 @@ class CartNotifier extends Notifier<CartState> {
       lines: [
         for (final l in state.lines)
           l.copy()..also((c) {
-            c.customerPrice = prices['${c.productId}:${c.variantId ?? ''}'];
+            final agreed = prices['${c.productId}:${c.variantId ?? ''}'];
+            c.customerPrice = c.isPack
+                ? packCustomerPrice(agreed, c.packSize!, c.retailPrice ?? 0)
+                : agreed;
             c.wholesaleCustomer = wholesale;
             if (c.priceIsDefault && c.defaultPrice != null) {
               c.price = c.defaultPrice!;
@@ -562,6 +640,11 @@ CartLine _invoiceItemToCartLine(Map<String, dynamic> it) {
   final product = it['products'] as Map?;
   final variant = it['product_variants'] as Map?;
   final variantId = it['variant_id'] as String?;
+  // A line sold by the pack comes back as packs at the pack price (0061).
+  final factor = toDouble(it['alt_factor']);
+  final size = it['sold_as_pack'] == true && factor > 0 ? factor : null;
+  final per = size ?? 1;
+  final listPrice = (it['list_price'] as num?)?.toDouble();
   return CartLine(
     // A dedicated key (the invoice_item's own id) rather than the usual
     // productId:variantId — an invoice can legitimately have more than one
@@ -574,22 +657,27 @@ CartLine _invoiceItemToCartLine(Map<String, dynamic> it) {
     name: it['product_name'] as String? ?? '',
     variantName: it['variant_name'] as String? ?? '',
     hsnCode: it['hsn_code'] as String? ?? '',
-    unitName: it['unit_name'] as String? ?? '',
-    price: toDouble(it['unit_price']) * divisor,
-    qty: toDouble(it['quantity']),
+    unitName: size != null
+        ? it['alt_unit_name'] as String? ?? ''
+        : it['unit_name'] as String? ?? '',
+    baseUnitName: size != null ? it['unit_name'] as String? ?? '' : '',
+    packSize: size,
+    price: toDouble(it['unit_price']) * divisor * per,
+    qty: toDouble(it['quantity']) / per,
     discount: toDouble(it['discount_amount']) * divisor,
     gstRate: gstRate,
-    costPrice: toDouble(it['cost_price']),
-    mrp: toDouble(it['mrp']),
+    costPrice: toDouble(it['cost_price']) * per,
+    mrp: toDouble(it['mrp']) * per,
     serialNo: it['serial_no'] as String? ?? '',
     trackSerial: product?['track_serial'] == true,
-    allowDecimal: (product?['units'] as Map?)?['allow_decimal'] == true,
-    availableStock: toDouble(
-      (variantId != null ? variant : product)?['current_stock'],
-    ),
+    allowDecimal:
+        size == null && (product?['units'] as Map?)?['allow_decimal'] == true,
+    availableStock:
+        toDouble((variantId != null ? variant : product)?['current_stock']) /
+        per,
     // The default price recorded on the bill (0043), so the editor can show
     // how far below default the bill is; an edit keeps the charged price.
-    retailPrice: (it['list_price'] as num?)?.toDouble(),
+    retailPrice: listPrice == null ? null : listPrice * per,
     priceIsDefault: false,
   );
 }
@@ -612,6 +700,9 @@ Map<String, dynamic> buildInvoicePayload({
   final items = cart.lines.map((l) {
     final rate = gst ? l.gstRate : 0.0;
     final divisor = 1 + rate / 100;
+    // The server keeps quantities in the base unit: a pack line goes as
+    // its pieces at the pack price per piece, flagged "pack" (0061).
+    final per = l.packSize ?? 1;
     return {
       // A cutting charge has no product (no stock moves).
       'product_id': l.productId.isEmpty ? null : l.productId,
@@ -623,11 +714,12 @@ Map<String, dynamic> buildInvoicePayload({
       'variant_name': l.variantName,
       'hsn_code': l.hsnCode,
       'serial_no': l.serialNo,
-      'quantity': l.qty,
-      'unit_name': l.unitName,
-      'unit_price': r2(l.price / divisor),
-      'mrp': l.mrp,
-      'cost_price': l.costPrice,
+      'quantity': l.isPack ? toBaseQty(l.qty, per) : l.qty,
+      'unit_name': l.isPack ? l.baseUnitName : l.unitName,
+      'unit_price': r2(l.price / per / divisor),
+      'mrp': l.mrp / per,
+      'cost_price': l.costPrice / per,
+      if (l.isPack) 'pack': true,
       'discount_amount': r2(l.discountAmount / divisor),
       'gst_rate': rate,
       'tax_amount': r2(l.gross - l.gross / divisor),

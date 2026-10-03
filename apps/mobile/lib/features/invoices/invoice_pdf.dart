@@ -239,11 +239,10 @@ class InvoicePdf {
                   '${i + 1}',
                   _itemName(items[i]),
                   if (isGst) items[i]['hsn_code'] as String? ?? '',
-                  qtyUnit(
-                    items[i]['quantity'] as num?,
-                    items[i]['unit_name'] as String?,
-                  ),
-                  (toDouble(items[i]['unit_price']) * _inclFactor(items[i]))
+                  qtyUnit(billedQty(items[i]).qty, billedQty(items[i]).unit),
+                  (toDouble(items[i]['unit_price']) *
+                          _inclFactor(items[i]) *
+                          billedQty(items[i]).per)
                       .toStringAsFixed(2),
                   if (isGst) '${qty(items[i]['gst_rate'] as num?)}%',
                   toDouble(items[i]['discount_amount']) > 0
@@ -427,8 +426,8 @@ class InvoicePdf {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(
-                    '${qtyUnit(it['quantity'] as num?, it['unit_name'] as String?)}'
-                    ' x ${(toDouble(it['unit_price']) * _inclFactor(it)).toStringAsFixed(2)}',
+                    '${qtyUnit(billedQty(it).qty, billedQty(it).unit)}'
+                    ' x ${(toDouble(it['unit_price']) * _inclFactor(it) * billedQty(it).per).toStringAsFixed(2)}',
                     style: small,
                   ),
                   pw.Text(
@@ -517,6 +516,10 @@ class InvoicePdf {
     final factor = toDouble(it['alt_factor']);
     final altUnit = it['alt_unit_name'] as String? ?? '';
     final q = toDouble(it['quantity']);
+    if (it['sold_as_pack'] == true && factor > 0) {
+      // Sold by the pack (0061): the pack is the quantity; show its size.
+      return '$name\n(1 $altUnit = ${qtyUnit(factor, it['unit_name'] as String?)})';
+    }
     if (altUnit.isNotEmpty && factor > 0 && q >= factor) {
       final bulk = q / factor;
       final shown = bulk == bulk.roundToDouble()

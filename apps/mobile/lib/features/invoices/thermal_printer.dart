@@ -190,12 +190,15 @@ class ThermalPrinterService {
         name = '$name (${it['variant_name']})';
       }
       bytes += generator.text(name, styles: const PosStyles(bold: true));
+      final billed = billedQty(it);
       final rate =
           toDouble(it['unit_price']) *
-          (isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1);
+          (isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1) *
+          billed.per;
       bytes += generator.row([
         PosColumn(
-          text: '${qty(it['quantity'] as num?)} x ${rate.toStringAsFixed(2)}',
+          text:
+              '${qtyUnit(billed.qty, it['sold_as_pack'] == true ? billed.unit : null)} x ${rate.toStringAsFixed(2)}',
           width: 7,
         ),
         PosColumn(

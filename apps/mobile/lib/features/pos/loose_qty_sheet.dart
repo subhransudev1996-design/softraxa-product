@@ -5,11 +5,12 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import 'cart.dart';
 
-/// Result of the loose-quantity sheet: the quantity in BASE units, plus the
-/// unit label it was entered in (for the snackbar/label only).
+/// Result of the quantity sheet: the quantity in BASE units — or, when
+/// [asPack], in whole packs to bill at the product's pack price (0061).
 class LooseQtyResult {
-  const LooseQtyResult(this.qty);
+  const LooseQtyResult(this.qty, {this.asPack = false});
   final double qty;
+  final bool asPack;
 }
 
 /// Quantity entry for loose/weighed goods (kirana sugar by the kg, rods by
@@ -20,7 +21,9 @@ class LooseQtyResult {
 ///   • by amount    — "₹50 ka sugar" → type 50 in the ₹ field, qty computes
 /// If [secondaryUnitName] and [conversionFactor] are set (e.g. Bag = 50 kg),
 /// a unit toggle lets the qty be typed in the secondary unit and converts to
-/// base units on return.
+/// base units on return. With a [packPrice] (cigarettes: Box of 10 at ₹95,
+/// not 10 × ₹10) the pack is billed as whole packs at that price instead.
+/// Whole-number units ([allowDecimal] false) only take whole quantities.
 Future<LooseQtyResult?> showLooseQtySheet(
   BuildContext context, {
   required String name,
@@ -28,6 +31,8 @@ Future<LooseQtyResult?> showLooseQtySheet(
   required String unitName,
   String? secondaryUnitName,
   double? conversionFactor,
+  double? packPrice,
+  bool allowDecimal = true,
 }) {
   // Desktop: a small dialog; the quantity is pre-selected so typing
   // replaces it, and Enter adds.
@@ -43,6 +48,8 @@ Future<LooseQtyResult?> showLooseQtySheet(
             unitName: unitName,
             secondaryUnitName: secondaryUnitName,
             conversionFactor: conversionFactor,
+            packPrice: packPrice,
+            allowDecimal: allowDecimal,
             dialog: true,
           ),
         ),
@@ -60,6 +67,8 @@ Future<LooseQtyResult?> showLooseQtySheet(
         unitName: unitName,
         secondaryUnitName: secondaryUnitName,
         conversionFactor: conversionFactor,
+        packPrice: packPrice,
+        allowDecimal: allowDecimal,
       ),
     ),
   );
@@ -72,6 +81,8 @@ class _LooseQtySheet extends StatefulWidget {
     required this.unitName,
     this.secondaryUnitName,
     this.conversionFactor,
+    this.packPrice,
+    this.allowDecimal = true,
     this.dialog = false,
   });
 
@@ -81,6 +92,8 @@ class _LooseQtySheet extends StatefulWidget {
   final String unitName;
   final String? secondaryUnitName;
   final double? conversionFactor; // 1 secondary = X base units
+  final double? packPrice; // own price of one whole pack, if set
+  final bool allowDecimal;
 
   @override
   State<_LooseQtySheet> createState() => _LooseQtySheetState();
@@ -95,10 +108,21 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   bool get _hasSecondary =>
       widget.secondaryUnitName != null && (widget.conversionFactor ?? 0) > 0;
 
+  /// Packs billed at their own price — whole packs only.
+  bool get _packPriced => _inSecondaryUnit && (widget.packPrice ?? 0) > 0;
+
   /// Rate for the unit currently being typed in.
   double get _activeRate => _inSecondaryUnit
-      ? widget.rate * (widget.conversionFactor ?? 1)
+      ? (_packPriced
+            ? widget.packPrice!
+            : widget.rate * (widget.conversionFactor ?? 1))
       : widget.rate;
+
+  /// Whole numbers only: whole-number units, and packs at a pack price.
+  bool get _wholeOnly => !widget.allowDecimal || _packPriced;
+
+  bool _isValid(double? q) =>
+      q != null && q > 0 && (!_wholeOnly || q == q.roundToDouble());
 
   String get _activeUnit =>
       _inSecondaryUnit ? widget.secondaryUnitName! : widget.unitName;
@@ -106,7 +130,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   @override
   void initState() {
     super.initState();
-    _amountC.text = widget.rate > 0 ? _activeRate.toStringAsFixed(2) : '';
+    _amountC.text = _activeRate > 0 ? _activeRate.toStringAsFixed(2) : '';
     _qtyC.addListener(_onQtyChanged);
     _amountC.addListener(_onAmountChanged);
     if (widget.dialog) {
@@ -125,7 +149,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   }
 
   void _onQtyChanged() {
-    if (_syncing || widget.rate <= 0) return;
+    if (_syncing || _activeRate <= 0) return;
     _syncing = true;
     final q = double.tryParse(_qtyC.text);
     _amountC.text = q == null ? '' : (q * _activeRate).toStringAsFixed(2);
@@ -134,7 +158,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   }
 
   void _onAmountChanged() {
-    if (_syncing || widget.rate <= 0) return;
+    if (_syncing || _activeRate <= 0) return;
     _syncing = true;
     final a = double.tryParse(_amountC.text);
     final q = a == null ? 0.0 : qtyForAmount(a, _activeRate);
@@ -150,19 +174,22 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
 
   void _submit() {
     final q = double.tryParse(_qtyC.text);
-    if (q == null || q <= 0) return;
+    if (!_isValid(q)) return;
     Navigator.pop(
       context,
-      LooseQtyResult(
-        toBaseQty(q, _inSecondaryUnit ? widget.conversionFactor : null),
-      ),
+      _packPriced
+          ? LooseQtyResult(q!, asPack: true)
+          : LooseQtyResult(
+              toBaseQty(q!, _inSecondaryUnit ? widget.conversionFactor : null),
+            ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final parsedQty = double.tryParse(_qtyC.text);
-    final valid = parsedQty != null && parsedQty > 0;
+    final valid = _isValid(parsedQty);
+    final whole = parsedQty != null && parsedQty == parsedQty.roundToDouble();
 
     return Padding(
       padding: EdgeInsets.all(widget.dialog ? 24 : 16),
@@ -178,7 +205,8 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
           ),
           const SizedBox(height: 4),
           Text(
-            '${money(widget.rate)} / ${widget.unitName.isEmpty ? 'unit' : widget.unitName}',
+            '${money(widget.rate)} / ${widget.unitName.isEmpty ? 'unit' : widget.unitName}'
+            '${(widget.packPrice ?? 0) > 0 && _hasSecondary ? '  ·  ${money(widget.packPrice)} / ${widget.secondaryUnitName}' : ''}',
             style: TextStyle(
               color: AppColors.inkSoft,
               fontWeight: FontWeight.w600,
@@ -213,7 +241,12 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: InputDecoration(labelText: 'Qty ($_activeUnit)'),
+                  decoration: InputDecoration(
+                    labelText: 'Qty ($_activeUnit)',
+                    errorText: parsedQty != null && _wholeOnly && !whole
+                        ? 'Whole $_activeUnit only'
+                        : null,
+                  ),
                   onSubmitted: (_) => _submit(),
                 ),
               ),
@@ -234,13 +267,16 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
           Wrap(
             spacing: 8,
             children: [
-              for (final f in const [
-                (0.25, '¼'),
-                (0.5, '½'),
-                (1.0, '1'),
-                (2.0, '2'),
-                (5.0, '5'),
-              ])
+              for (final f
+                  in _wholeOnly
+                      ? const [(1.0, '1'), (2.0, '2'), (5.0, '5'), (10.0, '10')]
+                      : const [
+                          (0.25, '¼'),
+                          (0.5, '½'),
+                          (1.0, '1'),
+                          (2.0, '2'),
+                          (5.0, '5'),
+                        ])
                 ActionChip(
                   label: Text('${f.$2} $_activeUnit'),
                   onPressed: () => _setQty(f.$1),
@@ -251,11 +287,14 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
           FilledButton(
             onPressed: valid ? _submit : null,
             child: Text(
-              valid
-                  ? 'Add ${qty(_inSecondaryUnit ? parsedQty * (widget.conversionFactor ?? 1) : parsedQty)} '
+              !valid
+                  ? 'Add'
+                  : _packPriced
+                  ? 'Add ${qty(parsedQty)} ${widget.secondaryUnitName} • '
+                        '${money(parsedQty! * _activeRate)}'
+                  : 'Add ${qty(_inSecondaryUnit ? parsedQty! * (widget.conversionFactor ?? 1) : parsedQty)} '
                         '${widget.unitName.isEmpty ? '' : widget.unitName} • '
-                        '${money((parsedQty) * _activeRate)}'
-                  : 'Add',
+                        '${money(parsedQty! * _activeRate)}',
             ),
           ),
           SizedBox(height: widget.dialog ? 4 : 24),

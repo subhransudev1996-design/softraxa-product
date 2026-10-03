@@ -144,6 +144,8 @@ class _CartRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final details = [
       if (line.variantName.isNotEmpty) line.variantName,
+      if (line.isPack)
+        '${line.unitName} of ${qtyUnit(line.packSize, line.baseUnitName)}',
       if (line.trackSerial)
         line.serialNo.isEmpty ? 'IMEI/serial missing' : 'S/N ${line.serialNo}',
       if (line.priceSource != 'retail' && line.priceSource != 'manual')

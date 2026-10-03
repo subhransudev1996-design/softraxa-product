@@ -411,7 +411,8 @@ class ProductDetailScreen extends ConsumerWidget {
                                             top: 2,
                                           ),
                                           child: Text(
-                                            '1 ${p['secondary_unit_name']} = ${qty(toDouble(p['conversion_factor']))} $unit',
+                                            '1 ${p['secondary_unit_name']} = ${qty(toDouble(p['conversion_factor']))} $unit'
+                                            '${toDouble(p['pack_price']) > 0 ? ' · sells at ${money(p['pack_price'] as num?)}' : ''}',
                                             style: TextStyle(
                                               fontSize: 13,
                                               color: AppColors.inkSoft,
@@ -620,14 +621,14 @@ class ProductDetailScreen extends ConsumerWidget {
 
 final productSerialsProvider = FutureProvider.autoDispose
     .family<List<Map<String, dynamic>>, String>((ref, productId) async {
-  final client = ref.watch(supabaseProvider);
-  final rows = await client
-      .from('product_serials')
-      .select('*, invoice:invoices(invoice_no, invoice_date)')
-      .eq('product_id', productId)
-      .order('created_at', ascending: false);
-  return List<Map<String, dynamic>>.from(rows);
-});
+      final client = ref.watch(supabaseProvider);
+      final rows = await client
+          .from('product_serials')
+          .select('*, invoice:invoices(invoice_no, invoice_date)')
+          .eq('product_id', productId)
+          .order('created_at', ascending: false);
+      return List<Map<String, dynamic>>.from(rows);
+    });
 
 class _SerialsCard extends ConsumerWidget {
   const _SerialsCard({required this.productId, required this.product});
@@ -671,11 +672,14 @@ class _SerialsCard extends ConsumerWidget {
     if (added == true && controller.text.trim().isNotEmpty) {
       final client = ref.read(supabaseProvider);
       try {
-        await client.rpc('add_product_serials', params: {
-          'p_product_id': productId,
-          'p_variant_id': null,
-          'p_serials': [controller.text.trim()],
-        });
+        await client.rpc(
+          'add_product_serials',
+          params: {
+            'p_product_id': productId,
+            'p_variant_id': null,
+            'p_serials': [controller.text.trim()],
+          },
+        );
         ref.invalidate(productSerialsProvider(productId));
         ref.invalidate(productDetailProvider(productId));
         if (context.mounted) showSuccess(context, 'IMEI added');
@@ -733,8 +737,12 @@ class _SerialsCard extends ConsumerWidget {
                   );
                 }
 
-                final inStock = serials.where((s) => s['status'] == 'in_stock').toList();
-                final sold = serials.where((s) => s['status'] == 'sold').toList();
+                final inStock = serials
+                    .where((s) => s['status'] == 'in_stock')
+                    .toList();
+                final sold = serials
+                    .where((s) => s['status'] == 'sold')
+                    .toList();
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -751,7 +759,11 @@ class _SerialsCard extends ConsumerWidget {
                     if (inStock.isNotEmpty) ...[
                       const Text(
                         'Available In Stock',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.green),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.green,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -760,8 +772,15 @@ class _SerialsCard extends ConsumerWidget {
                         children: [
                           for (final s in inStock)
                             Chip(
-                              avatar: const Icon(Icons.check_circle_outline, size: 14, color: AppColors.green),
-                              label: Text(s['serial_no'] as String? ?? '', style: const TextStyle(fontSize: 13)),
+                              avatar: const Icon(
+                                Icons.check_circle_outline,
+                                size: 14,
+                                color: AppColors.green,
+                              ),
+                              label: Text(
+                                s['serial_no'] as String? ?? '',
+                                style: const TextStyle(fontSize: 13),
+                              ),
                               backgroundColor: AppColors.green.withAlpha(20),
                             ),
                         ],
@@ -771,7 +790,11 @@ class _SerialsCard extends ConsumerWidget {
                     if (sold.isNotEmpty) ...[
                       Text(
                         'Sold Units',
-                        style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.inkSoft),
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.inkSoft,
+                        ),
                       ),
                       const SizedBox(height: 6),
                       Wrap(
@@ -780,7 +803,11 @@ class _SerialsCard extends ConsumerWidget {
                         children: [
                           for (final s in sold)
                             Chip(
-                              avatar: Icon(Icons.sell_outlined, size: 14, color: AppColors.inkSoft),
+                              avatar: Icon(
+                                Icons.sell_outlined,
+                                size: 14,
+                                color: AppColors.inkSoft,
+                              ),
                               label: Text(
                                 '${s['serial_no']}${s['invoice'] != null ? ' (${s['invoice']['invoice_no']})' : ''}',
                                 style: const TextStyle(fontSize: 13),
