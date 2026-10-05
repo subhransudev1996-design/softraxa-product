@@ -355,6 +355,80 @@ Future<void> showRecordSupplierPayment(
   }
 }
 
+/// Deletes a supplier from the list. Their purchases, payments and returns
+/// stay in the books (purchases keep the supplier's name), so this only hides
+/// them: is_active = false, which every supplier list and picker filters on.
+/// Not allowed while money is owed either way — that would hide a balance.
+/// Returns true when deleted.
+Future<bool> deleteSupplier(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> supplier,
+) async {
+  final name = supplier['name'] as String? ?? '';
+  final due = toDouble(supplier['due_amount']);
+  if (due.abs() >= 0.005) {
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Can\'t delete yet'),
+        content: Text(
+          due > 0
+              ? 'You still owe $name ${money(due)}. Pay or settle it first, '
+                    'then delete.'
+              : '$name owes you ${money(-due)}. Settle it first, then delete.',
+        ),
+        actions: [
+          FilledButton(
+            style: dialogActionStyle,
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+    return false;
+  }
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text('Delete $name?'),
+      content: const Text(
+        'They will no longer appear in your supplier list or when adding a '
+        'purchase. Their past purchases and payments stay in your records '
+        'and reports.',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx, false),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          style: dialogActionStyle.copyWith(
+            backgroundColor: const WidgetStatePropertyAll(AppColors.red),
+          ),
+          onPressed: () => Navigator.pop(ctx, true),
+          child: const Text('Delete'),
+        ),
+      ],
+    ),
+  );
+  if (ok != true) return false;
+  try {
+    await ref
+        .read(supabaseProvider)
+        .from('suppliers')
+        .update({'is_active': false})
+        .eq('id', supplier['id'] as String);
+    ref.invalidate(suppliersProvider);
+    if (context.mounted) showSuccess(context, '$name deleted');
+    return true;
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+    return false;
+  }
+}
+
 Future<void> _callPhone(BuildContext context, String phone) async {
   final uri = Uri(scheme: 'tel', path: phone);
   try {
@@ -650,6 +724,22 @@ class SupplierDetailScreen extends ConsumerWidget {
                   }
                 },
               ),
+            ),
+          if (data.hasValue &&
+              (ref.watch(appContextProvider).value?.canManagePurchases ??
+                  false))
+            IconButton(
+              tooltip: 'Delete supplier',
+              icon: const Icon(Icons.delete_outline),
+              onPressed: () async {
+                final deleted = await deleteSupplier(
+                  context,
+                  ref,
+                  data.value!['supplier'] as Map<String, dynamic>,
+                );
+                if (!deleted || !context.mounted) return;
+                context.canPop() ? context.pop() : context.go('/suppliers');
+              },
             ),
         ],
       ),
