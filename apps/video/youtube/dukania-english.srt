@@ -1,0 +1,92 @@
+1
+00:00:00,400 --> 00:00:07,700
+Running a shop isn't easy. Accounts in a register, sums on a calculator, and counting stock late at night.
+
+2
+00:00:08,400 --> 00:00:19,700
+Who took how much on credit? Which item is about to run out? How much did you earn today? Often there is no answer.
+
+3
+00:00:20,400 --> 00:00:29,700
+Dukania: billing, stock and credit accounts for your shop, all in one app.
+
+4
+00:00:30,400 --> 00:00:39,700
+It works on your phone and on your computer. Grocery, mobile shop, hardware or clothes.
+
+5
+00:00:40,400 --> 00:00:51,700
+Getting started is easy. Enter your shop name, type and phone number. That's it.
+
+6
+00:00:52,400 --> 00:01:01,700
+Add your products: name, rate, unit. Keep one rate for the Box and another for a single piece.
+
+7
+00:01:02,400 --> 00:01:09,700
+Already have a list in Excel? Import it in one go.
+
+8
+00:01:10,400 --> 00:01:21,700
+A new bill: type the product name and press Enter. The bill builds in seconds.
+
+9
+00:01:22,400 --> 00:01:33,700
+Loose goods are easy too. Sell by the kilo, or when a customer asks for fifty rupees of sugar, type the amount and the quantity appears.
+
+10
+00:01:34,400 --> 00:01:49,700
+A tray at one price, a single egg at another. Sell either way. The rate is right automatically, and stock goes down correctly.
+
+11
+00:01:50,400 --> 00:02:04,700
+At checkout choose cash, UPI, card or credit. And you see your profit, which the customer never sees.
+
+12
+00:02:05,400 --> 00:02:16,700
+Make a bill PDF and send it straight to WhatsApp from your phone. Every bill carries your shop name and number.
+
+13
+00:02:17,400 --> 00:02:29,700
+Print on A4, or a small thermal receipt. Whatever suits your counter.
+
+14
+00:02:30,400 --> 00:02:44,700
+Credit accounts live in the app, not in a register. Every customer's balance at a glance.
+
+15
+00:02:45,400 --> 00:02:59,700
+When a payment comes, tap Receive Payment. Old bills clear automatically and the balance goes down.
+
+16
+00:03:00,400 --> 00:03:11,700
+The app tells you which items are running low before they run out. Don't wait for the stock to finish.
+
+17
+00:03:12,400 --> 00:03:29,700
+Stock arrived from the supplier? Add a purchase. Stock goes up by itself, and what you owe the supplier shows too.
+
+18
+00:03:30,400 --> 00:03:41,700
+On the dashboard: today's earnings, profit and stock, at a glance.
+
+19
+00:03:42,400 --> 00:03:54,700
+Sales, profit and GST reports, as a PDF whenever you need them.
+
+20
+00:03:55,400 --> 00:04:04,700
+The same shop, the same accounts, on your phone too. A computer at the counter, a phone in your pocket.
+
+21
+00:04:05,400 --> 00:04:14,700
+Even if the internet goes, billing keeps working. As soon as the net is back, everything syncs.
+
+22
+00:04:15,400 --> 00:04:24,700
+Try it free for 7 days. Then decide.
+
+23
+00:04:25,400 --> 00:04:34,700
+Visit softraxa.in now, or message us on WhatsApp. Dukania: shop accounts, made simple.
+

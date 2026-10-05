@@ -1,0 +1,11 @@
+import puppeteer from "puppeteer-core";
+const [w, out, theme = "light"] = process.argv.slice(2);
+const b = await puppeteer.launch({ executablePath: "C:/Program Files/Google/Chrome/Application/chrome.exe", headless: "new" });
+const p = await b.newPage();
+await p.setViewport({ width: +w, height: 900, deviceScaleFactor: 1 });
+await p.emulateMediaFeatures([{ name: "prefers-color-scheme", value: theme }]);
+await p.goto("file:///" + "C:/Projects/SOFTRAXA/INVENTORY-SOFTWARE/apps/video/out/sb/storyboard.html", { waitUntil: "networkidle0" });
+await p.screenshot({ path: out, fullPage: true });
+const ov = await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+console.log("overflow-x:", ov);
+await b.close();
