@@ -311,6 +311,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               state,
               PurchaseFormScreen(
                 initialSupplierId: state.uri.queryParameters['supplier'],
+                initialItems: state.extra is List
+                    ? [
+                        for (final e in state.extra as List)
+                          Map<String, dynamic>.from(e as Map),
+                      ]
+                    : null,
               ),
             ),
           ),

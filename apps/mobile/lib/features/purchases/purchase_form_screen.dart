@@ -49,9 +49,13 @@ class _PurchaseLine {
 
 /// Add purchase bill (PRD 7.12).
 class PurchaseFormScreen extends ConsumerStatefulWidget {
-  const PurchaseFormScreen({super.key, this.initialSupplierId});
+  const PurchaseFormScreen({super.key, this.initialSupplierId, this.initialItems});
 
   final String? initialSupplierId;
+
+  /// Lines to start with, e.g. from the low-stock reorder list:
+  /// `{'product': {...}, 'variant': {...}?, 'qty': num}`.
+  final List<Map<String, dynamic>>? initialItems;
 
   @override
   ConsumerState<PurchaseFormScreen> createState() => _PurchaseFormScreenState();
@@ -94,7 +98,35 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   void initState() {
     super.initState();
     if (widget.initialSupplierId != null) _loadSupplier();
+    for (final it in widget.initialItems ?? const <Map<String, dynamic>>[]) {
+      _lines.add(
+        _lineFor(
+          Map<String, dynamic>.from(it['product'] as Map),
+          it['variant'] == null ? null : Map<String, dynamic>.from(it['variant'] as Map),
+          qty: toDouble(it['qty']) > 0 ? toDouble(it['qty']) : 1,
+        ),
+      );
+    }
   }
+
+  _PurchaseLine _lineFor(
+    Map<String, dynamic> product,
+    Map<String, dynamic>? variant, {
+    double qty = 1,
+  }) => _PurchaseLine(
+    productId: product['id'] as String,
+    variantId: variant?['id'] as String?,
+    name: product['name'] as String,
+    variantName: variant?['name'] as String? ?? '',
+    qty: qty,
+    price: toDouble(variant?['purchase_price'] ?? product['purchase_price']),
+    gstRate: toDouble(product['gst_rate']),
+    trackSerial: product['track_serial'] == true,
+    allowDecimal: (product['units'] as Map?)?['allow_decimal'] == true,
+    unitName: (product['units'] as Map?)?['short_name'] as String? ?? '',
+    secondaryUnitName: product['secondary_unit_name'] as String?,
+    conversionFactor: (product['conversion_factor'] as num?)?.toDouble(),
+  );
 
   Future<void> _loadSupplier() async {
     final row = await ref
@@ -182,26 +214,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
     final product = selected['product'] as Map<String, dynamic>;
     final variant = selected['variant'] as Map<String, dynamic>?;
-    setState(() {
-      _lines.add(
-        _PurchaseLine(
-          productId: product['id'] as String,
-          variantId: variant?['id'] as String?,
-          name: product['name'] as String,
-          variantName: variant?['name'] as String? ?? '',
-          qty: 1,
-          price: toDouble(
-            variant?['purchase_price'] ?? product['purchase_price'],
-          ),
-          gstRate: toDouble(product['gst_rate']),
-          trackSerial: product['track_serial'] == true,
-          allowDecimal: (product['units'] as Map?)?['allow_decimal'] == true,
-          unitName: (product['units'] as Map?)?['short_name'] as String? ?? '',
-          secondaryUnitName: product['secondary_unit_name'] as String?,
-          conversionFactor: (product['conversion_factor'] as num?)?.toDouble(),
-        ),
-      );
-    });
+    setState(() => _lines.add(_lineFor(product, variant)));
     // Jump straight into qty/price entry for the new line.
     if (mounted) _editLine(_lines.length - 1);
   }

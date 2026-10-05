@@ -8,6 +8,7 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
+import 'reorder.dart';
 import 'report_charts.dart';
 
 /// Groups purchase rows by calendar day (ascending) for the purchases-report
@@ -734,6 +735,21 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
             ),
         ],
       ),
+      // Low stock: order from a supplier straight from the report.
+      floatingActionButton:
+          widget.type == 'low_stock' &&
+              ((data.value?['table'] as Map?)?['rows'] as List? ?? const []).isNotEmpty
+          ? FloatingActionButton.extended(
+              onPressed: () async {
+                await Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const ReorderScreen()),
+                );
+                ref.invalidate(reportDataProvider(query));
+              },
+              icon: const Icon(Icons.local_shipping_outlined),
+              label: const Text('Reorder from supplier'),
+            )
+          : null,
       body: Column(
         children: [
           if (_hasDateFilter)
@@ -885,7 +901,8 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                               ),
                             ),
                         ],
-                        const SizedBox(height: 24),
+                        // Room for the Reorder button over the last rows.
+                        SizedBox(height: widget.type == 'low_stock' ? 88 : 24),
                       ],
                     ),
                   ),
