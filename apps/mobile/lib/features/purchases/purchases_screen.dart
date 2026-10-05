@@ -3,9 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
+import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import 'purchase_export.dart';
 import 'purchase_providers.dart';
 import '../../core/theme.dart';
 
@@ -30,7 +33,11 @@ class PurchasesScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Purchases'),
-        actions: [const GuideButton('purchases'), mainAction.inAppBar(context)],
+        actions: [
+          const _DownloadButton(),
+          const GuideButton('purchases'),
+          mainAction.inAppBar(context),
+        ],
       ),
       floatingActionButton: mainAction.fab(context),
       body: Column(
@@ -171,6 +178,87 @@ class PurchasesScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// Downloads the purchases matching the current search, date and status
+/// filters as Excel (Save dialog on Windows, share sheet on phones).
+class _DownloadButton extends ConsumerStatefulWidget {
+  const _DownloadButton();
+
+  @override
+  ConsumerState<_DownloadButton> createState() => _DownloadButtonState();
+}
+
+class _DownloadButtonState extends ConsumerState<_DownloadButton> {
+  bool _busy = false;
+
+  static const _periods = {
+    'all': 'All dates',
+    'today': 'Today',
+    'yesterday': 'Yesterday',
+    'week': 'This week',
+    'month': 'This month',
+  };
+
+  Future<void> _download() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final filter = ref.read(purchaseFilterProvider);
+    setState(() => _busy = true);
+    try {
+      final rows = await fetchPurchasesForExport(
+        ref.read(supabaseProvider),
+        filter,
+      );
+      if (rows.isEmpty) {
+        messenger.showSnackBar(
+          const SnackBar(content: Text('No purchases to download for this filter')),
+        );
+        return;
+      }
+      final range = purchasePresetRange(filter.preset);
+      final period = range == null
+          ? _periods['all']!
+          : range.$1 == range.$2
+          ? dateStr(ymd(range.$1))
+          : '${dateStr(ymd(range.$1))} to ${dateStr(ymd(range.$2))}';
+      final bytes = buildPurchasesWorkbook(
+        purchases: rows,
+        businessName:
+            ref.read(appContextProvider).value?.business?['name'] as String? ??
+            '',
+        period: [
+          period,
+          if (filter.status != null) purchaseStatusLabel(filter.status),
+        ].join(' · '),
+      );
+      final stamp = range == null ? ymd(DateTime.now()) : ymd(range.$2);
+      final message = await saveOrShareFile(
+        bytes,
+        'Purchases_${filter.preset}_$stamp.xlsx',
+        subject: 'Purchases · $period',
+      );
+      if (message != null) {
+        messenger.showSnackBar(SnackBar(content: Text(message)));
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text(friendlyError(e))));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => IconButton(
+    tooltip: 'Download Excel',
+    onPressed: _busy ? null : _download,
+    icon: _busy
+        ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+        : const Icon(Icons.download_outlined),
+  );
 }
 
 // ==================== desktop: sortable data table ====================
