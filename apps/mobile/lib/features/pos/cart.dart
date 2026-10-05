@@ -716,7 +716,11 @@ Map<String, dynamic> buildInvoicePayload({
       'serial_no': l.serialNo,
       'quantity': l.isPack ? toBaseQty(l.qty, per) : l.qty,
       'unit_name': l.isPack ? l.baseUnitName : l.unitName,
-      'unit_price': r2(l.price / per / divisor),
+      // A pack price spread over its pieces needn't divide evenly (₹190 a
+      // tray of 30): 4 decimals keep the line at the pack price (0062).
+      'unit_price': l.isPack
+          ? (l.price / per / divisor * 10000).roundToDouble() / 10000
+          : r2(l.price / divisor),
       'mrp': l.mrp / per,
       'cost_price': l.costPrice / per,
       if (l.isPack) 'pack': true,

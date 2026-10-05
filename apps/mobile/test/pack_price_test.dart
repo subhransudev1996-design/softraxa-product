@@ -71,6 +71,27 @@ void main() {
     expect(item['pack'], true);
   });
 
+  test('a tray of 30 at ₹190 keeps the rate to 4 decimals (₹190, not ₹189.90)', () {
+    final eggs = {
+      ...cigarette(packPrice: 190),
+      'conversion_factor': 30,
+      'secondary_unit_name': 'Tray',
+    };
+    cart().addProduct(eggs, asPack: true);
+    final item =
+        (buildInvoicePayload(
+                  cart: state(),
+                  invoiceType: 'non_gst',
+                  paidAmount: 190,
+                  paymentMode: 'cash',
+                )['items']
+                as List)
+            .single;
+    expect(item['unit_price'], 6.3333);
+    expect(item['line_total'], 190);
+    expect(state().total, 190);
+  });
+
   test('a saved box line reloads as a box for editing', () {
     final line = invoiceItemsToCartLines([
       {

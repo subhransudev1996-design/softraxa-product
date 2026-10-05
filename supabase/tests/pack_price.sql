@@ -1,7 +1,7 @@
 -- ============================================================
--- Sell loose or by the pack, each at its own price (migration 0061).
+-- Sell loose or by the pack, each at its own price (migrations 0061, 0062).
 --
--- HOW TO RUN — on a STAGING copy, after 0061:
+-- HOW TO RUN — on a STAGING copy, after 0062:
 --   Supabase Dashboard → SQL Editor → paste this file → Run.
 -- One transaction ending in ROLLBACK; no test data is left behind.
 -- Success: the run finishes without an error. The first failed check
@@ -39,9 +39,12 @@ insert into public.products
   (id, business_id, name, selling_price, purchase_price, gst_rate,
    secondary_unit_name, conversion_factor, pack_price) values
   ('61616161-2222-0000-0000-000000000001', '61616161-1111-0000-0000-000000000001',
-   'Pack Cigarette', 10, 8, 0, 'Box', 10, 95);
+   'Pack Cigarette', 10, 8, 0, 'Box', 10, 95),
+  ('61616161-2222-0000-0000-000000000002', '61616161-1111-0000-0000-000000000001',
+   'Pack Eggs', 7, 5.5, 0, 'Tray', 30, 190);
 insert into public.stock_movements (business_id, product_id, movement_type, quantity, note) values
-  ('61616161-1111-0000-0000-000000000001', '61616161-2222-0000-0000-000000000001', 'opening', 100, 'test');
+  ('61616161-1111-0000-0000-000000000001', '61616161-2222-0000-0000-000000000001', 'opening', 100, 'test'),
+  ('61616161-1111-0000-0000-000000000001', '61616161-2222-0000-0000-000000000002', 'opening', 90, 'test');
 
 -- One line: qty in pieces, rate per piece, "pack" when sold as whole boxes.
 create or replace function pg_temp.line(p_qty numeric, p_rate numeric, p_pack boolean)
@@ -121,6 +124,23 @@ begin
   select current_stock into stock from public.products where id = cig;
   if stock <> 77 then raise exception 'FAIL 4b: stock % instead of 77', stock; end if;
   raise notice 'PASS 4 (edited to 2 boxes: ₹190 + ₹30, stock 77)';
+
+  -- 5. A tray of 30 eggs at ₹190 (₹6.3333 an egg, 0062) bills exactly ₹190:
+  --    no 10-paise round-off, rate kept to 4 decimals.
+  perform pg_temp.act(staff);
+  inv := (public.create_invoice(jsonb_build_object(
+    'invoice_type', 'non_gst', 'customer_name', 'x', 'payment_mode', 'cash', 'paid_amount', 190,
+    'items', jsonb_build_array(jsonb_build_object(
+      'product_id', '61616161-2222-0000-0000-000000000002', 'product_name', 'Pack Eggs',
+      'quantity', 30, 'unit_name', 'pcs', 'unit_price', 6.3333, 'gst_rate', 0, 'tax_amount', 0,
+      'line_total', 190, 'pack', true)))) ->> 'id')::uuid;
+  select * into r from public.invoices where id = inv;
+  if r.total <> 190 or r.subtotal <> 190 or r.round_off <> 0 or r.price_reduction <> 0
+     or (select unit_price from public.invoice_items where invoice_id = inv and sold_as_pack) <> 6.3333 then
+    raise exception 'FAIL 5: total % subtotal % round off % reduction %',
+      r.total, r.subtotal, r.round_off, r.price_reduction;
+  end if;
+  raise notice 'PASS 5 (tray of 30 at ₹190: exactly ₹190)';
 end $$;
 
 rollback;
