@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/date_range_filter.dart';
 import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -59,6 +60,28 @@ class PurchasesScreen extends ConsumerWidget {
               id: 'presets',
               child: Row(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: DateRangeFilterChip(
+                      from: filter.preset == 'custom' ? filter.from : null,
+                      to: filter.preset == 'custom' ? filter.to : null,
+                      onChanged: (r) => ref
+                          .read(purchaseFilterProvider.notifier)
+                          .set(
+                            r == null
+                                ? filter.copyWith(
+                                    preset: 'all',
+                                    from: null,
+                                    to: null,
+                                  )
+                                : filter.copyWith(
+                                    preset: 'custom',
+                                    from: r.start,
+                                    to: r.end,
+                                  ),
+                          ),
+                    ),
+                  ),
                   for (final p in const [
                     ('all', 'All'),
                     ('today', 'Today'),
@@ -73,7 +96,13 @@ class PurchasesScreen extends ConsumerWidget {
                         selected: filter.preset == p.$1,
                         onSelected: (_) => ref
                             .read(purchaseFilterProvider.notifier)
-                            .set(filter.copyWith(preset: p.$1)),
+                            .set(
+                              filter.copyWith(
+                                preset: p.$1,
+                                from: null,
+                                to: null,
+                              ),
+                            ),
                       ),
                     ),
                 ],
@@ -192,14 +221,6 @@ class _DownloadButton extends ConsumerStatefulWidget {
 class _DownloadButtonState extends ConsumerState<_DownloadButton> {
   bool _busy = false;
 
-  static const _periods = {
-    'all': 'All dates',
-    'today': 'Today',
-    'yesterday': 'Yesterday',
-    'week': 'This week',
-    'month': 'This month',
-  };
-
   Future<void> _download() async {
     final messenger = ScaffoldMessenger.of(context);
     final filter = ref.read(purchaseFilterProvider);
@@ -211,13 +232,15 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
       );
       if (rows.isEmpty) {
         messenger.showSnackBar(
-          const SnackBar(content: Text('No purchases to download for this filter')),
+          const SnackBar(
+            content: Text('No purchases to download for this filter'),
+          ),
         );
         return;
       }
-      final range = purchasePresetRange(filter.preset);
+      final range = filter.range;
       final period = range == null
-          ? _periods['all']!
+          ? 'All dates'
           : range.$1 == range.$2
           ? dateStr(ymd(range.$1))
           : '${dateStr(ymd(range.$1))} to ${dateStr(ymd(range.$2))}';
@@ -234,7 +257,9 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
       final stamp = range == null ? ymd(DateTime.now()) : ymd(range.$2);
       final message = await saveOrShareFile(
         bytes,
-        'Purchases_${filter.preset}_$stamp.xlsx',
+        filter.preset == 'custom' && range != null
+            ? 'Purchases_${ymd(range.$1)}_to_${ymd(range.$2)}.xlsx'
+            : 'Purchases_${filter.preset}_$stamp.xlsx',
         subject: 'Purchases · $period',
       );
       if (message != null) {

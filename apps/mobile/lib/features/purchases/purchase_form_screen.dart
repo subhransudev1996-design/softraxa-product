@@ -49,7 +49,11 @@ class _PurchaseLine {
 
 /// Add purchase bill (PRD 7.12).
 class PurchaseFormScreen extends ConsumerStatefulWidget {
-  const PurchaseFormScreen({super.key, this.initialSupplierId, this.initialItems});
+  const PurchaseFormScreen({
+    super.key,
+    this.initialSupplierId,
+    this.initialItems,
+  });
 
   final String? initialSupplierId;
 
@@ -102,7 +106,9 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
       _lines.add(
         _lineFor(
           Map<String, dynamic>.from(it['product'] as Map),
-          it['variant'] == null ? null : Map<String, dynamic>.from(it['variant'] as Map),
+          it['variant'] == null
+              ? null
+              : Map<String, dynamic>.from(it['variant'] as Map),
           qty: toDouble(it['qty']) > 0 ? toDouble(it['qty']) : 1,
         ),
       );

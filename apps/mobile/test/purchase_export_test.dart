@@ -1,6 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:softraxa_inventory/features/purchases/purchase_export.dart';
+import 'package:softraxa_inventory/features/purchases/purchase_providers.dart';
 
 void main() {
   final purchases = [
@@ -69,5 +70,17 @@ void main() {
     expect(cell(s, 3, 0), 'PUR-00001');
     expect(double.parse(cell(s, 3, 4)), 12.5);
     expect(x.tables.keys, isNot(contains('Sheet1')));
+  });
+
+  test('purchase filter: a custom from-to range overrides the presets', () {
+    final f = const PurchaseFilter().copyWith(
+      preset: 'custom',
+      from: DateTime(2026, 9, 1),
+      to: DateTime(2026, 9, 30),
+    );
+    expect(f.range, (DateTime(2026, 9, 1), DateTime(2026, 9, 30)));
+    expect(const PurchaseFilter().range, isNull);
+    expect(const PurchaseFilter(preset: 'custom').range, isNull);
+    expect(const PurchaseFilter(preset: 'today').range, isNotNull);
   });
 }

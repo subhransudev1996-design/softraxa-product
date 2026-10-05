@@ -5,21 +5,38 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 
 class PurchaseFilter {
-  const PurchaseFilter({this.search = '', this.preset = 'all', this.status});
+  const PurchaseFilter({
+    this.search = '',
+    this.preset = 'all',
+    this.status,
+    this.from,
+    this.to,
+  });
 
   final String search;
-  final String preset; // all | today | yesterday | week | month
+  final String preset; // all | today | yesterday | week | month | custom
   final String? status; // paid | partial | unpaid
+  final DateTime? from; // only for preset 'custom'
+  final DateTime? to;
 
   PurchaseFilter copyWith({
     String? search,
     String? preset,
     Object? status = _sentinel,
+    Object? from = _sentinel,
+    Object? to = _sentinel,
   }) => PurchaseFilter(
     search: search ?? this.search,
     preset: preset ?? this.preset,
     status: status == _sentinel ? this.status : status as String?,
+    from: from == _sentinel ? this.from : from as DateTime?,
+    to: to == _sentinel ? this.to : to as DateTime?,
   );
+
+  /// The (from, to) day range this filter covers, or null for all dates.
+  (DateTime, DateTime)? get range => preset == 'custom'
+      ? (from != null && to != null ? (from!, to!) : null)
+      : purchasePresetRange(preset);
 
   static const _sentinel = Object();
 }
@@ -70,7 +87,7 @@ PostgrestTransformBuilder<PostgrestList> _filteredPurchases(
   if (filter.status != null) {
     query = query.eq('payment_status', filter.status!);
   }
-  final range = purchasePresetRange(filter.preset);
+  final range = filter.range;
   if (range != null) {
     final (from, to) = range;
     query = query.gte('purchase_date', ymd(from)).lte('purchase_date', ymd(to));

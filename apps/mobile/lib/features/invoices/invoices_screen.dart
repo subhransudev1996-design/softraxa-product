@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/date_range_filter.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/widgets.dart';
@@ -11,26 +12,6 @@ import '../../core/theme.dart';
 
 class InvoicesScreen extends ConsumerWidget {
   const InvoicesScreen({super.key});
-
-  Future<void> _pickRange(
-    BuildContext context,
-    WidgetRef ref,
-    InvoiceFilter filter,
-  ) async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2020),
-      lastDate: DateTime.now(),
-      initialDateRange: filter.from != null && filter.to != null
-          ? DateTimeRange(start: filter.from!, end: filter.to!)
-          : null,
-    );
-    if (picked != null) {
-      ref
-          .read(invoiceFilterProvider.notifier)
-          .set(filter.copyWith(from: picked.start, to: picked.end));
-    }
-  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -48,15 +29,7 @@ class InvoicesScreen extends ConsumerWidget {
       appBar: AppBar(
         leading: appBarBack(context),
         title: const Text('Invoices'),
-        actions: [
-          const GuideButton('invoices'),
-          IconButton(
-            icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by date',
-            onPressed: () => _pickRange(context, ref, filter),
-          ),
-          mainAction.inAppBar(context),
-        ],
+        actions: [const GuideButton('invoices'), mainAction.inAppBar(context)],
       ),
       floatingActionButton: mainAction.fab(context),
       body: Column(
@@ -82,6 +55,16 @@ class InvoicesScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Row(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: DateRangeFilterChip(
+                      from: filter.from,
+                      to: filter.to,
+                      onChanged: (r) => ref
+                          .read(invoiceFilterProvider.notifier)
+                          .set(filter.copyWith(from: r?.start, to: r?.end)),
+                    ),
+                  ),
                   for (final s in const [
                     (null, 'All'),
                     ('paid', 'Paid'),
@@ -113,20 +96,6 @@ class InvoicesScreen extends ConsumerWidget {
                         onSelected: (sel) => ref
                             .read(invoiceFilterProvider.notifier)
                             .set(filter.copyWith(type: sel ? t.$1 : null)),
-                      ),
-                    ),
-                  if (filter.from != null && filter.to != null)
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: InputChip(
-                        avatar: const Icon(Icons.date_range, size: 16),
-                        label: Text(
-                          '${dateStr(filter.from)} → ${dateStr(filter.to)}',
-                        ),
-                        onPressed: () => _pickRange(context, ref, filter),
-                        onDeleted: () => ref
-                            .read(invoiceFilterProvider.notifier)
-                            .set(filter.copyWith(from: null, to: null)),
                       ),
                     ),
                 ],
