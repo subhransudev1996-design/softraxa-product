@@ -549,7 +549,9 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                   selected: _paymentMode == mode.$1,
                   onSelected: (_) => setState(() {
                     _paymentMode = mode.$1;
-                    _paidTouched = false;
+                    // Credit means "nothing paid yet": the 0 shown in the field must
+                    // count, otherwise the purchase saves as fully paid and no due is kept.
+                    _paidTouched = mode.$1 == 'credit';
                     _paid.text = mode.$1 == 'credit'
                         ? '0'
                         : _total.toStringAsFixed(2);

@@ -45,13 +45,22 @@ class ReportBarChart extends StatelessWidget {
 
   String _fmt(double v) => isMoney ? money(v) : qty(v);
 
+  /// Axis label: a full date ("01 Oct 2026") shrinks to "1 Oct", so
+  /// neighbouring labels never run into each other; other labels are cut
+  /// only when they are long.
+  static String axisLabel(String label) {
+    final m = RegExp(r'^0?(\d{1,2}) ([A-Za-z]{3}) \d{4}$').firstMatch(label);
+    if (m != null) return '${m[1]} ${m[2]}';
+    return label.length > 10 ? '${label.substring(0, 9)}…' : label;
+  }
+
   @override
   Widget build(BuildContext context) {
     if (points.isEmpty) return const SizedBox.shrink();
     final grouped = points2 != null && points2!.length == points.length;
     final barWidth = grouped ? 10.0 : 22.0;
     const groupSpace = 26.0;
-    final chartWidth =
+    final naturalWidth =
         (points.length * (barWidth * (grouped ? 2 : 1) + groupSpace)).clamp(
           240.0,
           double.infinity,
@@ -84,105 +93,113 @@ class ReportBarChart extends StatelessWidget {
           ),
         SizedBox(
           height: height,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: SizedBox(
-              width: chartWidth,
-              child: BarChart(
-                BarChartData(
-                  maxY: maxV * 1.2,
-                  alignment: BarChartAlignment.spaceAround,
-                  gridData: FlGridData(
-                    show: true,
-                    drawVerticalLine: false,
-                    horizontalInterval: maxV / 4,
-                    getDrawingHorizontalLine: (_) =>
-                        FlLine(color: AppColors.line, strokeWidth: 1),
-                  ),
-                  borderData: FlBorderData(show: false),
-                  titlesData: FlTitlesData(
-                    leftTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    rightTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    topTitles: const AxisTitles(
-                      sideTitles: SideTitles(showTitles: false),
-                    ),
-                    bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 34,
-                        getTitlesWidget: (value, meta) {
-                          final i = value.toInt();
-                          if (i < 0 || i >= points.length) {
-                            return const SizedBox.shrink();
-                          }
-                          final label = points[i].$1;
-                          return Padding(
-                            padding: const EdgeInsets.only(top: 6),
-                            child: Text(
-                              label.length > 10
-                                  ? '${label.substring(0, 9)}…'
-                                  : label,
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: AppColors.inkSoft,
+          // A few bars fill the card; many bars grow past it and scroll.
+          child: LayoutBuilder(
+            builder: (context, box) {
+              final chartWidth = naturalWidth < box.maxWidth
+                  ? box.maxWidth
+                  : naturalWidth;
+              return SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: SizedBox(
+                  width: chartWidth,
+                  child: BarChart(
+                    BarChartData(
+                      maxY: maxV * 1.2,
+                      alignment: BarChartAlignment.spaceAround,
+                      gridData: FlGridData(
+                        show: true,
+                        drawVerticalLine: false,
+                        horizontalInterval: maxV / 4,
+                        getDrawingHorizontalLine: (_) =>
+                            FlLine(color: AppColors.line, strokeWidth: 1),
+                      ),
+                      borderData: FlBorderData(show: false),
+                      titlesData: FlTitlesData(
+                        leftTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        rightTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        topTitles: const AxisTitles(
+                          sideTitles: SideTitles(showTitles: false),
+                        ),
+                        bottomTitles: AxisTitles(
+                          sideTitles: SideTitles(
+                            showTitles: true,
+                            reservedSize: 34,
+                            getTitlesWidget: (value, meta) {
+                              final i = value.toInt();
+                              if (i < 0 || i >= points.length) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(top: 6),
+                                child: Text(
+                                  axisLabel(points[i].$1),
+                                  maxLines: 1,
+                                  softWrap: false,
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.inkSoft,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      barTouchData: BarTouchData(
+                        touchTooltipData: BarTouchTooltipData(
+                          getTooltipColor: (_) => AppColors.ink,
+                          getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                            final label = points[group.x.toInt()].$1;
+                            final series = grouped
+                                ? (rodIndex == 0 ? seriesLabel : series2Label)
+                                : null;
+                            return BarTooltipItem(
+                              '$label\n${series != null ? '$series: ' : ''}${_fmt(rod.toY)}',
+                              const TextStyle(
+                                color: Colors.white,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
+                      barGroups: [
+                        for (var i = 0; i < points.length; i++)
+                          BarChartGroupData(
+                            x: i,
+                            barsSpace: 4,
+                            barRods: [
+                              BarChartRodData(
+                                toY: points[i].$2,
+                                color:
+                                    (barColors != null && i < barColors!.length)
+                                    ? barColors![i]
+                                    : barColor,
+                                width: barWidth,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              if (grouped)
+                                BarChartRodData(
+                                  toY: points2![i].$2,
+                                  color: bar2Color,
+                                  width: barWidth,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                            ],
+                          ),
+                      ],
                     ),
                   ),
-                  barTouchData: BarTouchData(
-                    touchTooltipData: BarTouchTooltipData(
-                      getTooltipColor: (_) => AppColors.ink,
-                      getTooltipItem: (group, groupIndex, rod, rodIndex) {
-                        final label = points[group.x.toInt()].$1;
-                        final series = grouped
-                            ? (rodIndex == 0 ? seriesLabel : series2Label)
-                            : null;
-                        return BarTooltipItem(
-                          '$label\n${series != null ? '$series: ' : ''}${_fmt(rod.toY)}',
-                          const TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  barGroups: [
-                    for (var i = 0; i < points.length; i++)
-                      BarChartGroupData(
-                        x: i,
-                        barsSpace: 4,
-                        barRods: [
-                          BarChartRodData(
-                            toY: points[i].$2,
-                            color: (barColors != null && i < barColors!.length)
-                                ? barColors![i]
-                                : barColor,
-                            width: barWidth,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          if (grouped)
-                            BarChartRodData(
-                              toY: points2![i].$2,
-                              color: bar2Color,
-                              width: barWidth,
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                        ],
-                      ),
-                  ],
                 ),
-              ),
-            ),
+              );
+            },
           ),
         ),
       ],
