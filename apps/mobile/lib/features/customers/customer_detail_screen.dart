@@ -9,6 +9,7 @@ import '../../core/theme.dart';
 import '../../core/walkthrough.dart';
 import '../../core/widgets.dart';
 import 'customer_prices_section.dart';
+import 'payment_reminder.dart';
 import 'customer_providers.dart';
 import 'customers_screen.dart';
 
@@ -241,6 +242,14 @@ class CustomerDetailScreen extends ConsumerWidget {
                       icon: const Icon(Icons.payments),
                       label: Text(due > 0 ? 'Receive payment' : 'Receive advance'),
                     ),
+                  ),
+                ],
+                if (due > 0.005) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => showPaymentReminder(context, ref, c),
+                    icon: const Icon(Icons.chat_outlined),
+                    label: const Text('Remind on WhatsApp'),
                   ),
                 ],
                 if (isOwner && advance > 0) ...[

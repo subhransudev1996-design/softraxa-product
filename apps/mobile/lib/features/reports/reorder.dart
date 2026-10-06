@@ -1,15 +1,16 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+
+export '../../core/whatsapp_helper.dart' show whatsAppNumber;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:share_plus/share_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/file_export.dart';
+import '../../core/whatsapp_helper.dart';
 import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
@@ -147,15 +148,6 @@ String reorderMessage({
   b.write('— $shopName');
   if (shopPhone.isNotEmpty) b.write(', $shopPhone');
   return b.toString();
-}
-
-/// A phone number as WhatsApp wants it: digits with the country code
-/// (Indian 10-digit numbers get 91). Empty when there's no usable number.
-String whatsAppNumber(String phone) {
-  var d = phone.replaceAll(RegExp(r'[^0-9]'), '');
-  if (d.length == 11 && d.startsWith('0')) d = d.substring(1);
-  if (d.length == 10) d = '91$d';
-  return d.length >= 11 ? d : '';
 }
 
 /// The order as an A4 PDF (purchase order, no prices).
@@ -338,21 +330,11 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
       shopPhone: business['phone'] as String? ?? '',
       items: chosen,
     );
-    final number = whatsAppNumber(supplier?['phone'] as String? ?? '');
-    final encoded = Uri.encodeComponent(text);
-    if (number.isNotEmpty) {
-      for (final uri in [
-        Uri.parse('whatsapp://send?phone=$number&text=$encoded'),
-        Uri.parse('https://wa.me/$number?text=$encoded'),
-      ]) {
-        try {
-          if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
-        } catch (_) {}
-      }
-    }
-    // No number for this supplier (or WhatsApp missing): let the user pick
-    // the chat or app from the share sheet.
-    await SharePlus.instance.share(ShareParams(text: text, subject: 'Order'));
+    await sendWhatsAppText(
+      supplier?['phone'] as String? ?? '',
+      text,
+      subject: 'Order',
+    );
   }
 
   Future<Uint8List> _pdf(List<ReorderItem> chosen, Map<String, dynamic>? supplier) => buildReorderPdf(

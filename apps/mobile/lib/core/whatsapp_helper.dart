@@ -1,9 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import 'supabase_providers.dart';
 import 'widgets.dart';
+
+/// A phone number as WhatsApp wants it: digits with the country code
+/// (Indian 10-digit numbers get 91). Empty when there's no usable number.
+String whatsAppNumber(String phone) {
+  var d = phone.replaceAll(RegExp(r'[^0-9]'), '');
+  if (d.length == 11 && d.startsWith('0')) d = d.substring(1);
+  if (d.length == 10) d = '91$d';
+  return d.length >= 11 ? d : '';
+}
+
+/// Opens a WhatsApp chat with [phone] and [text] typed in, ready to send —
+/// the app, else wa.me. Without a usable number (or WhatsApp) the share
+/// sheet lets the user pick the chat. Nothing is sent by itself.
+Future<void> sendWhatsAppText(
+  String phone,
+  String text, {
+  String subject = '',
+}) async {
+  final number = whatsAppNumber(phone);
+  final encoded = Uri.encodeComponent(text);
+  if (number.isNotEmpty) {
+    for (final uri in [
+      Uri.parse('whatsapp://send?phone=$number&text=$encoded'),
+      Uri.parse('https://wa.me/$number?text=$encoded'),
+    ]) {
+      try {
+        if (await launchUrl(uri, mode: LaunchMode.externalApplication)) return;
+      } catch (_) {}
+    }
+  }
+  await SharePlus.instance.share(ShareParams(text: text, subject: subject));
+}
 
 /// Used only until the number set in the admin panel is known (older
 /// database, or before the first sign-in).

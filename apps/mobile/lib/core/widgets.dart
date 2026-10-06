@@ -752,6 +752,7 @@ class PartyCard extends StatelessWidget {
     this.onCall,
     this.onPay,
     this.payLabel = 'Record payment',
+    this.onRemind,
   });
 
   final String name;
@@ -765,6 +766,9 @@ class PartyCard extends StatelessWidget {
   final VoidCallback? onCall;
   final VoidCallback? onPay;
   final String payLabel;
+
+  /// Reminds the party of their due on WhatsApp (customers).
+  final VoidCallback? onRemind;
 
   @override
   Widget build(BuildContext context) {
@@ -813,6 +817,14 @@ class PartyCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (onRemind != null && due > 0.005)
+                    IconButton(
+                      icon: const Icon(Icons.chat_outlined, size: 19),
+                      color: AppColors.green,
+                      tooltip: 'Remind on WhatsApp',
+                      visualDensity: VisualDensity.compact,
+                      onPressed: onRemind,
+                    ),
                   if (onCall != null && phone.isNotEmpty)
                     IconButton(
                       icon: const Icon(Icons.call_outlined, size: 19),

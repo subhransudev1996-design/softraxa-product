@@ -12,6 +12,7 @@ import '../../core/widgets.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../invoices/invoice_providers.dart';
 import 'customer_providers.dart';
+import 'payment_reminder.dart';
 import 'receive_payment_dialog.dart';
 import '../../core/theme.dart';
 
@@ -460,6 +461,8 @@ class CustomersScreen extends ConsumerWidget {
                                             toDouble(c['credit_limit']),
                                     onTap: () =>
                                         context.push('/customers/${c['id']}'),
+                                    onRemind: () =>
+                                        showPaymentReminder(context, ref, c),
                                     onCall:
                                         (c['phone'] as String? ?? '').isEmpty
                                         ? null
