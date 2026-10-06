@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -212,6 +213,30 @@ class MoreScreen extends ConsumerWidget {
             ),
           ],
           const SectionLabel('Money'),
+          Card(
+            child: ListTile(
+              leading: const IconChip(
+                Icons.translate,
+                color: AppColors.purple,
+                size: 38,
+              ),
+              title: Text(
+                t('App language'),
+                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+              ),
+              subtitle: Text(
+                appLanguages
+                    .firstWhere(
+                      (l) => l.$1 == ref.watch(languageProvider),
+                      orElse: () => appLanguages.first,
+                    )
+                    .$2,
+              ),
+              trailing: const Icon(Icons.chevron_right, size: 20),
+              onTap: () => showLanguagePicker(context, ref),
+            ),
+          ),
+          const SizedBox(height: 12),
           Card(
             child: Column(
               children: [

@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
@@ -132,6 +133,13 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                 },
               ),
               const _NotificationBell(),
+              _ActionButton(
+                icon: Icons.translate,
+                onTap: () {
+                  final ctx = rootNavigatorKey.currentContext;
+                  if (ctx != null) showLanguagePicker(ctx, ref);
+                },
+              ),
               _ActionButton(
                 icon: ref.watch(darkModeProvider)
                     ? Icons.light_mode_outlined

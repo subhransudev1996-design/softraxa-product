@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:window_manager/window_manager.dart';
@@ -10,6 +11,7 @@ import 'core/platform.dart';
 import 'core/branding.dart';
 import 'core/crash_reporting.dart';
 import 'core/desktop_titlebar.dart';
+import 'core/i18n.dart';
 import 'core/push_service.dart';
 import 'core/router.dart';
 import 'core/supabase_providers.dart';
@@ -60,6 +62,7 @@ Future<void> _start() async {
     });
   }
   await loadSavedThemeMode(); // desktop-only; no-op on phones
+  await loadSavedLanguage();
   runApp(const ProviderScope(child: App()));
 }
 
@@ -126,11 +129,21 @@ class _AppState extends ConsumerState<App> {
     });
     final router = ref.watch(routerProvider);
     final dark = ref.watch(darkModeProvider);
+    final language = ref.watch(languageProvider);
     return MaterialApp.router(
       title: kAppName,
       debugShowCheckedModeBanner: false,
       theme: buildTheme(dark: dark, desktop: isDesktopPlatform),
       routerConfig: router,
+      // Flutter's own texts (date picker, copy/paste) in the app language;
+      // our texts come from t() (core/i18n.dart).
+      locale: Locale(language),
+      supportedLocales: appLocales,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       // AppColors' mode-dependent neutrals are plain static fields — no
       // widget depends on them reactively — so a theme toggle must force
       // the whole tree to rebuild. Keying the subtree on the mode does
@@ -138,7 +151,9 @@ class _AppState extends ConsumerState<App> {
       builder: (context, child) {
         final content = child ?? const SizedBox();
         return KeyedSubtree(
-          key: ValueKey(dark),
+          // Language too: t() is read at build time, so a new language
+          // needs every screen rebuilt.
+          key: ValueKey('$dark-$language'),
           child: isDesktopPlatform
               ? Column(
                   children: [
