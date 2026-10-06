@@ -10,6 +10,7 @@ import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import 'pack_pricing.dart';
 import 'product_providers.dart';
 import 'variant_sheet.dart';
 import '../../core/theme.dart';
@@ -68,6 +69,21 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late final _packPrice = TextEditingController(
     text: _num(widget.existing?['pack_price']),
   );
+
+  /// What one bulk unit costs to buy. Not stored: it is the purchase price
+  /// x units in the bulk unit, typed here so the per-unit price follows.
+  late final _packCost = TextEditingController(
+    text: priceText(
+      packPriceFor(
+        (widget.existing?['purchase_price'] as num?)?.toDouble(),
+        (widget.existing?['conversion_factor'] as num?)?.toDouble(),
+      ),
+    ),
+  );
+
+  /// The per-unit selling price was filled from the bulk selling price, so
+  /// it keeps following it until the owner types their own.
+  bool _sellingFromPack = false;
 
   String? _categoryId;
   String? _brandId;
@@ -374,6 +390,59 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     if (code != null && code.isNotEmpty) {
       setState(() => _barcode.text = code);
     }
+  }
+
+  double? get _packSize => double.tryParse(_conversionFactor.text);
+
+  bool get _showPackPrices =>
+      _secondaryUnitName.text.trim().isNotEmpty && !_hasVariants;
+
+  /// Bulk cost typed -> per-unit purchase price (Rs 1600 a 50 kg bag -> Rs 32).
+  void _packCostChanged() {
+    final unit = perUnitPrice(double.tryParse(_packCost.text), _packSize);
+    if (unit != null) _purchase.text = priceText(unit);
+    setState(() {});
+  }
+
+  /// Bulk selling price typed -> per-unit selling price, while that is empty
+  /// or still the one filled from here.
+  void _packPriceChanged() {
+    final unit = perUnitPrice(double.tryParse(_packPrice.text), _packSize);
+    if (unit != null && (_sellingFromPack || _selling.text.trim().isEmpty)) {
+      _selling.text = priceText(unit);
+      _sellingFromPack = true;
+    }
+    setState(() {});
+  }
+
+  /// Units in the bulk unit changed: the bulk prices stay as typed and the
+  /// per-unit prices follow.
+  void _packSizeChanged() {
+    if (_packCost.text.trim().isNotEmpty) {
+      final unit = perUnitPrice(double.tryParse(_packCost.text), _packSize);
+      if (unit != null) _purchase.text = priceText(unit);
+    }
+    if (_sellingFromPack) {
+      final unit = perUnitPrice(double.tryParse(_packPrice.text), _packSize);
+      if (unit != null) _selling.text = priceText(unit);
+    }
+    setState(() {});
+  }
+
+  String _packCostHint() {
+    final unit = perUnitPrice(double.tryParse(_packCost.text), _packSize);
+    final base = _unitShort();
+    return unit == null
+        ? 'Fills the purchase price per $base'
+        : '= ${money(unit)} per $base';
+  }
+
+  String _unitShort() {
+    final units = ref.read(unitsProvider).value ?? const [];
+    for (final u in units) {
+      if (u['id'] == _unitId) return u['short_name'] as String? ?? 'unit';
+    }
+    return 'unit';
   }
 
   /// What the pack price means, with this product's numbers.
@@ -754,26 +823,68 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         labelText: '= how many units?',
                         helperText: '1 Bag = 50 kg → 50',
                       ),
-                      onChanged: (_) => setState(() {}),
+                      onChanged: (_) => _packSizeChanged(),
                     ),
                   ),
                 ],
               ),
-              if (_secondaryUnitName.text.trim().isNotEmpty &&
-                  !_hasVariants) ...[
+              if (_showPackPrices) ...[
                 const SizedBox(height: 12),
-                TextFormField(
-                  controller: _packPrice,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText:
-                        'Selling price of 1 ${_secondaryUnitName.text.trim()} ₹ (optional)',
-                    helperText: _packPriceHint(),
-                  ),
-                  onChanged: (_) => setState(() {}),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: TextFormField(
+                        controller: _packCost,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'Purchase price of 1 ${_secondaryUnitName.text.trim()} ₹',
+                          helperText: _packCostHint(),
+                          helperMaxLines: 2,
+                        ),
+                        onChanged: (_) => _packCostChanged(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextFormField(
+                        controller: _packPrice,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'Selling price of 1 ${_secondaryUnitName.text.trim()} ₹',
+                          helperText: _packPriceHint(),
+                          helperMaxLines: 2,
+                        ),
+                        onChanged: (_) => _packPriceChanged(),
+                      ),
+                    ),
+                  ],
                 ),
+                if (packMarginText(
+                      double.tryParse(_packCost.text),
+                      double.tryParse(_packPrice.text),
+                      _secondaryUnitName.text.trim(),
+                    )
+                    case final margin?)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      margin,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: margin.startsWith('Loss')
+                            ? AppColors.red
+                            : AppColors.green,
+                      ),
+                    ),
+                  ),
               ],
               const SectionLabel('Codes'),
               TextFormField(
@@ -819,9 +930,21 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Purchase price ₹',
+                      decoration: InputDecoration(
+                        labelText: _showPackPrices
+                            ? 'Purchase price per ${_unitShort()} ₹'
+                            : 'Purchase price ₹',
                       ),
+                      onChanged: (_) {
+                        if (!_showPackPrices) return;
+                        _packCost.text = priceText(
+                          packPriceFor(
+                            double.tryParse(_purchase.text),
+                            _packSize,
+                          ),
+                        );
+                        setState(() {});
+                      },
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -831,9 +954,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Selling price ₹ *',
+                      decoration: InputDecoration(
+                        labelText: _showPackPrices
+                            ? 'Selling price per ${_unitShort()} ₹ *'
+                            : 'Selling price ₹ *',
                       ),
+                      onChanged: (_) => _sellingFromPack = false,
                       validator: (v) =>
                           !_hasVariants && (double.tryParse(v ?? '') == null)
                           ? 'Required'
