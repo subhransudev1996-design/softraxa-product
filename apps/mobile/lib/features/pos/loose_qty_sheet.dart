@@ -13,6 +13,20 @@ class LooseQtyResult {
   final bool asPack;
 }
 
+/// The smaller unit loose goods are asked for in: "100 g" of a kg
+/// product, "200 ml" of a litre one. Null when the unit has none.
+({String name, double factor})? looseSubUnit(String unit) {
+  switch (unit.trim().toLowerCase()) {
+    case 'kg' || 'kgs' || 'kilo' || 'kilogram':
+      return (name: 'g', factor: 1000);
+    case 'l' || 'ltr' || 'litre' || 'liter':
+      return (name: 'ml', factor: 1000);
+    case 'm' || 'mtr' || 'metre' || 'meter':
+      return (name: 'cm', factor: 100);
+  }
+  return null;
+}
+
 /// Quantity entry for loose/weighed goods (kirana sugar by the kg, rods by
 /// the metre — PRD Phase 3 "partial quantities"). Shown instead of the
 /// silent qty-1 add when the product's unit has `allow_decimal`. Supports
@@ -102,7 +116,14 @@ class _LooseQtySheet extends StatefulWidget {
 class _LooseQtySheetState extends State<_LooseQtySheet> {
   final _qtyC = TextEditingController(text: '1');
   final _amountC = TextEditingController();
-  bool _inSecondaryUnit = false;
+
+  /// What the qty is typed in: 'base' (kg), 'sub' (g) or 'pack' (Bag).
+  String _mode = 'base';
+  bool get _inSecondaryUnit => _mode == 'pack';
+  bool get _inSubUnit => _mode == 'sub' && _sub != null;
+
+  /// g for kg, ml for L — only for goods sold loose.
+  late final _sub = widget.allowDecimal ? looseSubUnit(widget.unitName) : null;
   bool _syncing = false; // guards against qty<->amount update loops
 
   bool get _hasSecondary =>
@@ -116,6 +137,8 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
       ? (_packPriced
             ? widget.packPrice!
             : widget.rate * (widget.conversionFactor ?? 1))
+      : _inSubUnit
+      ? widget.rate / _sub!.factor
       : widget.rate;
 
   /// Whole numbers only: whole-number units, and packs at a pack price.
@@ -124,8 +147,41 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   bool _isValid(double? q) =>
       q != null && q > 0 && (!_wholeOnly || q == q.roundToDouble());
 
-  String get _activeUnit =>
-      _inSecondaryUnit ? widget.secondaryUnitName! : widget.unitName;
+  String get _activeUnit => _inSecondaryUnit
+      ? widget.secondaryUnitName!
+      : _inSubUnit
+      ? _sub!.name
+      : widget.unitName;
+
+  /// The typed qty in base units (kg).
+  double _toBase(double q) => _inSubUnit
+      ? q / _sub!.factor
+      : toBaseQty(q, _inSecondaryUnit ? widget.conversionFactor : null);
+
+  /// A base qty (kg) in the unit being typed.
+  double _fromBase(double v) => _inSubUnit
+      ? v * _sub!.factor
+      : _inSecondaryUnit
+      ? v / (widget.conversionFactor ?? 1)
+      : v;
+
+  /// "100 g", "1.5 kg" for a base qty.
+  String _baseLabel(double v) => _sub != null && v < 1
+      ? '${qty(v * _sub.factor)} ${_sub.name}'
+      : '${qty(v)} ${widget.unitName}';
+
+  /// Switching kg ↔ g keeps the same weight (1 kg → 1000 g).
+  void _switchMode(String mode) {
+    final q = double.tryParse(_qtyC.text);
+    final base = q == null ? null : _toBase(q);
+    final keep = mode != 'pack' && _mode != 'pack';
+    setState(() => _mode = mode);
+    if (keep && base != null) {
+      _setQty(_fromBase(base));
+    } else {
+      _onQtyChanged(); // recompute amount at the new unit's rate
+    }
+  }
 
   @override
   void initState() {
@@ -179,9 +235,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
       context,
       _packPriced
           ? LooseQtyResult(q!, asPack: true)
-          : LooseQtyResult(
-              toBaseQty(q!, _inSecondaryUnit ? widget.conversionFactor : null),
-            ),
+          : LooseQtyResult(_toBase(q!)),
     );
   }
 
@@ -213,22 +267,23 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
             ),
           ),
           const SizedBox(height: 16),
-          if (_hasSecondary) ...[
-            SegmentedButton<bool>(
+          if (_hasSecondary || _sub != null) ...[
+            SegmentedButton<String>(
               segments: [
-                ButtonSegment(value: false, label: Text(widget.unitName)),
-                ButtonSegment(
-                  value: true,
-                  label: Text(
-                    '${widget.secondaryUnitName} (${qty(widget.conversionFactor)} ${widget.unitName})',
+                if (_sub != null)
+                  ButtonSegment(value: 'sub', label: Text(_sub.name)),
+                ButtonSegment(value: 'base', label: Text(widget.unitName)),
+                if (_hasSecondary)
+                  ButtonSegment(
+                    value: 'pack',
+                    label: Text(
+                      '${widget.secondaryUnitName} (${qty(widget.conversionFactor)} ${widget.unitName})',
+                    ),
                   ),
-                ),
               ],
-              selected: {_inSecondaryUnit},
-              onSelectionChanged: (s) {
-                setState(() => _inSecondaryUnit = s.first);
-                _onQtyChanged(); // recompute amount at the new unit's rate
-              },
+              selected: {_mode},
+              showSelectedIcon: false,
+              onSelectionChanged: (s) => _switchMode(s.first),
             ),
             const SizedBox(height: 16),
           ],
@@ -266,21 +321,44 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
           const SizedBox(height: 12),
           Wrap(
             spacing: 8,
+            runSpacing: 8,
             children: [
-              for (final f
-                  in _wholeOnly
-                      ? const [(1.0, '1'), (2.0, '2'), (5.0, '5'), (10.0, '10')]
-                      : const [
-                          (0.25, '¼'),
-                          (0.5, '½'),
-                          (1.0, '1'),
-                          (2.0, '2'),
-                          (5.0, '5'),
-                        ])
-                ActionChip(
-                  label: Text('${f.$2} $_activeUnit'),
-                  onPressed: () => _setQty(f.$1),
-                ),
+              // Loose goods: everyday weights, whatever unit is being typed.
+              if (_sub != null && !_inSecondaryUnit)
+                for (final v in const [
+                  0.05,
+                  0.1,
+                  0.2,
+                  0.25,
+                  0.5,
+                  1.0,
+                  2.0,
+                  5.0,
+                ])
+                  ActionChip(
+                    label: Text(_baseLabel(v)),
+                    onPressed: () => _setQty(_fromBase(v)),
+                  )
+              else
+                for (final f
+                    in _wholeOnly
+                        ? const [
+                            (1.0, '1'),
+                            (2.0, '2'),
+                            (5.0, '5'),
+                            (10.0, '10'),
+                          ]
+                        : const [
+                            (0.25, '¼'),
+                            (0.5, '½'),
+                            (1.0, '1'),
+                            (2.0, '2'),
+                            (5.0, '5'),
+                          ])
+                  ActionChip(
+                    label: Text('${f.$2} $_activeUnit'),
+                    onPressed: () => _setQty(f.$1),
+                  ),
             ],
           ),
           const SizedBox(height: 16),
@@ -292,9 +370,8 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                   : _packPriced
                   ? 'Add ${qty(parsedQty)} ${widget.secondaryUnitName} • '
                         '${money(parsedQty! * _activeRate)}'
-                  : 'Add ${qty(_inSecondaryUnit ? parsedQty! * (widget.conversionFactor ?? 1) : parsedQty)} '
-                        '${widget.unitName.isEmpty ? '' : widget.unitName} • '
-                        '${money(parsedQty! * _activeRate)}',
+                  : 'Add ${_baseLabel(_toBase(parsedQty!))} • '
+                        '${money(parsedQty * _activeRate)}',
             ),
           ),
           SizedBox(height: widget.dialog ? 4 : 24),
