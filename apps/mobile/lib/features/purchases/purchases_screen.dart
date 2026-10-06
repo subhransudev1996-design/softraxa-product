@@ -3,7 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/data_refresh.dart';
 import '../../core/date_range_filter.dart';
+import '../suppliers/suppliers.dart' show suppliersProvider;
 import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -437,11 +439,40 @@ class PurchaseDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(purchaseDetailProvider(purchaseId));
 
+    final canManage =
+        ref.watch(appContextProvider).value?.canManagePurchases ?? false;
+    final p = detail.value;
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(detail.value?['purchase_no'] as String? ?? 'Purchase'),
+        title: Text(p?['purchase_no'] as String? ?? 'Purchase'),
+        actions: [
+          // Correct a wrong entry (migration 0063). Opening balances are
+          // changed from the supplier's opening balance instead.
+          if (p != null && canManage && p['is_opening'] != true)
+            PopupMenuButton<String>(
+              onSelected: (v) async {
+                if (v == 'edit') {
+                  await context.push('/purchases/$purchaseId/edit');
+                  ref.invalidate(purchaseDetailProvider(purchaseId));
+                }
+                if (v == 'delete' && context.mounted) {
+                  await _delete(context, ref, p);
+                }
+              },
+              itemBuilder: (_) => const [
+                PopupMenuItem(value: 'edit', child: Text('Edit purchase')),
+                PopupMenuItem(
+                  value: 'delete',
+                  child: Text(
+                    'Delete purchase',
+                    style: TextStyle(color: AppColors.red),
+                  ),
+                ),
+              ],
+            ),
+        ],
       ),
       body: AsyncView(
         value: detail,
@@ -569,6 +600,76 @@ class PurchaseDetailScreen extends ConsumerWidget {
         },
       ),
     );
+  }
+
+  /// Deletes a purchase entered by mistake: stock, the supplier's due and
+  /// the payment made with it are undone; a copy stays in the audit log.
+  Future<void> _delete(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> p,
+  ) async {
+    final reason = TextEditingController();
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Delete ${p['purchase_no']}?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Use this only for a purchase entered by mistake. Its items come '
+              'out of stock (${money(p['total'] as num?)} total)'
+              '${(p['supplier_name'] as String? ?? '').isNotEmpty ? ', ${p['supplier_name']}\'s due is reduced' : ''} '
+              'and the payment made with it is removed.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reason,
+              decoration: const InputDecoration(
+                labelText: 'Reason (optional)',
+                hintText: 'e.g. entered twice',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Keep it'),
+          ),
+          FilledButton(
+            style: dialogActionStyle.copyWith(
+              backgroundColor: const WidgetStatePropertyAll(AppColors.red),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'delete_purchase',
+            params: {
+              'p_purchase_id': purchaseId,
+              'p_reason': reason.text.trim(),
+            },
+          );
+      ref.invalidate(purchasesProvider);
+      invalidateStockData(ref);
+      ref.invalidate(suppliersProvider);
+      if (context.mounted) {
+        showSuccess(context, '${p['purchase_no']} deleted');
+        context.canPop() ? context.pop() : context.go('/purchases');
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
   }
 
   Widget _row(String label, String value, {bool bold = false, Color? color}) {

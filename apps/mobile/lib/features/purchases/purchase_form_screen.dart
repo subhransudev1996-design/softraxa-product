@@ -53,9 +53,13 @@ class PurchaseFormScreen extends ConsumerStatefulWidget {
     super.key,
     this.initialSupplierId,
     this.initialItems,
+    this.editPurchaseId,
   });
 
   final String? initialSupplierId;
+
+  /// Set to correct an existing purchase (update_purchase, migration 0063).
+  final String? editPurchaseId;
 
   /// Lines to start with, e.g. from the low-stock reorder list:
   /// `{'product': {...}, 'variant': {...}?, 'qty': num}`.
@@ -79,6 +83,15 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   bool _paidTouched = false;
   bool _discountIsPercent = false;
 
+  // Edit mode: the purchase being corrected, loaded in initState.
+  bool get _editing => widget.editPurchaseId != null;
+  bool _loading = false;
+  String? _loadError;
+  String _purchaseNo = '';
+
+  /// Paid to the supplier after the purchase and counted on it — kept as is.
+  double _paidLater = 0;
+
   double get _subtotal => _lines.fold(0, (s, l) => s + l.taxable);
   double get _tax => _lines.fold(0, (s, l) => s + l.tax);
 
@@ -101,6 +114,11 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   @override
   void initState() {
     super.initState();
+    if (_editing) {
+      _loading = true;
+      _loadForEdit();
+      return;
+    }
     if (widget.initialSupplierId != null) _loadSupplier();
     for (final it in widget.initialItems ?? const <Map<String, dynamic>>[]) {
       _lines.add(
@@ -134,6 +152,92 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     conversionFactor: (product['conversion_factor'] as num?)?.toDouble(),
   );
 
+  /// Fills the form from the saved purchase: supplier, bill, date, lines
+  /// (with their products' units), charges, and the amount paid with it.
+  Future<void> _loadForEdit() async {
+    final client = ref.read(supabaseProvider);
+    try {
+      final p = Map<String, dynamic>.from(
+        await client
+            .from('purchases')
+            .select(
+              '*, suppliers(*), purchase_items(*, '
+              'products(id, name, purchase_price, gst_rate, track_serial, '
+              'secondary_unit_name, conversion_factor, units(short_name, allow_decimal)), '
+              'product_variants(id, name, purchase_price)), purchase_returns(id)',
+            )
+            .eq('id', widget.editPurchaseId!)
+            .single(),
+      );
+      if (p['is_opening'] == true) {
+        throw 'An opening balance can\'t be edited here — change it from the supplier\'s opening balance.';
+      }
+      if ((p['purchase_returns'] as List? ?? const []).isNotEmpty) {
+        throw 'This purchase has returns, so it can\'t be edited — record another return instead.';
+      }
+      final items = List<Map<String, dynamic>>.from(
+        p['purchase_items'] as List? ?? const [],
+      );
+      if (items.any((it) => it['products'] == null)) {
+        throw 'An item on this purchase is no longer in your products, so it can\'t be edited here.';
+      }
+      // Money paid with the purchase vs. paid later (kept as is).
+      var initial = toDouble(p['paid_amount']);
+      if (p['supplier_id'] != null) {
+        final rows = await client
+            .from('supplier_payments')
+            .select('amount')
+            .eq('purchase_id', widget.editPurchaseId!)
+            .eq('note', 'Paid with purchase');
+        initial = rows.fold<double>(0, (s, r) => s + toDouble(r['amount']));
+      }
+      if (!mounted) return;
+      setState(() {
+        _purchaseNo = p['purchase_no'] as String? ?? '';
+        _supplier = p['suppliers'] == null
+            ? null
+            : Map<String, dynamic>.from(p['suppliers'] as Map);
+        _billNo.text = p['bill_no'] as String? ?? '';
+        _date = DateTime.tryParse('${p['purchase_date']}') ?? DateTime.now();
+        _discount.text = toDouble(p['discount_amount']) > 0
+            ? toDouble(p['discount_amount']).toStringAsFixed(2)
+            : '';
+        _extraCharges.text = toDouble(p['extra_charges']) > 0
+            ? toDouble(p['extra_charges']).toStringAsFixed(2)
+            : '';
+        _notes.text = p['notes'] as String? ?? '';
+        _paymentMode = p['payment_mode'] as String? ?? 'cash';
+        _paidLater = (toDouble(p['paid_amount']) - initial)
+            .clamp(0, double.infinity)
+            .toDouble();
+        _paid.text = initial.toStringAsFixed(2);
+        _paidTouched = true;
+        for (final it in items) {
+          final product = Map<String, dynamic>.from(it['products'] as Map);
+          final variant = it['product_variants'] == null
+              ? null
+              : Map<String, dynamic>.from(it['product_variants'] as Map);
+          _lines.add(
+            _lineFor(product, variant, qty: toDouble(it['quantity']))
+              ..price = toDouble(it['unit_price'])
+              ..gstRate = toDouble(it['gst_rate'])
+              ..serialNos = List<String>.from(
+                it['serial_nos'] as List? ?? const [],
+              ),
+          );
+        }
+        _loading = false;
+      });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+          _loadError = e is String ? e : friendlyError(e);
+        });
+      }
+    }
+  }
+
   Future<void> _loadSupplier() async {
     final row = await ref
         .read(supabaseProvider)
@@ -147,6 +251,14 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   }
 
   Future<void> _pickSupplier() async {
+    if (_editing && _paidLater > 0.005) {
+      showError(
+        context,
+        '${money(_paidLater)} paid to ${_supplier?['name'] ?? 'the supplier'} later is '
+        'counted on this purchase, so its supplier can\'t be changed.',
+      );
+      return;
+    }
     final suppliers =
         ref.read(suppliersProvider).value ??
         List<Map<String, dynamic>>.from(
@@ -381,7 +493,15 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     final creditLimit = _supplier?['credit_limit'] == null
         ? null
         : toDouble(_supplier!['credit_limit']);
-    if (creditLimit != null) {
+    if (_editing && _total + 0.005 < _paidLater) {
+      showError(
+        context,
+        '${money(_paidLater)} was paid to the supplier later against this purchase, '
+        'so its total can\'t be less than that.',
+      );
+      return;
+    }
+    if (creditLimit != null && !_editing) {
       final due = (_total - _paidAmount).clamp(0, double.infinity);
       final projectedDue = toDouble(_supplier?['due_amount']) + due;
       if (projectedDue > creditLimit) {
@@ -429,13 +549,30 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
       final res =
           await ref
                   .read(supabaseProvider)
-                  .rpc('create_purchase', params: {'payload': payload})
+                  .rpc(
+                    _editing ? 'update_purchase' : 'create_purchase',
+                    params: {
+                      if (_editing) 'p_purchase_id': widget.editPurchaseId,
+                      'payload': payload,
+                    },
+                  )
               as Map<String, dynamic>;
       ref.invalidate(purchasesProvider);
       invalidateStockData(ref);
       ref.invalidate(suppliersProvider);
+      if (_editing) {
+        ref.invalidate(purchaseDetailProvider(widget.editPurchaseId!));
+        if (_supplier?['id'] != null) {
+          ref.invalidate(supplierLedgerProvider(_supplier!['id'] as String));
+        }
+      }
       if (mounted) {
-        showSuccess(context, 'Purchase ${res['purchase_no']} saved');
+        showSuccess(
+          context,
+          _editing
+              ? 'Purchase ${res['purchase_no']} corrected'
+              : 'Purchase ${res['purchase_no']} saved',
+        );
         context.pop();
       }
     } catch (e) {
@@ -447,17 +584,40 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final due = (_total - _paidAmount).clamp(0, double.infinity);
+    final due = (_total - _paidLater - _paidAmount).clamp(0, double.infinity);
+    final title = Text(
+      _editing
+          ? (_purchaseNo.isEmpty
+                ? 'Edit purchase'
+                : 'Edit purchase $_purchaseNo')
+          : 'Add purchase',
+    );
+
+    if (_loading || _loadError != null) {
+      return Scaffold(
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(leading: appBarBack(context), title: title),
+        body: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : EmptyState(icon: Icons.lock_outline, message: _loadError!),
+      );
+    }
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(
-        leading: appBarBack(context),
-        title: const Text('Add purchase'),
-      ),
+      appBar: AppBar(leading: appBarBack(context), title: title),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          if (_editing)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Text(
+                'Correct anything that was entered wrong. Stock, the product cost '
+                'and the supplier\'s due are updated to match.',
+                style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+              ),
+            ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.local_shipping_outlined),
@@ -573,7 +733,9 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                     _paidTouched = mode.$1 == 'credit';
                     _paid.text = mode.$1 == 'credit'
                         ? '0'
-                        : _total.toStringAsFixed(2);
+                        : (_total - _paidLater)
+                              .clamp(0, double.infinity)
+                              .toStringAsFixed(2);
                   }),
                 ),
             ],
@@ -583,8 +745,13 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
             controller: _paid,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
-              labelText: 'Paid amount ₹',
+              labelText: _editing
+                  ? 'Paid with this purchase ₹'
+                  : 'Paid amount ₹',
               hintText: _total.toStringAsFixed(2),
+              helperText: _paidLater > 0
+                  ? '${money(_paidLater)} paid later is kept as it is'
+                  : null,
             ),
             onChanged: (_) => setState(() => _paidTouched = true),
           ),
@@ -605,6 +772,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                     _row('Discount', '- ${money(_discountAmount)}'),
                   _row('Round off', money(_roundOff), color: AppColors.inkSoft),
                   _row('Total', money(_total), bold: true),
+                  if (_paidLater > 0)
+                    _row('Paid later', '- ${money(_paidLater)}'),
                   if (due > 0)
                     _row(
                       'Due to supplier',
@@ -655,7 +824,11 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('Save purchase • ${money(_total)}'),
+                : Text(
+                    _editing
+                        ? 'Save changes • ${money(_total)}'
+                        : 'Save purchase • ${money(_total)}',
+                  ),
           ),
           const SizedBox(height: 24),
         ],

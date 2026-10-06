@@ -339,6 +339,14 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
+            path: '/purchases/:id/edit',
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              PurchaseFormScreen(editPurchaseId: state.pathParameters['id']!),
+            ),
+          ),
+          GoRoute(
             path: '/purchase-returns',
             pageBuilder: (context, state) =>
                 _page(context, state, const PurchaseReturnsScreen()),

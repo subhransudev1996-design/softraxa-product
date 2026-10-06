@@ -1208,14 +1208,27 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         children: [
                           _row('Already paid', money(editing.paidAmount)),
                           _row('New bill total', money(cart.total), bold: true),
-                          _row(
-                            'Due after changes',
-                            money(cart.total - editing.paidAmount),
-                            bold: true,
-                            color: (cart.total - editing.paidAmount) > 0
-                                ? AppColors.red
-                                : AppColors.green,
-                          ),
+                          // Reduced below what was paid (0041 / 0063): a
+                          // customer's extra becomes their advance; a
+                          // walk-in customer gets it back now.
+                          if (editing.paidAmount - cart.total >= 0.01)
+                            _row(
+                              cart.customer == null
+                                  ? 'Give back to the customer'
+                                  : 'Kept as ${cart.customer!['name']}\'s advance',
+                              money(editing.paidAmount - cart.total),
+                              bold: true,
+                              color: AppColors.orange,
+                            )
+                          else
+                            _row(
+                              'Due after changes',
+                              money(cart.total - editing.paidAmount),
+                              bold: true,
+                              color: (cart.total - editing.paidAmount) > 0
+                                  ? AppColors.red
+                                  : AppColors.green,
+                            ),
                         ],
                       ),
                     ),
@@ -1223,7 +1236,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
-                      'Payments already recorded on this bill are unaffected — only the items and total change.',
+                      editing.paidAmount - cart.total >= 0.01 &&
+                              cart.customer == null
+                          ? 'Hand the difference back to the customer — the bill\'s payment is reduced to match.'
+                          : 'Payments already recorded on this bill are unaffected — only the items and total change.',
                       style: TextStyle(
                         fontSize: 12.5,
                         color: AppColors.inkSoft,

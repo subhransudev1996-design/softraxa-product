@@ -10,6 +10,7 @@ import '../../core/gst.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import '../customers/customer_picker.dart';
 import '../customers/customer_providers.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../pos/cart.dart';
@@ -251,6 +252,80 @@ class InvoiceDetailScreen extends ConsumerWidget {
     }
   }
 
+  /// Moves a bill made on the wrong khata to the right customer, or to
+  /// walk-in when it's fully paid (migration 0063). The bill's due moves
+  /// with it.
+  Future<void> _changeCustomer(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> inv,
+  ) async {
+    final due = toDouble(inv['due_amount']);
+    final current = (inv['customer_name'] as String? ?? '').isEmpty
+        ? 'Walk-in customer'
+        : inv['customer_name'] as String;
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: const Text('Change customer'),
+              subtitle: Text('Now: $current'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.person_search_outlined),
+              title: const Text('Choose another customer'),
+              onTap: () => Navigator.pop(ctx, 'pick'),
+            ),
+            if (inv['customer_id'] != null)
+              ListTile(
+                leading: const Icon(Icons.person_off_outlined),
+                title: const Text('Make it a walk-in bill'),
+                subtitle: due > 0.005
+                    ? Text('Collect the ${money(due)} due first')
+                    : null,
+                enabled: due <= 0.005,
+                onTap: () => Navigator.pop(ctx, 'walkin'),
+              ),
+          ],
+        ),
+      ),
+    );
+    if (choice == null || !context.mounted) return;
+    Map<String, dynamic>? picked;
+    if (choice == 'pick') {
+      picked = await showCustomerPicker(context);
+      if (picked == null || !context.mounted) return;
+      if (picked['id'] == inv['customer_id']) return;
+    }
+    final to = picked == null ? 'walk-in' : picked['name'] as String;
+    final ok = await confirmDialog(
+      context,
+      title: 'Move ${inv['invoice_no']} to $to?',
+      message: due > 0.005 && picked != null
+          ? 'The ${money(due)} due on this bill moves from $current\'s khata to $to\'s.'
+          : 'Only who the bill belongs to changes; the amounts stay the same.',
+      confirmText: 'Move bill',
+    );
+    if (!ok) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc(
+            'change_invoice_customer',
+            params: {'p_invoice_id': invoiceId, 'p_customer_id': picked?['id']},
+          );
+      ref.invalidate(invoiceDetailProvider(invoiceId));
+      ref.invalidate(invoicesProvider);
+      ref.invalidate(recentInvoicesProvider);
+      if (context.mounted) showSuccess(context, 'Bill moved to $to');
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
   Future<void> _cancel(BuildContext context, WidgetRef ref) async {
     final ok = await confirmDialog(
       context,
@@ -366,11 +441,19 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 if (v == 'edit') _editBill(context, ref, detail.value!);
                 if (v == 'cancel') _cancel(context, ref);
                 if (v == 'due') _changeDueDate(context, ref, detail.value!);
+                if (v == 'customer') {
+                  _changeCustomer(context, ref, detail.value!);
+                }
               },
               itemBuilder: (_) => [
                 // Opening balances can't be edited, only cancelled (0051).
                 if (detail.value!['invoice_type'] != 'opening')
                   const PopupMenuItem(value: 'edit', child: Text('Edit bill')),
+                if (detail.value!['invoice_type'] != 'opening')
+                  const PopupMenuItem(
+                    value: 'customer',
+                    child: Text('Change customer'),
+                  ),
                 // PD19: owner-only, with a reason (migration 0052).
                 if ((features?.isOwner ?? false) &&
                     toDouble(detail.value!['due_amount']) > 0 &&
