@@ -164,7 +164,7 @@ class ExpensesScreen extends ConsumerWidget {
         if (context.mounted) {
           showSuccess(
             context,
-            'Expense category "$trimmedName" already exists',
+            t('Expense category "{trimmedName}" already exists', {'trimmedName': trimmedName}),
           );
         }
         return;
@@ -179,7 +179,7 @@ class ExpensesScreen extends ConsumerWidget {
       final fresh = await ref.read(expenseCategoriesProvider.future);
       onAdded(inserted['id'] as String, fresh);
       if (context.mounted) {
-        showSuccess(context, 'Expense category "$trimmedName" added');
+        showSuccess(context, t('Expense category "{trimmedName}" added', {'trimmedName': trimmedName}));
       }
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -480,7 +480,7 @@ class ExpensesScreen extends ConsumerWidget {
                             title: Text(
                               '${dateStr(range.from)} → ${dateStr(range.to)}',
                             ),
-                            subtitle: Text('${rows.length} entries'),
+                            subtitle: Text(t('{v1} entries', {'v1': rows.length})),
                             trailing: Text(
                               money(total),
                               style: const TextStyle(
@@ -685,7 +685,7 @@ class _ExpenseCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    'Paid via ${(e['payment_mode'] as String? ?? 'cash').toUpperCase()}',
+                    t('Paid via {v1}', {'v1': (e['payment_mode'] as String? ?? 'cash').toUpperCase()}),
                     style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                   ),
                   Text(

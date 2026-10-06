@@ -188,7 +188,7 @@ Future<Uint8List> buildStatementPdf({
                 if ((business['address'] as String? ?? '').isNotEmpty)
                   pw.Text(business['address'] as String, style: small),
                 if ((business['phone'] as String? ?? '').isNotEmpty)
-                  pw.Text('Phone: ${business['phone']}', style: small),
+                  pw.Text(t('Phone: {v1}', {'v1': business['phone']}), style: small),
               ],
             ),
             pw.Column(
@@ -198,7 +198,7 @@ Future<Uint8List> buildStatementPdf({
                   style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text('${dateStr(s.from)} to ${dateStr(s.to)}', style: small),
-                pw.Text('Printed ${dateStr(DateTime.now())}', style: small),
+                pw.Text(t('Printed {v1}', {'v1': dateStr(DateTime.now())}), style: small),
               ],
             ),
           ],
@@ -207,7 +207,7 @@ Future<Uint8List> buildStatementPdf({
         pw.Text('Customer', style: small),
         pw.Text(customer['name'] as String? ?? '', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
         if ((customer['phone'] as String? ?? '').isNotEmpty)
-          pw.Text('Phone: ${customer['phone']}', style: small),
+          pw.Text(t('Phone: {v1}', {'v1': customer['phone']}), style: small),
         section(t('Bills in this period')),
         if (s.bills.isEmpty)
           pw.Text('No bills.', style: small)
@@ -290,7 +290,7 @@ Future<Uint8List> buildStatementPdf({
         ),
         if (upi.isNotEmpty && s.netPayable >= 0.01) ...[
           pw.SizedBox(height: 12),
-          pw.Text('Pay by UPI: $upi', style: bold),
+          pw.Text(t('Pay by UPI: {upi}', {'upi': upi}), style: bold),
         ],
       ],
     ),

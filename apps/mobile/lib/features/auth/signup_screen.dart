@@ -66,7 +66,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             email: email,
             emailRedirectTo: authCallbackUrl,
           );
-      if (mounted) showSuccess(context, 'Verification email sent to $email.');
+      if (mounted) showSuccess(context, t('Verification email sent to {email}.', {'email': email}));
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {

@@ -231,7 +231,7 @@ class _StockRow extends StatelessWidget {
                         ),
                       )
                     : Text(
-                        'Value: ${money(stock * toDouble(p['purchase_price']))}',
+                        t('Value: {v1}', {'v1': money(stock * toDouble(p['purchase_price']))}),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
@@ -334,7 +334,7 @@ class _StockTile extends StatelessWidget {
                             ),
                           )
                         : Text(
-                            'Value: ${money(stock * toDouble(p['purchase_price']))}',
+                            t('Value: {v1}', {'v1': money(stock * toDouble(p['purchase_price']))}),
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.inkSoft,

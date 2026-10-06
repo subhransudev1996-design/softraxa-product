@@ -300,10 +300,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       if (result.offline) {
         showSuccess(
           context,
-          'Saved offline as ${result.invoiceNo}. It will sync automatically.',
+          t('Saved offline as {v1}. It will sync automatically.', {'v1': result.invoiceNo}),
         );
       } else {
-        showSuccess(context, 'Bill ${result.invoiceNo} created');
+        showSuccess(context, t('Bill {v1} created', {'v1': result.invoiceNo}));
         context.push('/invoices/${result.invoiceId}?new=1');
       }
     } catch (e) {
@@ -620,7 +620,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            'Editing ${editing.invoiceNo} — ${editing.invoiceType.toUpperCase()}',
+                            t('Editing {v1} — {v2}', {'v1': editing.invoiceNo, 'v2': editing.invoiceType.toUpperCase()}),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               color: AppColors.indigo,
@@ -732,7 +732,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                         runSpacing: 2,
                                         children: [
                                           Text(
-                                            'Current due: ${money(existingDue)}',
+                                            t('Current due: {v1}', {'v1': money(existingDue)}),
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
@@ -743,7 +743,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                           ),
                                           if (creditLimit != null)
                                             Text(
-                                              'Credit limit: ${money(creditLimit)}',
+                                              t('Credit limit: {v1}', {'v1': money(creditLimit)}),
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 color: AppColors.inkSoft,
@@ -890,7 +890,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'About ${money(excess)} of credit is left after this bill.',
+                            t('About {v1} of credit is left after this bill.', {'v1': money(excess)}),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 8),
@@ -927,7 +927,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   ('upi', 'UPI'),
                                 ])
                                   ChoiceChip(
-                                    label: Text('Refund by ${m.$2}'),
+                                    label: Text(t('Refund by {v1}', {'v1': m.$2})),
                                     selected: _refundMode == m.$1,
                                     onSelected: (_) =>
                                         setState(() => _refundMode = m.$1),
@@ -1384,7 +1384,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               ),
               decoration: InputDecoration(
                 labelText: t('Amount received ₹'),
-                helperText: 'Up to ${money(due)}; anything left stays as due',
+                helperText: t('Up to {v1}; anything left stays as due', {'v1': money(due)}),
               ),
               onChanged: (_) => setState(() => _collectTouched = true),
             ),

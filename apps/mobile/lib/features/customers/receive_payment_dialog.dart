@@ -221,7 +221,7 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
                       contentPadding: EdgeInsets.zero,
                       value: _picked.contains(b['id']),
                       title: Text('${b['invoice_no']} • ${dateStr(b['invoice_date'])}'),
-                      subtitle: Text('Due ${money(b['due_amount'] as num?)}'),
+                      subtitle: Text(t('Due {v1}', {'v1': money(b['due_amount'] as num?)})),
                       onChanged: (v) {
                         setState(() {
                           v == true ? _picked.add(b['id'] as String) : _picked.remove(b['id']);
@@ -293,7 +293,7 @@ class _PreviewBox extends StatelessWidget {
             ),
           if (preview.advance > 0.005)
             Text(
-              '• keep ${money(preview.advance)} as advance for future bills',
+              t('• keep {v1} as advance for future bills', {'v1': money(preview.advance)}),
               style: style.copyWith(color: AppColors.green, fontWeight: FontWeight.w600),
             ),
         ],

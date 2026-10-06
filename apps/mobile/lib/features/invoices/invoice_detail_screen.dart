@@ -136,7 +136,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   decimal: true,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Amount ₹ (due ${money(due)})',
+                  labelText: t('Amount ₹ (due {v1})', {'v1': money(due)}),
                 ),
               ),
               const SizedBox(height: 12),
@@ -213,7 +213,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Due by ${dateStr(ymd(picked))}'),
+        title: Text(t('Due by {v1}', {'v1': dateStr(ymd(picked))})),
         content: TextField(
           controller: reason,
           autofocus: true,
@@ -273,7 +273,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
           children: [
             ListTile(
               title: Text(t('Change customer')),
-              subtitle: Text('Now: $current'),
+              subtitle: Text(t('Now: {current}', {'current': current})),
             ),
             ListTile(
               leading: const Icon(Icons.person_search_outlined),
@@ -285,7 +285,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 leading: const Icon(Icons.person_off_outlined),
                 title: Text(t('Make it a walk-in bill')),
                 subtitle: due > 0.005
-                    ? Text('Collect the ${money(due)} due first')
+                    ? Text(t('Collect the {v1} due first', {'v1': money(due)}))
                     : null,
                 enabled: due <= 0.005,
                 onTap: () => Navigator.pop(ctx, 'walkin'),
@@ -304,7 +304,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final to = picked == null ? 'walk-in' : picked['name'] as String;
     final ok = await confirmDialog(
       context,
-      title: 'Move ${inv['invoice_no']} to $to?',
+      title: t('Move {v1} to {to}?', {'v1': inv['invoice_no'], 'to': to}),
       message: due > 0.005 && picked != null
           ? 'The ${money(due)} due on this bill moves from $current\'s khata to $to\'s.'
           : 'Only who the bill belongs to changes; the amounts stay the same.',
@@ -321,7 +321,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(invoiceDetailProvider(invoiceId));
       ref.invalidate(invoicesProvider);
       ref.invalidate(recentInvoicesProvider);
-      if (context.mounted) showSuccess(context, 'Bill moved to $to');
+      if (context.mounted) showSuccess(context, t('Bill moved to {to}', {'to': to}));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -766,7 +766,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () => _recordPayment(context, ref, inv),
                       icon: const Icon(Icons.payments),
-                      label: Text('Record payment (due ${money(due)})'),
+                      label: Text(t('Record payment (due {v1})', {'v1': money(due)})),
                     ),
                   ),
                 // PD22: an advance is used only when the shop chooses to.

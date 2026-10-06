@@ -469,7 +469,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     if (!line.allowDecimal && newQty % 1 != 0) {
       showError(
         context,
-        '${line.name} is stocked in whole ${line.unitName.isEmpty ? 'units' : line.unitName} — quantity must come to a whole number',
+        t('{v1} is stocked in whole {v2} — quantity must come to a whole number', {'v1': line.name, 'v2': line.unitName.isEmpty ? 'units' : line.unitName}),
       );
       newQty = line.qty;
     }
@@ -956,7 +956,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                       return ListTile(
                         title: Text(p['name'] as String),
                         subtitle: Text(
-                          'Stock: ${qty(toDouble(p['current_stock']))} • Purchase: ${money(p['purchase_price'] as num?)}',
+                          t('Stock: {v1} • Purchase: {v2}', {'v1': qty(toDouble(p['current_stock'])), 'v2': money(p['purchase_price'] as num?)}),
                         ),
                         onTap: () => _select(p),
                       );

@@ -215,7 +215,7 @@ class ServicesScreen extends ConsumerWidget {
   ) async {
     final ok = await confirmDialog(
       context,
-      title: 'Remove "${service['name']}"?',
+      title: t('Remove "{v1}"?', {'v1': service['name']}),
       message: t('This only hides it from the service catalog; past job cards are unaffected.'),
       confirmText: t('Remove'),
     );

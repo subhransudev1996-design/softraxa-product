@@ -103,7 +103,7 @@ class CustomerPricesSection extends ConsumerWidget {
       context,
       title: t('Remove agreed price?'),
       message:
-          '${_name(r)} will go back to the normal price for this customer.',
+          t('{v1} will go back to the normal price for this customer.', {'v1': _name(r)}),
       confirmText: t('Remove'),
     );
     if (!ok) return;
@@ -148,7 +148,7 @@ class CustomerPricesSection extends ConsumerWidget {
               decoration: InputDecoration(
                 labelText: t('Agreed price ₹'),
                 helperText:
-                    'Normal price ${money(normal)} — same basis (incl. GST)',
+                    t('Normal price {v1} — same basis (incl. GST)', {'v1': money(normal)}),
               ),
             ),
             const SizedBox(height: 8),

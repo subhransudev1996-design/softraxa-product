@@ -646,7 +646,7 @@ class _MobileDashboard extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              'Profit ${moneyCompact(s!['today_profit'] as num?)}',
+                              t('Profit {v1}', {'v1': moneyCompact(s!['today_profit'] as num?)}),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
@@ -662,7 +662,7 @@ class _MobileDashboard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      '${s!['today_invoice_count']} ${s!['today_invoice_count'] == 1 ? 'invoice' : 'invoices'} today',
+                      t('{v1} {v2} today', {'v1': s!['today_invoice_count'], 'v2': s!['today_invoice_count'] == 1 ? 'invoice' : 'invoices'}),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 13,
@@ -923,7 +923,7 @@ class _ExpiryBanner extends ConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Your subscription ends $when',
+                  t('Your subscription ends {when}', {'when': when}),
                   style: const TextStyle(
                     fontSize: 13.5,
                     fontWeight: FontWeight.bold,
@@ -1001,7 +1001,7 @@ class _TrialBanner extends ConsumerWidget {
                   ),
                 ),
                 Text(
-                  'Ends ${dateStr(subscription?['expiry_date'])}',
+                  t('Ends {v1}', {'v1': dateStr(subscription?['expiry_date'])}),
                   style: const TextStyle(
                     fontSize: 12.5,
                     color: Color(0xFF996300),

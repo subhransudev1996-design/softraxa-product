@@ -85,7 +85,7 @@ class PiecesCard extends ConsumerWidget {
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: 'Actual length${_unit.isEmpty ? '' : ' ($_unit)'}',
+            labelText: t('Actual length{v1}', {'v1': _unit.isEmpty ? '' : ' ($_unit)'}),
             helperText: t('Measured on the shelf'),
           ),
         ),
@@ -130,12 +130,12 @@ class PiecesCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Throw away a ${qty(length)} $_unit piece?'),
+        title: Text(t('Throw away a {v1} {unit} piece?', {'v1': qty(length), 'unit': _unit})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Stock goes down by ${qty(length)} $_unit.'),
+            Text(t('Stock goes down by {v1} {unit}.', {'v1': qty(length), 'unit': _unit})),
             const SizedBox(height: 12),
             TextField(
               controller: reason,
@@ -213,7 +213,7 @@ class PiecesCard extends ConsumerWidget {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Full length of 1 piece ($_unit)',
+                    labelText: t('Full length of 1 piece ({unit})', {'unit': _unit}),
                     helperText: t('1 rod = 12 ft → 12. Empty for wire coils'),
                   ),
                 ),
@@ -246,7 +246,7 @@ class PiecesCard extends ConsumerWidget {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Throw away leftovers shorter than ($_unit)',
+                      labelText: t('Throw away leftovers shorter than ({unit})', {'unit': _unit}),
                       helperText: t('Empty = keep every leftover'),
                     ),
                   ),
@@ -257,7 +257,7 @@ class PiecesCard extends ConsumerWidget {
                       decimal: true,
                     ),
                     decoration: InputDecoration(
-                      labelText: 'Lost at each cut by the saw ($_unit)',
+                      labelText: t('Lost at each cut by the saw ({unit})', {'unit': _unit}),
                       helperText: t('Usually empty'),
                     ),
                   ),

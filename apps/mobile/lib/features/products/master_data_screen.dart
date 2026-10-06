@@ -153,7 +153,7 @@ class _MasterList extends ConsumerWidget {
   ) async {
     final ok = await confirmDialog(
       context,
-      title: 'Delete "${row['name']}"?',
+      title: t('Delete "{v1}"?', {'v1': row['name']}),
       message: t('Products using it will keep working but lose this label.'),
       confirmText: t('Delete'),
     );

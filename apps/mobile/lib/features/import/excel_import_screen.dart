@@ -392,11 +392,11 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
       invalidateStockData(ref);
       if (mounted) {
         if (failCount == 0) {
-          showSuccess(context, '$count products imported');
+          showSuccess(context, t('{count} products imported', {'count': count}));
         } else {
           showError(
             context,
-            '$count imported, $failCount failed — see the rows below for details.',
+            t('{count} imported, {failCount} failed — see the rows below for details.', {'count': count, 'failCount': failCount}),
           );
         }
       }
@@ -495,10 +495,10 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                     color: row.valid ? AppColors.green : AppColors.red,
                     size: 20,
                   ),
-                  title: Text('Row ${row.rowNumber}: ${row.values['name']}'),
+                  title: Text(t('Row {v1}: {v2}', {'v1': row.rowNumber, 'v2': row.values['name']})),
                   subtitle: row.valid
                       ? Text(
-                          '₹${row.values['selling_price']} • GST ${row.values['gst_rate']}% • Stock ${row.values['opening_stock']}',
+                          t('₹{v1} • GST {v2}% • Stock {v3}', {'v1': row.values['selling_price'], 'v2': row.values['gst_rate'], 'v3': row.values['opening_stock']}),
                           style: const TextStyle(fontSize: 13),
                         )
                       : Text(

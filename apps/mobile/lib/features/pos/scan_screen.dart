@@ -108,7 +108,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(t('Product not found')),
             content: Text(
-              'No product with barcode $code.\nAdd it as a new product?',
+              t('No product with barcode {code}.\nAdd it as a new product?', {'code': code}),
             ),
             actions: [
               TextButton(

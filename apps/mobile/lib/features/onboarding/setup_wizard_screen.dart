@@ -217,7 +217,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
                   child: Text(
-                    'Step ${_step + 1} of ${_titles.length}',
+                    t('Step {v1} of {v2}', {'v1': _step + 1, 'v2': _titles.length}),
                     style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                   ),
                 ),
@@ -396,7 +396,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Text(
-                  'State: ${gstStateLabel(_state)}',
+                  t('State: {v1}', {'v1': gstStateLabel(_state)}),
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
               ),

@@ -117,7 +117,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
     final pending = await ref.read(pendingBillCountProvider.future);
     if (pending > 0) {
       if (mounted) {
-        showError(context, '$pending offline bill(s) haven\'t synced yet — sync them before closing.');
+        showError(context, t('{pending} offline bill(s) haven\'t synced yet — sync them before closing.', {'pending': pending}));
       }
       return;
     }
@@ -133,12 +133,12 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
           final diff = c == null ? null : c - expected;
           final needsReason = diff != null && diff.abs() >= 0.005;
           return AlertDialog(
-            title: Text('Close ${dateStr(_day)}'),
+            title: Text(t('Close {v1}', {'v1': dateStr(_day)})),
             content: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Expected in the drawer: ${money(expected)}'),
+                Text(t('Expected in the drawer: {v1}', {'v1': money(expected)})),
                 const SizedBox(height: 12),
                 TextField(
                   controller: counted,
@@ -301,10 +301,10 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 8),
                           child: Text(
-                            'Not in the drawer: ${[
+                            t('Not in the drawer: {v1}', {'v1': [
                               for (final n in nonCash)
                                 '${'${n['mode']}'.toUpperCase()} ${money(toDouble(n['in']) - toDouble(n['out']))}',
-                            ].join(' • ')}',
+                            ].join(' • ')}),
                             style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                           ),
                         ),
@@ -441,11 +441,11 @@ class _ClosingCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text('Counted ${money(toDouble(closing['counted_cash']))} • ${varianceLabel(variance)}'),
+            Text(t('Counted {v1} • {v2}', {'v1': money(toDouble(closing['counted_cash'])), 'v2': varianceLabel(variance)})),
             if ((closing['reason'] as String? ?? '').isNotEmpty)
-              Text('Reason: ${closing['reason']}', style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+              Text(t('Reason: {v1}', {'v1': closing['reason']}), style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             Text(
-              'Closed at ${dateTimeStr(closing['submitted_at'])}',
+              t('Closed at {v1}', {'v1': dateTimeStr(closing['submitted_at'])}),
               style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             if (isOwner) ...[

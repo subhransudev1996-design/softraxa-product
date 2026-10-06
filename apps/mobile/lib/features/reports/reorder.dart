@@ -178,7 +178,7 @@ Future<Uint8List> buildReorderPdf({
                 if ((business['address'] as String? ?? '').isNotEmpty)
                   pw.Text(business['address'] as String, style: small),
                 if ((business['phone'] as String? ?? '').isNotEmpty)
-                  pw.Text('Phone: ${business['phone']}', style: small),
+                  pw.Text(t('Phone: {v1}', {'v1': business['phone']}), style: small),
               ],
             ),
             pw.Column(
@@ -187,7 +187,7 @@ Future<Uint8List> buildReorderPdf({
                 pw.Text('PURCHASE ORDER',
                   style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
                 ),
-                pw.Text('Date: ${dateStr(DateTime.now())}', style: small),
+                pw.Text(t('Date: {v1}', {'v1': dateStr(DateTime.now())}), style: small),
               ],
             ),
           ],
@@ -200,7 +200,7 @@ Future<Uint8List> buildReorderPdf({
             style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
           ),
           if ((supplier['phone'] as String? ?? '').isNotEmpty)
-            pw.Text('Phone: ${supplier['phone']}', style: small),
+            pw.Text(t('Phone: {v1}', {'v1': supplier['phone']}), style: small),
           pw.SizedBox(height: 14),
         ],
         pw.TableHelper.fromTextArray(

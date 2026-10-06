@@ -211,7 +211,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Over credit limit by ${money(due - creditLimit)}',
+                                    t('Over credit limit by {v1}', {'v1': money(due - creditLimit)}),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: AppColors.orange,
@@ -268,7 +268,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                       advance: advance,
                     ),
                     icon: const Icon(Icons.undo),
-                    label: Text('Refund advance (${money(advance)})'),
+                    label: Text(t('Refund advance ({v1})', {'v1': money(advance)})),
                   ),
                 ],
                 if (advances.isNotEmpty) ...[

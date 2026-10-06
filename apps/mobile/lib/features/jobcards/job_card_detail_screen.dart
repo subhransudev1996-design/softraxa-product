@@ -341,7 +341,7 @@ class JobCardDetailScreen extends ConsumerWidget {
   ) async {
     final ok = await confirmDialog(
       context,
-      title: 'Remove "${item['name']}"?',
+      title: t('Remove "{v1}"?', {'v1': item['name']}),
       message: item['item_type'] == 'part'
           ? t('This will add the quantity back to stock.')
           : 'This charge will be removed from the bill.',
@@ -386,7 +386,7 @@ class JobCardDetailScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  'Total: ${money(total)}  •  Advance already collected: ${money(advance)}',
+                  t('Total: {v1}  •  Advance already collected: {v2}', {'v1': money(total), 'v2': money(advance)}),
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
                 const SizedBox(height: 12),
@@ -470,7 +470,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       ref.invalidate(dashboardStatsProvider);
       ref.invalidate(customersProvider);
       if (context.mounted) {
-        showSuccess(context, 'Invoice ${res['invoice_no']} generated');
+        showSuccess(context, t('Invoice {v1} generated', {'v1': res['invoice_no']}));
         context.push('/invoices/${res['invoice_id']}?new=1');
       }
     } catch (e) {
@@ -586,7 +586,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                           ),
                         if ((j['serial_no'] as String? ?? '').isNotEmpty)
                           Text(
-                            'IMEI/Serial: ${j['serial_no']}',
+                            t('IMEI/Serial: {v1}', {'v1': j['serial_no']}),
                             style: TextStyle(
                               fontSize: 12.5,
                               color: AppColors.inkSoft,
@@ -668,7 +668,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                'Expected: ${dateStr(j['expected_delivery'])}',
+                                t('Expected: {v1}', {'v1': dateStr(j['expected_delivery'])}),
                                 style: const TextStyle(fontSize: 13),
                               ),
                             ],
@@ -688,7 +688,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Invoice $invoiceNo',
+                                  t('Invoice {invoiceNo}', {'invoiceNo': invoiceNo}),
                                   style: const TextStyle(
                                     color: AppColors.indigo,
                                     fontWeight: FontWeight.w600,
@@ -702,7 +702,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                         if (j['warranty_end'] != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            'Warranty until ${dateStr(j['warranty_end'])}',
+                            t('Warranty until {v1}', {'v1': dateStr(j['warranty_end'])}),
                             style: const TextStyle(
                               fontSize: 12.5,
                               color: AppColors.green,
@@ -718,7 +718,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _changeStatus(context, ref, status),
                   icon: const Icon(Icons.sync_alt),
-                  label: Text('Status: ${jobStatusLabel(status)}'),
+                  label: Text(t('Status: {v1}', {'v1': jobStatusLabel(status)})),
                 ),
                 if (needsEstimate) ...[
                   SectionLabel(t('Estimate')),
@@ -754,7 +754,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
+                              t('Qty {v1} × {v2}', {'v1': qty(items[i]['quantity'] as num?), 'v2': money(items[i]['unit_price'] as num?)}),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -798,7 +798,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                     onPressed: () => _addDiagnosticFee(context, ref),
                     icon: const Icon(Icons.fact_check_outlined),
                     label: Text(
-                      'Add diagnostic fee ${money(j['diagnostic_fee'] as num?)}',
+                      t('Add diagnostic fee {v1}', {'v1': money(j['diagnostic_fee'] as num?)}),
                     ),
                   ),
                 ],
@@ -1036,7 +1036,7 @@ class PartPickerState extends ConsumerState<PartPicker> {
                       return ListTile(
                         title: Text(p['name'] as String),
                         subtitle: Text(
-                          'Stock: ${qty(toDouble(p['current_stock']))} • ${money(p['selling_price'] as num?)}',
+                          t('Stock: {v1} • {v2}', {'v1': qty(toDouble(p['current_stock'])), 'v2': money(p['selling_price'] as num?)}),
                         ),
                         onTap: () => _select(p),
                       );

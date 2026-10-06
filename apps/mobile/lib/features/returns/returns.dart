@@ -99,7 +99,7 @@ Future<double?> _promptReturnQty(
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
           labelText: t('Return qty'),
-          helperText: 'Max ${qty(max)}',
+          helperText: t('Max {v1}', {'v1': qty(max)}),
         ),
         onSubmitted: (_) => Navigator.pop(ctx, double.tryParse(c.text)),
       ),
@@ -119,7 +119,7 @@ Future<double?> _promptReturnQty(
   if (v == null) return null;
   if (v < 0 || v > max) {
     if (context.mounted) {
-      showError(context, 'Enter a quantity between 0 and ${qty(max)}');
+      showError(context, t('Enter a quantity between 0 and {v1}', {'v1': qty(max)}));
     }
     return null;
   }
@@ -495,7 +495,7 @@ class _SaleReturnTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Against ${(r['invoices'] as Map?)?['invoice_no'] ?? '—'} • ${dateStr(r['return_date'])}',
+                      t('Against {v1} • {v2}', {'v1': (r['invoices'] as Map?)?['invoice_no'] ?? '—', 'v2': dateStr(r['return_date'])}),
                       style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
                     ),
                   ],
@@ -706,7 +706,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Against invoice $invoiceNo',
+                                  t('Against invoice {invoiceNo}', {'invoiceNo': invoiceNo}),
                                   style: const TextStyle(
                                     color: AppColors.indigo,
                                     fontWeight: FontWeight.w600,
@@ -1099,7 +1099,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text('Return — ${widget.invoice['invoice_no']}'),
+        title: Text(t('Return — {v1}', {'v1': widget.invoice['invoice_no']})),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -1138,7 +1138,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 ),
                               ),
                               Text(
-                                'Sold: ${qty(it['quantity'] as num?)} @ ${money(_lineInclRate(it))}',
+                                t('Sold: {v1} @ {v2}', {'v1': qty(it['quantity'] as num?), 'v2': money(_lineInclRate(it))}),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.inkSoft,
@@ -1354,7 +1354,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
             Padding(
               padding: const EdgeInsets.only(top: 8),
               child: Text(
-                '${money(_total - _refundAmount)} will be adjusted against the customer\'s due.',
+                t('{v1} will be adjusted against the customer\'s due.', {'v1': money(_total - _refundAmount)}),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
@@ -1374,7 +1374,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('Record return • ${money(_total)}'),
+                : Text(t('Record return • {v1}', {'v1': money(_total)})),
           ),
           if (ref.watch(appContextProvider).value?.canCreateInvoice ?? false) ...[
             const SizedBox(height: 8),
@@ -1884,7 +1884,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  'Against purchase $purchaseNo',
+                                  t('Against purchase {purchaseNo}', {'purchaseNo': purchaseNo}),
                                   style: const TextStyle(
                                     color: AppColors.teal,
                                     fontWeight: FontWeight.w600,
@@ -1926,7 +1926,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                             ),
                           ),
                           subtitle: Text(
-                            'Qty ${qty(items[i]['quantity'] as num?)} × ${money(items[i]['unit_price'] as num?)}',
+                            t('Qty {v1} × {v2}', {'v1': qty(items[i]['quantity'] as num?), 'v2': money(items[i]['unit_price'] as num?)}),
                             style: TextStyle(
                               fontSize: 13,
                               color: AppColors.inkSoft,
@@ -2275,7 +2275,7 @@ class _PurchaseReturnFormScreenState
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text('Return — ${widget.purchase['purchase_no']}'),
+        title: Text(t('Return — {v1}', {'v1': widget.purchase['purchase_no']})),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -2311,7 +2311,7 @@ class _PurchaseReturnFormScreenState
                                 ),
                               ),
                               Text(
-                                'Bought: ${qty(it['quantity'] as num?)} @ ${money(_lineRate(it))}',
+                                t('Bought: {v1} @ {v2}', {'v1': qty(it['quantity'] as num?), 'v2': money(_lineRate(it))}),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.inkSoft,
@@ -2422,7 +2422,7 @@ class _PurchaseReturnFormScreenState
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text('Record return • ${money(_total)}'),
+                : Text(t('Record return • {v1}', {'v1': money(_total)})),
           ),
           const SizedBox(height: 24),
         ],

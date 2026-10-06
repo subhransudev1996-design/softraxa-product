@@ -259,7 +259,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Add $label'),
+        title: Text(t('Add {label}', {'label': label})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -321,7 +321,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           onAdded(existingId);
           showSuccess(
             context,
-            '${label[0].toUpperCase()}${label.substring(1)} "$trimmedName" already exists',
+            t('{v1}{v2} "{trimmedName}" already exists', {'v1': label[0].toUpperCase(), 'v2': label.substring(1), 'trimmedName': trimmedName}),
           );
         }
         return;
@@ -352,7 +352,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           onAdded(existingId);
           showSuccess(
             context,
-            '${label[0].toUpperCase()}${label.substring(1)} "$trimmedName" already exists',
+            t('{v1}{v2} "{trimmedName}" already exists', {'v1': label[0].toUpperCase(), 'v2': label.substring(1), 'trimmedName': trimmedName}),
           );
         }
         return;
@@ -382,7 +382,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
       if (mounted) {
         onAdded(newId);
-        showSuccess(context, 'New $label "$trimmedName" added');
+        showSuccess(context, t('New {label} "{trimmedName}" added', {'label': label, 'trimmedName': trimmedName}));
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -476,7 +476,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         (double.tryParse(_conversionFactor.text) ?? 0) <= 0) {
       showError(
         context,
-        'Enter how many base units make one ${_secondaryUnitName.text.trim()} (e.g. 1 Bag = 50 kg)',
+        t('Enter how many base units make one {v1} (e.g. 1 Bag = 50 kg)', {'v1': _secondaryUnitName.text.trim()}),
       );
       return;
     }
@@ -851,7 +851,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         ),
                         decoration: InputDecoration(
                           labelText:
-                              'Purchase price of 1 ${_secondaryUnitName.text.trim()} ₹',
+                              t('Purchase price of 1 {v1} ₹', {'v1': _secondaryUnitName.text.trim()}),
                           helperText: _packCostHint(),
                           helperMaxLines: 2,
                         ),
@@ -867,7 +867,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         ),
                         decoration: InputDecoration(
                           labelText:
-                              'Selling price of 1 ${_secondaryUnitName.text.trim()} ₹',
+                              t('Selling price of 1 {v1} ₹', {'v1': _secondaryUnitName.text.trim()}),
                           helperText: _packPriceHint(),
                           helperMaxLines: 2,
                         ),
@@ -1123,7 +1123,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Full length of 1 piece (${_unitShort()})',
+                    labelText: t('Full length of 1 piece ({v1})', {'v1': _unitShort()}),
                     helperText: t('1 rod = 12 ft → 12. New stock is split into full pieces. Empty = each purchase is one piece (wire coil).'),
                     helperMaxLines: 2,
                   ),
@@ -1256,7 +1256,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: ListTile(
                       title: Text(_variants[i].name),
                       subtitle: Text(
-                        'Stock: ${_variants[i].openingStock}  •  ₹${_variants[i].sellingPrice ?? _selling.text}',
+                        t('Stock: {v1}  •  ₹{v2}', {'v1': _variants[i].openingStock, 'v2': _variants[i].sellingPrice ?? _selling.text}),
                       ),
                       trailing: IconButton(
                         icon: const Icon(

@@ -245,7 +245,7 @@ class _MyRequests extends ConsumerWidget {
       );
       ref.invalidate(myApprovalsProvider);
       if (context.mounted) {
-        showSuccess(context, 'Bill ${res['invoice_no'] ?? ''} created');
+        showSuccess(context, t('Bill {v1} created', {'v1': res['invoice_no'] ?? ''}));
         context.push('/invoices/${res['id']}?new=1');
       }
     } catch (e) {
@@ -421,9 +421,9 @@ class _ApprovalCard extends StatelessWidget {
                 ),
               ),
             if ((r['reason'] as String? ?? '').isNotEmpty)
-              Text('Reason: ${r['reason']}', style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+              Text(t('Reason: {v1}', {'v1': r['reason']}), style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             if ((r['decision_note'] as String? ?? '').isNotEmpty)
-              Text('Owner: ${r['decision_note']}', style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
+              Text(t('Owner: {v1}', {'v1': r['decision_note']}), style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft)),
             if (actions.isNotEmpty) ...[
               const SizedBox(height: 8),
               Wrap(alignment: WrapAlignment.end, spacing: 8, children: actions),

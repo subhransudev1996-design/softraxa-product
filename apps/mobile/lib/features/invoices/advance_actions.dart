@@ -27,7 +27,7 @@ Future<bool> applyAdvanceToInvoice(
       message:
           '${customerName ?? t('This customer')} has an advance. Use ${money(amount)} '
           'of it to pay this bill? This is not a new cash receipt.',
-      confirmText: 'Use ${money(amount)}',
+      confirmText: t('Use {v1}', {'v1': money(amount)}),
     );
     if (!ok || !context.mounted) return false;
   }
@@ -46,7 +46,7 @@ Future<bool> applyAdvanceToInvoice(
     if (context.mounted) {
       showSuccess(
         context,
-        'Advance of ${money(toDouble((res as Map)['applied']))} used on this bill',
+        t('Advance of {v1} used on this bill', {'v1': money(toDouble((res as Map)['applied']))}),
       );
     }
     return true;

@@ -272,7 +272,7 @@ class _DaySummaryDialogState extends ConsumerState<_DaySummaryDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                '${s.bills} bill${s.bills == 1 ? '' : 's'}',
+                t('{v1} bill{v2}', {'v1': s.bills, 'v2': s.bills == 1 ? '' : 's'}),
                 style: TextStyle(color: AppColors.inkSoft),
               ),
               _row('Sales', s.sales, bold: true),

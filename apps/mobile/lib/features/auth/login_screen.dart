@@ -91,7 +91,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             emailRedirectTo: authCallbackUrl,
           );
       if (mounted) {
-        showSuccess(context, 'Verification email sent to $email.');
+        showSuccess(context, t('Verification email sent to {email}.', {'email': email}));
       }
     } catch (e) {
       if (mounted) showError(context, e);

@@ -188,7 +188,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
         if (ctx?.isStaffLimitReached ?? false) {
           showError(
             context,
-            'Staff limit reached for your plan (${ctx?.userLimit} allowed).',
+            t('Staff limit reached for your plan ({v1} allowed).', {'v1': ctx?.userLimit}),
           );
         } else {
           _showAddStaffDialog();
@@ -210,7 +210,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       ),
       body: staffAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text('Error: $err')),
+        error: (err, stack) => Center(child: Text(t('Error: {err}', {'err': err}))),
         data: (staffList) {
           final limit = ctx?.userLimit ?? 999;
           final isLimitReached = limit != 999 && staffList.length >= limit;
@@ -239,7 +239,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Staff Accounts: ${staffList.length} / ${limit == 999 ? t('Unlimited') : limit}',
+                            t('Staff Accounts: {v1} / {v2}', {'v1': staffList.length, 'v2': limit == 999 ? t('Unlimited') : limit}),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 2),
@@ -458,7 +458,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       builder: (ctx) => AlertDialog(
         title: Text(t('Remove Staff Member')),
         content: Text(
-          'Are you sure you want to remove ${staff['full_name']} (${staff['email']})? They will immediately lose access to this store.',
+          t('Are you sure you want to remove {v1} ({v2})? They will immediately lose access to this store.', {'v1': staff['full_name'], 'v2': staff['email']}),
         ),
         actions: [
           TextButton(
@@ -747,7 +747,7 @@ class _EditPermissionsDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit Permissions (${widget.staff['full_name']})'),
+      title: Text(t('Edit Permissions ({v1})', {'v1': widget.staff['full_name']})),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,

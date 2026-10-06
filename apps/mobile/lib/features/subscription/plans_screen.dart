@@ -40,7 +40,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
       if (mounted) {
         showSuccess(
           context,
-          'Request sent — SOFTRAXA will contact you about the ${plan['name']} plan',
+          t('Request sent — SOFTRAXA will contact you about the {v1} plan', {'v1': plan['name']}),
         );
       }
     } catch (e) {

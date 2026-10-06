@@ -191,7 +191,7 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
                         subtitle: Text(c['phone'] as String? ?? ''),
                         trailing: due > 0
                             ? Text(
-                                'Due ${money(due)}',
+                                t('Due {v1}', {'v1': money(due)}),
                                 style: const TextStyle(
                                   color: AppColors.red,
                                   fontWeight: FontWeight.w600,

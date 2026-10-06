@@ -512,7 +512,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
                       ),
                       if ((p['bill_no'] as String? ?? '').isNotEmpty)
                         Text(
-                          'Supplier bill: ${p['bill_no']}',
+                          t('Supplier bill: {v1}', {'v1': p['bill_no']}),
                           style: TextStyle(
                             color: AppColors.inkSoft,
                             fontSize: 13,
@@ -612,7 +612,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Delete ${p['purchase_no']}?'),
+        title: Text(t('Delete {v1}?', {'v1': p['purchase_no']})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -662,7 +662,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
       invalidateStockData(ref);
       ref.invalidate(suppliersProvider);
       if (context.mounted) {
-        showSuccess(context, '${p['purchase_no']} deleted');
+        showSuccess(context, t('{v1} deleted', {'v1': p['purchase_no']}));
         context.canPop() ? context.pop() : context.go('/purchases');
       }
     } catch (e) {

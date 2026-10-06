@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -80,7 +81,7 @@ class QuickItemsRow extends ConsumerWidget {
               '${p['name']}  ${money(toDouble(p['selling_price']))}',
               style: const TextStyle(fontSize: 12.5),
             ),
-            tooltip: 'Add ${p['name']}',
+            tooltip: t('Add {v1}', {'v1': p['name']}),
             onPressed: () => onPick(p),
           );
         },

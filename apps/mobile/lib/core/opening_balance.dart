@@ -22,7 +22,7 @@ Future<bool> showOpeningBalanceDialog(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text('Opening balance — $name'),
+        title: Text(t('Opening balance — {name}', {'name': name})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -43,7 +43,7 @@ Future<bool> showOpeningBalanceDialog(
             ListTile(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event_outlined),
-              title: Text('As of ${dateStr(asOf)}'),
+              title: Text(t('As of {v1}', {'v1': dateStr(asOf)})),
               trailing: Text(t('Change')),
               onTap: () async {
                 final now = DateTime.now();

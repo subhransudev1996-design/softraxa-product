@@ -103,7 +103,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               as Map<String, dynamic>;
       ref.invalidate(jobCardsProvider);
       if (mounted) {
-        showSuccess(context, 'Job card ${res['job_no']} created');
+        showSuccess(context, t('Job card {v1} created', {'v1': res['job_no']}));
         context.pushReplacement('/job-cards/${res['id']}');
       }
     } catch (e) {

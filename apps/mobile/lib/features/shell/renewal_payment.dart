@@ -177,7 +177,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 if (planName != null) ...[
                   const SizedBox(height: 4),
                   Text(
-                    'Plan: $planName',
+                    t('Plan: {planName}', {'planName': planName}),
                     style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 ],

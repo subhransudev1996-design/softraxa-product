@@ -335,7 +335,7 @@ class TopProductsPanel extends ConsumerWidget {
                     SizedBox(
                       width: 64,
                       child: Text(
-                        '${qty(r['qty_sold'] as num?)} sold',
+                        t('{v1} sold', {'v1': qty(r['qty_sold'] as num?)}),
                         textAlign: TextAlign.right,
                         style: TextStyle(
                           fontSize: 11.5,

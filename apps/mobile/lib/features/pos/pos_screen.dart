@@ -88,7 +88,7 @@ Future<String?> showImeiPicker(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text('Select IMEI / Serial — $productName'),
+        title: Text(t('Select IMEI / Serial — {productName}', {'productName': productName})),
         content: SizedBox(
           width: 400,
           child: Column(
@@ -216,7 +216,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ? await showDialog<Map<String, dynamic>>(
               context: context,
               builder: (ctx) => SimpleDialog(
-                title: Text('Select variant — ${product['name']}'),
+                title: Text(t('Select variant — {v1}', {'v1': product['name']})),
                 children: [
                   for (final (i, v) in variants.indexed)
                     SizedBox(
@@ -234,7 +234,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           ),
                         ),
                         trailing: StatusChip(
-                          'Stock ${qty(toDouble(v['current_stock']))}',
+                          t('Stock {v1}', {'v1': qty(toDouble(v['current_stock']))}),
                           color: toDouble(v['current_stock']) <= 0
                               ? AppColors.red
                               : AppColors.green,
@@ -257,7 +257,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              'Select variant — ${product['name']}',
+                              t('Select variant — {v1}', {'v1': product['name']}),
                               style: Theme.of(ctx).textTheme.titleMedium,
                             ),
                           ),
@@ -284,7 +284,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 ),
                               ),
                               trailing: StatusChip(
-                                'Stock ${qty(toDouble(v['current_stock']))}',
+                                t('Stock {v1}', {'v1': qty(toDouble(v['current_stock']))}),
                                 color: toDouble(v['current_stock']) <= 0
                                     ? AppColors.red
                                     : AppColors.green,
@@ -563,7 +563,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           if (mounted) {
             showError(
               context,
-              'Still not enough stock (${qty(fresh)} available).',
+              t('Still not enough stock ({v1} available).', {'v1': qty(fresh)}),
             );
           }
           return;
@@ -690,7 +690,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (!line.allowDecimal && newQty % 1 != 0) {
       showError(
         context,
-        '${line.name} is sold in whole ${line.unitName.isEmpty ? 'units' : line.unitName} — quantity must be a whole number',
+        t('{v1} is sold in whole {v2} — quantity must be a whole number', {'v1': line.name, 'v2': line.unitName.isEmpty ? 'units' : line.unitName}),
       );
       newQty = line.qty;
     }
@@ -995,7 +995,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                       ? EmptyState(
                                           icon: Icons.search_off,
                                           message:
-                                              'No product found for "$search"',
+                                              t('No product found for "{search}"', {'search': search}),
                                           action: OutlinedButton.icon(
                                             onPressed: () =>
                                                 context.push('/products/new'),
@@ -1068,7 +1068,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           builder: (rows) => rows.isEmpty
                               ? EmptyState(
                                   icon: Icons.search_off,
-                                  message: 'No product found for "$search"',
+                                  message: t('No product found for "{search}"', {'search': search}),
                                   action: OutlinedButton.icon(
                                     onPressed: () =>
                                         context.push('/products/new'),
@@ -1110,7 +1110,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                           ),
                                         ),
                                         trailing: StatusChip(
-                                          'Stock ${qty(stock)}',
+                                          t('Stock {v1}', {'v1': qty(stock)}),
                                           color: stock <= 0
                                               ? AppColors.red
                                               : AppColors.green,
@@ -1265,7 +1265,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    '${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} • Qty ${qty(cart.totalQty)}',
+                                    t('{v1} {v2} • Qty {v3}', {'v1': cart.itemCount, 'v2': cart.itemCount == 1 ? 'item' : 'items', 'v3': qty(cart.totalQty)}),
                                     style: TextStyle(
                                       fontSize: 12.5,
                                       color: AppColors.inkSoft,
@@ -1282,7 +1282,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                   ),
                                   if (cart.taxTotal > 0)
                                     Text(
-                                      'incl. GST ${money(cart.billTaxTotal)}',
+                                      t('incl. GST {v1}', {'v1': money(cart.billTaxTotal)}),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.inkSoft,

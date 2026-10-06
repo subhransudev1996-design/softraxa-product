@@ -303,7 +303,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Qty ($_activeUnit)',
+                    labelText: t('Qty ({activeUnit})', {'activeUnit': _activeUnit}),
                     errorText: parsedQty != null && _wholeOnly && !whole
                         ? 'Whole $_activeUnit only'
                         : null,

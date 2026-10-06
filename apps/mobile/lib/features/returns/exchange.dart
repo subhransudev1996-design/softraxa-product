@@ -122,11 +122,11 @@ Future<Map<String, double>?> showConditionSplitDialog(
         final sum = split.values.fold(0.0, (s, v) => s + v);
         final ok = (sum - total).abs() < 0.0005 && split.values.every((v) => v >= 0);
         return AlertDialog(
-          title: Text('Condition — $name'),
+          title: Text(t('Condition — {name}', {'name': name})),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('Split ${qty(total)} returned by condition.'),
+              Text(t('Split {v1} returned by condition.', {'v1': qty(total)})),
               const SizedBox(height: 8),
               for (final e in returnConditions.entries)
                 Padding(
@@ -140,7 +140,7 @@ Future<Map<String, double>?> showConditionSplitDialog(
                 ),
               if (!ok)
                 Text(
-                  'The quantities must add up to ${qty(total)} (now ${qty(sum)}).',
+                  t('The quantities must add up to {v1} (now {v2}).', {'v1': qty(total), 'v2': qty(sum)}),
                   style: const TextStyle(color: AppColors.red, fontSize: 13),
                 ),
             ],

@@ -830,7 +830,7 @@ class PartyCard extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.call_outlined, size: 19),
                       color: AppColors.teal,
-                      tooltip: 'Call $phone',
+                      tooltip: t('Call {phone}', {'phone': phone}),
                       visualDensity: VisualDensity.compact,
                       onPressed: onCall,
                     ),
@@ -889,7 +889,7 @@ class PartyCard extends StatelessWidget {
                     const SizedBox(width: 4),
                     Expanded(
                       child: Text(
-                        'Over limit by ${money(due - creditLimit!)}',
+                        t('Over limit by {v1}', {'v1': money(due - creditLimit!)}),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(

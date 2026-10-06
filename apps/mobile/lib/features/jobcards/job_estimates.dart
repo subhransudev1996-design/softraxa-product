@@ -147,7 +147,7 @@ class EstimateSection extends ConsumerWidget {
                 margin: const EdgeInsets.only(top: 8),
                 child: ExpansionTile(
                   title: Text(
-                    'Earlier versions (${older.length})',
+                    t('Earlier versions ({v1})', {'v1': older.length}),
                     style: const TextStyle(
                       fontSize: 13.5,
                       fontWeight: FontWeight.w600,
@@ -196,7 +196,7 @@ class _EstimateCard extends ConsumerWidget {
               children: [
                 Expanded(
                   child: Text(
-                    'Estimate v${estimate['version']}',
+                    t('Estimate v{v1}', {'v1': estimate['version']}),
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 15,
@@ -287,7 +287,7 @@ class _EstimateCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      '${dateTimeStr(answer['customer_decided_at'])} · staff-recorded',
+                      t('{v1} · staff-recorded', {'v1': dateTimeStr(answer['customer_decided_at'])}),
                       style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                     if ((answer['notes'] as String? ?? '').isNotEmpty)
@@ -594,7 +594,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
     }
     for (final l in _lines) {
       if (l.quantity <= 0 || l.unitPrice < 0) {
-        showError(context, 'Check the quantity and price of ${l.name}');
+        showError(context, t('Check the quantity and price of {v1}', {'v1': l.name}));
         return;
       }
     }
@@ -615,7 +615,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
       if (mounted) {
         showSuccess(
           context,
-          'Estimate v${res['version']} saved — ${money(res['total'] as num?)}',
+          t('Estimate v{v1} saved — {v2}', {'v1': res['version'], 'v2': money(res['total'] as num?)}),
         );
         Navigator.pop(context, true);
       }
@@ -634,7 +634,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
         : (widget.base!['version'] as int) + 1;
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text('Estimate v$version')),
+      appBar: AppBar(title: Text(t('Estimate v{version}', {'version': version}))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -934,7 +934,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
     if (failed > 0) {
       showError(
         context,
-        'Answer saved, but $failed photo(s) failed to upload. Add them again under Photos.',
+        t('Answer saved, but {failed} photo(s) failed to upload. Add them again under Photos.', {'failed': failed}),
       );
     } else {
       showSuccess(context, t('Customer\'s answer recorded'));
@@ -944,7 +944,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Customer\'s answer — v${widget.estimate['version']}'),
+      title: Text(t('Customer\'s answer — v{v1}', {'v1': widget.estimate['version']})),
       content: SizedBox(
         width: 460,
         child: SingleChildScrollView(
@@ -1114,7 +1114,7 @@ Future<void> markEstimateWorkDone(
         children: [
           ListTile(
             title: Text(
-              'Approved work — estimate v${current['version']}',
+              t('Approved work — estimate v{v1}', {'v1': current['version']}),
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -1150,7 +1150,7 @@ Future<void> markEstimateWorkDone(
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
-            labelText: 'Quantity used (up to ${qty(left)})',
+            labelText: t('Quantity used (up to {v1})', {'v1': qty(left)}),
           ),
         ),
         actions: [

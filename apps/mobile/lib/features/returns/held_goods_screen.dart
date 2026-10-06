@@ -69,7 +69,7 @@ class HeldGoodsScreen extends ConsumerWidget {
               TextField(
                 controller: quantity,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(labelText: 'Quantity (held ${qty(held)})'),
+                decoration: InputDecoration(labelText: t('Quantity (held {v1})', {'v1': qty(held)})),
               ),
             const SizedBox(height: 8),
             TextField(

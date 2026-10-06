@@ -243,7 +243,7 @@ Future<void> showRefundAdvance(
             TextField(
               controller: amount,
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: InputDecoration(labelText: 'Amount ₹ (advance ${money(advance)})'),
+              decoration: InputDecoration(labelText: t('Amount ₹ (advance {v1})', {'v1': money(advance)})),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
@@ -283,7 +283,7 @@ Future<void> showRefundAdvance(
       },
     );
     _refreshCustomerMoney(ref, customerId);
-    if (context.mounted) showSuccess(context, 'Refunded ${money(amt)}');
+    if (context.mounted) showSuccess(context, t('Refunded {v1}', {'v1': money(amt)}));
   } catch (e) {
     if (context.mounted) showError(context, e);
   }
@@ -302,7 +302,7 @@ Future<void> showReversePayment(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text('Reverse payment of ${money(payment['amount'] as num?)}?'),
+        title: Text(t('Reverse payment of {v1}?', {'v1': money(payment['amount'] as num?)})),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [

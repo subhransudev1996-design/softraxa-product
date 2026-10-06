@@ -215,7 +215,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text('Import $_what'),
+        title: Text(t('Import {what}', {'what': _what})),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -237,7 +237,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.event_outlined),
-                    title: Text('Balances as of ${dateStr(_asOf)}'),
+                    title: Text(t('Balances as of {v1}', {'v1': dateStr(_asOf)})),
                     subtitle: Text(
                       widget.suppliers
                           ? t('Paid off first by your next supplier payments')
@@ -279,7 +279,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${result['created']} imported',
+                      t('{v1} imported', {'v1': result['created']}),
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         color: AppColors.green,
@@ -287,7 +287,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                     ),
                     for (final s in List.from(result['skipped'] as List? ?? []))
                       Text(
-                        'Row ${s['row']} ${s['name']}: skipped — ${s['reason']}',
+                        t('Row {v1} {v2}: skipped — {v3}', {'v1': s['row'], 'v2': s['name'], 'v3': s['reason']}),
                         style: TextStyle(
                           fontSize: 12.5,
                           color: AppColors.inkSoft,
@@ -295,7 +295,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                       ),
                     for (final e in List.from(result['errors'] as List? ?? []))
                       Text(
-                        'Row ${e['row']} ${e['name']}: ${friendlyError(e['error'] ?? '')}',
+                        t('Row {v1} {v2}: {v3}', {'v1': e['row'], 'v2': e['name'], 'v3': friendlyError(e['error'] ?? '')}),
                         style: const TextStyle(
                           fontSize: 12.5,
                           color: AppColors.red,
@@ -308,7 +308,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
           ],
           if (_rows.isNotEmpty) ...[
             SectionLabel(
-              '${_fileName ?? t('File')}: $good ready, ${_rows.length - good} with errors',
+              t('{v1}: {good} ready, {v3} with errors', {'v1': _fileName ?? t('File'), 'good': good, 'v3': _rows.length - good}),
             ),
             Card(
               child: Column(
@@ -325,7 +325,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                             : AppColors.red,
                         size: 20,
                       ),
-                      title: Text('Row ${r.number}: ${r.values['name']}'),
+                      title: Text(t('Row {v1}: {v2}', {'v1': r.number, 'v2': r.values['name']})),
                       subtitle: Text(
                         r.errors.isNotEmpty
                             ? r.errors.join(' • ')

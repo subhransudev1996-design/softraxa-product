@@ -352,7 +352,7 @@ class ProductDetailScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    'Purchase: ${money(p['purchase_price'] as num?)}  •  GST ${qty(p['gst_rate'] as num?)}%',
+                                    t('Purchase: {v1}  •  GST {v2}%', {'v1': money(p['purchase_price'] as num?), 'v2': qty(p['gst_rate'] as num?)}),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: AppColors.inkSoft,
@@ -503,19 +503,19 @@ class ProductDetailScreen extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if ((p['sku'] as String? ?? '').isNotEmpty)
-                                Text('SKU: ${p['sku']}'),
+                                Text(t('SKU: {v1}', {'v1': p['sku']})),
                               if ((p['barcode'] as String? ?? '')
                                   .isNotEmpty) ...[
                                 if ((p['sku'] as String? ?? '').isNotEmpty)
                                   const SizedBox(height: 6),
-                                Text('Barcode: ${p['barcode']}'),
+                                Text(t('Barcode: {v1}', {'v1': p['barcode']})),
                               ],
                               if ((p['hsn_code'] as String? ?? '')
                                   .isNotEmpty) ...[
                                 if ((p['sku'] as String? ?? '').isNotEmpty ||
                                     (p['barcode'] as String? ?? '').isNotEmpty)
                                   const SizedBox(height: 6),
-                                Text('HSN: ${p['hsn_code']}'),
+                                Text(t('HSN: {v1}', {'v1': p['hsn_code']})),
                               ],
                             ],
                           ),
@@ -739,7 +739,7 @@ class _SerialsCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'In Stock (${inStock.length})  •  Sold (${sold.length})',
+                      t('In Stock ({v1})  •  Sold ({v2})', {'v1': inStock.length, 'v2': sold.length}),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,

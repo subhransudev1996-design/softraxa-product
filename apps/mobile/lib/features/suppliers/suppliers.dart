@@ -294,7 +294,7 @@ Future<void> showRecordSupplierPayment(
                 decimal: true,
               ),
               decoration: InputDecoration(
-                labelText: 'Amount ₹ (pending ${money(due)})',
+                labelText: t('Amount ₹ (pending {v1})', {'v1': money(due)}),
               ),
             ),
             const SizedBox(height: 12),
@@ -392,7 +392,7 @@ Future<bool> deleteSupplier(
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: Text('Delete $name?'),
+      title: Text(t('Delete {name}?', {'name': name})),
       content: Text(t('They will no longer appear in your supplier list or when adding a purchase. Their past purchases and payments stay in your records and reports.'),
       ),
       actions: [
@@ -418,7 +418,7 @@ Future<bool> deleteSupplier(
         .update({'is_active': false})
         .eq('id', supplier['id'] as String);
     ref.invalidate(suppliersProvider);
-    if (context.mounted) showSuccess(context, '$name deleted');
+    if (context.mounted) showSuccess(context, t('{name} deleted', {'name': name}));
     return true;
   } catch (e) {
     if (context.mounted) showError(context, e);
@@ -852,7 +852,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                                 const SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Over credit limit by ${money(due - creditLimit)}',
+                                    t('Over credit limit by {v1}', {'v1': money(due - creditLimit)}),
                                     style: const TextStyle(
                                       fontSize: 13,
                                       color: AppColors.orange,
