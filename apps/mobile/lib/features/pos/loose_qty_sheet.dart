@@ -115,6 +115,7 @@ class _LooseQtySheet extends StatefulWidget {
 
 class _LooseQtySheetState extends State<_LooseQtySheet> {
   final _qtyC = TextEditingController(text: '1');
+  final _qtyFocus = FocusNode();
   final _amountC = TextEditingController();
 
   /// What the qty is typed in: 'base' (kg), 'sub' (g) or 'pack' (Bag).
@@ -200,6 +201,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
   @override
   void dispose() {
     _qtyC.dispose();
+    _qtyFocus.dispose();
     _amountC.dispose();
     super.dispose();
   }
@@ -225,6 +227,8 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
 
   void _setQty(double v) {
     _qtyC.text = qty(v).replaceAll(',', '');
+    // Back to the qty box so Enter adds right after a quick pick.
+    _qtyFocus.requestFocus();
     // listener recomputes amount
   }
 
@@ -293,6 +297,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                 child: TextField(
                   controller: _qtyC,
                   autofocus: true,
+                  focusNode: _qtyFocus,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),

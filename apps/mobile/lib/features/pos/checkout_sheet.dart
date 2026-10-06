@@ -1000,6 +1000,20 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             decoration: InputDecoration(
                               labelText: 'Paid amount ₹',
                               hintText: payable.toStringAsFixed(2),
+                              // One tap: the customer paid the whole bill.
+                              suffixIcon: Padding(
+                                padding: const EdgeInsets.only(right: 6),
+                                child: TextButton(
+                                  onPressed: () => setState(() {
+                                    if (_paymentMode == 'credit') {
+                                      _paymentMode = 'cash';
+                                    }
+                                    _paid.text = payable.toStringAsFixed(2);
+                                    _paidTouched = true;
+                                  }),
+                                  child: const Text('Exact'),
+                                ),
+                              ),
                             ),
                             onChanged: (_) =>
                                 setState(() => _paidTouched = true),
@@ -1007,27 +1021,46 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Due',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.inkSoft,
-                                ),
-                              ),
-                              Text(
-                                money(due),
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: due > 0
-                                      ? AppColors.red
-                                      : AppColors.green,
-                                ),
-                              ),
-                            ],
+                          child: Builder(
+                            builder: (context) {
+                              // More cash handed over than the bill: the
+                              // change to give back (walk-in), or what goes
+                              // to the customer's advance.
+                              final handed = _paidTouched
+                                  ? double.tryParse(_paid.text) ?? 0
+                                  : 0.0;
+                              final extra = handed - payable;
+                              final over =
+                                  extra >= 0.01 && _docType != 'estimate';
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    !over
+                                        ? 'Due'
+                                        : cart.customer == null
+                                        ? 'Give back'
+                                        : 'Kept as advance',
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: AppColors.inkSoft,
+                                    ),
+                                  ),
+                                  Text(
+                                    money(over ? extra : due),
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: over
+                                          ? AppColors.orange
+                                          : due > 0
+                                          ? AppColors.red
+                                          : AppColors.green,
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
                           ),
                         ),
                       ],
