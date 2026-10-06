@@ -1,3 +1,4 @@
+import 'day_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -317,6 +318,11 @@ class _DesktopDashboard extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         const GuideButton('home'),
+                        OutlinedButton.icon(
+                          onPressed: () => showDaySummary(context),
+                          icon: const Icon(Icons.insights_outlined, size: 18),
+                          label: const Text("Today's summary"),
+                        ),
                         OutlinedButton.icon(
                           onPressed: () => context.push('/products/new'),
                           icon: const Icon(Icons.add_box_outlined, size: 18),
@@ -711,6 +717,12 @@ class _MobileDashboard extends StatelessWidget {
                     color: AppColors.green,
                     label: 'Purchase',
                     onTap: () => context.push('/purchases/new'),
+                  ),
+                  _QuickAction(
+                    icon: Icons.insights_rounded,
+                    color: AppColors.orange,
+                    label: 'Summary',
+                    onTap: () => showDaySummary(context),
                   ),
                   if (!isDesktopPlatform)
                     _QuickAction(

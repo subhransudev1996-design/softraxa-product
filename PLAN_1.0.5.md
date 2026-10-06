@@ -16,6 +16,11 @@ released).
 - Checked by hand in the Windows app on the demo shop at the end of each
   phase; test data is cleaned up afterwards.
 
+## Status
+
+A ✅ B1 ✅ B2 ✅ C1 ✅ C2 ✅ D1 ✅ — all committed with tests; on-screen check of
+B1/B2/C1/D1 pending (needs the PC free).
+
 ## Phase A — fixes found while testing (small, low risk)
 
 | # | Fix | Where | How |
@@ -30,7 +35,8 @@ released).
 
 **B1. WhatsApp payment reminder**
 - Button "Remind on WhatsApp" on the customer page (when they owe) and a
-  WhatsApp icon on each row of the Customer due report.
+  chat icon on each customer card that has a due (the Customer due report
+  is a shared text table for all reports, so it stays as it is).
 - Message (editable before sending, shop language later):
   "Namaste {name} ji, aapka {shop} mein ₹{due} baaki hai. Kripya jaldi
   bhugtan karein. UPI: {upi_id}. — {shop}, {phone}"
@@ -39,12 +45,16 @@ released).
 - Pure message builder in its own file + unit tests.
 
 **B2. Customer statement (khata) PDF**
-- "Statement" button on the customer page: PDF with shop header, customer,
-  period (last 3 months by default, can pick From–To), every bill / payment /
-  return / advance line with running balance, closing balance and UPI ID.
+- "Statement (PDF)" button on the customer page: shop header, customer,
+  period (This month / Last 3 months / This year / All), bills in the
+  period (amount, paid, due now), payments, returns, every unpaid bill,
+  total due less advance = amount payable, and the UPI ID.
+- No running balance: rebuilding one from history drifts with cancelled
+  bills, advances and edits. Every figure shown is one the app stores, so
+  the statement always matches the customer page.
 - Share PDF / Print, same as the reorder PDF.
 - Uses the ledger the customer page already loads (no new query shape).
-- Unit test for the running balance.
+- Unit tests for the period, unpaid bills and earlier balance.
 
 ## Phase C — faster billing
 
@@ -54,15 +64,18 @@ released).
 - "Held bills (n)" chip shows the list (customer/first item, items, total,
   time); tap to resume. Resuming while the counter has items asks to hold
   those first.
-- Kept on this device; survives an app restart (local storage). Not used
-  while editing an existing bill.
-- Tests: hold → clear → resume gives the same cart; prices re-checked.
+- Kept on this device while the app is open (closing the app drops held
+  bills — a held cart is short-lived). Not used while editing a bill or
+  in an exchange.
+- Tests: hold → clear → resume gives the same cart; nothing on the counter
+  is lost when resuming.
 
 **C2. Quick items**
 - A row of the shop's best sellers (last 30 days, up to 12) on New Bill while
   the search box is empty. One tap adds, exactly like picking it from search
   (loose / pack / serial / cut-length prompts still appear).
-- Uses the dashboard's top-products data; refreshed when a bill is saved.
+- Counted per bill line over the last 30 days (most often billed, not
+  highest revenue), readable by every staff member; hidden when offline.
 
 ## Phase D — end of day
 
