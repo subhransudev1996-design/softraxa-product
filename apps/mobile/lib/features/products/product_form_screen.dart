@@ -828,9 +828,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
+                      decoration: InputDecoration(
                         labelText: '= how many units?',
-                        helperText: '1 Bag = 50 kg → 50',
+                        helperText:
+                            '1 ${_secondaryUnitName.text.trim().isEmpty ? 'Bag' : _secondaryUnitName.text.trim()} = 50 kg → 50',
                       ),
                       onChanged: (_) => _packSizeChanged(),
                     ),
@@ -879,6 +880,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       double.tryParse(_packCost.text),
                       double.tryParse(_packPrice.text),
                       _secondaryUnitName.text.trim(),
+                      gstRate: _gstRate,
                     )
                     case final margin?)
                   Padding(

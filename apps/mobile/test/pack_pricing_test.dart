@@ -31,4 +31,16 @@ void main() {
     );
     expect(packMarginText(null, 1800, 'Bag'), isNull);
   });
+
+  test('GST comes off the selling price before the margin', () {
+    // ₹1800 at 5% GST = ₹1714.29 to the shop.
+    expect(
+      packMarginText(1600, 1800, 'Bag', gstRate: 5),
+      'Profit ₹114.29 a Bag (7%) after 5% GST',
+    );
+    expect(
+      packMarginText(1600, 1800, 'Bag', gstRate: 18),
+      'Loss ₹74.58 a Bag after 18% GST — selling below cost',
+    );
+  });
 }

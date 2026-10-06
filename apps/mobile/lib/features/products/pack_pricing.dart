@@ -27,13 +27,22 @@ String priceText(double? v) {
   return v == v.roundToDouble() ? v.toStringAsFixed(0) : v.toStringAsFixed(2);
 }
 
-/// "Profit ₹200 a Bag (11%)", or a loss, or null without both prices.
-String? packMarginText(double? cost, double? sell, String unit) {
+/// "Profit ₹200 a Bag (13%)", or a loss, or null without both prices.
+/// Selling prices include GST, so with a [gstRate] the tax comes off the
+/// selling price first (₹1800 at 18% GST is ₹1525.42 to the shop).
+String? packMarginText(
+  double? cost,
+  double? sell,
+  String unit, {
+  double gstRate = 0,
+}) {
   if (cost == null || cost <= 0 || sell == null || sell <= 0) return null;
-  final m = sell - cost;
+  final net = gstRate > 0 ? sell / (1 + gstRate / 100) : sell;
+  final m = ((net - cost) * 100).round() / 100;
   final pct = (m / cost * 100).round();
   final amt = priceText(m.abs());
+  final gst = gstRate > 0 ? ' after ${priceText(gstRate)}% GST' : '';
   return m >= 0
-      ? 'Profit ₹$amt a $unit ($pct%)'
-      : 'Loss ₹$amt a $unit — selling below cost';
+      ? 'Profit ₹$amt a $unit ($pct%)$gst'
+      : 'Loss ₹$amt a $unit$gst — selling below cost';
 }

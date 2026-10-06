@@ -483,8 +483,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             extra: extra,
           );
       // The customer paid the difference on the spot (migration 0060).
+      // Negative when the edit took the bill below what was paid (the
+      // server gives the difference back), so there is nothing to collect.
       final due = cart.total - editing.paidAmount;
-      final collect = _collectMode == 'due'
+      final collect = _collectMode == 'due' || due < 0.01
           ? 0.0
           : (double.tryParse(_collect.text) ?? 0).clamp(0, due).toDouble();
       String? paymentError;

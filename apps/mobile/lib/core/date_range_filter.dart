@@ -21,6 +21,17 @@ Future<DateTimeRange?> pickDateRange(
     saveText: 'Apply',
     fieldStartLabelText: 'From date',
     fieldEndLabelText: 'To date',
+    // The range picker is full screen; on a PC window that is a sea of
+    // white with the dates in the middle. Keep it phone-sized there.
+    builder: (context, child) => Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 440, maxHeight: 640),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: child,
+        ),
+      ),
+    ),
   );
 }
 
