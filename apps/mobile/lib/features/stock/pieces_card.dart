@@ -8,10 +8,28 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import 'piece_providers.dart';
 
-/// "Cut pieces" management card on the product detail page — for rod/sheet
-/// stores tracking individual remnants (PRD Phase 3). Pieces are auxiliary:
-/// totals live in current_stock; this card just records how the total is
-/// physically split, with a mismatch hint when the two drift apart.
+/// Same-length pieces shown as one row: "12 ft × 3".
+class PieceGroup {
+  const PieceGroup(this.length, this.pieces);
+  final double length;
+  final List<Map<String, dynamic>> pieces;
+}
+
+/// Groups available pieces by length, longest first.
+List<PieceGroup> groupPieces(List<Map<String, dynamic>> rows) {
+  final byLength = <double, List<Map<String, dynamic>>>{};
+  for (final r in rows) {
+    final len = (toDouble(r['length']) * 1000).round() / 1000;
+    byLength.putIfAbsent(len, () => []).add(r);
+  }
+  final keys = byLength.keys.toList()..sort((a, b) => b.compareTo(a));
+  return [for (final k in keys) PieceGroup(k, byLength[k]!)];
+}
+
+/// "Pieces in stock" on the product page — rods, pipe, wire, cloth sold in
+/// cut lengths. The app keeps the pieces by itself (migration 0064): new
+/// stock becomes full pieces, each bill cuts the best piece. This card
+/// only shows them, and fixes the odd case where they drift from stock.
 class PiecesCard extends ConsumerWidget {
   const PiecesCard({super.key, required this.product});
 
@@ -21,85 +39,29 @@ class PiecesCard extends ConsumerWidget {
   String get _unit =>
       (product['units'] as Map?)?['short_name'] as String? ?? '';
 
-  Future<void> _addPieces(BuildContext context, WidgetRef ref) async {
-    final countC = TextEditingController(text: '1');
-    final lengthC = TextEditingController();
-    final labelC = TextEditingController();
-    final saved = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Add pieces'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: countC,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'How many'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: lengthC,
-                    autofocus: true,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText:
-                          'Length each${_unit.isEmpty ? '' : ' ($_unit)'}',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: labelC,
-              decoration: const InputDecoration(
-                labelText: 'Label (optional)',
-                helperText: 'e.g. Rack A',
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: dialogActionStyle,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-    if (saved != true) return;
-    final count = int.tryParse(countC.text) ?? 0;
-    final length = double.tryParse(lengthC.text) ?? 0;
-    if (count <= 0 || length <= 0) {
-      if (context.mounted) showError(context, 'Enter a valid count and length');
-      return;
-    }
+  void _refresh(WidgetRef ref) {
+    ref.invalidate(stockPiecesProvider(_productId));
+    invalidateStockData(ref);
+  }
+
+  Future<void> _matchToStock(BuildContext context, WidgetRef ref) async {
     try {
-      final businessId = ref.read(appContextProvider).value?.businessId;
-      final label = labelC.text.trim();
-      await ref.read(supabaseProvider).from('stock_pieces').insert([
-        for (var i = 0; i < count; i++)
-          {
-            'business_id': businessId,
-            'product_id': _productId,
-            'label': count > 1 && label.isNotEmpty ? '$label ${i + 1}' : label,
-            'length': length,
-          },
-      ]);
-      ref.invalidate(stockPiecesProvider(_productId));
+      final change = toDouble(
+        await ref
+            .read(supabaseProvider)
+            .rpc('match_pieces_to_stock', params: {'p_product': _productId}),
+      );
+      _refresh(ref);
+      if (context.mounted) {
+        showSuccess(
+          context,
+          change > 0
+              ? '${qty(change)} $_unit added as pieces'
+              : change < 0
+              ? '${qty(-change)} $_unit taken off the smallest pieces'
+              : 'Pieces already match stock',
+        );
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -113,30 +75,18 @@ class PiecesCard extends ConsumerWidget {
     final lengthC = TextEditingController(
       text: qty(toDouble(piece['length'])).replaceAll(',', ''),
     );
-    final labelC = TextEditingController(text: piece['label'] as String? ?? '');
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Edit piece'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: lengthC,
-              autofocus: true,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              decoration: InputDecoration(
-                labelText: 'Length${_unit.isEmpty ? '' : ' ($_unit)'}',
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: labelC,
-              decoration: const InputDecoration(labelText: 'Label (optional)'),
-            ),
-          ],
+        title: const Text('Correct the length'),
+        content: TextField(
+          controller: lengthC,
+          autofocus: true,
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          decoration: InputDecoration(
+            labelText: 'Actual length${_unit.isEmpty ? '' : ' ($_unit)'}',
+            helperText: 'Measured on the shelf',
+          ),
         ),
         actions: [
           TextButton(
@@ -161,7 +111,7 @@ class PiecesCard extends ConsumerWidget {
       await ref
           .read(supabaseProvider)
           .from('stock_pieces')
-          .update({'length': length, 'label': labelC.text.trim()})
+          .update({'length': length})
           .eq('id', piece['id'] as String);
       ref.invalidate(stockPiecesProvider(_productId));
     } catch (e) {
@@ -169,7 +119,7 @@ class PiecesCard extends ConsumerWidget {
     }
   }
 
-  Future<void> _scrapPiece(
+  Future<void> _throwAway(
     BuildContext context,
     WidgetRef ref,
     Map<String, dynamic> piece,
@@ -179,16 +129,20 @@ class PiecesCard extends ConsumerWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Scrap this piece?'),
+        title: Text('Throw away a ${qty(length)} $_unit piece?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('${qty(length)} $_unit leaves available stock as scrap.'),
+            Text('Stock goes down by ${qty(length)} $_unit.'),
             const SizedBox(height: 12),
             TextField(
               controller: reason,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Reason *'),
+              decoration: const InputDecoration(
+                labelText: 'Why? *',
+                helperText: 'e.g. bent, rusted, too short to sell',
+              ),
             ),
           ],
         ),
@@ -202,7 +156,7 @@ class PiecesCard extends ConsumerWidget {
             onPressed: () {
               if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },
-            child: const Text('Mark scrap'),
+            child: const Text('Throw away'),
           ),
         ],
       ),
@@ -220,53 +174,46 @@ class PiecesCard extends ConsumerWidget {
               'p_reason': reason.text.trim(),
             },
           );
-      ref.invalidate(stockPiecesProvider(_productId));
-      invalidateStockData(ref);
+      _refresh(ref);
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
   }
 
-  /// Per-product cutting rules (PD27, PD40, PD42, PD44; migration 0049).
-  Future<void> _editRules(BuildContext context, WidgetRef ref) async {
+  /// Full length and the optional cutting details (0049, 0064), in plain
+  /// words.
+  Future<void> _editSettings(BuildContext context, WidgetRef ref) async {
     String n(String k) {
       final v = toDouble(product[k]);
-      return v == 0 ? '' : qty(v);
+      return v == 0 ? '' : qty(v).replaceAll(',', '');
     }
 
-    final allowance = TextEditingController(text: n('cutting_allowance'));
-    final minLeft = TextEditingController(text: n('min_remnant_length'));
+    final full = TextEditingController(text: n('piece_length'));
     final charge = TextEditingController(text: n('cutting_charge'));
+    final minLeft = TextEditingController(text: n('min_remnant_length'));
+    final allowance = TextEditingController(text: n('cutting_allowance'));
     var returns = product['allow_piece_returns'] == true;
+    var more =
+        toDouble(product['min_remnant_length']) > 0 ||
+        toDouble(product['cutting_allowance']) > 0;
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Cutting rules'),
+          title: const Text('Cut length settings'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 TextField(
-                  controller: allowance,
+                  controller: full,
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Cutting loss per cut ($_unit)',
-                    helperText:
-                        'Lost at each cut, e.g. 0.01 — the shop\'s loss',
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: minLeft,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: 'Smallest reusable leftover ($_unit)',
-                    helperText: 'Shorter leftovers are suggested as scrap',
+                    labelText: 'Full length of 1 piece ($_unit)',
+                    helperText: '1 rod = 12 ft → 12. Empty for wire coils',
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -276,16 +223,44 @@ class PiecesCard extends ConsumerWidget {
                     decimal: true,
                   ),
                   decoration: const InputDecoration(
-                    labelText: 'Cutting charge per cut ₹ (optional)',
-                    helperText: 'Added to the bill as its own line',
+                    labelText: 'Charge for each cut ₹ (optional)',
+                    helperText: 'Added to the bill by itself',
                   ),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   value: returns,
                   onChanged: (v) => setState(() => returns = v),
-                  title: const Text('Allow returns of cut pieces'),
+                  title: const Text('Customers can return cut pieces'),
                 ),
+                if (!more)
+                  TextButton(
+                    onPressed: () => setState(() => more = true),
+                    child: const Text('More settings'),
+                  )
+                else ...[
+                  TextField(
+                    controller: minLeft,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Throw away leftovers shorter than ($_unit)',
+                      helperText: 'Empty = keep every leftover',
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: allowance,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
+                    decoration: InputDecoration(
+                      labelText: 'Lost at each cut by the saw ($_unit)',
+                      helperText: 'Usually empty',
+                    ),
+                  ),
+                ],
               ],
             ),
           ),
@@ -310,14 +285,15 @@ class PiecesCard extends ConsumerWidget {
           .read(supabaseProvider)
           .from('products')
           .update({
-            'cutting_allowance': v(allowance),
-            'min_remnant_length': v(minLeft),
+            'piece_length': v(full),
             'cutting_charge': v(charge),
+            'min_remnant_length': v(minLeft),
+            'cutting_allowance': v(allowance),
             'allow_piece_returns': returns,
           })
           .eq('id', _productId);
       invalidateStockData(ref);
-      if (context.mounted) showSuccess(context, 'Cutting rules saved');
+      if (context.mounted) showSuccess(context, 'Saved');
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -327,6 +303,8 @@ class PiecesCard extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final pieces = ref.watch(stockPiecesProvider(_productId));
     final currentStock = toDouble(product['current_stock']);
+    final fullLength = toDouble(product['piece_length']);
+    final canFix = ref.watch(appContextProvider).value?.canManageStock ?? false;
 
     return Card(
       child: Padding(
@@ -342,21 +320,34 @@ class PiecesCard extends ConsumerWidget {
                   size: 38,
                 ),
                 const SizedBox(width: 10),
-                const Expanded(
-                  child: Text(
-                    'Cut pieces',
-                    style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Pieces in stock',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Text(
+                        fullLength > 0
+                            ? 'Full piece = ${qty(fullLength)} $_unit · '
+                                  'kept up to date by itself'
+                            : 'Kept up to date by itself',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Cutting rules',
+                  tooltip: 'Settings',
                   icon: const Icon(Icons.tune, size: 20),
-                  onPressed: () => _editRules(context, ref),
-                ),
-                TextButton.icon(
-                  onPressed: () => _addPieces(context, ref),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add'),
+                  onPressed: () => _editSettings(context, ref),
                 ),
               ],
             ),
@@ -378,64 +369,105 @@ class PiecesCard extends ConsumerWidget {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (rows.isEmpty)
+                    const SizedBox(height: 6),
+                    if (rows.isEmpty && !mismatch)
                       Padding(
-                        padding: EdgeInsets.fromLTRB(0, 4, 8, 4),
+                        padding: const EdgeInsets.fromLTRB(0, 4, 8, 4),
                         child: Text(
-                          'No pieces recorded. Add them so billing can pick '
-                          'which piece each cut comes from.',
+                          'No stock yet. When you add stock or a purchase, '
+                          'it shows up here as pieces.',
                           style: TextStyle(
                             fontSize: 12.5,
                             color: AppColors.inkSoft,
                           ),
                         ),
                       ),
-                    for (final piece in rows)
+                    for (final g in groupPieces(rows))
                       Row(
                         children: [
                           Expanded(
-                            child: Text(
-                              '${(piece['label'] as String? ?? '').isNotEmpty ? '${piece['label']} — ' : ''}'
-                              '${qty(toDouble(piece['length']))} $_unit'
-                              '${switch (piece['source']) {
-                                'remnant' => ' · offcut',
-                                'return' => ' · returned',
-                                _ => '',
-                              }}',
-                              style: const TextStyle(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.w600,
+                            child: Text.rich(
+                              TextSpan(
+                                children: [
+                                  TextSpan(
+                                    text: '${qty(g.length)} $_unit',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                  if (g.pieces.length > 1)
+                                    TextSpan(text: '  × ${g.pieces.length}'),
+                                  TextSpan(
+                                    text:
+                                        fullLength > 0 &&
+                                            (g.length - fullLength).abs() <
+                                                0.001
+                                        ? '  full'
+                                        : '  leftover',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: AppColors.inkSoft,
+                                    ),
+                                  ),
+                                ],
                               ),
+                              style: const TextStyle(fontSize: 13.5),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(Icons.edit_outlined, size: 18),
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => _editPiece(context, ref, piece),
-                          ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              size: 18,
-                              color: AppColors.red,
+                          if (canFix)
+                            PopupMenuButton<String>(
+                              tooltip: 'Change',
+                              icon: const Icon(Icons.more_vert, size: 18),
+                              onSelected: (a) => a == 'edit'
+                                  ? _editPiece(context, ref, g.pieces.first)
+                                  : _throwAway(context, ref, g.pieces.first),
+                              itemBuilder: (_) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Text(
+                                    g.pieces.length > 1
+                                        ? 'Correct one piece\'s length'
+                                        : 'Correct the length',
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'scrap',
+                                  child: Text(
+                                    g.pieces.length > 1
+                                        ? 'Throw away one piece'
+                                        : 'Throw away',
+                                  ),
+                                ),
+                              ],
                             ),
-                            tooltip: 'Mark scrap',
-                            visualDensity: VisualDensity.compact,
-                            onPressed: () => _scrapPiece(context, ref, piece),
-                          ),
                         ],
                       ),
-                    if (rows.isNotEmpty && mismatch)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4, right: 8),
-                        child: Text(
-                          'Pieces total ${qty(piecesTotal)} $_unit, stock is '
-                          '${qty(currentStock)} $_unit — update pieces or adjust stock.',
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.orange,
-                            fontWeight: FontWeight.w600,
-                          ),
+                    if (mismatch)
+                      Container(
+                        margin: const EdgeInsets.only(top: 8, right: 8),
+                        padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+                        decoration: BoxDecoration(
+                          color: AppColors.orangeSoft,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Pieces add up to ${qty(piecesTotal)} $_unit, '
+                                'stock is ${qty(currentStock)} $_unit.',
+                                style: const TextStyle(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            if (canFix)
+                              TextButton(
+                                onPressed: () => _matchToStock(context, ref),
+                                child: const Text('Match to stock'),
+                              ),
+                          ],
                         ),
                       ),
                   ],

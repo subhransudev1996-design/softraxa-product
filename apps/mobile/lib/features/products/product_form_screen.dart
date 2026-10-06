@@ -96,6 +96,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late bool _hasVariants = widget.existing?['has_variants'] == true;
   late bool _trackSerial = widget.existing?['track_serial'] == true;
   late bool _trackPieces = widget.existing?['track_pieces'] == true;
+
+  /// Full length of one new piece (1 rod = 12 ft). New stock is split into
+  /// pieces of this length by the server (0064).
+  late final _pieceLength = TextEditingController(
+    text: _num(widget.existing?['piece_length']),
+  );
   final List<VariantDraft> _variants = [];
   final List<String> _serials = [];
   final TextEditingController _singleImeiInput = TextEditingController();
@@ -500,6 +506,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'has_variants': _hasVariants,
         'track_serial': _trackSerial,
         'track_pieces': _trackPieces,
+        'piece_length': _trackPieces
+            ? double.tryParse(_pieceLength.text.trim()) ?? 0
+            : 0,
         'expiry_date': _expiryDate == null ? null : ymd(_expiryDate!),
         // Secondary (bulk) unit is display/entry-only; stock stays in the
         // base unit. Only saved when both label and a valid factor are set.
@@ -1092,12 +1101,37 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               SwitchListTile(
                 value: _trackPieces,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Track cut pieces'),
+                title: const Text('Sold in cut lengths'),
                 subtitle: const Text(
-                  'Rods, sheets, rolls — sold as cut lengths',
+                  'Rods, pipes, wire, cloth — the app keeps count of '
+                  'full pieces and leftovers by itself',
                 ),
-                onChanged: (v) => setState(() => _trackPieces = v),
+                onChanged: (v) => setState(() {
+                  _trackPieces = v;
+                  // A bulk unit like "1 Rod = 12 ft" is usually the length.
+                  if (v &&
+                      _pieceLength.text.trim().isEmpty &&
+                      _secondaryUnitName.text.trim().isNotEmpty) {
+                    _pieceLength.text = _conversionFactor.text.trim();
+                  }
+                }),
               ),
+              if (_trackPieces) ...[
+                TextFormField(
+                  controller: _pieceLength,
+                  keyboardType: const TextInputType.numberWithOptions(
+                    decimal: true,
+                  ),
+                  decoration: InputDecoration(
+                    labelText: 'Full length of 1 piece (${_unitShort()})',
+                    helperText:
+                        '1 rod = 12 ft → 12. New stock is split into full '
+                        'pieces. Empty = each purchase is one piece (wire coil).',
+                    helperMaxLines: 2,
+                  ),
+                ),
+                const SizedBox(height: 8),
+              ],
               if (_trackSerial) ...[
                 const SizedBox(height: 8),
                 Card(

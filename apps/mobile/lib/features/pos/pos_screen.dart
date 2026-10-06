@@ -14,7 +14,6 @@ import '../offline/offline_service.dart';
 import '../products/product_providers.dart' show parseWeightedBarcode;
 import '../returns/exchange.dart';
 import '../stock/adjust_stock_sheet.dart';
-import '../stock/piece_picker.dart';
 import 'cart.dart';
 import 'checkout_sheet.dart';
 import 'loose_qty_sheet.dart';
@@ -315,7 +314,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         toDouble(product['conversion_factor']) > 0 &&
         product['track_serial'] != true &&
         product['track_pieces'] != true;
-    if (allowDecimal || hasPack) {
+    // Cut lengths (rods, pipe, wire): always ask the length. The server
+    // picks the best piece to cut from when the bill is saved (0064).
+    final cutPieces = product['track_pieces'] == true && variant == null;
+    if (allowDecimal || hasPack || cutPieces) {
       if (!mounted) return;
       final result = await showLooseQtySheet(
         context,
@@ -323,7 +325,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
             '${product['name']}${variant != null ? ' (${variant['name']})' : ''}',
         rate: toDouble(variant?['selling_price'] ?? product['selling_price']),
         unitName: unitMap?['short_name'] as String? ?? '',
-        secondaryUnitName: secondaryUnit.isEmpty ? null : secondaryUnit,
+        secondaryUnitName: secondaryUnit.isEmpty || cutPieces
+            ? null
+            : secondaryUnit,
         conversionFactor: (product['conversion_factor'] as num?)?.toDouble(),
         packPrice: hasPack ? packOf(product, variant)?.price : null,
         allowDecimal: allowDecimal,
@@ -336,28 +340,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final baseQty = asPack
         ? toBaseQty(addQty, toDouble(product['conversion_factor']))
         : addQty;
-
-    // Cut-piece shops (wire, rods, pipe): pick which physical piece this
-    // cut comes from — best fit first. The server cuts it with the sale
-    // (migration 0049). Variants don't take part (pieces are per-product).
-    String? pieceId;
-    bool? keepRemnant;
-    var remnantReason = '';
-    if (product['track_pieces'] == true && variant == null) {
-      if (!mounted) return;
-      final pick = await showPiecePicker(
-        context,
-        ref,
-        productId: product['id'] as String,
-        productName: product['name'] as String,
-        needQty: baseQty,
-        unitName: (product['units'] as Map?)?['short_name'] as String? ?? '',
-      );
-      if (pick == null || !mounted) return; // cancelled
-      pieceId = pick.piece?['id'] as String?;
-      keepRemnant = pick.keepRemnant;
-      remnantReason = pick.reason;
-    }
 
     String serialNo = '';
     if (product['track_serial'] == true) {
@@ -397,9 +379,6 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           serialNo: serialNo,
           addQty: addQty,
           asPack: asPack,
-          pieceId: pieceId,
-          keepRemnant: keepRemnant,
-          remnantReason: remnantReason,
         );
     _clearSearch();
     _searchFocus.requestFocus();

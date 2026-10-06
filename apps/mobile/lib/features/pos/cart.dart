@@ -360,8 +360,9 @@ class CartNotifier extends Notifier<CartState> {
   /// Add a product (or variant) to the cart; merges quantity if already there.
   /// Serial-tracked items always get their own line. [addQty] supports loose
   /// quantities (e.g. 0.5 kg) for units with allow_decimal. Lines cut from a
-  /// specific piece ([pieceId]) never merge — each cut is its own line so
-  /// the right piece gets shortened at checkout.
+  /// specific piece ([pieceId]) or of a cut-length product never merge —
+  /// each cut is its own line, so the server cuts each one from the best
+  /// piece at checkout (0064).
   ///
   /// [asPack] adds whole packs at the product's pack price (migration
   /// 0061) — [addQty] is then in packs, on a line of its own.
@@ -380,7 +381,8 @@ class CartNotifier extends Notifier<CartState> {
     final pack = asPack ? packOf(product, variant) : null;
     final key = pack != null ? '$priceKey:pack' : priceKey;
     final trackSerial = product['track_serial'] == true;
-    final ownLine = trackSerial || pieceId != null;
+    final cutLength = product['track_pieces'] == true && variantId == null;
+    final ownLine = trackSerial || pieceId != null || cutLength;
 
     if (!ownLine) {
       final idx = state.lines.indexWhere((l) => l.key == key);
@@ -462,7 +464,7 @@ class CartNotifier extends Notifier<CartState> {
       lines: [
         ...state.lines,
         line,
-        if (pieceId != null && charge > 0)
+        if ((pieceId != null || cutLength) && charge > 0)
           CartLine(
             key: 'cut:${line.key}',
             productId: '',

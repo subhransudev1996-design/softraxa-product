@@ -38,8 +38,6 @@ insert into public.products (id, business_id, name, selling_price, purchase_pric
   track_pieces, cutting_allowance, min_remnant_length) values
   ('efefefef-2222-0000-0000-00000000000a', 'efefefef-1111-0000-0000-00000000000a',
    'R1 Wire', 100, 60, 0, true, 0.01, 1);
-insert into public.stock_movements (business_id, product_id, movement_type, quantity, note) values
-  ('efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'opening', 26, 'r1 test');
 -- 12 m + 5 m + 3 m + 3 m + 3 m = 26 m.
 insert into public.stock_pieces (id, business_id, product_id, label, length) values
   ('efefefef-4444-0000-0000-000000000012', 'efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'Coil A', 12),
@@ -47,6 +45,10 @@ insert into public.stock_pieces (id, business_id, product_id, label, length) val
   ('efefefef-4444-0000-0000-000000000031', 'efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'Bit 1', 3),
   ('efefefef-4444-0000-0000-000000000032', 'efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'Bit 2', 3),
   ('efefefef-4444-0000-0000-000000000033', 'efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'Bit 3', 3);
+-- Opening stock after the pieces: since 0064 new stock not yet in pieces
+-- becomes pieces by itself, and these 26 m already are.
+insert into public.stock_movements (business_id, product_id, movement_type, quantity, note) values
+  ('efefefef-1111-0000-0000-00000000000a', 'efefefef-2222-0000-0000-00000000000a', 'opening', 26, 'r1 test');
 
 create or replace function pg_temp.act(p_user uuid) returns void language sql as $$
   select set_config('request.jwt.claims',
