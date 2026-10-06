@@ -29,8 +29,10 @@ def main():
         for part in sorted(glob.glob(os.path.join(SRC, f'{code}_*.json'))):
             merged.update(json.load(open(part, encoding='utf-8')))
         unknown = [k for k in merged if k not in app]
+        # A translation may drop a placeholder (English plural endings like
+        # "bill{v2}" -> "s"), but must never invent one: it would show raw.
         lost = [k for k, v in merged.items()
-                if set(re.findall(r'\{\w+\}', k)) != set(re.findall(r'\{\w+\}', v))]
+                if not set(re.findall(r'\{\w+\}', v)) <= set(re.findall(r'\{\w+\}', k))]
         out = {k: merged[k] for k in sorted(merged) if k in app and merged[k].strip()}
         json.dump(out, open(os.path.join(I18N, f'{code}.json'), 'w', encoding='utf-8'),
                   ensure_ascii=False, indent=1, sort_keys=True)
