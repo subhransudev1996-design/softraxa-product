@@ -105,7 +105,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               prefixIcon: Icon(Icons.person_outline),
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
-                                ? 'Enter your name'
+                                ? t('Enter your name')
                                 : null,
                           ),
                           const SizedBox(height: 16),
@@ -117,7 +117,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               prefixIcon: Icon(Icons.email_outlined),
                             ),
                             validator: (v) => v == null || !v.contains('@')
-                                ? 'Enter a valid email'
+                                ? t('Enter a valid email')
                                 : null,
                           ),
                           const SizedBox(height: 16),
@@ -138,7 +138,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                               ),
                             ),
                             validator: (v) => v == null || v.length < 6
-                                ? 'Minimum 6 characters'
+                                ? t('Minimum 6 characters')
                                 : null,
                           ),
                           const SizedBox(height: 24),

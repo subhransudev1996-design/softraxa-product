@@ -217,7 +217,7 @@ class ExpensesScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(existing == null ? 'Add expense' : 'Edit expense'),
+          title: Text(existing == null ? t('Add expense') : 'Edit expense'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -180,7 +180,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                       )
                     : InitialsAvatar(_customer!['name'] as String? ?? ''),
                 title: Text(
-                  _customer?['name'] as String? ?? 'Walk-in customer',
+                  _customer?['name'] as String? ?? t('Walk-in customer'),
                 ),
                 subtitle:
                     _customer?['phone'] != null &&
@@ -217,11 +217,11 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               textCapitalization: TextCapitalization.words,
               decoration: InputDecoration(
                 labelText: _jobType == 'vehicle'
-                    ? 'Vehicle (e.g. Bike, Car) *'
+                    ? t('Vehicle (e.g. Bike, Car) *')
                     : 'Item name *',
               ),
               validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Required' : null,
+                  v == null || v.trim().isEmpty ? t('Required') : null,
             ),
             if (_jobType == 'vehicle') ...[
               const SizedBox(height: 12),
@@ -234,7 +234,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 ),
                 validator: (v) =>
                     _jobType == 'vehicle' && (v == null || v.trim().isEmpty)
-                    ? 'Required for vehicles'
+                    ? t('Required for vehicles')
                     : null,
               ),
               const SizedBox(height: 12),
@@ -248,10 +248,10 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                         labelText: t('Odometer (km)'),
                       ),
                       validator: (v) {
-                        final t = (v ?? '').trim();
-                        if (t.isEmpty) return null;
-                        final n = int.tryParse(t);
-                        return n == null || n < 0 ? 'Whole number' : null;
+                        final s = (v ?? '').trim();
+                        if (s.isEmpty) return null;
+                        final n = int.tryParse(s);
+                        return n == null || n < 0 ? t('Whole number') : null;
                       },
                     ),
                   ),
@@ -318,7 +318,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 labelText: t('Problem / issue description *'),
               ),
               validator: (v) =>
-                  v == null || v.trim().isEmpty ? 'Required' : null,
+                  v == null || v.trim().isEmpty ? t('Required') : null,
             ),
             const SizedBox(height: 12),
             TextFormField(
@@ -403,7 +403,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 ),
                 child: Text(
                   _expectedDelivery == null
-                      ? 'Not set'
+                      ? t('Not set')
                       : dateStr(_expectedDelivery),
                 ),
               ),

@@ -600,7 +600,7 @@ class _InvoicePickerState extends ConsumerState<_InvoicePicker> {
                           '${inv['invoice_no']} • ${money(inv['total'] as num?)}',
                         ),
                         subtitle: Text(
-                          '${(inv['customer_name'] as String?)?.isNotEmpty == true ? inv['customer_name'] : 'Walk-in'}'
+                          '${(inv['customer_name'] as String?)?.isNotEmpty == true ? inv['customer_name'] : t('Walk-in')}'
                           ' • ${dateStr(inv['invoice_date'])}',
                         ),
                         onTap: () => Navigator.pop(context, inv),
@@ -1154,7 +1154,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                               else if (already > 0)
                                 Text(
                                   maxReturnable <= 0
-                                      ? 'Already fully returned'
+                                      ? t('Already fully returned')
                                       : '${qty(already)} already returned — ${qty(maxReturnable)} left to return',
                                   style: TextStyle(
                                     fontSize: 13,
@@ -2103,7 +2103,7 @@ class _PurchasePickerState extends ConsumerState<_PurchasePicker> {
                           '${p['purchase_no']} • ${money(p['total'] as num?)}',
                         ),
                         subtitle: Text(
-                          '${(p['supplier_name'] as String?)?.isNotEmpty == true ? p['supplier_name'] : 'No supplier'}'
+                          '${(p['supplier_name'] as String?)?.isNotEmpty == true ? p['supplier_name'] : t('No supplier')}'
                           ' • ${dateStr(p['purchase_date'])}',
                         ),
                         onTap: () => _select(p),
@@ -2319,11 +2319,11 @@ class _PurchaseReturnFormScreenState
                               ),
                               Text(
                                 _loadingReturned
-                                    ? 'Checking earlier returns…'
+                                    ? t('Checking earlier returns…')
                                     : fullyReturned
-                                    ? 'Already fully returned on this purchase'
+                                    ? t('Already fully returned on this purchase')
                                     : maxReturnable <= 0
-                                    ? 'None in stock — already sold, can\'t return'
+                                    ? t('None in stock — already sold, can\'t return')
                                     : already > 0
                                     ? '${qty(already)} already returned — in stock: ${qty(available)} returnable'
                                     : 'In stock: ${qty(available)} returnable',

@@ -143,7 +143,7 @@ String _stockValue(Map<String, dynamic>? s) => s == null
 
 String _stockValueTitle(Map<String, dynamic>? s) =>
     s != null && s['stock_value'] != null && toDouble(s['stock_value']) == 0
-    ? 'Stock value · add costs'
+    ? t('Stock value · add costs')
     : 'Stock value (cost)';
 
 /// Desktop KPI cards: all in one row, equal widths.
@@ -291,7 +291,7 @@ class _DesktopDashboard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          appContext?.businessName ?? 'My Shop',
+                          appContext?.businessName ?? t('My Shop'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
@@ -322,7 +322,7 @@ class _DesktopDashboard extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: () => showDaySummary(context),
                           icon: const Icon(Icons.insights_outlined, size: 18),
-                          label: const Text("Today's summary"),
+                          label: Text(t('Today\'s summary')),
                         ),
                         OutlinedButton.icon(
                           onPressed: () => context.push('/products/new'),
@@ -390,7 +390,7 @@ class _DesktopDashboard extends StatelessWidget {
                       id: 'stats',
                       child: _statRow([
                         _StatCard(
-                          title: "Today's Sale",
+                          title: t('Today\'s Sale'),
                           value: s == null
                               ? '…'
                               : money(s!['today_sales'] as num?),
@@ -400,7 +400,7 @@ class _DesktopDashboard extends StatelessWidget {
                         ),
                         if (appContext?.canViewProfit ?? true)
                           _StatCard(
-                            title: "Today's Profit",
+                            title: t('Today\'s Profit'),
                             value: s == null
                                 ? '…'
                                 : moneyCompact(s!['today_profit'] as num?),
@@ -542,7 +542,7 @@ class _MobileDashboard extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            appContext?.businessName ?? 'My Shop',
+                            appContext?.businessName ?? t('My Shop'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -990,9 +990,9 @@ class _TrialBanner extends ConsumerWidget {
               children: [
                 Text(
                   daysLeft == null
-                      ? 'Free trial'
+                      ? t('Free trial')
                       : daysLeft <= 0
-                      ? 'Free trial ends today'
+                      ? t('Free trial ends today')
                       : 'Free trial · $daysLeft ${daysLeft == 1 ? 'day' : 'days'} left',
                   style: const TextStyle(
                     fontSize: 13.5,
@@ -1150,7 +1150,7 @@ class _InvoiceTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final name = (invoice['customer_name'] as String?)?.trim() ?? '';
-    final displayName = name.isEmpty ? 'Walk-in customer' : name;
+    final displayName = name.isEmpty ? t('Walk-in customer') : name;
     // Built manually instead of ListTile: ListTile's trailing slot enforces
     // a fixed max height (~40px) independent of contentPadding, which a
     // 2-line trailing column (amount + status chip) overflows by ~1px under

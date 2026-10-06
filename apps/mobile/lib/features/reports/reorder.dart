@@ -477,7 +477,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                chosen.isEmpty ? 'Tick the items to order' : '${chosen.length} item${chosen.length == 1 ? '' : 's'} to order',
+                chosen.isEmpty ? t('Tick the items to order') : '${chosen.length} item${chosen.length == 1 ? '' : 's'} to order',
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 8),

@@ -46,9 +46,9 @@ class BlockedScreen extends ConsumerWidget {
                   const SizedBox(height: 12),
                   Text(
                     overLimit
-                        ? 'Your login is paused'
+                        ? t('Your login is paused')
                         : suspended
-                        ? 'Account suspended'
+                        ? t('Account suspended')
                         : 'Subscription expired',
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.headlineSmall,
@@ -59,7 +59,7 @@ class BlockedScreen extends ConsumerWidget {
                         ? 'The shop\'s plan allows ${appContext?.userLimit} users, owner included. '
                               'Ask the owner to move to a bigger plan or remove a staff login.'
                         : suspended
-                        ? 'Your account has been suspended. Please contact support to reactivate it.'
+                        ? t('Your account has been suspended. Please contact support to reactivate it.')
                         : 'Renew to continue billing. Your data is safe.',
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.inkSoft),

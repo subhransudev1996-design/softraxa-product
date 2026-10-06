@@ -659,7 +659,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
   Future<void> _exportPdf(Map<String, dynamic> data) async {
     final business = ref.read(appContextProvider).value?.business ?? {};
     final doc = pw.Document();
-    final title = _titles[widget.type] ?? 'Report';
+    final title = _titles[widget.type] ?? t('Report');
     final table = data['table'] as Map<String, dynamic>?;
     final summary = data['summary'] as List;
 
@@ -726,7 +726,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(_titles[widget.type] ?? 'Report'),
+        title: Text(_titles[widget.type] ?? t('Report')),
         actions: [
           if (data.hasValue)
             IconButton(

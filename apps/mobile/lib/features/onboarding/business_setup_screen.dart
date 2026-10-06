@@ -148,7 +148,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       }
       await ref.read(appContextProvider.notifier).refresh();
       if (mounted) {
-        showSuccess(context, isEdit ? 'Business updated' : 'Business created!');
+        showSuccess(context, isEdit ? t('Business updated') : 'Business created!');
         if (isEdit) Navigator.of(context).pop();
         // For setup, the router redirects to the dashboard automatically.
       }
@@ -217,7 +217,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(isEdit ? 'Business profile' : 'Set up your business'),
+        title: Text(isEdit ? t('Business profile') : 'Set up your business'),
         actions: [
           if (!isEdit)
             TextButton(
@@ -265,7 +265,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: t('Business name *')),
                 validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Required' : null,
+                    v == null || v.trim().isEmpty ? t('Required') : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -346,7 +346,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     helperText: t('Decides CGST + SGST vs IGST on invoices'),
                     onChanged: (v) => setState(() => _state = v),
                     validator: (v) =>
-                        (v ?? '').isEmpty ? 'Required for GST billing' : null,
+                        (v ?? '').isEmpty ? t('Required for GST billing') : null,
                   ),
                 ),
               if (_taxPref != 'non_gst')
@@ -411,7 +411,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
                   return n == null || n < 0 || n > 3650
-                      ? 'Enter 0–3650 days'
+                      ? t('Enter 0–3650 days')
                       : null;
                 },
               ),
@@ -480,7 +480,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(isEdit ? 'Save changes' : 'Start using the app'),
+                    : Text(isEdit ? t('Save changes') : 'Start using the app'),
               ),
               // Full data export for the owner (migration 0050).
               if (isEdit &&

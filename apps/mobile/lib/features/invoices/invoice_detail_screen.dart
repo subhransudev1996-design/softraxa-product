@@ -263,7 +263,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
   ) async {
     final due = toDouble(inv['due_amount']);
     final current = (inv['customer_name'] as String? ?? '').isEmpty
-        ? 'Walk-in customer'
+        ? t('Walk-in customer')
         : inv['customer_name'] as String;
     final choice = await showModalBottomSheet<String>(
       context: context,
@@ -338,7 +338,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final name = inv['customer_id'] == null
         ? null
         : ((inv['customer_name'] as String? ?? '').trim().isEmpty
-              ? 'the customer'
+              ? t('the customer')
               : (inv['customer_name'] as String).trim());
     final ok = await confirmDialog(
       context,
@@ -450,7 +450,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(detail.value?['invoice_no'] as String? ?? 'Invoice'),
+        title: Text(detail.value?['invoice_no'] as String? ?? t('Invoice')),
         actions: [
           if (detail.hasValue &&
               detail.value!['is_cancelled'] != true &&
@@ -587,7 +587,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                                   ),
                                 );
                             return Text(
-                              '${late ? 'Overdue since' : 'Due by'} ${dateStr(inv['due_date'])}',
+                              '${late ? t('Overdue since') : 'Due by'} ${dateStr(inv['due_date'])}',
                               style: TextStyle(
                                 color: late ? AppColors.red : AppColors.inkSoft,
                                 fontSize: 13,
@@ -622,7 +622,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           child: Padding(
                             padding: const EdgeInsets.only(top: 2),
                             child: Text('Place of supply: '
-                              '${gstStateLabel(inv['place_of_supply'] as String?).isEmpty ? 'not set' : gstStateLabel(inv['place_of_supply'] as String?)}'
+                              '${gstStateLabel(inv['place_of_supply'] as String?).isEmpty ? t('not set') : gstStateLabel(inv['place_of_supply'] as String?)}'
                               '${cancelled ? '' : '  ✎'}',
                               style: TextStyle(
                                 color: AppColors.inkSoft,

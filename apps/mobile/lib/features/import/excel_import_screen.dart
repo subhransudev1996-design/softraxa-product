@@ -159,7 +159,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
           throw Exception(
             'This doesn\'t look like the sample template — column ${i + 1} '
             'should be "${_headers[i]}" but found '
-            '"${actual.isEmpty ? '(empty)' : actual}". Please use the '
+            '"${actual.isEmpty ? t('(empty)') : actual}". Please use the '
             'downloaded sample file and don\'t reorder its columns.',
           );
         }
@@ -457,7 +457,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                           child: FilledButton.icon(
                             onPressed: _parsing ? null : _pickFile,
                             icon: const Icon(Icons.upload_file),
-                            label: Text(_parsing ? 'Reading…' : 'Choose file'),
+                            label: Text(_parsing ? t('Reading…') : 'Choose file'),
                           ),
                         ),
                       ),

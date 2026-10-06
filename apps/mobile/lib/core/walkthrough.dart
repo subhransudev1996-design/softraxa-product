@@ -461,7 +461,7 @@ class _CoachCard extends StatelessWidget {
                     minimumSize: const Size(0, 38),
                     padding: const EdgeInsets.symmetric(horizontal: 18),
                   ),
-                  child: Text(isLast ? 'Done' : 'Next'),
+                  child: Text(isLast ? t('Done') : 'Next'),
                 ),
               ],
             ),
@@ -634,7 +634,7 @@ class _WalkthroughSheetState extends State<_WalkthroughSheet> {
                     );
                   }
                 },
-                child: Text(last ? 'Done' : 'Next'),
+                child: Text(last ? t('Done') : 'Next'),
               ),
             ],
           ),

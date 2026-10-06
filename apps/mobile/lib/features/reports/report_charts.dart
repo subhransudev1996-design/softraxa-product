@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -86,8 +87,8 @@ class ReportBarChart extends StatelessWidget {
             child: Wrap(
               spacing: 16,
               children: [
-                _legendDot(barColor, seriesLabel ?? 'Series 1'),
-                _legendDot(bar2Color, series2Label ?? 'Series 2'),
+                _legendDot(barColor, seriesLabel ?? t('Series 1')),
+                _legendDot(bar2Color, series2Label ?? t('Series 2')),
               ],
             ),
           ),

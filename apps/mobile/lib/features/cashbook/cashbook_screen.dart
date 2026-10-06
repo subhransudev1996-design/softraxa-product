@@ -86,7 +86,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
               TextField(
                 controller: note,
                 decoration: InputDecoration(
-                  labelText: kind.startsWith('other') ? 'What for? *' : 'Note (optional)',
+                  labelText: kind.startsWith('other') ? t('What for? *') : 'Note (optional)',
                 ),
               ),
             ],
@@ -434,7 +434,7 @@ class _ClosingCard extends StatelessWidget {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    reviewed ? 'Closed and reviewed by the owner' : 'Closed — waiting for owner review',
+                    reviewed ? t('Closed and reviewed by the owner') : 'Closed — waiting for owner review',
                     style: const TextStyle(fontWeight: FontWeight.w700),
                   ),
                 ),

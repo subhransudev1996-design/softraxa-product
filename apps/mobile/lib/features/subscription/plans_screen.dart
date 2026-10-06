@@ -161,7 +161,7 @@ class _CurrentPlanCard extends StatelessWidget {
     final expiry = current['expiry_date'];
     final name =
         plan?['name'] as String? ??
-        (state == 'trial' ? 'Free trial' : 'No plan');
+        (state == 'trial' ? t('Free trial') : 'No plan');
     final description = plan?['description'] as String? ?? '';
     final (label, color) = switch (state) {
       'trial' => ('TRIAL', AppColors.orange),
@@ -390,7 +390,7 @@ class _PlanCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  plan['name'] as String? ?? 'Plan',
+                  plan['name'] as String? ?? t('Plan'),
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -432,21 +432,21 @@ class _PlanCard extends StatelessWidget {
               _LimitChip(
                 icon: Icons.badge_outlined,
                 label: users == null
-                    ? 'Unlimited users'
+                    ? t('Unlimited users')
                     : users == 1
-                    ? '1 user (owner only)'
+                    ? t('1 user (owner only)')
                     : '$users users (owner + ${users - 1} staff)',
               ),
               _LimitChip(
                 icon: Icons.inventory_2_outlined,
                 label: products == null
-                    ? 'Unlimited products'
+                    ? t('Unlimited products')
                     : '$products products',
               ),
               _LimitChip(
                 icon: Icons.receipt_long_outlined,
                 label: bills == null
-                    ? 'Unlimited bills'
+                    ? t('Unlimited bills')
                     : '$bills bills a month',
               ),
             ],
@@ -465,7 +465,7 @@ class _PlanCard extends StatelessWidget {
                 : FilledButton.icon(
                     onPressed: busy ? null : onAsk,
                     icon: const Icon(Icons.north_east, size: 18),
-                    label: Text(busy ? 'Sending…' : 'Ask for this plan'),
+                    label: Text(busy ? t('Sending…') : 'Ask for this plan'),
                   ),
           ),
         ],

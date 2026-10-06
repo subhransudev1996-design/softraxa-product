@@ -147,7 +147,7 @@ class _CartRow extends StatelessWidget {
       if (line.isPack)
         '${line.unitName} of ${qtyUnit(line.packSize, line.baseUnitName)}',
       if (line.trackSerial)
-        line.serialNo.isEmpty ? 'IMEI/serial missing' : 'S/N ${line.serialNo}',
+        line.serialNo.isEmpty ? t('IMEI/serial missing') : 'S/N ${line.serialNo}',
       if (line.priceSource != 'retail' && line.priceSource != 'manual')
         priceSourceLabel(line.priceSource),
     ];

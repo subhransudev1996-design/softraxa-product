@@ -25,7 +25,7 @@ Future<bool> applyAdvanceToInvoice(
       context,
       title: t('Use advance?'),
       message:
-          '${customerName ?? 'This customer'} has an advance. Use ${money(amount)} '
+          '${customerName ?? t('This customer')} has an advance. Use ${money(amount)} '
           'of it to pay this bill? This is not a new cash receipt.',
       confirmText: 'Use ${money(amount)}',
     );

@@ -343,7 +343,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       context,
       title: 'Remove "${item['name']}"?',
       message: item['item_type'] == 'part'
-          ? 'This will add the quantity back to stock.'
+          ? t('This will add the quantity back to stock.')
           : 'This charge will be removed from the bill.',
       confirmText: t('Remove'),
     );
@@ -562,7 +562,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                         ),
                         const Divider(height: 20),
                         Text(
-                          '${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : 'Item'}'
+                          '${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : t('Item')}'
                           '${(j['brand'] as String? ?? '').isNotEmpty ? ' • ${j['brand']}' : ''}'
                           '${(j['model'] as String? ?? '').isNotEmpty ? ' ${j['model']}' : ''}',
                           style: const TextStyle(
@@ -724,7 +724,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                   SectionLabel(t('Estimate')),
                   EstimateSection(job: j),
                 ],
-                SectionLabel(needsEstimate ? 'Work done' : 'Parts & labor'),
+                SectionLabel(needsEstimate ? t('Work done') : 'Parts & labor'),
                 if (items.isEmpty)
                   EmptyState(
                     icon: Icons.build_outlined,

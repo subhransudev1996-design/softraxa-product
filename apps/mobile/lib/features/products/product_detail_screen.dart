@@ -243,7 +243,7 @@ class ProductDetailScreen extends ConsumerWidget {
                   value: 'toggle',
                   child: Text(
                     detail.value!['is_active'] == true
-                        ? 'Deactivate'
+                        ? t('Deactivate')
                         : 'Activate',
                   ),
                 ),

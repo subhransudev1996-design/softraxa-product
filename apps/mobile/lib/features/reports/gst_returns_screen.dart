@@ -297,10 +297,10 @@ class _Gstr1Card extends StatelessWidget {
     final rows = [
       ('B2B — registered customers', '${data.documentCount('b2b')} invoices', taxable('b2b')),
       ('B2C large — inter-state above ₹1 lakh', '${data.documentCount('b2cl')} invoices', taxable('b2cl')),
-      ('B2C small — net of their credit notes', '${data.section('b2cs').length} rows', taxable('b2cs')),
+      ('B2C small — net of their credit notes', '${data.section(t('b2cs')).length} rows', taxable('b2cs')),
       ('Credit notes — registered', '${data.documentCount('cdnr')} notes', taxable('cdnr')),
       ('Credit notes — unregistered', '${data.documentCount('cdnur')} notes', taxable('cdnur')),
-      ('HSN summary', '${data.section('hsn').length} rows', null),
+      ('HSN summary', '${data.section(t('hsn')).length} rows', null),
     ];
     return Card(
       child: Column(

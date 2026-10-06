@@ -53,7 +53,7 @@ Future<Map<String, dynamic>?> showCustomerForm(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text(existing == null ? 'Add customer' : 'Edit customer'),
+        title: Text(existing == null ? t('Add customer') : 'Edit customer'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

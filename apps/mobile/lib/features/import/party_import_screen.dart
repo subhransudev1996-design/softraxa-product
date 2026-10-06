@@ -113,7 +113,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
             normalizeImportHeader(_headers[i])) {
           throw Exception(
             'Column ${i + 1} should be "${_headers[i]}" but found '
-            '"${actual.isEmpty ? '(empty)' : actual}". Please use the sample file '
+            '"${actual.isEmpty ? t('(empty)') : actual}". Please use the sample file '
             'and don\'t reorder its columns.',
           );
         }
@@ -228,7 +228,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                 children: [
                   Text(
                     '1. Download the sample file and fill in your $_what\n'
-                    '2. Opening balance: what ${widget.suppliers ? 'you owe them' : 'they owe you'}'
+                    '2. Opening balance: what ${widget.suppliers ? t('you owe them') : 'they owe you'}'
                     '${widget.suppliers ? '' : ' (a minus amount = advance they paid you)'}\n'
                     '3. Choose the file, check the rows, then import',
                     style: const TextStyle(fontSize: 13),
@@ -240,7 +240,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                     title: Text('Balances as of ${dateStr(_asOf)}'),
                     subtitle: Text(
                       widget.suppliers
-                          ? 'Paid off first by your next supplier payments'
+                          ? t('Paid off first by your next supplier payments')
                           : 'Due after your payment terms from this date; '
                                 'receipts settle it first',
                     ),
@@ -308,7 +308,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
           ],
           if (_rows.isNotEmpty) ...[
             SectionLabel(
-              '${_fileName ?? 'File'}: $good ready, ${_rows.length - good} with errors',
+              '${_fileName ?? t('File')}: $good ready, ${_rows.length - good} with errors',
             ),
             Card(
               child: Column(
@@ -345,7 +345,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
             const SizedBox(height: 12),
             FilledButton(
               onPressed: _busy || good == 0 || result != null ? null : _import,
-              child: Text(_busy ? 'Importing…' : 'Import $good $_what'),
+              child: Text(_busy ? t('Importing…') : 'Import $good $_what'),
             ),
           ],
         ],

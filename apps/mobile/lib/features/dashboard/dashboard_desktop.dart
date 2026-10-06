@@ -461,7 +461,7 @@ class RecentInvoicesPanel extends StatelessWidget {
                                 ((inv['customer_name'] as String?) ?? '')
                                         .trim()
                                         .isEmpty
-                                    ? 'Walk-in customer'
+                                    ? t('Walk-in customer')
                                     : (inv['customer_name'] as String).trim(),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,

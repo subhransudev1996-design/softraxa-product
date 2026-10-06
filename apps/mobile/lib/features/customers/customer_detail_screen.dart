@@ -240,7 +240,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                         due: due,
                       ),
                       icon: const Icon(Icons.payments),
-                      label: Text(due > 0 ? 'Receive payment' : 'Receive advance'),
+                      label: Text(due > 0 ? t('Receive payment') : 'Receive advance'),
                     ),
                   ),
                 ],

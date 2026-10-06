@@ -166,7 +166,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (v) => v == null || !v.contains('@')
-                          ? 'Enter a valid email'
+                          ? t('Enter a valid email')
                           : null,
                     ),
                     const SizedBox(height: 16),
@@ -185,7 +185,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         ),
                       ),
                       validator: (v) => v == null || v.length < 6
-                          ? 'Minimum 6 characters'
+                          ? t('Minimum 6 characters')
                           : null,
                       onFieldSubmitted: (_) => _login(),
                     ),
@@ -208,7 +208,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 8),
                     TextButton(
                       onPressed: () => context.go('/signup'),
-                      child: const Text("Don't have an account? Sign up"),
+                      child: Text(t('Don\'t have an account? Sign up')),
                     ),
                   ],
                 ),

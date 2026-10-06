@@ -58,7 +58,7 @@ class JobCardsScreen extends ConsumerWidget {
                     Padding(
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
-                        label: Text(s == null ? 'All' : jobStatusLabel(s)),
+                        label: Text(s == null ? t('All') : jobStatusLabel(s)),
                         selected: filter.status == s,
                         onSelected: (_) => ref
                             .read(jobCardFilterProvider.notifier)
@@ -151,7 +151,7 @@ class _JobCardRow extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Text(
-                '${j['job_no']} • ${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : 'Item'}',
+                '${j['job_no']} • ${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : t('Item')}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(
@@ -240,7 +240,7 @@ class _JobCardTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${j['job_no']} • ${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : 'Item'}',
+                      '${j['job_no']} • ${(j['item_name'] as String? ?? '').isNotEmpty ? j['item_name'] : t('Item')}',
                       style: const TextStyle(
                         fontWeight: FontWeight.w700,
                         fontSize: 14,
@@ -248,7 +248,7 @@ class _JobCardTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${(j['customer_name'] as String?)?.isNotEmpty == true ? j['customer_name'] : 'Walk-in'}'
+                      '${(j['customer_name'] as String?)?.isNotEmpty == true ? j['customer_name'] : t('Walk-in')}'
                       ' • ${dateStr(j['created_at'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

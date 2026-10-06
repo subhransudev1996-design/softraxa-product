@@ -235,7 +235,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       showError(
         context,
         _exchange != null
-            ? 'Collect the full difference for a walk-in exchange.'
+            ? t('Collect the full difference for a walk-in exchange.')
             : 'Select a customer for credit/partial bills so the due can be tracked.',
       );
       return;
@@ -578,7 +578,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
             : exchange != null
             ? 'Complete exchange • collect ${money(payable)}'
             : _docType == 'estimate'
-            ? 'Save estimate'
+            ? t('Save estimate')
             : 'Create bill • ${money(cart.total)}',
       ),
     );
@@ -595,7 +595,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               padding: const EdgeInsets.all(16),
               children: [
                 Text(
-                  editing == null ? 'Checkout' : 'Save bill changes',
+                  editing == null ? t('Checkout') : 'Save bill changes',
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 const SizedBox(height: 12),
@@ -781,7 +781,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   }
                                 },
                                 child: Text(
-                                  cart.customer == null ? 'Select' : 'Change',
+                                  cart.customer == null ? t('Select') : 'Change',
                                 ),
                               ),
                               if (cart.customer != null)
@@ -957,7 +957,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                           size: 16,
                         ),
                         label: Text(
-                          _splitMode ? 'Single method' : 'Split payment',
+                          _splitMode ? t('Single method') : 'Split payment',
                         ),
                       ),
                     ],
@@ -1035,9 +1035,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                 children: [
                                   Text(
                                     !over
-                                        ? 'Due'
+                                        ? t('Due')
                                         : cart.customer == null
-                                        ? 'Give back'
+                                        ? t('Give back')
                                         : 'Kept as advance',
                                     style: TextStyle(
                                       fontSize: 13,
@@ -1244,7 +1244,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                           if (editing.paidAmount - cart.total >= 0.01)
                             _row(
                               cart.customer == null
-                                  ? 'Give back to the customer'
+                                  ? t('Give back to the customer')
                                   : 'Kept as ${cart.customer!['name']}\'s advance',
                               money(editing.paidAmount - cart.total),
                               bold: true,
@@ -1268,7 +1268,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     child: Text(
                       editing.paidAmount - cart.total >= 0.01 &&
                               cart.customer == null
-                          ? 'Hand the difference back to the customer — the bill\'s payment is reduced to match.'
+                          ? t('Hand the difference back to the customer — the bill\'s payment is reduced to match.')
                           : 'Payments already recorded on this bill are unaffected — only the items and total change.',
                       style: TextStyle(
                         fontSize: 12.5,
@@ -1393,7 +1393,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               padding: const EdgeInsets.only(top: 8),
               child: Text(
                 '${money(due)} stays due on this bill'
-                '${ref.read(cartProvider).customer != null ? ' and the customer\'s khata' : ''}.',
+                '${ref.read(cartProvider).customer != null ? t(' and the customer\'s khata') : ''}.',
                 style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
               ),
             ),
@@ -1470,7 +1470,7 @@ class _ProfitBanner extends StatelessWidget {
           Expanded(
             child: Text(
               costMissing
-                  ? 'Profit unknown — add purchase prices to see it'
+                  ? t('Profit unknown — add purchase prices to see it')
                   : 'Your profit (not shown to customer)',
               style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
             ),

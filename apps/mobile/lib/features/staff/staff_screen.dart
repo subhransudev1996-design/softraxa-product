@@ -239,13 +239,13 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Staff Accounts: ${staffList.length} / ${limit == 999 ? "Unlimited" : limit}',
+                            'Staff Accounts: ${staffList.length} / ${limit == 999 ? t('Unlimited') : limit}',
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             isLimitReached
-                                ? 'Plan limit reached. Upgrade plan to add more staff.'
+                                ? t('Plan limit reached. Upgrade plan to add more staff.')
                                 : 'Store owners can create accounts and assign permissions.',
                             style: TextStyle(
                               fontSize: 13,
@@ -612,7 +612,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 controller: _nameCtrl,
                 decoration: InputDecoration(labelText: t('Full Name *')),
                 validator: (v) =>
-                    (v == null || v.trim().isEmpty) ? 'Required' : null,
+                    (v == null || v.trim().isEmpty) ? t('Required') : null,
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -620,7 +620,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: InputDecoration(labelText: t('Email Address *')),
                 validator: (v) => (v == null || !v.contains('@'))
-                    ? 'Valid email required'
+                    ? t('Valid email required')
                     : null,
               ),
               const SizedBox(height: 12),
@@ -629,7 +629,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                 obscureText: true,
                 decoration: InputDecoration(labelText: t('Password *')),
                 validator: (v) => (v == null || v.length < 8)
-                    ? 'At least 8 characters'
+                    ? t('At least 8 characters')
                     : null,
               ),
               const SizedBox(height: 16),

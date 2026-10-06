@@ -34,9 +34,9 @@ Future<bool> showOpeningBalanceDialog(
                 signed: true,
               ),
               decoration: InputDecoration(
-                labelText: supplier ? 'You owed them ₹' : 'They owed you ₹',
+                labelText: supplier ? t('You owed them ₹') : 'They owed you ₹',
                 helperText: supplier
-                    ? 'Settled first by your next payments to them'
+                    ? t('Settled first by your next payments to them')
                     : 'Minus amount = advance they had paid you',
               ),
             ),

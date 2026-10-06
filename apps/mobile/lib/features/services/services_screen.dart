@@ -54,7 +54,7 @@ class ServicesScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(existing == null ? 'Add service' : 'Edit service'),
+          title: Text(existing == null ? t('Add service') : 'Edit service'),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -400,7 +400,7 @@ class PiecesCard extends ConsumerWidget {
                                         fullLength > 0 &&
                                             (g.length - fullLength).abs() <
                                                 0.001
-                                        ? '  full'
+                                        ? t('  full')
                                         : '  leftover',
                                     style: TextStyle(
                                       fontSize: 12,
@@ -424,7 +424,7 @@ class PiecesCard extends ConsumerWidget {
                                   value: 'edit',
                                   child: Text(
                                     g.pieces.length > 1
-                                        ? 'Correct one piece\'s length'
+                                        ? t('Correct one piece\'s length')
                                         : 'Correct the length',
                                   ),
                                 ),
@@ -432,7 +432,7 @@ class PiecesCard extends ConsumerWidget {
                                   value: 'scrap',
                                   child: Text(
                                     g.pieces.length > 1
-                                        ? 'Throw away one piece'
+                                        ? t('Throw away one piece')
                                         : 'Throw away',
                                   ),
                                 ),

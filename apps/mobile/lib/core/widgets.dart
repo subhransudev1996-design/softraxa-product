@@ -232,7 +232,7 @@ String friendlyError(Object e) {
   final approval = approvalExceptions(e);
   if (approval != null) {
     return approval.isEmpty
-        ? 'This sale needs the owner\'s approval.'
+        ? t('This sale needs the owner\'s approval.')
         : 'Needs the owner\'s approval — ${approvalSummary(approval)}';
   }
   // Surface PostgREST / RPC exception messages cleanly

@@ -166,7 +166,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               pw.Text(
-                _name.text.trim().isEmpty ? 'Your shop' : _name.text.trim(),
+                _name.text.trim().isEmpty ? t('Your shop') : _name.text.trim(),
                 style: pw.TextStyle(
                   fontSize: 20,
                   fontWeight: pw.FontWeight.bold,
@@ -272,7 +272,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : Text(last ? 'Finish setup' : 'Next'),
+                            : Text(last ? t('Finish setup') : 'Next'),
                       ),
                     ],
                   ),
@@ -330,7 +330,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             controller: _name,
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(labelText: t('Shop name *')),
-            validator: (v) => (v ?? '').trim().isEmpty ? 'Required' : null,
+            validator: (v) => (v ?? '').trim().isEmpty ? t('Required') : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
@@ -386,7 +386,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               textCapitalization: TextCapitalization.characters,
               decoration: InputDecoration(labelText: t('GSTIN *')),
               validator: (v) =>
-                  (v ?? '').trim().isEmpty ? 'Required' : gstinError(v ?? ''),
+                  (v ?? '').trim().isEmpty ? t('Required') : gstinError(v ?? ''),
               onChanged: (v) {
                 final s = stateFromGstin(v);
                 if (s != null && s != _state) setState(() => _state = s);
@@ -499,7 +499,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           OutlinedButton.icon(
             onPressed: () => ThermalPrinterService.printTestPage(
               context,
-              _name.text.trim().isEmpty ? 'Your shop' : _name.text.trim(),
+              _name.text.trim().isEmpty ? t('Your shop') : _name.text.trim(),
             ),
             icon: const Icon(Icons.bluetooth),
             label: Text(t('Bluetooth receipt printer')),
@@ -510,7 +510,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           onPressed: _printA4Test,
           icon: const Icon(Icons.print_outlined),
           label: Text(
-            isDesktopPlatform ? 'Print a test page' : 'A4 / other printer',
+            isDesktopPlatform ? t('Print a test page') : 'A4 / other printer',
           ),
         ),
         const SizedBox(height: 24),

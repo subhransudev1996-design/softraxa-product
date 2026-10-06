@@ -115,7 +115,7 @@ class MoreScreen extends ConsumerWidget {
                         ref.watch(pendingApprovalCountProvider).value ?? 0;
                     return tile(
                       Icons.verified_user_outlined,
-                      isOwner ? 'Approvals' : 'My approval requests',
+                      isOwner ? t('Approvals') : 'My approval requests',
                       '/approvals',
                       color: pending > 0 ? AppColors.red : AppColors.teal,
                       subtitle: isOwner

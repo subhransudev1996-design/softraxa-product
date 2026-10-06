@@ -372,7 +372,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
             onPressed: valid ? _submit : null,
             child: Text(
               !valid
-                  ? 'Add'
+                  ? t('Add')
                   : _packPriced
                   ? 'Add ${qty(parsedQty)} ${widget.secondaryUnitName} • '
                         '${money(parsedQty! * _activeRate)}'

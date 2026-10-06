@@ -235,7 +235,7 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
               if (v['is_active'] != false) v,
           ];
     return AlertDialog(
-      title: Text(product == null ? 'Choose product' : 'Choose variant'),
+      title: Text(product == null ? t('Choose product') : 'Choose variant'),
       content: SizedBox(
         width: 420,
         height: 420,

@@ -255,7 +255,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     if (_editing && _paidLater > 0.005) {
       showError(
         context,
-        '${money(_paidLater)} paid to ${_supplier?['name'] ?? 'the supplier'} later is '
+        '${money(_paidLater)} paid to ${_supplier?['name'] ?? t('the supplier')} later is '
         'counted on this purchase, so its supplier can\'t be changed.',
       );
       return;
@@ -588,7 +588,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     final title = Text(
       _editing
           ? (_purchaseNo.isEmpty
-                ? 'Edit purchase'
+                ? t('Edit purchase')
                 : 'Edit purchase $_purchaseNo')
           : 'Add purchase',
     );
@@ -619,7 +619,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           Card(
             child: ListTile(
               leading: const Icon(Icons.local_shipping_outlined),
-              title: Text(_supplier?['name'] as String? ?? 'Select supplier'),
+              title: Text(_supplier?['name'] as String? ?? t('Select supplier')),
               subtitle: _supplier == null
                   ? Text(t('Optional, needed for due tracking'))
                   : Text(_supplier!['phone'] as String? ?? ''),
@@ -744,7 +744,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(
               labelText: _editing
-                  ? 'Paid with this purchase ₹'
+                  ? t('Paid with this purchase ₹')
                   : 'Paid amount ₹',
               hintText: _total.toStringAsFixed(2),
               helperText: _paidLater > 0

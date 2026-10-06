@@ -367,7 +367,7 @@ class AppSidebar extends ConsumerWidget {
                   label: t('Reports'),
                   route: '/reports',
                 ),
-                ...section('Sales', [
+                ...section(t('Sales'), [
                   link(
                     icon: Icons.receipt_long_outlined,
                     label: t('All invoices'),
@@ -395,7 +395,7 @@ class AppSidebar extends ConsumerWidget {
                     color: pendingApprovals > 0 ? AppColors.red : null,
                   ),
                 ]),
-                ...section('Inventory', [
+                ...section(t('Inventory'), [
                   link(
                     icon: Icons.warehouse_outlined,
                     label: t('Stock'),
@@ -425,7 +425,7 @@ class AppSidebar extends ConsumerWidget {
                 ]),
                 if ((features?.featureOn('service_module') ?? true) &&
                     (appContext?.category.jobCards ?? true))
-                  ...section('Services', [
+                  ...section(t('Services'), [
                     link(
                       icon: Icons.build_outlined,
                       label: t('Service catalog'),
@@ -437,7 +437,7 @@ class AppSidebar extends ConsumerWidget {
                       route: '/job-cards',
                     ),
                   ]),
-                ...section('Money', [
+                ...section(t('Money'), [
                   if (appContext?.canManageCash ?? false)
                     link(
                       icon: Icons.point_of_sale_outlined,
@@ -452,7 +452,7 @@ class AppSidebar extends ConsumerWidget {
                     ),
                 ]),
                 if (appContext?.isOwner == true)
-                  ...section('Store management', [
+                  ...section(t('Store management'), [
                     link(
                       icon: Icons.badge_outlined,
                       label: t('Staff & permissions'),
@@ -464,7 +464,7 @@ class AppSidebar extends ConsumerWidget {
                       route: '/subscription/plans',
                     ),
                   ]),
-                ...section('Other', [
+                ...section(t('Other'), [
                   link(
                     icon: Icons.sync_outlined,
                     label: t('Pending offline bills'),
@@ -539,7 +539,7 @@ class _SidebarFooter extends StatelessWidget {
     final state = appContext.subscriptionState;
     final plan =
         ((appContext.subscription?['plan'] as Map?)?['name'] as String?) ??
-        (state == 'trial' ? 'Free trial' : '');
+        (state == 'trial' ? t('Free trial') : '');
     final expiry = DateTime.tryParse(
       appContext.subscription?['expiry_date'] as String? ?? '',
     );

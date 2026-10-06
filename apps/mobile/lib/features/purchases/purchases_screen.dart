@@ -242,7 +242,7 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
       }
       final range = filter.range;
       final period = range == null
-          ? 'All dates'
+          ? t('All dates')
           : range.$1 == range.$2
           ? dateStr(ymd(range.$1))
           : '${dateStr(ymd(range.$1))} to ${dateStr(ymd(range.$2))}';
@@ -446,7 +446,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(p?['purchase_no'] as String? ?? 'Purchase'),
+        title: Text(p?['purchase_no'] as String? ?? t('Purchase')),
         actions: [
           // Correct a wrong entry (migration 0063). Opening balances are
           // changed from the supplier's opening balance instead.

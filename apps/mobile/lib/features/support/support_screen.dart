@@ -139,7 +139,7 @@ class SupportScreen extends ConsumerWidget {
                             children: [
                               Text(
                                 isTrial
-                                    ? 'Trial Account — WhatsApp Upgrade & Support'
+                                    ? i18n.t('Trial Account — WhatsApp Upgrade & Support')
                                     : 'Instant WhatsApp Support',
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
@@ -152,7 +152,7 @@ class SupportScreen extends ConsumerWidget {
                               const SizedBox(height: 2),
                               Text(
                                 isTrial
-                                    ? 'Chat with our team to upgrade your store plan or get help.'
+                                    ? i18n.t('Chat with our team to upgrade your store plan or get help.')
                                     : 'Get instant assistance on WhatsApp for your store.',
                                 style: TextStyle(
                                   fontSize: 12.5,

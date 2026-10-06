@@ -402,7 +402,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               'Add stock first, or continue anyway?';
     final action = await _showStockDialog(
       context,
-      title: stock <= 0 ? 'Out of stock' : 'Not enough stock',
+      title: stock <= 0 ? t('Out of stock') : 'Not enough stock',
       message: message,
     );
     if (action == 'add_anyway') return true;
@@ -726,11 +726,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final exchanging = ref.read(exchangeDraftProvider) != null;
     final ok = await confirmDialog(
       context,
-      title: exchanging ? 'Cancel exchange?' : 'Discard changes?',
+      title: exchanging ? t('Cancel exchange?') : 'Discard changes?',
       message: exchanging
-          ? 'Nothing has been saved — the return and the replacement are only recorded together at checkout.'
+          ? t('Nothing has been saved — the return and the replacement are only recorded together at checkout.')
           : 'Changes to this bill haven\'t been saved yet.',
-      confirmText: exchanging ? 'Cancel exchange' : 'Discard',
+      confirmText: exchanging ? t('Cancel exchange') : 'Discard',
     );
     if (ok) {
       ref.read(cartProvider.notifier).clear();
@@ -781,7 +781,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 controller: _searchController,
                 focusNode: _searchFocus,
                 hint: wide
-                    ? 'Search product name, barcode or SKU  (F2)'
+                    ? t('Search product name, barcode or SKU  (F2)')
                     : 'Search or scan barcode…',
                 autofocus: wide,
                 onChanged: (v) {
@@ -866,7 +866,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   child: Text(
                     cart.customer == null
                         ? (wide
-                              ? 'Walk-in customer  (F4 to choose)'
+                              ? t('Walk-in customer  (F4 to choose)')
                               : 'Walk-in customer (tap to select)')
                         : '${cart.customer!['name']}'
                               '${(cart.customer!['phone'] as String? ?? '').isNotEmpty ? ' • ${cart.customer!['phone']}' : ''}',
@@ -919,7 +919,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           exchange != null
               ? 'Exchange — ${exchange.invoiceNo}'
               : editing == null
-              ? 'New Bill'
+              ? t('New Bill')
               : 'Edit Bill — ${editing.invoiceNo}',
         ),
         actions: [
@@ -1040,7 +1040,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     cart: cart,
                     customerTile: customerTile,
                     checkoutLabel: editing == null
-                        ? 'Checkout'
+                        ? t('Checkout')
                         : 'Review changes',
                     onCheckout: cart.lines.isEmpty
                         ? null
@@ -1185,7 +1185,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                       ),
                                                   child: Text(
                                                     line.serialNo.isEmpty
-                                                        ? 'Tap to add IMEI/serial'
+                                                        ? t('Tap to add IMEI/serial')
                                                         : 'S/N: ${line.serialNo}',
                                                     style: TextStyle(
                                                       fontSize: 12,
@@ -1295,7 +1295,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               onPressed: () => showCheckoutSheet(context),
                               icon: const Icon(Icons.arrow_forward, size: 18),
                               label: Text(
-                                editing == null ? 'Checkout' : 'Review changes',
+                                editing == null ? t('Checkout') : 'Review changes',
                               ),
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(150, 52),

@@ -124,7 +124,7 @@ class EstimateSection extends ConsumerWidget {
                           openEstimateEditor(context, ref, jobId, base: latest),
                       icon: const Icon(Icons.edit_note),
                       label: Text(
-                        awaiting ? 'Edit estimate' : 'Revise estimate',
+                        awaiting ? t('Edit estimate') : 'Revise estimate',
                       ),
                     ),
                   ),
@@ -278,7 +278,7 @@ class _EstimateCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${answer['decision'] == 'rejected' ? 'Rejected' : 'Approved'} by '
+                      '${answer['decision'] == 'rejected' ? t('Rejected') : 'Approved'} by '
                       '${answer['customer_name']} · ${approvalChannelLabel(answer['channel'] as String)}'
                       '${answer['decision'] == 'partially_approved' ? ' · ${money(answer['approved_total'] as num?)} approved' : ''}',
                       style: const TextStyle(
@@ -305,7 +305,7 @@ class _EstimateCard extends ConsumerWidget {
                         icon: const Icon(Icons.image_outlined, size: 16),
                         label: Text(
                           (a['file_name'] as String? ?? '').isEmpty
-                              ? 'Evidence'
+                              ? t('Evidence')
                               : a['file_name'] as String,
                         ),
                       ),
@@ -1001,7 +1001,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
                 leading: const Icon(Icons.schedule),
                 title: Text(
                   _when == null
-                      ? 'Answered just now'
+                      ? t('Answered just now')
                       : 'Answered ${dateTimeStr(_when!.toIso8601String())}',
                 ),
                 trailing: Text(t('Change')),
@@ -1188,7 +1188,7 @@ Future<void> markEstimateWorkDone(
       showSuccess(
         context,
         line['item_type'] == 'part'
-            ? 'Part added — stock deducted'
+            ? t('Part added — stock deducted')
             : 'Work added',
       );
     }
@@ -1218,7 +1218,7 @@ class JobPhotosSection extends ConsumerWidget {
               leading: const Icon(Icons.image_outlined),
               title: Text(
                 (a['file_name'] as String? ?? '').isEmpty
-                    ? 'Photo'
+                    ? t('Photo')
                     : a['file_name'] as String,
               ),
               subtitle: Text(

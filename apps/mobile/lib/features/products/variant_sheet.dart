@@ -290,7 +290,7 @@ class _VariantSheetState extends State<_VariantSheet> {
       shrinkWrap: dialog,
       children: [
         Text(
-          widget.existing == null ? 'Add variant' : 'Edit variant',
+          widget.existing == null ? t('Add variant') : 'Edit variant',
           style: Theme.of(context).textTheme.titleLarge,
         ),
         SectionLabel(t('Attributes')),

@@ -84,7 +84,7 @@ class _MasterList extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(existing == null ? 'Add' : 'Edit'),
+          title: Text(existing == null ? t('Add') : 'Edit'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

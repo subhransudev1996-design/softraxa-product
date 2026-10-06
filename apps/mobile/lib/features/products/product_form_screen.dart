@@ -586,7 +586,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
       _dirty = false;
       if (mounted) {
-        showSuccess(context, isEdit ? 'Product updated' : 'Product added');
+        showSuccess(context, isEdit ? t('Product updated') : 'Product added');
         context.pop();
       }
     } catch (e) {
@@ -635,7 +635,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   onPressed: () => _dirty ? _confirmLeave() : context.pop(),
                 )
               : null,
-          title: Text(isEdit ? 'Edit product' : 'Add product'),
+          title: Text(isEdit ? t('Edit product') : 'Add product'),
         ),
         body: Form(
           key: _formKey,
@@ -650,7 +650,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 textCapitalization: TextCapitalization.words,
                 decoration: InputDecoration(labelText: t('Product name *')),
                 validator: (v) =>
-                    v == null || v.trim().isEmpty ? 'Required' : null,
+                    v == null || v.trim().isEmpty ? t('Required') : null,
               ),
               if (_suggestions.isNotEmpty)
                 Card(
@@ -831,7 +831,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       decoration: InputDecoration(
                         labelText: t('= how many units?'),
                         helperText:
-                            '1 ${_secondaryUnitName.text.trim().isEmpty ? 'Bag' : _secondaryUnitName.text.trim()} = 50 kg → 50',
+                            '1 ${_secondaryUnitName.text.trim().isEmpty ? t('Bag') : _secondaryUnitName.text.trim()} = 50 kg → 50',
                       ),
                       onChanged: (_) => _packSizeChanged(),
                     ),
@@ -973,7 +973,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       onChanged: (_) => _sellingFromPack = false,
                       validator: (v) =>
                           !_hasVariants && (double.tryParse(v ?? '') == null)
-                          ? 'Required'
+                          ? t('Required')
                           : null,
                     ),
                   ),
@@ -1312,7 +1312,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : Text(isEdit ? 'Save changes' : 'Add product'),
+                    : Text(isEdit ? t('Save changes') : 'Add product'),
               ),
               const SizedBox(height: 24),
             ],

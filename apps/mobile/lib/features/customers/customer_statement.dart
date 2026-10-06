@@ -208,7 +208,7 @@ Future<Uint8List> buildStatementPdf({
         pw.Text(customer['name'] as String? ?? '', style: pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold)),
         if ((customer['phone'] as String? ?? '').isNotEmpty)
           pw.Text('Phone: ${customer['phone']}', style: small),
-        section('Bills in this period'),
+        section(t('Bills in this period')),
         if (s.bills.isEmpty)
           pw.Text('No bills.', style: small)
         else
@@ -227,7 +227,7 @@ Future<Uint8List> buildStatementPdf({
             right: {2, 3, 4},
           ),
         if (s.payments.isNotEmpty) ...[
-          section('Payments received'),
+          section(t('Payments received')),
           table(
             ['Date', 'Mode', 'Amount'],
             [
@@ -242,7 +242,7 @@ Future<Uint8List> buildStatementPdf({
           ),
         ],
         if (s.returns.isNotEmpty) ...[
-          section('Returns'),
+          section(t('Returns')),
           table(
             ['Date', 'Return no', 'Amount'],
             [
@@ -256,7 +256,7 @@ Future<Uint8List> buildStatementPdf({
             right: {2},
           ),
         ],
-        section('Bills still to be paid'),
+        section(t('Bills still to be paid')),
         if (s.unpaid.isEmpty && s.earlierDue < 0.01)
           pw.Text('Nothing pending.', style: small)
         else

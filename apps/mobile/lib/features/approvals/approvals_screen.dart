@@ -88,7 +88,7 @@ class ApprovalsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: Text(isOwner ? 'Approvals' : 'My approval requests'),
+        title: Text(isOwner ? t('Approvals') : 'My approval requests'),
       ),
       body: isOwner ? const _OwnerInbox() : const _MyRequests(),
     );
@@ -110,7 +110,7 @@ class _OwnerInbox extends ConsumerWidget {
         builder: (ctx, setState) {
           final all = exceptions.every((e) => ticked.contains(e['kind']));
           return AlertDialog(
-            title: Text(approve ? 'Approve this sale?' : 'Reject this sale?'),
+            title: Text(approve ? t('Approve this sale?') : 'Reject this sale?'),
             content: SingleChildScrollView(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -124,7 +124,7 @@ class _OwnerInbox extends ConsumerWidget {
                   TextField(
                     controller: note,
                     decoration: InputDecoration(
-                      labelText: approve ? 'Note (optional)' : 'Tell staff why',
+                      labelText: approve ? t('Note (optional)') : 'Tell staff why',
                     ),
                   ),
                 ],
@@ -137,7 +137,7 @@ class _OwnerInbox extends ConsumerWidget {
                     ? dialogActionStyle
                     : dialogActionStyle.merge(FilledButton.styleFrom(backgroundColor: AppColors.red)),
                 onPressed: !approve || all ? () => Navigator.pop(ctx, true) : null,
-                child: Text(approve ? 'Approve' : 'Reject'),
+                child: Text(approve ? t('Approve') : 'Reject'),
               ),
             ],
           );
@@ -154,7 +154,7 @@ class _OwnerInbox extends ConsumerWidget {
       });
       ref.invalidate(ownerApprovalsProvider);
       ref.invalidate(pendingApprovalCountProvider);
-      if (context.mounted) showSuccess(context, approve ? 'Approved' : 'Rejected');
+      if (context.mounted) showSuccess(context, approve ? t('Approved') : 'Rejected');
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -391,7 +391,7 @@ class _ApprovalCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    (customerName?.isNotEmpty ?? false) ? customerName! : 'Walk-in customer',
+                    (customerName?.isNotEmpty ?? false) ? customerName! : t('Walk-in customer'),
                     style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
                   ),
                 ),

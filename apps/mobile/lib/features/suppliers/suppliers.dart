@@ -153,7 +153,7 @@ Future<Map<String, dynamic>?> showSupplierForm(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text(existing == null ? 'Add supplier' : 'Edit supplier'),
+        title: Text(existing == null ? t('Add supplier') : 'Edit supplier'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,

@@ -142,7 +142,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(widget.mode == 'return' ? 'Scan barcode' : 'Scan to bill'),
+        title: Text(widget.mode == 'return' ? t('Scan barcode') : 'Scan to bill'),
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
@@ -198,7 +198,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
                   icon: const Icon(Icons.shopping_cart),
                   label: Text(
                     cart.lines.isEmpty
-                        ? 'Back to bill'
+                        ? t('Back to bill')
                         : 'Done — ${cart.itemCount} ${cart.itemCount == 1 ? 'item' : 'items'} in bill',
                   ),
                 ),

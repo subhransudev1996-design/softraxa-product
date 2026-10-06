@@ -80,7 +80,7 @@ String? gstinError(String gstin) {
   final g = gstin.trim();
   if (g.isEmpty) return null;
   if (g.length != 15) return 'A GSTIN has 15 characters (${g.length} entered)';
-  return isValidGstin(g) ? null : 'This GSTIN is not valid — check for a typo';
+  return isValidGstin(g) ? null : t('This GSTIN is not valid — check for a typo');
 }
 
 /// Dropdown for picking a GST state. [value] '' = not set.

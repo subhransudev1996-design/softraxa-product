@@ -239,7 +239,7 @@ class _InvoiceRow extends StatelessWidget {
             Expanded(
               flex: 3,
               child: Text(
-                customerName.isEmpty ? 'Walk-in' : customerName,
+                customerName.isEmpty ? t('Walk-in') : customerName,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 13.5),
@@ -346,7 +346,7 @@ class _InvoiceTile extends StatelessWidget {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${(inv['customer_name'] as String?)?.isNotEmpty == true ? inv['customer_name'] : 'Walk-in'}'
+                      '${(inv['customer_name'] as String?)?.isNotEmpty == true ? inv['customer_name'] : t('Walk-in')}'
                       ' • ${dateTimeStr(inv['invoice_date'])}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
