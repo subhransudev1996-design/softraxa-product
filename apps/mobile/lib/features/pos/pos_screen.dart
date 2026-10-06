@@ -20,6 +20,7 @@ import 'checkout_sheet.dart';
 import 'loose_qty_sheet.dart';
 import 'pos_desktop.dart';
 import 'pos_providers.dart';
+import 'quick_items.dart';
 
 /// Shared "not enough stock" dialog: message + three evenly-sized, full-width,
 /// evenly-spaced actions (Cancel / Add stock first / Add anyway). Buttons
@@ -981,6 +982,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     children: [
                       if (exchange != null) _ExchangeBanner(exchange: exchange),
                       searchRow,
+                      if (search.isEmpty) QuickItemsRow(onPick: _addToCart),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -1051,6 +1053,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               children: [
                 if (exchange != null) _ExchangeBanner(exchange: exchange),
                 searchRow,
+                if (search.isEmpty) QuickItemsRow(onPick: _addToCart),
                 // customer row
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
