@@ -154,9 +154,9 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                   if (ctx == null) return;
                   final ok = await confirmDialog(
                     ctx,
-                    title: 'Logout',
-                    message: 'Are you sure you want to logout?',
-                    confirmText: 'Logout',
+                    title: t('Logout'),
+                    message: t('Are you sure you want to logout?'),
+                    confirmText: t('Logout'),
                   );
                   if (ok) await ref.read(supabaseProvider).auth.signOut();
                 },

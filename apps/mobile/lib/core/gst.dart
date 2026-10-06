@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 
 import 'formatters.dart';
@@ -109,7 +110,7 @@ class GstStateField extends StatelessWidget {
       decoration: InputDecoration(labelText: label, helperText: helperText),
       validator: validator,
       items: [
-        const DropdownMenuItem(value: '', child: Text('Not set')),
+        DropdownMenuItem(value: '', child: Text(t('Not set'))),
         for (final e in gstStates.entries)
           DropdownMenuItem(value: e.key, child: Text('${e.key} - ${e.value}')),
       ],

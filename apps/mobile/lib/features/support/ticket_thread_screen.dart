@@ -1,3 +1,4 @@
+import '../../core/i18n.dart' as i18n;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -159,8 +160,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
                         ? [
                             Padding(
                               padding: const EdgeInsets.only(top: 16),
-                              child: Text(
-                                'SOFTRAXA will reply here. You\'ll get a notification.',
+                              child: Text(i18n.t('SOFTRAXA will reply here. You\'ll get a notification.'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: AppColors.inkSoft,
@@ -194,13 +194,13 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
                       minLines: 1,
                       maxLines: 4,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        hintText: 'Write a message…',
+                      decoration: InputDecoration(
+                        hintText: i18n.t('Write a message…'),
                       ),
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Send',
+                    tooltip: i18n.t('Send'),
                     onPressed: _sending ? null : _send,
                     icon: const Icon(Icons.send, color: AppColors.primary),
                   ),

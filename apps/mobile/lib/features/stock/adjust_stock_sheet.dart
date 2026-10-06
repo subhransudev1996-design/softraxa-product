@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/data_refresh.dart';
@@ -46,7 +47,7 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
   Future<void> _save() async {
     final q = double.tryParse(_qty.text);
     if (q == null || q <= 0) {
-      showError(context, 'Enter a valid quantity');
+      showError(context, t('Enter a valid quantity'));
       return;
     }
     // Whole-unit products (allow_decimal off) can't be adjusted by fractions.
@@ -56,7 +57,7 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
     if (allowDecimal == false && q % 1 != 0) {
       showError(
         context,
-        'This product is stocked in whole units — enter a whole number',
+        t('This product is stocked in whole units — enter a whole number'),
       );
       return;
     }
@@ -76,7 +77,7 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
           );
       invalidateStockData(ref);
       if (mounted) {
-        showSuccess(context, 'Stock updated');
+        showSuccess(context, t('Stock updated'));
         Navigator.pop(context, true);
       }
     } catch (e) {
@@ -94,7 +95,7 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('Adjust stock', style: Theme.of(context).textTheme.titleLarge),
+          Text(t('Adjust stock'), style: Theme.of(context).textTheme.titleLarge),
           const SizedBox(height: 4),
           Text(
             '${widget.product['name']}${widget.variant != null ? ' — ${widget.variant!['name']}' : ''}'
@@ -103,20 +104,20 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
           ),
           const SizedBox(height: 16),
           SegmentedButton<String>(
-            segments: const [
+            segments: [
               ButtonSegment(
                 value: 'add',
-                label: Text('Add'),
+                label: Text(t('Add')),
                 icon: Icon(Icons.add),
               ),
               ButtonSegment(
                 value: 'remove',
-                label: Text('Remove'),
+                label: Text(t('Remove')),
                 icon: Icon(Icons.remove),
               ),
               ButtonSegment(
                 value: 'damage',
-                label: Text('Damaged/Lost'),
+                label: Text(t('Damaged/Lost')),
                 icon: Icon(Icons.dangerous_outlined),
               ),
             ],
@@ -128,13 +129,13 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
             controller: _qty,
             autofocus: true,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Quantity'),
+            decoration: InputDecoration(labelText: t('Quantity')),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _note,
-            decoration: const InputDecoration(
-              labelText: 'Note / reason (optional)',
+            decoration: InputDecoration(
+              labelText: t('Note / reason (optional)'),
             ),
           ),
           const SizedBox(height: 16),
@@ -146,7 +147,7 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save adjustment'),
+                : Text(t('Save adjustment')),
           ),
           const SizedBox(height: 24),
         ],

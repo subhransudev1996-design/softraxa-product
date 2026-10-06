@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -193,8 +194,7 @@ Future<Uint8List> buildStatementPdf({
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text(
-                  'STATEMENT OF ACCOUNT',
+                pw.Text('STATEMENT OF ACCOUNT',
                   style: pw.TextStyle(fontSize: 13, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text('${dateStr(s.from)} to ${dateStr(s.to)}', style: small),
@@ -317,12 +317,12 @@ Future<void> showCustomerStatement(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: const Text('Customer statement'),
+        title: Text(t('Customer statement')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Bills, payments and what is still due, as a PDF.'),
+            Text(t('Bills, payments and what is still due, as a PDF.')),
             const SizedBox(height: 12),
             Wrap(
               spacing: 8,
@@ -341,18 +341,18 @@ Future<void> showCustomerStatement(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           OutlinedButton.icon(
             onPressed: () => Navigator.pop(ctx, 'print'),
             icon: const Icon(Icons.print_outlined, size: 18),
-            label: const Text('Print'),
+            label: Text(t('Print')),
           ),
           FilledButton.icon(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, 'share'),
             icon: const Icon(Icons.share, size: 18),
-            label: const Text('Share PDF'),
+            label: Text(t('Share PDF')),
           ),
         ],
       ),

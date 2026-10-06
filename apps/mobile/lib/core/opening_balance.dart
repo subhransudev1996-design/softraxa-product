@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -43,7 +44,7 @@ Future<bool> showOpeningBalanceDialog(
               contentPadding: EdgeInsets.zero,
               leading: const Icon(Icons.event_outlined),
               title: Text('As of ${dateStr(asOf)}'),
-              trailing: const Text('Change'),
+              trailing: Text(t('Change')),
               onTap: () async {
                 final now = DateTime.now();
                 final d = await showDatePicker(
@@ -60,12 +61,12 @@ Future<bool> showOpeningBalanceDialog(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -86,7 +87,7 @@ Future<bool> showOpeningBalanceDialog(
             'p_as_of': ymd(asOf),
           },
         );
-    if (context.mounted) showSuccess(context, 'Opening balance saved');
+    if (context.mounted) showSuccess(context, t('Opening balance saved'));
     return true;
   } catch (e) {
     if (context.mounted) showError(context, e);

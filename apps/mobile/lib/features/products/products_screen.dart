@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,7 +20,7 @@ class ProductsScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'Add product',
+      label: t('Add product'),
       icon: Icons.add,
       onPressed: () => context.push('/products/new'),
       coachPage: 'products',
@@ -28,12 +29,12 @@ class ProductsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        title: const Text('Products'),
+        title: Text(t('Products')),
         actions: [
           const GuideButton('products'),
           IconButton(
             icon: const Icon(Icons.category_outlined),
-            tooltip: 'Categories, brands & units',
+            tooltip: t('Categories, brands & units'),
             onPressed: () => context.push('/products/master-data'),
           ),
           CoachTarget(
@@ -41,7 +42,7 @@ class ProductsScreen extends ConsumerWidget {
             id: 'master',
             child: IconButton(
               icon: const Icon(Icons.upload_file_outlined),
-              tooltip: 'Excel import',
+              tooltip: t('Excel import'),
               onPressed: () => context.push('/import'),
             ),
           ),
@@ -57,7 +58,7 @@ class ProductsScreen extends ConsumerWidget {
               page: 'products',
               id: 'search',
               child: SearchField(
-                hint: 'Search name, SKU or barcode',
+                hint: t('Search name, SKU or barcode'),
                 onChanged: (v) =>
                     ref.read(productSearchProvider.notifier).set(v),
               ),
@@ -73,10 +74,9 @@ class ProductsScreen extends ConsumerWidget {
                   value: products,
                   onRetry: () => ref.invalidate(productsProvider),
                   builder: (rows) => rows.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.inventory_2_outlined,
-                          message:
-                              'No products yet.\nAdd your first product or import from Excel.',
+                          message: t('No products yet.\nAdd your first product or import from Excel.'),
                         )
                       : isDesktop
                       ? DesktopTable<Map<String, dynamic>>(
@@ -85,13 +85,13 @@ class ProductsScreen extends ConsumerWidget {
                           trailingWidth: _colStatusWidth,
                           columns: [
                             DesktopTableColumn(
-                              label: 'Product',
+                              label: t('Product'),
                               flex: _colName,
                               comparable: (p) =>
                                   (p['name'] as String? ?? '').toLowerCase(),
                             ),
                             DesktopTableColumn(
-                              label: 'Category',
+                              label: t('Category'),
                               flex: _colCategory,
                               comparable: (p) =>
                                   ((p['categories'] as Map?)?['name']
@@ -100,7 +100,7 @@ class ProductsScreen extends ConsumerWidget {
                                       .toLowerCase(),
                             ),
                             DesktopTableColumn(
-                              label: 'Brand',
+                              label: t('Brand'),
                               flex: _colBrand,
                               comparable: (p) =>
                                   ((p['brands'] as Map?)?['name'] as String? ??
@@ -108,13 +108,13 @@ class ProductsScreen extends ConsumerWidget {
                                       .toLowerCase(),
                             ),
                             DesktopTableColumn(
-                              label: 'Price',
+                              label: t('Price'),
                               flex: _colPrice,
                               alignEnd: true,
                               comparable: (p) => toDouble(p['selling_price']),
                             ),
                             DesktopTableColumn(
-                              label: 'Stock',
+                              label: t('Stock'),
                               flex: _colStock,
                               alignEnd: true,
                               comparable: (p) => toDouble(p['current_stock']),
@@ -294,9 +294,9 @@ class _ProductRow extends StatelessWidget {
                 child: inactive
                     ? StatusChip('inactive', color: AppColors.inkSoft)
                     : isOut
-                    ? const StatusChip('out of stock', color: AppColors.red)
+                    ? StatusChip(t('out of stock'), color: AppColors.red)
                     : isLow
-                    ? const StatusChip('low stock', color: AppColors.orange)
+                    ? StatusChip(t('low stock'), color: AppColors.orange)
                     : const StatusChip('active', color: AppColors.green),
               ),
             ),
@@ -423,9 +423,9 @@ class _ProductTile extends ConsumerWidget {
                   if (inactive)
                     StatusChip('inactive', color: AppColors.inkSoft)
                   else if (isOut)
-                    const StatusChip('out of stock', color: AppColors.red)
+                    StatusChip(t('out of stock'), color: AppColors.red)
                   else if (isLow)
-                    const StatusChip('low stock', color: AppColors.orange),
+                    StatusChip(t('low stock'), color: AppColors.orange),
                 ],
               ),
             ],

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -78,21 +79,21 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Place of supply'),
+        title: Text(t('Place of supply')),
         content: GstStateField(
           value: selected,
-          helperText: 'State where the goods are delivered',
+          helperText: t('State where the goods are delivered'),
           onChanged: (v) => selected = v,
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -106,7 +107,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             params: {'p_invoice_id': invoice['id'], 'p_state': selected},
           );
       ref.invalidate(invoiceDetailProvider(invoice['id'] as String));
-      if (context.mounted) showSuccess(context, 'Place of supply updated');
+      if (context.mounted) showSuccess(context, t('Place of supply updated'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -124,7 +125,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Record payment'),
+          title: Text(t('Record payment')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -141,11 +142,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: mode,
-                decoration: const InputDecoration(labelText: 'Payment mode'),
-                items: const [
-                  DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                  DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                  DropdownMenuItem(value: 'card', child: Text('Card')),
+                decoration: InputDecoration(labelText: t('Payment mode')),
+                items: [
+                  DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                  DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                  DropdownMenuItem(value: 'card', child: Text(t('Card'))),
                 ],
                 onChanged: (v) => setState(() => mode = v ?? 'cash'),
               ),
@@ -154,12 +155,12 @@ class InvoiceDetailScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Record'),
+              child: Text(t('Record')),
             ),
           ],
         ),
@@ -185,7 +186,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(customersProvider);
       ref.invalidate(dashboardStatsProvider);
       ref.invalidate(recentInvoicesProvider);
-      if (context.mounted) showSuccess(context, 'Payment recorded');
+      if (context.mounted) showSuccess(context, t('Payment recorded'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -216,19 +217,19 @@ class InvoiceDetailScreen extends ConsumerWidget {
         content: TextField(
           controller: reason,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Reason *'),
+          decoration: InputDecoration(labelText: t('Reason *')),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () {
               if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -246,7 +247,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             },
           );
       ref.invalidate(invoiceDetailProvider(invoiceId));
-      if (context.mounted) showSuccess(context, 'Due date changed');
+      if (context.mounted) showSuccess(context, t('Due date changed'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -271,18 +272,18 @@ class InvoiceDetailScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             ListTile(
-              title: const Text('Change customer'),
+              title: Text(t('Change customer')),
               subtitle: Text('Now: $current'),
             ),
             ListTile(
               leading: const Icon(Icons.person_search_outlined),
-              title: const Text('Choose another customer'),
+              title: Text(t('Choose another customer')),
               onTap: () => Navigator.pop(ctx, 'pick'),
             ),
             if (inv['customer_id'] != null)
               ListTile(
                 leading: const Icon(Icons.person_off_outlined),
-                title: const Text('Make it a walk-in bill'),
+                title: Text(t('Make it a walk-in bill')),
                 subtitle: due > 0.005
                     ? Text('Collect the ${money(due)} due first')
                     : null,
@@ -307,7 +308,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       message: due > 0.005 && picked != null
           ? 'The ${money(due)} due on this bill moves from $current\'s khata to $to\'s.'
           : 'Only who the bill belongs to changes; the amounts stay the same.',
-      confirmText: 'Move bill',
+      confirmText: t('Move bill'),
     );
     if (!ok) return;
     try {
@@ -341,7 +342,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
               : (inv['customer_name'] as String).trim());
     final ok = await confirmDialog(
       context,
-      title: 'Cancel invoice?',
+      title: t('Cancel invoice?'),
       message: [
         'Stock will be restored.',
         if (paid >= 0.01)
@@ -352,7 +353,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
           'The due comes off $name\'s khata.',
         'This cannot be undone.',
       ].join(' '),
-      confirmText: 'Cancel invoice',
+      confirmText: t('Cancel invoice'),
     );
     if (!ok) return;
     try {
@@ -363,7 +364,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(invoicesProvider);
       invalidateStockData(ref); // cancel restores stock
       ref.invalidate(recentInvoicesProvider);
-      if (context.mounted) showSuccess(context, 'Invoice cancelled');
+      if (context.mounted) showSuccess(context, t('Invoice cancelled'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -383,10 +384,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
     if (liveCart.lines.isNotEmpty && ref.read(editingInvoiceProvider) == null) {
       final proceed = await confirmDialog(
         context,
-        title: 'Replace current bill?',
-        message:
-            'You have an unsaved bill in progress. Editing this invoice will replace it.',
-        confirmText: 'Continue',
+        title: t('Replace current bill?'),
+        message: t('You have an unsaved bill in progress. Editing this invoice will replace it.'),
+        confirmText: t('Continue'),
       );
       if (!proceed) return;
     }
@@ -467,24 +467,23 @@ class InvoiceDetailScreen extends ConsumerWidget {
               itemBuilder: (_) => [
                 // Opening balances can't be edited, only cancelled (0051).
                 if (detail.value!['invoice_type'] != 'opening')
-                  const PopupMenuItem(value: 'edit', child: Text('Edit bill')),
+                  PopupMenuItem(value: 'edit', child: Text(t('Edit bill'))),
                 if (detail.value!['invoice_type'] != 'opening')
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'customer',
-                    child: Text('Change customer'),
+                    child: Text(t('Change customer')),
                   ),
                 // PD19: owner-only, with a reason (migration 0052).
                 if ((features?.isOwner ?? false) &&
                     toDouble(detail.value!['due_amount']) > 0 &&
                     detail.value!['invoice_type'] != 'estimate')
-                  const PopupMenuItem(
+                  PopupMenuItem(
                     value: 'due',
-                    child: Text('Change due date'),
+                    child: Text(t('Change due date')),
                   ),
-                const PopupMenuItem(
+                PopupMenuItem(
                   value: 'cancel',
-                  child: Text(
-                    'Cancel invoice',
+                  child: Text(t('Cancel invoice'),
                     style: TextStyle(color: AppColors.red),
                   ),
                 ),
@@ -525,12 +524,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     color: AppColors.redSoft,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Row(
+                  child: Row(
                     children: [
                       Icon(Icons.cancel, color: AppColors.red),
                       SizedBox(width: 8),
-                      Text(
-                        'This invoice is cancelled',
+                      Text(t('This invoice is cancelled'),
                         style: TextStyle(color: AppColors.red),
                       ),
                     ],
@@ -623,8 +621,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               : () => _changePlaceOfSupply(context, ref, inv),
                           child: Padding(
                             padding: const EdgeInsets.only(top: 2),
-                            child: Text(
-                              'Place of supply: '
+                            child: Text('Place of supply: '
                               '${gstStateLabel(inv['place_of_supply'] as String?).isEmpty ? 'not set' : gstStateLabel(inv['place_of_supply'] as String?)}'
                               '${cancelled ? '' : '  ✎'}',
                               style: TextStyle(
@@ -732,12 +729,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 Card(
                   child: Column(
                     children: [
-                      const Padding(
+                      Padding(
                         padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Payment history',
+                          child: Text(t('Payment history'),
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -803,7 +799,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           onPressed: () =>
                               _sharePdf(context, ref, inv, thermal: false),
                           icon: const Icon(Icons.share),
-                          label: const Text('Share PDF'),
+                          label: Text(t('Share PDF')),
                         ),
                       ),
                     if (features?.featureOn('a4_print') ?? true) ...[
@@ -813,7 +809,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           onPressed: () =>
                               _printPdf(context, ref, inv, thermal: false),
                           icon: const Icon(Icons.print),
-                          label: const Text('A4 print'),
+                          label: Text(t('A4 print')),
                         ),
                       ),
                     ],
@@ -839,7 +835,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                                   items: items,
                                 ),
                           icon: const Icon(Icons.receipt),
-                          label: const Text('Thermal print'),
+                          label: Text(t('Thermal print')),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -848,7 +844,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           onPressed: () =>
                               _sharePdf(context, ref, inv, thermal: true),
                           icon: const Icon(Icons.receipt_long),
-                          label: const Text('Receipt PDF'),
+                          label: Text(t('Receipt PDF')),
                         ),
                       ),
                     ],

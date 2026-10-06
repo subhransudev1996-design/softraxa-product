@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ class JobCardsScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'New job card',
+      label: t('New job card'),
       icon: Icons.add,
       onPressed: () => context.push('/job-cards/new'),
       coachPage: 'job_cards',
@@ -30,7 +31,7 @@ class JobCardsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Job cards'),
+        title: Text(t('Job cards')),
         actions: [const GuideButton('job_cards'), mainAction.inAppBar(context)],
       ),
       floatingActionButton: mainAction.fab(context),
@@ -39,7 +40,7 @@ class JobCardsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: SearchField(
-              hint: 'Search job no, customer, device, IMEI',
+              hint: t('Search job no, customer, device, IMEI'),
               onChanged: (v) => ref
                   .read(jobCardFilterProvider.notifier)
                   .set(filter.copyWith(search: v)),
@@ -76,10 +77,9 @@ class JobCardsScreen extends ConsumerWidget {
                 value: jobs,
                 onRetry: () => ref.invalidate(jobCardsProvider),
                 builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.build_outlined,
-                        message:
-                            'No job cards found.\nCreate one when a customer drops off an item.',
+                        message: t('No job cards found.\nCreate one when a customer drops off an item.'),
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
@@ -90,24 +90,24 @@ class JobCardsScreen extends ConsumerWidget {
                         trailingWidth: 130,
                         columns: [
                           DesktopTableColumn(
-                            label: 'Job #',
+                            label: t('Job #'),
                             flex: 3,
                             comparable: (j) => j['job_no'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Customer',
+                            label: t('Customer'),
                             flex: 2,
                             comparable: (j) =>
                                 (j['customer_name'] as String? ?? '')
                                     .toLowerCase(),
                           ),
                           DesktopTableColumn(
-                            label: 'Date',
+                            label: t('Date'),
                             flex: 2,
                             comparable: (j) => j['created_at'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Est. cost',
+                            label: t('Est. cost'),
                             flex: 2,
                             alignEnd: true,
                             comparable: (j) => toDouble(j['estimated_cost']),

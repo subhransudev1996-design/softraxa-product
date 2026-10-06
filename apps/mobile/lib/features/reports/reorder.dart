@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -183,8 +184,7 @@ Future<Uint8List> buildReorderPdf({
             pw.Column(
               crossAxisAlignment: pw.CrossAxisAlignment.end,
               children: [
-                pw.Text(
-                  'PURCHASE ORDER',
+                pw.Text('PURCHASE ORDER',
                   style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold),
                 ),
                 pw.Text('Date: ${dateStr(DateTime.now())}', style: small),
@@ -351,16 +351,16 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
     final data = ref.watch(_reorderDataProvider);
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(leading: appBarBack(context), title: const Text('Reorder low stock')),
+      appBar: AppBar(leading: appBarBack(context), title: Text(t('Reorder low stock'))),
       body: AsyncView(
         value: data,
         onRetry: () => ref.invalidate(_reorderDataProvider),
         builder: (d) {
           final items = d.items;
           if (items.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.inventory_2_outlined,
-              message: 'Nothing is low on stock right now.',
+              message: t('Nothing is low on stock right now.'),
             );
           }
           _init(items);
@@ -378,12 +378,12 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                         DropdownButtonFormField<String?>(
                           initialValue: _supplierId,
                           isExpanded: true,
-                          decoration: const InputDecoration(
-                            labelText: 'Order from supplier',
+                          decoration: InputDecoration(
+                            labelText: t('Order from supplier'),
                             prefixIcon: Icon(Icons.local_shipping_outlined),
                           ),
                           items: [
-                            const DropdownMenuItem<String?>(value: null, child: Text('No supplier (just the list)')),
+                            DropdownMenuItem<String?>(value: null, child: Text(t('No supplier (just the list)'))),
                             for (final s in d.suppliers)
                               DropdownMenuItem<String?>(
                                 value: s['id'] as String,
@@ -399,8 +399,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                           }),
                         ),
                         const SizedBox(height: 6),
-                        Text(
-                          'Items last bought from this supplier are ticked. Change any quantity before sending.',
+                        Text(t('Items last bought from this supplier are ticked. Change any quantity before sending.'),
                           style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                         ),
                         const SizedBox(height: 10),
@@ -454,7 +453,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                 enabled: it.selected,
                 textAlign: TextAlign.right,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(isDense: true, labelText: 'Order', suffixText: it.unit),
+                decoration: InputDecoration(isDense: true, labelText: t('Order'), suffixText: it.unit),
                 onChanged: (v) => setState(() => it.qty = double.tryParse(v) ?? 0),
               ),
             ),
@@ -490,7 +489,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                     style: FilledButton.styleFrom(backgroundColor: const Color(0xFF25D366)),
                     onPressed: enabled ? () => _run(() => _whatsApp(chosen, supplier)) : null,
                     icon: const Icon(Icons.chat_outlined),
-                    label: const Text('Send on WhatsApp'),
+                    label: Text(t('Send on WhatsApp')),
                   ),
                   OutlinedButton.icon(
                     onPressed: enabled
@@ -500,7 +499,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                           })
                         : null,
                     icon: const Icon(Icons.print_outlined),
-                    label: const Text('Print'),
+                    label: Text(t('Print')),
                   ),
                   OutlinedButton.icon(
                     onPressed: enabled
@@ -514,7 +513,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                           })
                         : null,
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    label: const Text('Share PDF'),
+                    label: Text(t('Share PDF')),
                   ),
                   if (ref.watch(appContextProvider).value?.canManagePurchases ?? false)
                     OutlinedButton.icon(
@@ -527,7 +526,7 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                             )
                           : null,
                       icon: const Icon(Icons.add_shopping_cart),
-                      label: const Text('Goods came? Add purchase'),
+                      label: Text(t('Goods came? Add purchase')),
                     ),
                 ],
               ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,18 +74,18 @@ class BlockedScreen extends ConsumerWidget {
                       ref.invalidate(paymentInfoProvider);
                       ref.read(appContextProvider.notifier).refresh();
                     },
-                    child: const Text('Check again'),
+                    child: Text(t('Check again')),
                   ),
                   // The shop's data stays theirs after expiry (migration 0050).
                   if (appContext?.isOwner ?? false)
                     TextButton.icon(
                       onPressed: () => exportAllData(context, ref),
                       icon: const Icon(Icons.download_outlined),
-                      label: const Text('Export all my data'),
+                      label: Text(t('Export all my data')),
                     ),
                   TextButton(
                     onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-                    child: const Text('Logout'),
+                    child: Text(t('Logout')),
                   ),
                 ],
               ),

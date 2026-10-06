@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -165,7 +166,7 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
   Widget build(BuildContext context) {
     final preview = _preview;
     return AlertDialog(
-      title: const Text('Receive payment'),
+      title: Text(t('Receive payment')),
       content: SizedBox(
         width: 420,
         child: SingleChildScrollView(
@@ -187,25 +188,25 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _mode,
-                decoration: const InputDecoration(labelText: 'Payment mode'),
-                items: const [
-                  DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                  DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                  DropdownMenuItem(value: 'card', child: Text('Card')),
+                decoration: InputDecoration(labelText: t('Payment mode')),
+                items: [
+                  DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                  DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                  DropdownMenuItem(value: 'card', child: Text(t('Card'))),
                 ],
                 onChanged: (v) => setState(() => _mode = v ?? 'cash'),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: _note,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
+                decoration: InputDecoration(labelText: t('Note (optional)')),
               ),
               if ((_openBills ?? const []).isNotEmpty) ...[
                 const SizedBox(height: 12),
                 SegmentedButton<bool>(
-                  segments: const [
-                    ButtonSegment(value: false, label: Text('Oldest bills first')),
-                    ButtonSegment(value: true, label: Text('Choose bills')),
+                  segments: [
+                    ButtonSegment(value: false, label: Text(t('Oldest bills first'))),
+                    ButtonSegment(value: true, label: Text(t('Choose bills'))),
                   ],
                   selected: {_pickBills},
                   onSelectionChanged: (s) {
@@ -241,7 +242,7 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle,
@@ -256,7 +257,7 @@ class _ReceivePaymentDialogState extends ConsumerState<ReceivePaymentDialog> {
                   ),
                 )
               : null,
-          child: const Text('Receive'),
+          child: Text(t('Receive')),
         ),
       ],
     );
@@ -281,7 +282,7 @@ class _PreviewBox extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('This payment will', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(t('This payment will'), style: TextStyle(fontWeight: FontWeight.w600)),
           const SizedBox(height: 4),
           for (final a in preview.allocations)
             Text(

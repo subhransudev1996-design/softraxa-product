@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -61,26 +62,26 @@ Future<Map<String, dynamic>?> showCustomerForm(
                 controller: name,
                 autofocus: existing == null,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Name *'),
+                decoration: InputDecoration(labelText: t('Name *')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: phone,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone'),
+                decoration: InputDecoration(labelText: t('Phone')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: address,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Address'),
+                decoration: InputDecoration(labelText: t('Address')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: gst,
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
-                  labelText: 'GSTIN (optional)',
+                  labelText: t('GSTIN (optional)'),
                   errorText: gstinError(gst.text),
                 ),
                 onChanged: (v) => setState(() {
@@ -90,22 +91,22 @@ Future<Map<String, dynamic>?> showCustomerForm(
               const SizedBox(height: 12),
               GstStateField(
                 value: state,
-                helperText: 'Another state means IGST on their invoices',
+                helperText: t('Another state means IGST on their invoices'),
                 onChanged: (v) => setState(() => state = v),
               ),
               const SizedBox(height: 4),
               if (canEditPrices)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Wholesale customer'),
-                  subtitle: const Text('Wholesale prices from the first unit'),
+                  title: Text(t('Wholesale customer')),
+                  subtitle: Text(t('Wholesale prices from the first unit')),
                   value: wholesale,
                   onChanged: (v) => setState(() => wholesale = v),
                 ),
               if (isOwner)
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Unlimited credit'),
+                  title: Text(t('Unlimited credit')),
                   value: unlimited,
                   onChanged: (v) => setState(() => unlimited = v),
                 ),
@@ -115,9 +116,9 @@ Future<Map<String, dynamic>?> showCustomerForm(
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Credit limit ₹',
-                    helperText: 'Leave blank to use the shop default',
+                  decoration: InputDecoration(
+                    labelText: t('Credit limit ₹'),
+                    helperText: t('Leave blank to use the shop default'),
                   ),
                 ),
             ],
@@ -126,14 +127,14 @@ Future<Map<String, dynamic>?> showCustomerForm(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: gstinError(gst.text) == null
                 ? () => Navigator.pop(ctx, true)
                 : null,
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -206,7 +207,7 @@ Future<void> showRecordCustomerPayment(
         .read(supabaseProvider)
         .rpc('record_customer_payment', params: request.toParams(customerId));
     _refreshCustomerMoney(ref, customerId);
-    if (context.mounted) showSuccess(context, 'Payment recorded');
+    if (context.mounted) showSuccess(context, t('Payment recorded'));
   } catch (e) {
     if (context.mounted) showError(context, e);
   }
@@ -235,7 +236,7 @@ Future<void> showRefundAdvance(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: const Text('Refund advance'),
+        title: Text(t('Refund advance')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -247,24 +248,24 @@ Future<void> showRefundAdvance(
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: mode,
-              decoration: const InputDecoration(labelText: 'Paid back by'),
-              items: const [
-                DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                DropdownMenuItem(value: 'card', child: Text('Card')),
+              decoration: InputDecoration(labelText: t('Paid back by')),
+              items: [
+                DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                DropdownMenuItem(value: 'card', child: Text(t('Card'))),
               ],
               onChanged: (v) => setState(() => mode = v ?? 'cash'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: note,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: InputDecoration(labelText: t('Note (optional)')),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Refund')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('Refund'))),
         ],
       ),
     ),
@@ -305,28 +306,26 @@ Future<void> showReversePayment(
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'The bills it paid will show as due again. The payment stays in '
-              'the history, marked reversed.',
+            Text(t('The bills it paid will show as due again. The payment stays in the history, marked reversed.'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reason,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Reason *',
-                hintText: 'e.g. cheque bounced, entered twice',
+              decoration: InputDecoration(
+                labelText: t('Reason *'),
+                hintText: t('e.g. cheque bounced, entered twice'),
               ),
               onChanged: (_) => setState(() {}),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
           FilledButton(
             style: dialogActionStyle,
             onPressed: reason.text.trim().length >= 3 ? () => Navigator.pop(ctx, true) : null,
-            child: const Text('Reverse'),
+            child: Text(t('Reverse')),
           ),
         ],
       ),
@@ -339,7 +338,7 @@ Future<void> showReversePayment(
       params: {'p_payment_id': payment['id'], 'p_reason': reason.text.trim()},
     );
     _refreshCustomerMoney(ref, customerId);
-    if (context.mounted) showSuccess(context, 'Payment reversed');
+    if (context.mounted) showSuccess(context, t('Payment reversed'));
   } catch (e) {
     if (context.mounted) showError(context, e);
   }
@@ -350,7 +349,7 @@ Future<void> _callPhone(BuildContext context, String phone) async {
   try {
     final launched = await launchUrl(uri);
     if (!launched && context.mounted) {
-      showError(context, 'Could not open the phone dialer.');
+      showError(context, t('Could not open the phone dialer.'));
     }
   } catch (e) {
     if (context.mounted) showError(context, e);
@@ -367,7 +366,7 @@ class CustomersScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'Add customer',
+      label: t('Add customer'),
       icon: Icons.person_add,
       onPressed: () => showCustomerForm(context, ref),
       coachPage: 'customers',
@@ -377,12 +376,12 @@ class CustomersScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Customers'),
+        title: Text(t('Customers')),
         actions: [
           // Import from Excel with opening balances (owner, migration 0051).
           if (ref.watch(appContextProvider).value?.isOwner ?? false)
             IconButton(
-              tooltip: 'Import from Excel',
+              tooltip: t('Import from Excel'),
               icon: const Icon(Icons.upload_file_outlined),
               onPressed: () => context.push('/import/customers'),
             ),
@@ -396,7 +395,7 @@ class CustomersScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: SearchField(
-              hint: 'Search name or phone',
+              hint: t('Search name or phone'),
               onChanged: (v) =>
                   ref.read(customerSearchProvider.notifier).set(v),
             ),
@@ -433,9 +432,9 @@ class CustomersScreen extends ConsumerWidget {
                   value: customers,
                   onRetry: () => ref.invalidate(customersProvider),
                   builder: (rows) => rows.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.people_outline,
-                          message: 'No customers yet',
+                          message: t('No customers yet'),
                         )
                       : isDesktop
                       ? Align(
@@ -450,7 +449,7 @@ class CustomersScreen extends ConsumerWidget {
                                     name: c['name'] as String? ?? '',
                                     phone: c['phone'] as String? ?? '',
                                     due: toDouble(c['due_amount']),
-                                    dueLabel: 'Due',
+                                    dueLabel: t('Due'),
                                     dueColor: AppColors.red,
                                     creditLimit: c['credit_limit'] == null
                                         ? null

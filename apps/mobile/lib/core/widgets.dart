@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -177,7 +178,7 @@ class AsyncView<T> extends StatelessWidget {
               Text(friendlyError(e), textAlign: TextAlign.center),
               if (onRetry != null) ...[
                 const SizedBox(height: 12),
-                OutlinedButton(onPressed: onRetry, child: const Text('Retry')),
+                OutlinedButton(onPressed: onRetry, child: Text(t('Retry'))),
               ],
             ],
           ),
@@ -329,7 +330,7 @@ Future<bool> confirmDialog(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle,
@@ -358,18 +359,18 @@ Future<String?> promptBarcode(
         controller: controller,
         autofocus: true,
         textInputAction: TextInputAction.done,
-        decoration: const InputDecoration(labelText: 'Barcode / serial number'),
+        decoration: InputDecoration(labelText: t('Barcode / serial number')),
         onSubmitted: (v) => Navigator.pop(ctx, v),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, controller.text),
-          child: const Text('Use code'),
+          child: Text(t('Use code')),
         ),
       ],
     ),
@@ -821,7 +822,7 @@ class PartyCard extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.chat_outlined, size: 19),
                       color: AppColors.green,
-                      tooltip: 'Remind on WhatsApp',
+                      tooltip: t('Remind on WhatsApp'),
                       visualDensity: VisualDensity.compact,
                       onPressed: onRemind,
                     ),
@@ -860,8 +861,7 @@ class PartyCard extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'Credit limit',
+                    Text(t('Credit limit'),
                       style: TextStyle(
                         fontSize: 12.5,
                         color: AppColors.inkSoft,

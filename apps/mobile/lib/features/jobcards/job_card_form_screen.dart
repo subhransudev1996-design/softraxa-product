@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,7 +54,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
 
   Future<void> _scanSerial() async {
     final code = isDesktopPlatform
-        ? await promptBarcode(context, title: 'Enter serial number')
+        ? await promptBarcode(context, title: t('Enter serial number'))
         : await context.push<String>('/scan?mode=return');
     if (!mounted) return;
     if (code != null && code.isNotEmpty) setState(() => _serialNo.text = code);
@@ -121,12 +122,12 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
     if (services.isEmpty) return const [];
     final fee = toDouble(_diagService?['diagnostic_fee']);
     return [
-      const SectionLabel('Diagnostic fee'),
+      SectionLabel(t('Diagnostic fee')),
       DropdownButtonFormField<String>(
         initialValue: _diagService?['id'] as String?,
-        decoration: const InputDecoration(labelText: 'Checking fee (optional)'),
+        decoration: InputDecoration(labelText: t('Checking fee (optional)')),
         items: [
-          const DropdownMenuItem(value: null, child: Text('No diagnostic fee')),
+          DropdownMenuItem(value: null, child: Text(t('No diagnostic fee'))),
           for (final s in services)
             DropdownMenuItem(
               value: s['id'] as String,
@@ -161,14 +162,14 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('New job card'),
+        title: Text(t('New job card')),
       ),
       body: Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            const SectionLabel('Customer'),
+            SectionLabel(t('Customer')),
             Card(
               child: ListTile(
                 leading: _customer == null
@@ -185,7 +186,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                     _customer?['phone'] != null &&
                         (_customer!['phone'] as String).isNotEmpty
                     ? Text(_customer!['phone'] as String)
-                    : const Text('Optional, needed for due tracking'),
+                    : Text(t('Optional, needed for due tracking')),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () async {
                   final picked = await showCustomerPicker(context);
@@ -193,18 +194,18 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 },
               ),
             ),
-            const SectionLabel('Device / vehicle'),
+            SectionLabel(t('Device / vehicle')),
             SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 'device',
                   icon: Icon(Icons.smartphone),
-                  label: Text('Device / item'),
+                  label: Text(t('Device / item')),
                 ),
                 ButtonSegment(
                   value: 'vehicle',
                   icon: Icon(Icons.two_wheeler),
-                  label: Text('Vehicle'),
+                  label: Text(t('Vehicle')),
                 ),
               ],
               selected: {_jobType},
@@ -227,9 +228,9 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               TextFormField(
                 controller: _registration,
                 textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
-                  labelText: 'Registration number *',
-                  hintText: 'e.g. OD02 AB 1234',
+                decoration: InputDecoration(
+                  labelText: t('Registration number *'),
+                  hintText: t('e.g. OD02 AB 1234'),
                 ),
                 validator: (v) =>
                     _jobType == 'vehicle' && (v == null || v.trim().isEmpty)
@@ -243,8 +244,8 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                     child: TextFormField(
                       controller: _odometer,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Odometer (km)',
+                      decoration: InputDecoration(
+                        labelText: t('Odometer (km)'),
                       ),
                       validator: (v) {
                         final t = (v ?? '').trim();
@@ -258,19 +259,19 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _fuel,
-                      decoration: const InputDecoration(
-                        labelText: 'Fuel level',
+                      decoration: InputDecoration(
+                        labelText: t('Fuel level'),
                       ),
-                      items: const [
-                        DropdownMenuItem(value: '', child: Text('Not noted')),
-                        DropdownMenuItem(value: 'empty', child: Text('Empty')),
+                      items: [
+                        DropdownMenuItem(value: '', child: Text(t('Not noted'))),
+                        DropdownMenuItem(value: 'empty', child: Text(t('Empty'))),
                         DropdownMenuItem(value: 'quarter', child: Text('¼')),
                         DropdownMenuItem(value: 'half', child: Text('½')),
                         DropdownMenuItem(
                           value: 'three_quarter',
                           child: Text('¾'),
                         ),
-                        DropdownMenuItem(value: 'full', child: Text('Full')),
+                        DropdownMenuItem(value: 'full', child: Text(t('Full'))),
                       ],
                       onChanged: (v) => setState(() => _fuel = v ?? ''),
                     ),
@@ -285,7 +286,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                   child: TextFormField(
                     controller: _brand,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(labelText: 'Brand'),
+                    decoration: InputDecoration(labelText: t('Brand')),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -293,7 +294,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                   child: TextFormField(
                     controller: _model,
                     textCapitalization: TextCapitalization.words,
-                    decoration: const InputDecoration(labelText: 'Model'),
+                    decoration: InputDecoration(labelText: t('Model')),
                   ),
                 ),
               ],
@@ -302,19 +303,19 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             TextFormField(
               controller: _serialNo,
               decoration: InputDecoration(
-                labelText: 'IMEI / serial number (optional)',
+                labelText: t('IMEI / serial number (optional)'),
                 suffixIcon: IconButton(
                   icon: const Icon(Icons.qr_code_scanner),
                   onPressed: _scanSerial,
                 ),
               ),
             ),
-            const SectionLabel('Issue'),
+            SectionLabel(t('Issue')),
             TextFormField(
               controller: _issue,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Problem / issue description *',
+              decoration: InputDecoration(
+                labelText: t('Problem / issue description *'),
               ),
               validator: (v) =>
                   v == null || v.trim().isEmpty ? 'Required' : null,
@@ -322,19 +323,19 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _condition,
-              decoration: const InputDecoration(
-                labelText: 'Item condition at receiving (optional)',
+              decoration: InputDecoration(
+                labelText: t('Item condition at receiving (optional)'),
               ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _accessories,
-              decoration: const InputDecoration(
-                labelText: 'Accessories received (optional)',
+              decoration: InputDecoration(
+                labelText: t('Accessories received (optional)'),
               ),
             ),
             ..._diagnosticFee(),
-            const SectionLabel('Estimate & advance'),
+            SectionLabel(t('Estimate & advance')),
             Row(
               children: [
                 Expanded(
@@ -343,8 +344,8 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Estimated cost ₹',
+                    decoration: InputDecoration(
+                      labelText: t('Estimated cost ₹'),
                     ),
                   ),
                 ),
@@ -355,8 +356,8 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: const InputDecoration(
-                      labelText: 'Advance paid ₹',
+                    decoration: InputDecoration(
+                      labelText: t('Advance paid ₹'),
                     ),
                   ),
                 ),
@@ -365,24 +366,23 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _advanceMode,
-              decoration: const InputDecoration(
-                labelText: 'Advance payment mode',
+              decoration: InputDecoration(
+                labelText: t('Advance payment mode'),
               ),
-              items: const [
-                DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                DropdownMenuItem(value: 'card', child: Text('Card')),
+              items: [
+                DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                DropdownMenuItem(value: 'card', child: Text(t('Card'))),
               ],
               onChanged: (v) => setState(() => _advanceMode = v ?? 'cash'),
             ),
-            const SectionLabel('Delivery & technician'),
+            SectionLabel(t('Delivery & technician')),
             TextFormField(
               controller: _location,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Service / installation location (optional)',
-                hintText:
-                    'e.g. Patia, Bhubaneswar — 2nd floor, near water tank',
+              decoration: InputDecoration(
+                labelText: t('Service / installation location (optional)'),
+                hintText: t('e.g. Patia, Bhubaneswar — 2nd floor, near water tank'),
                 prefixIcon: Icon(Icons.place_outlined),
               ),
             ),
@@ -398,8 +398,8 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                 if (picked != null) setState(() => _expectedDelivery = picked);
               },
               child: InputDecorator(
-                decoration: const InputDecoration(
-                  labelText: 'Expected delivery date',
+                decoration: InputDecoration(
+                  labelText: t('Expected delivery date'),
                 ),
                 child: Text(
                   _expectedDelivery == null
@@ -411,22 +411,22 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             const SizedBox(height: 12),
             TextFormField(
               controller: _technician,
-              decoration: const InputDecoration(
-                labelText: 'Technician name (optional)',
+              decoration: InputDecoration(
+                labelText: t('Technician name (optional)'),
               ),
             ),
-            const SectionLabel('Notes'),
+            SectionLabel(t('Notes')),
             TextFormField(
               controller: _customerNote,
-              decoration: const InputDecoration(
-                labelText: 'Customer-visible note (optional)',
+              decoration: InputDecoration(
+                labelText: t('Customer-visible note (optional)'),
               ),
             ),
             const SizedBox(height: 12),
             TextFormField(
               controller: _internalNote,
-              decoration: const InputDecoration(
-                labelText: 'Internal note (optional)',
+              decoration: InputDecoration(
+                labelText: t('Internal note (optional)'),
               ),
             ),
             const SizedBox(height: 24),
@@ -438,7 +438,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : const Text('Create job card'),
+                  : Text(t('Create job card')),
             ),
             const SizedBox(height: 24),
           ],

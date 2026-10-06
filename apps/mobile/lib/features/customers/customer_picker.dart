@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'customer_providers.dart';
@@ -79,7 +80,7 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New customer'),
+        title: Text(t('New customer')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -87,25 +88,25 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: t('Name')),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: phone,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone'),
+              decoration: InputDecoration(labelText: t('Phone')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Add'),
+            child: Text(t('Add')),
           ),
         ],
       ),
@@ -145,7 +146,7 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
               children: [
                 Expanded(
                   child: SearchField(
-                    hint: 'Search name or phone',
+                    hint: t('Search name or phone'),
                     autofocus: true,
                     onChanged: (v) {
                       _search = v;
@@ -167,11 +168,11 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
                 : _customers.isEmpty
                 ? EmptyState(
                     icon: Icons.person_search,
-                    message: 'No customers found',
+                    message: t('No customers found'),
                     action: FilledButton.icon(
                       onPressed: _quickAdd,
                       icon: const Icon(Icons.add),
-                      label: const Text('Add new customer'),
+                      label: Text(t('Add new customer')),
                     ),
                   )
                 : ListView.separated(

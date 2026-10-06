@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -22,7 +23,7 @@ Future<bool> applyAdvanceToInvoice(
   if (confirm) {
     final ok = await confirmDialog(
       context,
-      title: 'Use advance?',
+      title: t('Use advance?'),
       message:
           '${customerName ?? 'This customer'} has an advance. Use ${money(amount)} '
           'of it to pay this bill? This is not a new cash receipt.',

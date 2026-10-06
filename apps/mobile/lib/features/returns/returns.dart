@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -97,7 +98,7 @@ Future<double?> _promptReturnQty(
         autofocus: true,
         keyboardType: const TextInputType.numberWithOptions(decimal: true),
         decoration: InputDecoration(
-          labelText: 'Return qty',
+          labelText: t('Return qty'),
           helperText: 'Max ${qty(max)}',
         ),
         onSubmitted: (_) => Navigator.pop(ctx, double.tryParse(c.text)),
@@ -105,12 +106,12 @@ Future<double?> _promptReturnQty(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, double.tryParse(c.text)),
-          child: const Text('Set'),
+          child: Text(t('Set')),
         ),
       ],
     ),
@@ -261,7 +262,7 @@ class SaleReturnsScreen extends ConsumerWidget {
     final filter = ref.watch(saleReturnFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
     final mainAction = ScreenAction(
-      label: 'New return',
+      label: t('New return'),
       icon: Icons.add,
       onPressed: () => _newReturn(context, ref),
       coachPage: 'sale_returns',
@@ -271,17 +272,17 @@ class SaleReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Sale returns'),
+        title: Text(t('Sale returns')),
         actions: [
           const GuideButton('sale_returns'),
           IconButton(
             icon: const Icon(Icons.inventory_outlined),
-            tooltip: 'Held returned goods',
+            tooltip: t('Held returned goods'),
             onPressed: () => context.push('/sale-returns/held'),
           ),
           IconButton(
             icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by date',
+            tooltip: t('Filter by date'),
             onPressed: () => _pickRange(context, ref, filter),
           ),
           mainAction.inAppBar(context),
@@ -293,7 +294,7 @@ class SaleReturnsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: SearchField(
-              hint: 'Search return no, invoice no, customer',
+              hint: t('Search return no, invoice no, customer'),
               onChanged: (v) => ref
                   .read(saleReturnFilterProvider.notifier)
                   .set(filter.copyWith(search: v)),
@@ -323,9 +324,9 @@ class SaleReturnsScreen extends ConsumerWidget {
                 value: returns,
                 onRetry: () => ref.invalidate(saleReturnsProvider),
                 builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.assignment_return_outlined,
-                        message: 'No sale returns found',
+                        message: t('No sale returns found'),
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
@@ -336,12 +337,12 @@ class SaleReturnsScreen extends ConsumerWidget {
                         trailingWidth: 90,
                         columns: [
                           DesktopTableColumn(
-                            label: 'Return #',
+                            label: t('Return #'),
                             flex: 2,
                             comparable: (r) => r['return_no'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Against invoice',
+                            label: t('Against invoice'),
                             flex: 2,
                             comparable: (r) =>
                                 (r['invoices'] as Map?)?['invoice_no']
@@ -349,13 +350,13 @@ class SaleReturnsScreen extends ConsumerWidget {
                                 '',
                           ),
                           DesktopTableColumn(
-                            label: 'Date',
+                            label: t('Date'),
                             flex: 2,
                             comparable: (r) =>
                                 r['return_date'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Amount',
+                            label: t('Amount'),
                             flex: 2,
                             alignEnd: true,
                             comparable: (r) => toDouble(r['total']),
@@ -580,7 +581,7 @@ class _InvoicePickerState extends ConsumerState<_InvoicePicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: 'Search invoice no or customer',
+              hint: t('Search invoice no or customer'),
               autofocus: true,
               onChanged: _load,
             ),
@@ -627,12 +628,12 @@ class SaleReturnDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Sale return'),
+        title: Text(t('Sale return')),
         actions: [
           if (data.value?['credit_note_no'] != null)
             IconButton(
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              tooltip: 'Credit note PDF',
+              tooltip: t('Credit note PDF'),
               onPressed: () =>
                   _shareNotePdf(context, ref, data.value!, isDebitNote: false),
             ),
@@ -727,7 +728,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SectionLabel('Returned products'),
+                SectionLabel(t('Returned products')),
                 Card(
                   child: Column(
                     children: [
@@ -764,7 +765,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SectionLabel('Settlement'),
+                SectionLabel(t('Settlement')),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -773,7 +774,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Refund mode'),
+                            Text(t('Refund mode')),
                             Text(
                               (r['refund_mode'] as String? ?? 'cash')
                                   .toUpperCase(),
@@ -784,7 +785,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Refunded now'),
+                            Text(t('Refunded now')),
                             Text(
                               money(r['refund_amount'] as num?),
                               style: const TextStyle(
@@ -800,7 +801,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Adjusted against due'),
+                              Text(t('Adjusted against due')),
                               Text(
                                 money(
                                   toDouble(r['total']) -
@@ -819,7 +820,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 if ((r['notes'] as String? ?? '').isNotEmpty) ...[
-                  const SectionLabel('Note'),
+                  SectionLabel(t('Note')),
                   Text(r['notes'] as String),
                 ],
                 const SizedBox(height: 24),
@@ -934,7 +935,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       return true;
     }
     if (_lateReason.text.trim().isEmpty) {
-      showError(context, 'Give a reason for accepting this late return');
+      showError(context, t('Give a reason for accepting this late return'));
       return true;
     }
     return false;
@@ -943,7 +944,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
   /// D29: take this return into the POS as credit for replacement items.
   Future<void> _startExchange() async {
     if (_payloadItems.isEmpty) {
-      showError(context, 'Choose the items being returned first');
+      showError(context, t('Choose the items being returned first'));
       return;
     }
     if (_lateBlocked()) return;
@@ -1051,7 +1052,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
         .where((it) => (_returnQty[it['id']] ?? 0) > 0)
         .toList();
     if (returningItems.isEmpty) {
-      showError(context, 'Enter return quantity for at least one item');
+      showError(context, t('Enter return quantity for at least one item'));
       return;
     }
     if (_lateBlocked()) return;
@@ -1103,7 +1104,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const SectionLabel('Select items to return'),
+          SectionLabel(t('Select items to return')),
           for (final it in _items)
             Builder(
               builder: (context) {
@@ -1144,8 +1145,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 ),
                               ),
                               if (_loadingReturned)
-                                Text(
-                                  'Checking earlier returns…',
+                                Text(t('Checking earlier returns…'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.inkSoft,
@@ -1234,8 +1234,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                       padding: const EdgeInsets.fromLTRB(12, 0, 12, 10),
                       child: Row(
                         children: [
-                          Text(
-                            'Condition:',
+                          Text(t('Condition:'),
                             style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                           ),
                           const SizedBox(width: 8),
@@ -1276,7 +1275,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                   setState(() => _mixed[lineId] = res);
                                 }
                               },
-                              child: const Text('Split…'),
+                              child: Text(t('Split…')),
                             ),
                         ],
                       ),
@@ -1303,13 +1302,12 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                     if (ref.watch(appContextProvider).value?.isOwner ?? false)
                       TextField(
                         controller: _lateReason,
-                        decoration: const InputDecoration(
-                          labelText: 'Reason for accepting it *',
+                        decoration: InputDecoration(
+                          labelText: t('Reason for accepting it *'),
                         ),
                       )
                     else
-                      Text(
-                        'Only the owner can accept a late return.',
+                      Text(t('Only the owner can accept a late return.'),
                         style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                       ),
                   ],
@@ -1317,7 +1315,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
               ),
             ),
           ],
-          const SectionLabel('Refund'),
+          SectionLabel(t('Refund')),
           Row(
             children: [
               Expanded(
@@ -1327,7 +1325,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: 'Refund now ₹',
+                    labelText: t('Refund now ₹'),
                     hintText: _total.toStringAsFixed(2),
                   ),
                   onChanged: (_) => setState(() => _refundTouched = true),
@@ -1337,13 +1335,13 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
               Expanded(
                 child: DropdownButtonFormField<String>(
                   initialValue: _refundMode,
-                  decoration: const InputDecoration(labelText: 'Mode'),
-                  items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                    DropdownMenuItem(value: 'upi', child: Text('UPI')),
+                  decoration: InputDecoration(labelText: t('Mode')),
+                  items: [
+                    DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                    DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
                     DropdownMenuItem(
                       value: 'credit',
-                      child: Text('Adjust in due'),
+                      child: Text(t('Adjust in due')),
                     ),
                   ],
                   onChanged: (v) => setState(() => _refundMode = v ?? 'cash'),
@@ -1363,8 +1361,8 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _notes,
-            decoration: const InputDecoration(
-              labelText: 'Reason / note (optional)',
+            decoration: InputDecoration(
+              labelText: t('Reason / note (optional)'),
             ),
           ),
           const SizedBox(height: 16),
@@ -1383,7 +1381,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
             OutlinedButton.icon(
               onPressed: _busy || _total <= 0 ? null : _startExchange,
               icon: const Icon(Icons.swap_horiz),
-              label: const Text('Exchange for other items'),
+              label: Text(t('Exchange for other items')),
             ),
           ],
           const SizedBox(height: 24),
@@ -1519,7 +1517,7 @@ class PurchaseReturnsScreen extends ConsumerWidget {
     final filter = ref.watch(purchaseReturnFilterProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
     final mainAction = ScreenAction(
-      label: 'New return',
+      label: t('New return'),
       icon: Icons.add,
       onPressed: () => _newReturn(context, ref),
       coachPage: 'purchase_returns',
@@ -1529,12 +1527,12 @@ class PurchaseReturnsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Purchase returns'),
+        title: Text(t('Purchase returns')),
         actions: [
           const GuideButton('purchase_returns'),
           IconButton(
             icon: const Icon(Icons.date_range),
-            tooltip: 'Filter by date',
+            tooltip: t('Filter by date'),
             onPressed: () => _pickRange(context, ref, filter),
           ),
           mainAction.inAppBar(context),
@@ -1546,7 +1544,7 @@ class PurchaseReturnsScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: SearchField(
-              hint: 'Search return no, purchase no, supplier',
+              hint: t('Search return no, purchase no, supplier'),
               onChanged: (v) => ref
                   .read(purchaseReturnFilterProvider.notifier)
                   .set(filter.copyWith(search: v)),
@@ -1576,9 +1574,9 @@ class PurchaseReturnsScreen extends ConsumerWidget {
                 value: returns,
                 onRetry: () => ref.invalidate(purchaseReturnsProvider),
                 builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.assignment_return_outlined,
-                        message: 'No purchase returns found',
+                        message: t('No purchase returns found'),
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
@@ -1589,12 +1587,12 @@ class PurchaseReturnsScreen extends ConsumerWidget {
                         trailingWidth: 90,
                         columns: [
                           DesktopTableColumn(
-                            label: 'Return #',
+                            label: t('Return #'),
                             flex: 2,
                             comparable: (r) => r['return_no'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Against purchase',
+                            label: t('Against purchase'),
                             flex: 2,
                             comparable: (r) =>
                                 (r['purchases'] as Map?)?['purchase_no']
@@ -1602,7 +1600,7 @@ class PurchaseReturnsScreen extends ConsumerWidget {
                                 '',
                           ),
                           DesktopTableColumn(
-                            label: 'Supplier',
+                            label: t('Supplier'),
                             flex: 2,
                             comparable: (r) =>
                                 ((r['suppliers'] as Map?)?['name'] as String? ??
@@ -1610,13 +1608,13 @@ class PurchaseReturnsScreen extends ConsumerWidget {
                                     .toLowerCase(),
                           ),
                           DesktopTableColumn(
-                            label: 'Date',
+                            label: t('Date'),
                             flex: 2,
                             comparable: (r) =>
                                 r['return_date'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Amount',
+                            label: t('Amount'),
                             flex: 2,
                             alignEnd: true,
                             comparable: (r) => toDouble(r['total']),
@@ -1807,12 +1805,12 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Purchase return'),
+        title: Text(t('Purchase return')),
         actions: [
           if (data.value?['debit_note_no'] != null)
             IconButton(
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              tooltip: 'Debit note PDF',
+              tooltip: t('Debit note PDF'),
               onPressed: () =>
                   _shareNotePdf(context, ref, data.value!, isDebitNote: true),
             ),
@@ -1908,7 +1906,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                     ),
                   ),
                 ),
-                const SectionLabel('Returned products'),
+                SectionLabel(t('Returned products')),
                 Card(
                   child: Column(
                     children: [
@@ -1943,7 +1941,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
-                const SectionLabel('Settlement'),
+                SectionLabel(t('Settlement')),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -1952,7 +1950,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Received now'),
+                            Text(t('Received now')),
                             Text(
                               money(r['received_amount'] as num?),
                               style: const TextStyle(
@@ -1968,7 +1966,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Adjusted against supplier due'),
+                              Text(t('Adjusted against supplier due')),
                               Text(
                                 money(
                                   toDouble(r['total']) -
@@ -1987,7 +1985,7 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
                   ),
                 ),
                 if ((r['notes'] as String? ?? '').isNotEmpty) ...[
-                  const SectionLabel('Note'),
+                  SectionLabel(t('Note')),
                   Text(r['notes'] as String),
                 ],
                 const SizedBox(height: 24),
@@ -2081,7 +2079,7 @@ class _PurchasePickerState extends ConsumerState<_PurchasePicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: 'Search purchase no, bill no, supplier',
+              hint: t('Search purchase no, bill no, supplier'),
               autofocus: true,
               onChanged: _load,
             ),
@@ -2090,9 +2088,9 @@ class _PurchasePickerState extends ConsumerState<_PurchasePicker> {
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
                 : _purchases.isEmpty
-                ? const EmptyState(
+                ? EmptyState(
                     icon: Icons.shopping_cart_outlined,
-                    message: 'No purchases found',
+                    message: t('No purchases found'),
                   )
                 : ListView.separated(
                     controller: scrollController,
@@ -2217,7 +2215,7 @@ class _PurchaseReturnFormScreenState
         .where((it) => (_returnQty[it['id']] ?? 0) > 0)
         .toList();
     if (returningItems.isEmpty) {
-      showError(context, 'Enter return quantity for at least one item');
+      showError(context, t('Enter return quantity for at least one item'));
       return;
     }
     setState(() => _busy = true);
@@ -2282,7 +2280,7 @@ class _PurchaseReturnFormScreenState
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const SectionLabel('Select items to return to supplier'),
+          SectionLabel(t('Select items to return to supplier')),
           for (final it in _items)
             Builder(
               builder: (context) {
@@ -2399,20 +2397,20 @@ class _PurchaseReturnFormScreenState
                 );
               },
             ),
-          const SectionLabel('Settlement'),
+          SectionLabel(t('Settlement')),
           TextField(
             controller: _received,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(
-              labelText: 'Refund received now ₹ (rest adjusts supplier due)',
+            decoration: InputDecoration(
+              labelText: t('Refund received now ₹ (rest adjusts supplier due)'),
             ),
             onChanged: (_) => setState(() => _receivedTouched = true),
           ),
           const SizedBox(height: 12),
           TextField(
             controller: _notes,
-            decoration: const InputDecoration(
-              labelText: 'Reason / note (optional)',
+            decoration: InputDecoration(
+              labelText: t('Reason / note (optional)'),
             ),
           ),
           const SizedBox(height: 16),

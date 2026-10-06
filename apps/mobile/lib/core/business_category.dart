@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 
 /// R1 shop categories (LAUNCH_SPECIFICATION D01, D03, D06). The key is the
@@ -34,10 +35,11 @@ class BusinessCategory {
   final List<String> variantFields;
 }
 
-const businessCategories = <BusinessCategory>[
+// A getter, not a const: labels are translated (t()) when read.
+List<BusinessCategory> get businessCategories => [
   BusinessCategory(
     key: 'mobile',
-    label: 'Mobile shop',
+    label: t('Mobile shop'),
     description: 'Phones and accessories, IMEI tracking',
     icon: Icons.smartphone,
     jobCards: true,
@@ -45,7 +47,7 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'mobile_repair',
-    label: 'Mobile repair',
+    label: t('Mobile repair'),
     description: 'Job cards, estimates, spares',
     icon: Icons.phonelink_setup,
     jobCards: true,
@@ -53,14 +55,14 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'garment',
-    label: 'Garment shop',
+    label: t('Garment shop'),
     description: 'Sizes, colours, designs',
     icon: Icons.checkroom,
     variantFields: ['Size', 'Color', 'Fabric', 'Gender', 'Design'],
   ),
   BusinessCategory(
     key: 'hardware',
-    label: 'Hardware shop',
+    label: t('Hardware shop'),
     description: 'Bulk pricing, cut lengths',
     icon: Icons.hardware,
     bulkPricing: true,
@@ -68,7 +70,7 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'electrical',
-    label: 'Electrical shop',
+    label: t('Electrical shop'),
     description: 'Wires by the metre, installation jobs',
     icon: Icons.electrical_services,
     jobCards: true,
@@ -77,7 +79,7 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'car_workshop',
-    label: 'Car workshop',
+    label: t('Car workshop'),
     description: 'Vehicle job cards, estimates, parts',
     icon: Icons.directions_car,
     jobCards: true,
@@ -86,7 +88,7 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'bike_garage',
-    label: 'Bike garage',
+    label: t('Bike garage'),
     description: 'Vehicle job cards, estimates, parts',
     icon: Icons.two_wheeler,
     jobCards: true,
@@ -95,7 +97,7 @@ const businessCategories = <BusinessCategory>[
   ),
   BusinessCategory(
     key: 'other',
-    label: 'Other',
+    label: t('Other'),
     description: 'Everything switched on',
     icon: Icons.storefront,
     jobCards: true,

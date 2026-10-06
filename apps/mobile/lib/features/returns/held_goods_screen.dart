@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -73,13 +74,13 @@ class HeldGoodsScreen extends ConsumerWidget {
             const SizedBox(height: 8),
             TextField(
               controller: note,
-              decoration: const InputDecoration(labelText: 'Note (e.g. inspection result)'),
+              decoration: InputDecoration(labelText: t('Note (e.g. inspection result)')),
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Confirm')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('Confirm'))),
         ],
       ),
     );
@@ -100,7 +101,7 @@ class HeldGoodsScreen extends ConsumerWidget {
       );
       ref.invalidate(heldGoodsProvider);
       if (to == 'sellable') invalidateStockData(ref);
-      if (context.mounted) showSuccess(context, 'Done');
+      if (context.mounted) showSuccess(context, t('Done'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -117,16 +118,16 @@ class HeldGoodsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Held returned goods'),
+        title: Text(t('Held returned goods')),
       ),
       body: AsyncView(
         value: data,
         onRetry: () => ref.invalidate(heldGoodsProvider),
         builder: (rows) {
           if (rows.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.inventory_outlined,
-              message: 'Nothing held — every returned item is back in stock or written off.',
+              message: t('Nothing held — every returned item is back in stock or written off.'),
             );
           }
           return RefreshIndicator(
@@ -134,9 +135,7 @@ class HeldGoodsScreen extends ConsumerWidget {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text(
-                  'These returned items are not in sellable stock. Release them '
-                  'once they pass inspection, or write them off.',
+                Text(t('These returned items are not in sellable stock. Release them once they pass inspection, or write them off.'),
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
                 const SizedBox(height: 12),
@@ -163,7 +162,7 @@ class HeldGoodsScreen extends ConsumerWidget {
                             style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
                           ),
                           PopupMenuButton<(String, String)>(
-                            tooltip: 'Move',
+                            tooltip: t('Move'),
                             enabled: canStock || canReturns,
                             onSelected: (m) => _move(context, ref, r, m.$1, m.$2),
                             itemBuilder: (_) => [

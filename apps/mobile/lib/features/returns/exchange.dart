@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -145,7 +146,7 @@ Future<Map<String, double>?> showConditionSplitDialog(
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('Cancel'))),
             FilledButton(
               style: dialogActionStyle,
               onPressed: ok
@@ -154,7 +155,7 @@ Future<Map<String, double>?> showConditionSplitDialog(
                         if (e.value > 0) e.key: e.value,
                     })
                   : null,
-              child: const Text('Done'),
+              child: Text(t('Done')),
             ),
           ],
         );

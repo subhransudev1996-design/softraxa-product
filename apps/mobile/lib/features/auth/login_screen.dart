@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -57,7 +58,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final resend = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Verify your email'),
+        title: Text(t('Verify your email')),
         content: Text(
           'Your email ($email) hasn\'t been verified yet. '
           'Please open the verification link we emailed you.\n\n'
@@ -66,12 +67,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Close'),
+            child: Text(t('Close')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Resend email'),
+            child: Text(t('Resend email')),
           ),
         ],
       ),
@@ -147,8 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
-                    Text(
-                      'Billing • Stock • GST',
+                    Text(t('Billing • Stock • GST'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.inkSoft,
@@ -161,8 +161,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       controller: _email,
                       keyboardType: TextInputType.emailAddress,
                       autofillHints: const [AutofillHints.email],
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
+                      decoration: InputDecoration(
+                        labelText: t('Email'),
                         prefixIcon: Icon(Icons.email_outlined),
                       ),
                       validator: (v) => v == null || !v.contains('@')
@@ -175,7 +175,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       obscureText: _obscure,
                       autofillHints: const [AutofillHints.password],
                       decoration: InputDecoration(
-                        labelText: 'Password',
+                        labelText: t('Password'),
                         prefixIcon: const Icon(Icons.lock_outline),
                         suffixIcon: IconButton(
                           icon: Icon(
@@ -198,12 +198,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               width: 20,
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
-                          : const Text('Login'),
+                          : Text(t('Login')),
                     ),
                     const SizedBox(height: 4),
                     TextButton(
                       onPressed: _busy ? null : _forgotPassword,
-                      child: const Text('Forgot password?'),
+                      child: Text(t('Forgot password?')),
                     ),
                     const SizedBox(height: 8),
                     TextButton(

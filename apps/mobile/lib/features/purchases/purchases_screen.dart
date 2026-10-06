@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -25,7 +26,7 @@ class PurchasesScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'Add purchase',
+      label: t('Add purchase'),
       icon: Icons.add,
       onPressed: () => context.push('/purchases/new'),
       coachPage: 'purchases',
@@ -35,7 +36,7 @@ class PurchasesScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Purchases'),
+        title: Text(t('Purchases')),
         actions: [
           const _DownloadButton(),
           const GuideButton('purchases'),
@@ -48,7 +49,7 @@ class PurchasesScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
             child: SearchField(
-              hint: 'Search purchase no, bill no, supplier',
+              hint: t('Search purchase no, bill no, supplier'),
               onChanged: (v) => ref
                   .read(purchaseFilterProvider.notifier)
                   .set(filter.copyWith(search: v)),
@@ -154,10 +155,9 @@ class PurchasesScreen extends ConsumerWidget {
                 value: purchases,
                 onRetry: () => ref.invalidate(purchasesProvider),
                 builder: (rows) => rows.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.shopping_cart_outlined,
-                        message:
-                            'No purchases found.\nAdd purchase bills to increase stock.',
+                        message: t('No purchases found.\nAdd purchase bills to increase stock.'),
                       )
                     : isDesktop
                     ? DesktopTable<Map<String, dynamic>>(
@@ -168,26 +168,26 @@ class PurchasesScreen extends ConsumerWidget {
                         trailingWidth: 110,
                         columns: [
                           DesktopTableColumn(
-                            label: 'Purchase #',
+                            label: t('Purchase #'),
                             flex: 2,
                             comparable: (p) =>
                                 p['purchase_no'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Supplier',
+                            label: t('Supplier'),
                             flex: 3,
                             comparable: (p) =>
                                 (p['supplier_name'] as String? ?? '')
                                     .toLowerCase(),
                           ),
                           DesktopTableColumn(
-                            label: 'Date',
+                            label: t('Date'),
                             flex: 2,
                             comparable: (p) =>
                                 p['purchase_date'] as String? ?? '',
                           ),
                           DesktopTableColumn(
-                            label: 'Amount',
+                            label: t('Amount'),
                             flex: 2,
                             alignEnd: true,
                             comparable: (p) => toDouble(p['total']),
@@ -234,8 +234,8 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
       );
       if (rows.isEmpty) {
         messenger.showSnackBar(
-          const SnackBar(
-            content: Text('No purchases to download for this filter'),
+          SnackBar(
+            content: Text(t('No purchases to download for this filter')),
           ),
         );
         return;
@@ -276,7 +276,7 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
 
   @override
   Widget build(BuildContext context) => IconButton(
-    tooltip: 'Download Excel',
+    tooltip: t('Download Excel'),
     onPressed: _busy ? null : _download,
     icon: _busy
         ? const SizedBox(
@@ -461,12 +461,11 @@ class PurchaseDetailScreen extends ConsumerWidget {
                   await _delete(context, ref, p);
                 }
               },
-              itemBuilder: (_) => const [
-                PopupMenuItem(value: 'edit', child: Text('Edit purchase')),
+              itemBuilder: (_) => [
+                PopupMenuItem(value: 'edit', child: Text(t('Edit purchase'))),
                 PopupMenuItem(
                   value: 'delete',
-                  child: Text(
-                    'Delete purchase',
+                  child: Text(t('Delete purchase'),
                     style: TextStyle(color: AppColors.red),
                   ),
                 ),
@@ -592,7 +591,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
                 onPressed: () =>
                     context.push('/purchases/$purchaseId/return', extra: p),
                 icon: const Icon(Icons.assignment_return_outlined),
-                label: const Text('Record purchase return'),
+                label: Text(t('Record purchase return')),
               ),
               const SizedBox(height: 24),
             ],
@@ -618,8 +617,7 @@ class PurchaseDetailScreen extends ConsumerWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Use this only for a purchase entered by mistake. Its items come '
+            Text('Use this only for a purchase entered by mistake. Its items come '
               'out of stock (${money(p['total'] as num?)} total)'
               '${(p['supplier_name'] as String? ?? '').isNotEmpty ? ', ${p['supplier_name']}\'s due is reduced' : ''} '
               'and the payment made with it is removed.',
@@ -627,9 +625,9 @@ class PurchaseDetailScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             TextField(
               controller: reason,
-              decoration: const InputDecoration(
-                labelText: 'Reason (optional)',
-                hintText: 'e.g. entered twice',
+              decoration: InputDecoration(
+                labelText: t('Reason (optional)'),
+                hintText: t('e.g. entered twice'),
               ),
             ),
           ],
@@ -637,14 +635,14 @@ class PurchaseDetailScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Keep it'),
+            child: Text(t('Keep it')),
           ),
           FilledButton(
             style: dialogActionStyle.copyWith(
               backgroundColor: const WidgetStatePropertyAll(AppColors.red),
             ),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Delete'),
+            child: Text(t('Delete')),
           ),
         ],
       ),

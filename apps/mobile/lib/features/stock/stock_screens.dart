@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -95,7 +96,7 @@ class StockScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Stock'),
+        title: Text(t('Stock')),
         actions: const [GuideButton('stock')],
       ),
       body: Column(
@@ -103,7 +104,7 @@ class StockScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
             child: SearchField(
-              hint: 'Search product, SKU, barcode',
+              hint: t('Search product, SKU, barcode'),
               onChanged: (v) => ref.read(stockSearchProvider.notifier).set(v),
             ),
           ),
@@ -113,10 +114,10 @@ class StockScreen extends ConsumerWidget {
               page: 'stock',
               id: 'filters',
               child: SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'all', label: Text('All')),
-                  ButtonSegment(value: 'low', label: Text('Low stock')),
-                  ButtonSegment(value: 'out', label: Text('Out of stock')),
+                segments: [
+                  ButtonSegment(value: 'all', label: Text(t('All'))),
+                  ButtonSegment(value: 'low', label: Text(t('Low stock'))),
+                  ButtonSegment(value: 'out', label: Text(t('Out of stock'))),
                 ],
                 selected: {filter},
                 onSelectionChanged: (s) =>
@@ -134,9 +135,9 @@ class StockScreen extends ConsumerWidget {
                   value: list,
                   onRetry: () => ref.invalidate(stockListProvider),
                   builder: (rows) => rows.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.warehouse_outlined,
-                          message: 'Nothing here',
+                          message: t('Nothing here'),
                         )
                       : isDesktop
                       ? DesktopTable<Map<String, dynamic>>(
@@ -144,14 +145,14 @@ class StockScreen extends ConsumerWidget {
                           trailingWidth: 100,
                           columns: [
                             DesktopTableColumn(
-                              label: 'Product',
+                              label: t('Product'),
                               flex: 3,
                               comparable: (p) =>
                                   (p['name'] as String? ?? '').toLowerCase(),
                             ),
-                            const DesktopTableColumn(label: 'Detail', flex: 3),
+                            DesktopTableColumn(label: t('Detail'), flex: 3),
                             DesktopTableColumn(
-                              label: 'Stock',
+                              label: t('Stock'),
                               flex: 2,
                               alignEnd: true,
                               comparable: (p) => toDouble(p['current_stock']),
@@ -416,15 +417,15 @@ class StockMovementsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Stock history'),
+        title: Text(t('Stock history')),
       ),
       body: AsyncView(
         value: movements,
         onRetry: () => ref.invalidate(stockMovementsProvider(productId)),
         builder: (rows) => rows.isEmpty
-            ? const EmptyState(
+            ? EmptyState(
                 icon: Icons.history,
-                message: 'No stock movements yet',
+                message: t('No stock movements yet'),
               )
             : ListView.separated(
                 padding: const EdgeInsets.all(16),

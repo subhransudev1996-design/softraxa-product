@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -39,18 +40,17 @@ class CustomerPricesSection extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Expanded(child: SectionLabel('Agreed prices')),
+            Expanded(child: SectionLabel(t('Agreed prices'))),
             if (canEdit)
               TextButton.icon(
                 onPressed: () => _add(context, ref),
                 icon: const Icon(Icons.add, size: 18),
-                label: const Text('Add'),
+                label: Text(t('Add')),
               ),
           ],
         ),
         if (rows.isEmpty)
-          Text(
-            'No agreed prices — this customer pays the normal price.',
+          Text(t('No agreed prices — this customer pays the normal price.'),
             style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
           )
         else
@@ -75,7 +75,7 @@ class CustomerPricesSection extends ConsumerWidget {
                         if (canEdit)
                           IconButton(
                             icon: const Icon(Icons.delete_outline, size: 20),
-                            tooltip: 'Remove agreed price',
+                            tooltip: t('Remove agreed price'),
                             onPressed: () => _remove(context, ref, r),
                           ),
                       ],
@@ -101,10 +101,10 @@ class CustomerPricesSection extends ConsumerWidget {
   ) async {
     final ok = await confirmDialog(
       context,
-      title: 'Remove agreed price?',
+      title: t('Remove agreed price?'),
       message:
           '${_name(r)} will go back to the normal price for this customer.',
-      confirmText: 'Remove',
+      confirmText: t('Remove'),
     );
     if (!ok) return;
     try {
@@ -146,7 +146,7 @@ class CustomerPricesSection extends ConsumerWidget {
                 decimal: true,
               ),
               decoration: InputDecoration(
-                labelText: 'Agreed price ₹',
+                labelText: t('Agreed price ₹'),
                 helperText:
                     'Normal price ${money(normal)} — same basis (incl. GST)',
               ),
@@ -154,19 +154,19 @@ class CustomerPricesSection extends ConsumerWidget {
             const SizedBox(height: 8),
             TextField(
               controller: note,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: InputDecoration(labelText: t('Note (optional)')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -244,9 +244,9 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
                 children: [
                   TextField(
                     autofocus: true,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       prefixIcon: Icon(Icons.search),
-                      hintText: 'Search products',
+                      hintText: t('Search products'),
                     ),
                     onChanged: _search,
                   ),
@@ -301,7 +301,7 @@ class _ProductChooserState extends ConsumerState<_ProductChooser> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
       ],
     );

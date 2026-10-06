@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -435,8 +436,7 @@ class _CoachCard extends StatelessWidget {
                   onTap: onSkip,
                   child: Padding(
                     padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: Text(
-                      'Skip tour',
+                    child: Text(t('Skip tour'),
                       style: TextStyle(
                         fontSize: 12.5,
                         color: AppColors.inkSoft,
@@ -452,7 +452,7 @@ class _CoachCard extends StatelessWidget {
                       minimumSize: const Size(0, 38),
                       padding: const EdgeInsets.symmetric(horizontal: 14),
                     ),
-                    child: const Text('Back'),
+                    child: Text(t('Back')),
                   ),
                 const SizedBox(width: 8),
                 FilledButton(
@@ -611,12 +611,12 @@ class _WalkthroughSheetState extends State<_WalkthroughSheet> {
                     duration: const Duration(milliseconds: 250),
                     curve: Curves.easeOut,
                   ),
-                  child: const Text('Back'),
+                  child: Text(t('Back')),
                 )
               else
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('Skip'),
+                  child: Text(t('Skip')),
                 ),
               const Spacer(),
               FilledButton(
@@ -667,7 +667,7 @@ class _GuideButtonState extends State<GuideButton> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-      tooltip: 'Page guide',
+      tooltip: t('Page guide'),
       icon: Icon(Icons.help_outline, color: widget.color),
       onPressed: () => showWalkthrough(context, widget.pageKey),
     );
@@ -678,45 +678,46 @@ class _GuideButtonState extends State<GuideButton> {
 // Step `id`s reference CoachTarget wraps in the screens; a step whose
 // target isn't mounted is skipped (or shown centered when id is null).
 
-const Map<String, PageGuide> pageGuides = {
+// A getter, not a const: texts are translated (t()) when read.
+Map<String, PageGuide> get pageGuides => {
   'home': PageGuide('Welcome to Dukania', [
     CoachStep(
       icon: Icons.storefront_outlined,
-      title: 'Your shop, in one app',
+      title: t('Your shop, in one app'),
       body:
           'Billing, stock, purchases, customers, dues, expenses and reports — everything your shop needs, together in one place. Let\'s take a quick look around.',
     ),
     CoachStep(
       id: 'stats',
       icon: Icons.dashboard_outlined,
-      title: 'Today at a glance',
+      title: t('Today at a glance'),
       body:
           "These tiles show today's sales and profit, your total stock value, low-stock alerts and dues — they update live as you bill.",
     ),
     CoachStep(
       id: 'new_bill',
       icon: Icons.receipt_long_outlined,
-      title: 'Start billing here',
+      title: t('Start billing here'),
       body:
           'This button opens the billing screen. Search or scan a product, take payment, print or share the invoice — all in seconds.',
     ),
     CoachStep(
       id: 'quick_actions',
       icon: Icons.bolt_outlined,
-      title: 'Quick actions',
+      title: t('Quick actions'),
       body:
           'Shortcuts for the things you do most — new bill, add product, new purchase and barcode scan.',
     ),
     CoachStep(
       id: 'recent',
       icon: Icons.history,
-      title: 'Recent invoices',
+      title: t('Recent invoices'),
       body:
           'Your latest bills with payment status. Tap any of them to reprint, edit, record a payment or make a return.',
     ),
     CoachStep(
       icon: Icons.help_outline,
-      title: 'Help on every page',
+      title: t('Help on every page'),
       body:
           'Every page has a ? icon at the top — tap it anytime to replay that page\'s tour. This welcome tour is always available from More → App walkthrough.',
     ),
@@ -725,35 +726,35 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'search',
       icon: Icons.search,
-      title: 'Find products here',
+      title: t('Find products here'),
       body:
           'Type a name, SKU or barcode — or scan with a USB scanner straight into this box. Matching products appear below; tap one to add it to the bill.',
     ),
     CoachStep(
       id: 'scan',
       icon: Icons.qr_code_scanner,
-      title: 'Camera scanning',
+      title: t('Camera scanning'),
       body:
           'Tap to scan barcodes with the camera — keep scanning item after item and they\'re added automatically.',
     ),
     CoachStep(
       id: 'customer',
       icon: Icons.person_add_alt,
-      title: 'Who is this bill for?',
+      title: t('Who is this bill for?'),
       body:
           'Attach a customer to track credit (due) sales — or leave as walk-in. You can also add a brand-new customer from here.',
     ),
     CoachStep(
       id: 'cart',
       icon: Icons.shopping_cart_outlined,
-      title: 'The bill lives here',
+      title: t('The bill lives here'),
       body:
           'Every added item shows here. Tap a line to change quantity, price or give a line discount; swipe or use the buttons to remove.',
     ),
     CoachStep(
       id: 'charge',
       icon: Icons.payments_outlined,
-      title: 'Take payment',
+      title: t('Take payment'),
       body:
           'When the bill is ready, tap here: choose cash, UPI, card or credit — or split across several. Then print or share the invoice.',
     ),
@@ -762,27 +763,27 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'search',
       icon: Icons.search,
-      title: 'Search your catalog',
+      title: t('Search your catalog'),
       body: 'Find any product by name, SKU or barcode as you type.',
     ),
     CoachStep(
       id: 'master',
       icon: Icons.category_outlined,
-      title: 'Categories, brands & units',
+      title: t('Categories, brands & units'),
       body:
           'Manage the master lists here. Units decide whether an item can sell in fractions (kg, metre, litre).',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.add_box_outlined,
-      title: 'Add a product',
+      title: t('Add a product'),
       body:
           'Name, prices, GST, barcode, opening stock, low-stock alert — and variants (size/colour/model) if one product comes in versions.',
     ),
     CoachStep(
       id: 'list',
       icon: Icons.inventory_2_outlined,
-      title: 'Your products',
+      title: t('Your products'),
       body:
           'Tap any product to see its detail — stock, variants, barcode, history — or to edit it.',
     ),
@@ -791,20 +792,20 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'search',
       icon: Icons.search,
-      title: 'Find any bill',
+      title: t('Find any bill'),
       body: 'Search by invoice number or customer name.',
     ),
     CoachStep(
       id: 'filters',
       icon: Icons.filter_list,
-      title: 'Filter by payment',
+      title: t('Filter by payment'),
       body:
           'One tap to see only Paid, Partial or Credit bills — great for chasing dues.',
     ),
     CoachStep(
       id: 'list',
       icon: Icons.receipt_long_outlined,
-      title: 'Open a bill',
+      title: t('Open a bill'),
       body:
           'Tap an invoice to reprint/share it, record a due payment, edit it, make a return, or cancel it (stock is restored).',
     ),
@@ -813,19 +814,19 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'presets',
       icon: Icons.event_outlined,
-      title: 'Quick date filters',
+      title: t('Quick date filters'),
       body: 'Jump between today, this week, this month — one tap.',
     ),
     CoachStep(
       id: 'status',
       icon: Icons.account_balance_wallet_outlined,
-      title: 'Paid / Partial / Credit',
+      title: t('Paid / Partial / Credit'),
       body: 'Filter purchases by how much you\'ve paid the supplier.',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.add_shopping_cart,
-      title: 'Record a purchase',
+      title: t('Record a purchase'),
       body:
           'Enter a supplier bill — items, quantities, cost prices, GST. Stock goes up automatically when you save.',
     ),
@@ -834,14 +835,14 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'list',
       icon: Icons.people_outline,
-      title: 'Your customers',
+      title: t('Your customers'),
       body:
           'Each entry shows the due balance. Tap one for the full ledger — bills, payments and returns.',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.person_add_alt,
-      title: 'Add a customer',
+      title: t('Add a customer'),
       body:
           'Save name, phone and address; set an optional credit limit to get warned before dues grow too big.',
     ),
@@ -850,28 +851,28 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'info',
       icon: Icons.person_outline,
-      title: 'Customer profile & dues',
+      title: t('Customer profile & dues'),
       body:
           'View customer contact details, current outstanding due amount, credit limit, and over-limit warnings.',
     ),
     CoachStep(
       id: 'edit',
       icon: Icons.edit_outlined,
-      title: 'Edit customer details',
+      title: t('Edit customer details'),
       body:
           'Tap here anytime to update customer name, phone number, address, GSTIN, or change credit limit.',
     ),
     CoachStep(
       id: 'pay',
       icon: Icons.payments_outlined,
-      title: 'Receive due payment',
+      title: t('Receive due payment'),
       body:
           'Tap here to record a payment received from this customer (Cash, UPI, Card). Outstanding balance is updated immediately.',
     ),
     CoachStep(
       id: 'ledger',
       icon: Icons.receipt_long_outlined,
-      title: 'Transaction ledger',
+      title: t('Transaction ledger'),
       body:
           'Complete chronological record of all invoices, payments received, and sales returns. Tap any invoice row to view or print it.',
     ),
@@ -880,14 +881,14 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'list',
       icon: Icons.local_shipping_outlined,
-      title: 'Who you buy from',
+      title: t('Who you buy from'),
       body:
           'Each supplier shows how much you still owe. Tap for the full ledger of purchases and payments.',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.add,
-      title: 'Add a supplier',
+      title: t('Add a supplier'),
       body:
           'Save name, phone and address; track how much you owe on purchase orders.',
     ),
@@ -896,35 +897,35 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'info',
       icon: Icons.local_shipping_outlined,
-      title: 'Supplier profile & pending due',
+      title: t('Supplier profile & pending due'),
       body:
           'View supplier contact details, total pending balance owed to this supplier, credit limit, and over-limit status.',
     ),
     CoachStep(
       id: 'edit',
       icon: Icons.edit_outlined,
-      title: 'Edit supplier details',
+      title: t('Edit supplier details'),
       body:
           'Tap here anytime to update supplier name, phone, address, GSTIN, or set credit limits.',
     ),
     CoachStep(
       id: 'pay',
       icon: Icons.payments_outlined,
-      title: 'Pay supplier',
+      title: t('Pay supplier'),
       body:
           'Tap here to record a payment made to this supplier (Cash, UPI, Card, Bank). It reduces your pending balance.',
     ),
     CoachStep(
       id: 'new_purchase',
       icon: Icons.add_shopping_cart,
-      title: 'New purchase',
+      title: t('New purchase'),
       body:
           'Record a new stock purchase bill prefilled for this supplier.',
     ),
     CoachStep(
       id: 'ledger',
       icon: Icons.receipt_long_outlined,
-      title: 'Supplier ledger',
+      title: t('Supplier ledger'),
       body:
           'Complete chronological history of all purchases, payments made, and purchase returns. Tap any purchase to view details.',
     ),
@@ -933,14 +934,14 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'filters',
       icon: Icons.tune,
-      title: 'Low & out of stock',
+      title: t('Low & out of stock'),
       body:
           'These filters instantly show what needs restocking — the same alerts as the dashboard tiles.',
     ),
     CoachStep(
       id: 'list',
       icon: Icons.inventory_2_outlined,
-      title: 'Every product\'s stock',
+      title: t('Every product\'s stock'),
       body:
           'Tap a product to adjust stock, record damage, or see its full in/out movement history.',
     ),
@@ -949,20 +950,20 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'presets',
       icon: Icons.event_outlined,
-      title: 'Pick a period',
+      title: t('Pick a period'),
       body:
           'Today, this week, this month, last month — or use the calendar for any range.',
     ),
     CoachStep(
       id: 'total',
       icon: Icons.summarize_outlined,
-      title: 'Total for the period',
+      title: t('Total for the period'),
       body: 'The sum updates instantly as you change filters or add expenses.',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.add_card,
-      title: 'Add an expense',
+      title: t('Add an expense'),
       body:
           'Amount + category + note. Rent, electricity, transport, chai — everything counts.',
     ),
@@ -971,7 +972,7 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'list',
       icon: Icons.query_stats,
-      title: 'Pick any report',
+      title: t('Pick any report'),
       body:
           'Sales, profit, stock, GST, dues, purchases, expenses — each opens with a chart, a table, a date filter and PDF export.',
     ),
@@ -980,14 +981,14 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'template',
       icon: Icons.download_outlined,
-      title: '1. Download the template',
+      title: t('1. Download the template'),
       body:
           'Start here — the sample file has exactly the columns the import expects.',
     ),
     CoachStep(
       id: 'upload',
       icon: Icons.upload_file_outlined,
-      title: '2. Upload your file',
+      title: t('2. Upload your file'),
       body:
           'Every row is checked and duplicates are caught before anything is saved. Fix red rows and import again safely.',
     ),
@@ -996,14 +997,14 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'filters',
       icon: Icons.flag_outlined,
-      title: 'Track by status',
+      title: t('Track by status'),
       body:
           'Filter jobs by stage — received, in progress, waiting for parts, ready, delivered.',
     ),
     CoachStep(
       id: 'add',
       icon: Icons.build_outlined,
-      title: 'Take in a new job',
+      title: t('Take in a new job'),
       body:
           'Repair or on-site work? Record the item, problem, estimate, advance and service location. Parts + labour become one invoice at closing.',
     ),
@@ -1012,7 +1013,7 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'add',
       icon: Icons.home_repair_service_outlined,
-      title: 'Your service menu',
+      title: t('Your service menu'),
       body:
           'Add the services you offer — repairs, stitching, installation — with price, GST and warranty. Job cards pick labour charges from this list.',
     ),
@@ -1021,7 +1022,7 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'add',
       icon: Icons.assignment_return_outlined,
-      title: 'Take items back',
+      title: t('Take items back'),
       body:
           'Pick the original invoice and choose what\'s coming back — you can never return more than was sold. Refund or adjust against dues.',
     ),
@@ -1030,7 +1031,7 @@ const Map<String, PageGuide> pageGuides = {
     CoachStep(
       id: 'add',
       icon: Icons.assignment_return_outlined,
-      title: 'Return to supplier',
+      title: t('Return to supplier'),
       body:
           'Pick the purchase and choose items to send back — only what\'s still in stock can be returned. Your supplier balance adjusts.',
     ),
@@ -1038,7 +1039,7 @@ const Map<String, PageGuide> pageGuides = {
   'offline_bills': PageGuide('Offline bills', [
     CoachStep(
       icon: Icons.wifi_off_outlined,
-      title: 'No internet? Keep billing',
+      title: t('No internet? Keep billing'),
       body:
           'When the connection drops, bills are saved here with temporary numbers and sync automatically when internet returns. Failed ones can be retried from this list.',
     ),

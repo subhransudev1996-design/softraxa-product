@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -28,7 +29,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
   Future<void> _sendReset() async {
     final email = _email.text.trim();
     if (!email.contains('@')) {
-      showError(context, 'Enter a valid email');
+      showError(context, t('Enter a valid email'));
       return;
     }
     setState(() => _busy = true);
@@ -50,7 +51,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        title: const Text('Reset password'),
+        title: Text(t('Reset password')),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/login'),
@@ -76,15 +77,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       children: [
         const Icon(Icons.lock_reset, size: 64, color: AppColors.primary),
         const SizedBox(height: 20),
-        Text(
-          'Forgot your password?',
+        Text(t('Forgot your password?'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
-        Text(
-          'Enter your account email and we\'ll send you a link to set a new '
-          'password.',
+        Text(t('Enter your account email and we\'ll send you a link to set a new password.'),
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.inkSoft, height: 1.5),
         ),
@@ -93,8 +91,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           controller: _email,
           keyboardType: TextInputType.emailAddress,
           autofillHints: const [AutofillHints.email],
-          decoration: const InputDecoration(
-            labelText: 'Email',
+          decoration: InputDecoration(
+            labelText: t('Email'),
             prefixIcon: Icon(Icons.email_outlined),
           ),
           onFieldSubmitted: (_) => _sendReset(),
@@ -108,7 +106,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Send reset link'),
+              : Text(t('Send reset link')),
         ),
       ],
     );
@@ -124,8 +122,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           color: AppColors.primary,
         ),
         const SizedBox(height: 20),
-        Text(
-          'Check your email',
+        Text(t('Check your email'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -140,12 +137,12 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         const SizedBox(height: 28),
         FilledButton(
           onPressed: () => context.go('/login'),
-          child: const Text('Back to login'),
+          child: Text(t('Back to login')),
         ),
         const SizedBox(height: 8),
         TextButton(
           onPressed: _busy ? null : _sendReset,
-          child: const Text('Resend link'),
+          child: Text(t('Resend link')),
         ),
       ],
     );
@@ -167,12 +164,12 @@ Future<void> showSetNewPasswordDialog(
     barrierDismissible: false,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setLocal) => AlertDialog(
-        title: const Text('Set a new password'),
+        title: Text(t('Set a new password')),
         content: TextField(
           controller: controller,
           obscureText: true,
-          decoration: const InputDecoration(
-            labelText: 'New password (min 6 characters)',
+          decoration: InputDecoration(
+            labelText: t('New password (min 6 characters)'),
           ),
         ),
         actions: [
@@ -194,7 +191,7 @@ Future<void> showSetNewPasswordDialog(
                         Navigator.pop(ctx);
                         showSuccess(
                           ctx,
-                          'Password updated. You\'re signed in.',
+                          t('Password updated. You\'re signed in.'),
                         );
                       }
                     } catch (e) {
@@ -208,7 +205,7 @@ Future<void> showSetNewPasswordDialog(
                     width: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Update password'),
+                : Text(t('Update password')),
           ),
         ],
       ),

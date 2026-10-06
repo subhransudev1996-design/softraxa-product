@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -243,7 +244,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                           : 'Due after your payment terms from this date; '
                                 'receipts settle it first',
                     ),
-                    trailing: const Text('Change'),
+                    trailing: Text(t('Change')),
                     onTap: _pickDate,
                   ),
                   Row(
@@ -252,7 +253,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                         child: OutlinedButton.icon(
                           onPressed: _downloadSample,
                           icon: const Icon(Icons.download),
-                          label: const Text('Sample file'),
+                          label: Text(t('Sample file')),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -260,7 +261,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
                         child: FilledButton.icon(
                           onPressed: _busy ? null : _pickFile,
                           icon: const Icon(Icons.upload_file),
-                          label: const Text('Choose file'),
+                          label: Text(t('Choose file')),
                         ),
                       ),
                     ],
@@ -270,7 +271,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
             ),
           ),
           if (result != null) ...[
-            const SectionLabel('Result'),
+            SectionLabel(t('Result')),
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16),

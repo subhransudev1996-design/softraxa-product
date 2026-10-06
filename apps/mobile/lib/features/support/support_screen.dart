@@ -1,3 +1,4 @@
+import '../../core/i18n.dart' as i18n;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -29,21 +30,21 @@ class SupportScreen extends ConsumerWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('New support request'),
+        title: Text(i18n.t('New support request')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             TextField(
               controller: subject,
               autofocus: true,
-              decoration: const InputDecoration(labelText: 'Subject *'),
+              decoration: InputDecoration(labelText: i18n.t('Subject *')),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: message,
               maxLines: 4,
-              decoration: const InputDecoration(
-                labelText: 'Describe the issue',
+              decoration: InputDecoration(
+                labelText: i18n.t('Describe the issue'),
               ),
             ),
           ],
@@ -51,12 +52,12 @@ class SupportScreen extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(i18n.t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Send'),
+            child: Text(i18n.t('Send')),
           ),
         ],
       ),
@@ -71,7 +72,7 @@ class SupportScreen extends ConsumerWidget {
       });
       ref.invalidate(ticketsProvider);
       if (context.mounted) {
-        showSuccess(context, 'Request sent. We will contact you soon.');
+        showSuccess(context, i18n.t('Request sent. We will contact you soon.'));
       }
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -85,7 +86,7 @@ class SupportScreen extends ConsumerWidget {
     final isTrial = appContext?.subscriptionState == 'trial';
 
     final mainAction = ScreenAction(
-      label: 'New request',
+      label: i18n.t('New request'),
       icon: Icons.add,
       onPressed: () => _newTicket(context, ref),
     );
@@ -93,7 +94,7 @@ class SupportScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Support'),
+        title: Text(i18n.t('Support')),
         actions: [mainAction.inAppBar(context)],
       ),
       floatingActionButton: mainAction.fab(context),
@@ -178,8 +179,7 @@ class SupportScreen extends ConsumerWidget {
                           ),
                         ),
                         icon: const Icon(Icons.chat, size: 18),
-                        label: const Text(
-                          'Chat on WhatsApp',
+                        label: Text(i18n.t('Chat on WhatsApp'),
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -194,15 +194,14 @@ class SupportScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            const SectionLabel('Support Requests'),
+            SectionLabel(i18n.t('Support Requests')),
             AsyncView(
               value: tickets,
               onRetry: () => ref.invalidate(ticketsProvider),
               builder: (rows) => rows.isEmpty
-                  ? const EmptyState(
+                  ? EmptyState(
                       icon: Icons.support_agent_outlined,
-                      message:
-                          'No support requests yet.\nFacing a problem? Tap "New request".',
+                      message: i18n.t('No support requests yet.\nFacing a problem? Tap "New request".'),
                     )
                   : ListView.separated(
                       shrinkWrap: true,
@@ -250,8 +249,7 @@ class SupportScreen extends ConsumerWidget {
                               ),
                             ),
                             trailing: unread
-                                ? const StatusChip(
-                                    'new reply',
+                                ? StatusChip(i18n.t('new reply'),
                                     color: AppColors.indigo,
                                   )
                                 : StatusChip(

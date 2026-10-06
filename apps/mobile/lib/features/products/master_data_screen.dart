@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/data_refresh.dart';
@@ -19,12 +20,12 @@ class MasterDataScreen extends ConsumerWidget {
         backgroundColor: AppColors.canvas,
         appBar: AppBar(
           leading: appBarBack(context),
-          title: const Text('Categories, brands & units'),
-          bottom: const TabBar(
+          title: Text(t('Categories, brands & units')),
+          bottom: TabBar(
             tabs: [
-              Tab(text: 'Categories'),
-              Tab(text: 'Brands'),
-              Tab(text: 'Units'),
+              Tab(text: t('Categories')),
+              Tab(text: t('Brands')),
+              Tab(text: t('Units')),
             ],
           ),
         ),
@@ -91,20 +92,20 @@ class _MasterList extends ConsumerWidget {
                 controller: name,
                 autofocus: true,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Name'),
+                decoration: InputDecoration(labelText: t('Name')),
               ),
               if (table == 'units') ...[
                 const SizedBox(height: 12),
                 TextField(
                   controller: shortName,
-                  decoration: const InputDecoration(
-                    labelText: 'Short name (pcs, kg…)',
+                  decoration: InputDecoration(
+                    labelText: t('Short name (pcs, kg…)'),
                   ),
                 ),
                 SwitchListTile(
                   value: allowDecimal,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('Allow decimal qty'),
+                  title: Text(t('Allow decimal qty')),
                   onChanged: (v) => setState(() => allowDecimal = v),
                 ),
               ],
@@ -113,12 +114,12 @@ class _MasterList extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -153,8 +154,8 @@ class _MasterList extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: 'Delete "${row['name']}"?',
-      message: 'Products using it will keep working but lose this label.',
-      confirmText: 'Delete',
+      message: t('Products using it will keep working but lose this label.'),
+      confirmText: t('Delete'),
     );
     if (!ok) return;
     try {
@@ -185,7 +186,7 @@ class _MasterList extends ConsumerWidget {
         builder: (rows) => rows.isEmpty
             ? EmptyState(
                 icon: Icons.category_outlined,
-                message: 'Nothing here yet.\nTap + to add.',
+                message: t('Nothing here yet.\nTap + to add.'),
               )
             : ListView.separated(
                 padding: const EdgeInsets.all(16),

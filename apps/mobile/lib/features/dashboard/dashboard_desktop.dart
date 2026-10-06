@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -141,11 +142,11 @@ class SalesTrendPanel extends ConsumerWidget {
     final trend = ref.watch(salesTrendProvider);
     final total = trend.value?.fold<double>(0, (s, p) => s + p.$2);
     return DashPanel(
-      title: 'Sales — last 30 days',
+      title: t('Sales — last 30 days'),
       subtitle: total == null ? ' ' : 'Total ${money(total)}',
       action: TextButton(
         onPressed: () => context.push('/reports'),
-        child: const Text('Reports'),
+        child: Text(t('Reports')),
       ),
       child: AsyncView(
         value: trend,
@@ -273,16 +274,15 @@ class TopProductsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final top = ref.watch(topProductsProvider);
     return DashPanel(
-      title: 'Top products',
-      subtitle: 'By sales, last 30 days',
+      title: t('Top products'),
+      subtitle: t('By sales, last 30 days'),
       child: AsyncView(
         value: top,
         onRetry: () => ref.invalidate(topProductsProvider),
         builder: (rows) {
           if (rows.isEmpty) {
             return Center(
-              child: Text(
-                'No sales in the last 30 days.',
+              child: Text(t('No sales in the last 30 days.'),
                 style: TextStyle(color: AppColors.inkSoft),
               ),
             );
@@ -403,15 +403,14 @@ class RecentInvoicesPanel extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(20, 12, 12, 8),
             child: Row(
               children: [
-                const Expanded(
-                  child: Text(
-                    'Recent bills',
+                Expanded(
+                  child: Text(t('Recent bills'),
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                   ),
                 ),
                 TextButton(
                   onPressed: () => context.push('/invoices'),
-                  child: const Text('View all'),
+                  child: Text(t('View all')),
                 ),
               ],
             ),
@@ -420,11 +419,11 @@ class RecentInvoicesPanel extends StatelessWidget {
             color: AppColors.canvas,
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 9),
             child: cols([
-              Text('INVOICE', style: head),
-              Text('CUSTOMER', style: head),
-              Text('DATE', style: head),
-              Text('AMOUNT', style: head),
-              Text('STATUS', style: head),
+              Text(t('INVOICE'), style: head),
+              Text(t('CUSTOMER'), style: head),
+              Text(t('DATE'), style: head),
+              Text(t('AMOUNT'), style: head),
+              Text(t('STATUS'), style: head),
             ]),
           ),
           AsyncView(
@@ -434,8 +433,7 @@ class RecentInvoicesPanel extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Center(
-                      child: Text(
-                        'No bills yet — create your first bill with New Bill.',
+                      child: Text(t('No bills yet — create your first bill with New Bill.'),
                         style: TextStyle(color: AppColors.inkSoft),
                       ),
                     ),

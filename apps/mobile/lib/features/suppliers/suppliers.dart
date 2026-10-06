@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -161,26 +162,26 @@ Future<Map<String, dynamic>?> showSupplierForm(
                 controller: name,
                 autofocus: existing == null,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Name *'),
+                decoration: InputDecoration(labelText: t('Name *')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: phone,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone'),
+                decoration: InputDecoration(labelText: t('Phone')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: address,
                 maxLines: 2,
-                decoration: const InputDecoration(labelText: 'Address'),
+                decoration: InputDecoration(labelText: t('Address')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: gst,
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
-                  labelText: 'GSTIN (optional)',
+                  labelText: t('GSTIN (optional)'),
                   errorText: gstinError(gst.text),
                 ),
                 onChanged: (v) => setState(() {
@@ -190,7 +191,7 @@ Future<Map<String, dynamic>?> showSupplierForm(
               const SizedBox(height: 12),
               GstStateField(
                 value: state,
-                helperText: 'Another state means IGST on their bills',
+                helperText: t('Another state means IGST on their bills'),
                 onChanged: (v) => setState(() => state = v),
               ),
               const SizedBox(height: 12),
@@ -199,10 +200,9 @@ Future<Map<String, dynamic>?> showSupplierForm(
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Credit limit ₹ (optional)',
-                  helperText:
-                      'Max amount you can owe this supplier — leave blank for no limit',
+                decoration: InputDecoration(
+                  labelText: t('Credit limit ₹ (optional)'),
+                  helperText: t('Max amount you can owe this supplier — leave blank for no limit'),
                 ),
               ),
             ],
@@ -211,14 +211,14 @@ Future<Map<String, dynamic>?> showSupplierForm(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: gstinError(gst.text) == null
                 ? () => Navigator.pop(ctx, true)
                 : null,
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -283,7 +283,7 @@ Future<void> showRecordSupplierPayment(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: const Text('Pay supplier'),
+        title: Text(t('Pay supplier')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -300,31 +300,31 @@ Future<void> showRecordSupplierPayment(
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: mode,
-              decoration: const InputDecoration(labelText: 'Payment mode'),
-              items: const [
-                DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                DropdownMenuItem(value: 'card', child: Text('Card')),
-                DropdownMenuItem(value: 'other', child: Text('Bank/Other')),
+              decoration: InputDecoration(labelText: t('Payment mode')),
+              items: [
+                DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                DropdownMenuItem(value: 'card', child: Text(t('Card'))),
+                DropdownMenuItem(value: 'other', child: Text(t('Bank/Other'))),
               ],
               onChanged: (v) => setState(() => mode = v ?? 'cash'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: note,
-              decoration: const InputDecoration(labelText: 'Note (optional)'),
+              decoration: InputDecoration(labelText: t('Note (optional)')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Pay'),
+            child: Text(t('Pay')),
           ),
         ],
       ),
@@ -349,7 +349,7 @@ Future<void> showRecordSupplierPayment(
     ref.invalidate(suppliersProvider);
     ref.invalidate(dashboardStatsProvider);
     ref.invalidate(purchasesProvider);
-    if (context.mounted) showSuccess(context, 'Payment recorded');
+    if (context.mounted) showSuccess(context, t('Payment recorded'));
   } catch (e) {
     if (context.mounted) showError(context, e);
   }
@@ -371,7 +371,7 @@ Future<bool> deleteSupplier(
     await showDialog<void>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Can\'t delete yet'),
+        title: Text(t('Can\'t delete yet')),
         content: Text(
           due > 0
               ? 'You still owe $name ${money(due)}. Pay or settle it first, '
@@ -382,7 +382,7 @@ Future<bool> deleteSupplier(
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('OK'),
+            child: Text(t('OK')),
           ),
         ],
       ),
@@ -393,22 +393,19 @@ Future<bool> deleteSupplier(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text('Delete $name?'),
-      content: const Text(
-        'They will no longer appear in your supplier list or when adding a '
-        'purchase. Their past purchases and payments stay in your records '
-        'and reports.',
+      content: Text(t('They will no longer appear in your supplier list or when adding a purchase. Their past purchases and payments stay in your records and reports.'),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle.copyWith(
             backgroundColor: const WidgetStatePropertyAll(AppColors.red),
           ),
           onPressed: () => Navigator.pop(ctx, true),
-          child: const Text('Delete'),
+          child: Text(t('Delete')),
         ),
       ],
     ),
@@ -434,7 +431,7 @@ Future<void> _callPhone(BuildContext context, String phone) async {
   try {
     final launched = await launchUrl(uri);
     if (!launched && context.mounted) {
-      showError(context, 'Could not open the phone dialer.');
+      showError(context, t('Could not open the phone dialer.'));
     }
   } catch (e) {
     if (context.mounted) showError(context, e);
@@ -453,7 +450,7 @@ class SuppliersScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'Add supplier',
+      label: t('Add supplier'),
       icon: Icons.add,
       onPressed: () => showSupplierForm(context, ref),
       coachPage: 'suppliers',
@@ -463,12 +460,12 @@ class SuppliersScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Suppliers'),
+        title: Text(t('Suppliers')),
         actions: [
           // Import from Excel with opening balances (owner, migration 0051).
           if (ref.watch(appContextProvider).value?.isOwner ?? false)
             IconButton(
-              tooltip: 'Import from Excel',
+              tooltip: t('Import from Excel'),
               icon: const Icon(Icons.upload_file_outlined),
               onPressed: () => context.push('/import/suppliers'),
             ),
@@ -482,7 +479,7 @@ class SuppliersScreen extends ConsumerWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: SearchField(
-              hint: 'Search name or phone',
+              hint: t('Search name or phone'),
               onChanged: (v) =>
                   ref.read(supplierSearchProvider.notifier).set(v),
             ),
@@ -519,9 +516,9 @@ class SuppliersScreen extends ConsumerWidget {
                   value: suppliers,
                   onRetry: () => ref.invalidate(suppliersProvider),
                   builder: (rows) => rows.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.local_shipping_outlined,
-                          message: 'No suppliers yet',
+                          message: t('No suppliers yet'),
                         )
                       : isDesktop
                       ? Align(
@@ -536,7 +533,7 @@ class SuppliersScreen extends ConsumerWidget {
                                     name: s['name'] as String? ?? '',
                                     phone: s['phone'] as String? ?? '',
                                     due: toDouble(s['due_amount']),
-                                    dueLabel: 'We owe',
+                                    dueLabel: t('We owe'),
                                     dueColor: AppColors.purple,
                                     creditLimit: s['credit_limit'] == null
                                         ? null
@@ -567,7 +564,7 @@ class SuppliersScreen extends ConsumerWidget {
                                             supplierId: s['id'] as String,
                                             due: toDouble(s['due_amount']),
                                           ),
-                                    payLabel: 'Pay supplier',
+                                    payLabel: t('Pay supplier'),
                                   ),
                               ]),
                             ),
@@ -659,7 +656,7 @@ class _SupplierTile extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const Text('we owe', style: TextStyle(fontSize: 12)),
+                        Text(t('we owe'), style: TextStyle(fontSize: 12)),
                       ],
                     )
                   : const Icon(Icons.chevron_right),
@@ -686,14 +683,14 @@ class SupplierDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Supplier'),
+        title: Text(t('Supplier')),
         actions: [
           const GuideButton('supplier_detail'),
           // Balance from before Dukania (owner, migration 0051).
           if (data.hasValue &&
               (ref.watch(appContextProvider).value?.isOwner ?? false))
             IconButton(
-              tooltip: 'Opening balance',
+              tooltip: t('Opening balance'),
               icon: const Icon(Icons.account_balance_wallet_outlined),
               onPressed: () async {
                 final party = data.value!['supplier'] as Map<String, dynamic>;
@@ -729,7 +726,7 @@ class SupplierDetailScreen extends ConsumerWidget {
               (ref.watch(appContextProvider).value?.canManagePurchases ??
                   false))
             IconButton(
-              tooltip: 'Delete supplier',
+              tooltip: t('Delete supplier'),
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
                 final deleted = await deleteSupplier(
@@ -809,7 +806,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Pending payment'),
+                              Text(t('Pending payment')),
                               Text(
                                 money(due),
                                 style: TextStyle(
@@ -827,8 +824,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Credit limit',
+                                Text(t('Credit limit'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.inkSoft,
@@ -887,7 +883,7 @@ class SupplierDetailScreen extends ConsumerWidget {
                             due: due,
                           ),
                           icon: const Icon(Icons.payments),
-                          label: const Text('Pay supplier'),
+                          label: Text(t('Pay supplier')),
                         ),
                       ),
                     ),
@@ -901,17 +897,17 @@ class SupplierDetailScreen extends ConsumerWidget {
                             '/purchases/new?supplier=$supplierId',
                           ),
                           icon: const Icon(Icons.add_shopping_cart),
-                          label: const Text('New purchase'),
+                          label: Text(t('New purchase')),
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SectionLabel('Ledger'),
+                SectionLabel(t('Ledger')),
                 if (entries.isEmpty)
-                  const EmptyState(
+                  EmptyState(
                     icon: Icons.receipt_long,
-                    message: 'No transactions yet',
+                    message: t('No transactions yet'),
                   )
                 else
                   CoachTarget(

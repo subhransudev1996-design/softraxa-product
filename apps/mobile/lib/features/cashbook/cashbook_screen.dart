@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -61,13 +62,13 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Cash moved by hand'),
+          title: Text(t('Cash moved by hand')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               DropdownButtonFormField<String>(
                 initialValue: kind,
-                decoration: const InputDecoration(labelText: 'What'),
+                decoration: InputDecoration(labelText: t('What')),
                 items: [
                   for (final e in cashEntryKinds.entries)
                     DropdownMenuItem(value: e.key, child: Text(e.value)),
@@ -79,7 +80,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                 controller: amount,
                 autofocus: true,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: 'Amount ₹'),
+                decoration: InputDecoration(labelText: t('Amount ₹')),
               ),
               const SizedBox(height: 12),
               TextField(
@@ -91,8 +92,8 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Save')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('Save'))),
           ],
         ),
       ),
@@ -143,7 +144,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                   controller: counted,
                   autofocus: true,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Cash you counted ₹'),
+                  decoration: InputDecoration(labelText: t('Cash you counted ₹')),
                   onChanged: (_) => setState(() {}),
                 ),
                 if (diff != null) ...[
@@ -159,25 +160,23 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                 if (needsReason)
                   TextField(
                     controller: reason,
-                    decoration: const InputDecoration(labelText: 'Why is it different? *'),
+                    decoration: InputDecoration(labelText: t('Why is it different? *')),
                     onChanged: (_) => setState(() {}),
                   ),
                 const SizedBox(height: 8),
-                Text(
-                  'After closing, the day is locked. Cash taken later counts in the next day. '
-                  'Only the owner can reopen it.',
+                Text(t('After closing, the day is locked. Cash taken later counts in the next day. Only the owner can reopen it.'),
                   style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ],
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
               FilledButton(
                 style: dialogActionStyle,
                 onPressed: c != null && (!needsReason || reason.text.trim().length >= 3)
                     ? () => Navigator.pop(ctx, true)
                     : null,
-                child: const Text('Close the day'),
+                child: Text(t('Close the day')),
               ),
             ],
           );
@@ -192,7 +191,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
         'p_reason': reason.text.trim(),
       });
       _refresh();
-      if (mounted) showSuccess(context, 'Day closed');
+      if (mounted) showSuccess(context, t('Day closed'));
     } catch (e) {
       if (mounted) showError(context, e);
     }
@@ -212,15 +211,15 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Reopen this day?'),
+        title: Text(t('Reopen this day?')),
         content: TextField(
           controller: reason,
           autofocus: true,
-          decoration: const InputDecoration(labelText: 'Reason *'),
+          decoration: InputDecoration(labelText: t('Reason *')),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Reopen')),
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
+          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: Text(t('Reopen'))),
         ],
       ),
     );
@@ -243,7 +242,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(leading: appBarBack(context), title: const Text('Cashbook')),
+      appBar: AppBar(leading: appBarBack(context), title: Text(t('Cashbook'))),
       body: Column(
         children: [
           Padding(
@@ -252,7 +251,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
-                  tooltip: 'Previous day',
+                  tooltip: t('Previous day'),
                   onPressed: () => setState(() => _day = _day.subtract(const Duration(days: 1))),
                 ),
                 Expanded(
@@ -264,7 +263,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
-                  tooltip: 'Next day',
+                  tooltip: t('Next day'),
                   onPressed: _isToday ? null : () => setState(() => _day = _day.add(const Duration(days: 1))),
                 ),
               ],
@@ -324,7 +323,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                               child: OutlinedButton.icon(
                                 onPressed: _addEntry,
                                 icon: const Icon(Icons.add),
-                                label: const Text('Cash in / out'),
+                                label: Text(t('Cash in / out')),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -332,7 +331,7 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                               child: FilledButton.icon(
                                 onPressed: () => _close(book),
                                 icon: const Icon(Icons.lock_outline),
-                                label: const Text('Close the day'),
+                                label: Text(t('Close the day')),
                               ),
                             ),
                           ],
@@ -347,9 +346,9 @@ class _CashbookScreenState extends ConsumerState<CashbookScreen> {
                             style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                           ),
                         ),
-                      const SectionLabel('Cash movements'),
+                      SectionLabel(t('Cash movements')),
                       if (lines.isEmpty)
-                        const EmptyState(icon: Icons.payments_outlined, message: 'No cash moved this day')
+                        EmptyState(icon: Icons.payments_outlined, message: t('No cash moved this day'))
                       else
                         Card(
                           child: Column(
@@ -454,8 +453,8 @@ class _ClosingCard extends StatelessWidget {
               Wrap(
                 spacing: 8,
                 children: [
-                  if (!reviewed) FilledButton(onPressed: onReview, child: const Text('Mark reviewed')),
-                  OutlinedButton(onPressed: onReopen, child: const Text('Reopen')),
+                  if (!reviewed) FilledButton(onPressed: onReview, child: Text(t('Mark reviewed'))),
+                  OutlinedButton(onPressed: onReopen, child: Text(t('Reopen'))),
                 ],
               ),
             ],

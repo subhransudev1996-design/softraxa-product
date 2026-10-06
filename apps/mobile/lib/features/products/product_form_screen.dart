@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -122,9 +123,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Future<void> _confirmLeave() async {
     final leave = await confirmDialog(
       context,
-      title: 'Discard this product?',
-      message: 'What you entered has not been saved.',
-      confirmText: 'Discard',
+      title: t('Discard this product?'),
+      message: t('What you entered has not been saved.'),
+      confirmText: t('Discard'),
     );
     if (leave && mounted) {
       setState(() => _dirty = false);
@@ -236,7 +237,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         }
       });
       _filling = false;
-      showSuccess(context, 'Details filled in — add your prices and stock');
+      showSuccess(context, t('Details filled in — add your prices and stock'));
     } catch (e) {
       _filling = false;
       if (mounted) showError(context, e);
@@ -266,14 +267,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: const InputDecoration(labelText: 'Name'),
+              decoration: InputDecoration(labelText: t('Name')),
             ),
             if (table == 'units') ...[
               const SizedBox(height: 12),
               TextField(
                 controller: shortName,
-                decoration: const InputDecoration(
-                  labelText: 'Short name (pcs, kg…)',
+                decoration: InputDecoration(
+                  labelText: t('Short name (pcs, kg…)'),
                 ),
               ),
             ],
@@ -282,12 +283,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -390,7 +391,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   Future<void> _scanBarcode() async {
     final code = isDesktopPlatform
-        ? await promptBarcode(context, title: 'Enter barcode')
+        ? await promptBarcode(context, title: t('Enter barcode'))
         : await context.push<String>('/scan?mode=return');
     if (!mounted) return;
     if (code != null && code.isNotEmpty) {
@@ -468,7 +469,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
     if (_hasVariants && !isEdit && _variants.isEmpty) {
-      showError(context, 'Add at least one variant, or turn variants off');
+      showError(context, t('Add at least one variant, or turn variants off'));
       return;
     }
     if (_secondaryUnitName.text.trim().isNotEmpty &&
@@ -647,7 +648,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               TextFormField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Product name *'),
+                decoration: InputDecoration(labelText: t('Product name *')),
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Required' : null,
               ),
@@ -662,8 +663,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
-                                'In the product list — tap to fill in the details',
+                              child: Text(t('In the product list — tap to fill in the details'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -672,7 +672,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               ),
                             ),
                             IconButton(
-                              tooltip: 'Not in the list',
+                              tooltip: t('Not in the list'),
                               visualDensity: VisualDensity.compact,
                               icon: const Icon(Icons.close, size: 18),
                               onPressed: () =>
@@ -705,7 +705,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ],
                   ),
                 ),
-              const SectionLabel('Classification'),
+              SectionLabel(t('Classification')),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
@@ -716,7 +716,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       // item, so one long name overflows the half-width field.
                       isExpanded: true,
                       initialValue: selectedCategory,
-                      decoration: const InputDecoration(labelText: 'Category'),
+                      decoration: InputDecoration(labelText: t('Category')),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         for (final c in categories)
@@ -733,7 +733,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Add category',
+                    tooltip: t('Add category'),
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: () => _quickAddMaster(
                       'categories',
@@ -746,7 +746,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       key: ValueKey('brand_$selectedBrand'),
                       isExpanded: true,
                       initialValue: selectedBrand,
-                      decoration: const InputDecoration(labelText: 'Brand'),
+                      decoration: InputDecoration(labelText: t('Brand')),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         for (final b in brands)
@@ -763,7 +763,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Add brand',
+                    tooltip: t('Add brand'),
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: () => _quickAddMaster(
                       'brands',
@@ -781,7 +781,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       key: ValueKey('unit_$selectedUnit'),
                       isExpanded: true,
                       initialValue: selectedUnit,
-                      decoration: const InputDecoration(labelText: 'Unit'),
+                      decoration: InputDecoration(labelText: t('Unit')),
                       items: [
                         const DropdownMenuItem(value: null, child: Text('—')),
                         for (final u in units)
@@ -798,7 +798,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
                   IconButton(
-                    tooltip: 'Add unit',
+                    tooltip: t('Add unit'),
                     icon: const Icon(Icons.add_circle_outline),
                     onPressed: () => _quickAddMaster(
                       'units',
@@ -815,9 +815,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       controller: _secondaryUnitName,
                       textCapitalization: TextCapitalization.words,
                       onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        labelText: 'Bulk unit (optional)',
-                        helperText: 'e.g. Bag, Box, Rod',
+                      decoration: InputDecoration(
+                        labelText: t('Bulk unit (optional)'),
+                        helperText: t('e.g. Bag, Box, Rod'),
                       ),
                     ),
                   ),
@@ -829,7 +829,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         decimal: true,
                       ),
                       decoration: InputDecoration(
-                        labelText: '= how many units?',
+                        labelText: t('= how many units?'),
                         helperText:
                             '1 ${_secondaryUnitName.text.trim().isEmpty ? 'Bag' : _secondaryUnitName.text.trim()} = 50 kg → 50',
                       ),
@@ -897,18 +897,18 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
               ],
-              const SectionLabel('Codes'),
+              SectionLabel(t('Codes')),
               TextFormField(
                 controller: _sku,
-                decoration: const InputDecoration(
-                  labelText: 'SKU / product code',
+                decoration: InputDecoration(
+                  labelText: t('SKU / product code'),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _barcode,
                 decoration: InputDecoration(
-                  labelText: 'Barcode',
+                  labelText: t('Barcode'),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.qr_code_scanner),
                     onPressed: _scanBarcode,
@@ -919,9 +919,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               TextFormField(
                 controller: _hsn,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'HSN code (for GST invoice)',
-                  helperText: 'Needed on bills to GST-registered customers',
+                decoration: InputDecoration(
+                  labelText: t('HSN code (for GST invoice)'),
+                  helperText: t('Needed on bills to GST-registered customers'),
                 ),
                 // Same rule as the database (migration 0048).
                 validator: (v) {
@@ -932,7 +932,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       : '4, 6 or 8 digits';
                 },
               ),
-              const SectionLabel('Pricing'),
+              SectionLabel(t('Pricing')),
               Row(
                 children: [
                   Expanded(
@@ -984,7 +984,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(labelText: 'MRP ₹'),
+                      decoration: InputDecoration(labelText: t('MRP ₹')),
                     ),
                   ),
                 ],
@@ -992,9 +992,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               const SizedBox(height: 12),
               DropdownButtonFormField<double>(
                 initialValue: _gstRate,
-                decoration: const InputDecoration(labelText: 'GST %'),
-                items: const [
-                  DropdownMenuItem(value: 0.0, child: Text('0% (Exempt)')),
+                decoration: InputDecoration(labelText: t('GST %')),
+                items: [
+                  DropdownMenuItem(value: 0.0, child: Text(t('0% (Exempt)'))),
                   DropdownMenuItem(value: 3.0, child: Text('3%')),
                   DropdownMenuItem(value: 5.0, child: Text('5%')),
                   DropdownMenuItem(value: 12.0, child: Text('12%')),
@@ -1004,7 +1004,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 onChanged: (v) => setState(() => _gstRate = v ?? 0),
               ),
               if (categoryOf(businessType).bulkPricing) ...[
-                const SectionLabel('Bulk pricing (optional)'),
+                SectionLabel(t('Bulk pricing (optional)')),
                 Row(
                   children: [
                     Expanded(
@@ -1013,8 +1013,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Wholesale price ₹',
+                        decoration: InputDecoration(
+                          labelText: t('Wholesale price ₹'),
                         ),
                       ),
                     ),
@@ -1025,15 +1025,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Min qty for wholesale',
+                        decoration: InputDecoration(
+                          labelText: t('Min qty for wholesale'),
                         ),
                       ),
                     ),
                   ],
                 ),
               ],
-              const SectionLabel('Stock'),
+              SectionLabel(t('Stock')),
               Row(
                 children: [
                   if (!isEdit && !_hasVariants) ...[
@@ -1043,8 +1043,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Opening stock',
+                        decoration: InputDecoration(
+                          labelText: t('Opening stock'),
                         ),
                       ),
                     ),
@@ -1056,8 +1056,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      decoration: const InputDecoration(
-                        labelText: 'Low stock alert qty',
+                      decoration: InputDecoration(
+                        labelText: t('Low stock alert qty'),
                       ),
                     ),
                   ),
@@ -1079,12 +1079,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 },
                 child: InputDecorator(
                   decoration: InputDecoration(
-                    labelText: 'Expiry date (optional)',
-                    helperText: 'Alerts appear when expired or within 30 days',
+                    labelText: t('Expiry date (optional)'),
+                    helperText: t('Alerts appear when expired or within 30 days'),
                     suffixIcon: _expiryDate == null
                         ? const Icon(Icons.event_outlined)
                         : IconButton(
-                            tooltip: 'Clear expiry date',
+                            tooltip: t('Clear expiry date'),
                             icon: const Icon(Icons.close, size: 18),
                             onPressed: () => setState(() => _expiryDate = null),
                           ),
@@ -1092,21 +1092,19 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   child: Text(_expiryDate == null ? '—' : dateStr(_expiryDate)),
                 ),
               ),
-              const SectionLabel('Options'),
+              SectionLabel(t('Options')),
               SwitchListTile(
                 value: _trackSerial,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Track IMEI / serial numbers'),
-                subtitle: const Text('For mobiles & electronics'),
+                title: Text(t('Track IMEI / serial numbers')),
+                subtitle: Text(t('For mobiles & electronics')),
                 onChanged: (v) => setState(() => _trackSerial = v),
               ),
               SwitchListTile(
                 value: _trackPieces,
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Sold in cut lengths'),
-                subtitle: const Text(
-                  'Rods, pipes, wire, cloth — the app keeps count of '
-                  'full pieces and leftovers by itself',
+                title: Text(t('Sold in cut lengths')),
+                subtitle: Text(t('Rods, pipes, wire, cloth — the app keeps count of full pieces and leftovers by itself'),
                 ),
                 onChanged: (v) => setState(() {
                   _trackPieces = v;
@@ -1126,9 +1124,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   ),
                   decoration: InputDecoration(
                     labelText: 'Full length of 1 piece (${_unitShort()})',
-                    helperText:
-                        '1 rod = 12 ft → 12. New stock is split into full '
-                        'pieces. Empty = each purchase is one piece (wire coil).',
+                    helperText: t('1 rod = 12 ft → 12. New stock is split into full pieces. Empty = each purchase is one piece (wire coil).'),
                     helperMaxLines: 2,
                   ),
                 ),
@@ -1143,13 +1139,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'IMEI / Serial Numbers',
+                        Text(t('IMEI / Serial Numbers'),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
-                        Text(
-                          'Add or scan unique IMEI numbers for individual stock units.',
+                        Text(t('Add or scan unique IMEI numbers for individual stock units.'),
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.inkSoft,
@@ -1161,8 +1155,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             Expanded(
                               child: TextField(
                                 controller: _singleImeiInput,
-                                decoration: const InputDecoration(
-                                  labelText: 'Enter or scan IMEI / Serial',
+                                decoration: InputDecoration(
+                                  labelText: t('Enter or scan IMEI / Serial'),
                                   isDense: true,
                                 ),
                                 onSubmitted: (v) {
@@ -1184,7 +1178,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                                 final code = isDesktopPlatform
                                     ? await promptBarcode(
                                         context,
-                                        title: 'Enter IMEI',
+                                        title: t('Enter IMEI'),
                                       )
                                     : await context.push<String>(
                                         '/scan?mode=return',
@@ -1240,8 +1234,8 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   child: TextFormField(
                     controller: _warranty,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Warranty (months)',
+                    decoration: InputDecoration(
+                      labelText: t('Warranty (months)'),
                     ),
                   ),
                 ),
@@ -1250,12 +1244,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 SwitchListTile(
                   value: _hasVariants,
                   contentPadding: EdgeInsets.zero,
-                  title: const Text('This product has variants'),
-                  subtitle: const Text('Size, color, RAM/storage etc.'),
+                  title: Text(t('This product has variants')),
+                  subtitle: Text(t('Size, color, RAM/storage etc.')),
                   onChanged: (v) => setState(() => _hasVariants = v),
                 ),
               if (!isEdit && _hasVariants) ...[
-                const SectionLabel('Variants'),
+                SectionLabel(t('Variants')),
                 for (var i = 0; i < _variants.length; i++)
                   Card(
                     margin: const EdgeInsets.only(bottom: 8),
@@ -1298,15 +1292,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     if (draft != null) setState(() => _variants.add(draft));
                   },
                   icon: const Icon(Icons.add),
-                  label: const Text('Add variant'),
+                  label: Text(t('Add variant')),
                 ),
               ],
               const SizedBox(height: 12),
               TextFormField(
                 controller: _description,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Description (optional)',
+                decoration: InputDecoration(
+                  labelText: t('Description (optional)'),
                 ),
               ),
               const SizedBox(height: 24),

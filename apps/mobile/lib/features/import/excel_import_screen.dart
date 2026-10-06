@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 import '../../core/walkthrough.dart';
 import '../../core/data_refresh.dart';
@@ -415,7 +416,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Excel import'),
+        title: Text(t('Excel import')),
         actions: const [GuideButton('import')],
       ),
       body: ListView(
@@ -427,16 +428,11 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'How it works',
+                  Text(t('How it works'),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
-                  const Text(
-                    '1. Download the sample Excel file\n'
-                    '2. Fill in your products (one per row)\n'
-                    '3. Upload the file here\n'
-                    '4. Fix any errors shown, then import',
+                  Text(t('1. Download the sample Excel file\n2. Fill in your products (one per row)\n3. Upload the file here\n4. Fix any errors shown, then import'),
                     style: TextStyle(fontSize: 13),
                   ),
                   const SizedBox(height: 12),
@@ -449,7 +445,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                           child: OutlinedButton.icon(
                             onPressed: _downloadSample,
                             icon: const Icon(Icons.download),
-                            label: const Text('Sample file'),
+                            label: Text(t('Sample file')),
                           ),
                         ),
                       ),

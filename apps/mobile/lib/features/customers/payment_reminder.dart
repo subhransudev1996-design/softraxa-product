@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -52,7 +53,7 @@ Future<void> showPaymentReminder(
   final send = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Remind on WhatsApp'),
+      title: Text(t('Remind on WhatsApp')),
       content: SizedBox(
         width: 440,
         child: Column(
@@ -70,8 +71,8 @@ Future<void> showPaymentReminder(
               controller: text,
               minLines: 6,
               maxLines: 12,
-              decoration: const InputDecoration(
-                labelText: 'Message (you can change it)',
+              decoration: InputDecoration(
+                labelText: t('Message (you can change it)'),
               ),
             ),
           ],
@@ -80,13 +81,13 @@ Future<void> showPaymentReminder(
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(ctx, false),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton.icon(
           style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, true),
           icon: const Icon(Icons.send, size: 18),
-          label: const Text('Open WhatsApp'),
+          label: Text(t('Open WhatsApp')),
         ),
       ],
     ),

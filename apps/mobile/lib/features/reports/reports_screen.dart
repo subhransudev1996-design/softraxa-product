@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -112,15 +113,15 @@ class ReportsScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
-        title: const Text('Reports'),
+        title: Text(t('Reports')),
         actions: const [GuideButton('reports')],
       ),
       body: !enabled
-          ? const Center(child: Text('Reports are not enabled on your plan.'))
+          ? Center(child: Text(t('Reports are not enabled on your plan.')))
           : !allowed
-          ? const EmptyState(
+          ? EmptyState(
               icon: Icons.lock_outline,
-              message: 'Ask the shop owner for permission to view reports.',
+              message: t('Ask the shop owner for permission to view reports.'),
             )
           : CoachTarget(
               page: 'reports',

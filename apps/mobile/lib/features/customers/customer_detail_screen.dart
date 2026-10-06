@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,14 +28,14 @@ class CustomerDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Customer'),
+        title: Text(t('Customer')),
         actions: [
           const GuideButton('customer_detail'),
           // Balance from before Dukania (owner, migration 0051).
           if (data.hasValue &&
               (ref.watch(appContextProvider).value?.isOwner ?? false))
             IconButton(
-              tooltip: 'Opening balance',
+              tooltip: t('Opening balance'),
               icon: const Icon(Icons.account_balance_wallet_outlined),
               onPressed: () async {
                 final party = data.value!['customer'] as Map<String, dynamic>;
@@ -137,7 +138,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Outstanding due'),
+                              Text(t('Outstanding due')),
                               Text(
                                 money(due),
                                 style: TextStyle(
@@ -155,7 +156,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Text('Advance'),
+                                Text(t('Advance')),
                                 Text(
                                   money(advance),
                                   style: const TextStyle(
@@ -170,8 +171,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                           if (c['credit_unlimited'] == true)
                             Padding(
                               padding: const EdgeInsets.only(top: 4),
-                              child: Text(
-                                'Unlimited credit',
+                              child: Text(t('Unlimited credit'),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.inkSoft,
@@ -183,8 +183,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(
-                                  'Credit limit',
+                                Text(t('Credit limit'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.inkSoft,
@@ -249,14 +248,14 @@ class CustomerDetailScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => showCustomerStatement(context, ref, d),
                   icon: const Icon(Icons.description_outlined),
-                  label: const Text('Statement (PDF)'),
+                  label: Text(t('Statement (PDF)')),
                 ),
                 if (due > 0.005) ...[
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     onPressed: () => showPaymentReminder(context, ref, c),
                     icon: const Icon(Icons.chat_outlined),
-                    label: const Text('Remind on WhatsApp'),
+                    label: Text(t('Remind on WhatsApp')),
                   ),
                 ],
                 if (isOwner && advance > 0) ...[
@@ -273,7 +272,7 @@ class CustomerDetailScreen extends ConsumerWidget {
                   ),
                 ],
                 if (advances.isNotEmpty) ...[
-                  const SectionLabel('Advance history'),
+                  SectionLabel(t('Advance history')),
                   Card(
                     child: Column(
                       children: [
@@ -308,17 +307,16 @@ class CustomerDetailScreen extends ConsumerWidget {
                 if (c['is_wholesale'] == true)
                   Padding(
                     padding: const EdgeInsets.only(top: 8),
-                    child: Text(
-                      'Wholesale customer — wholesale prices from the first unit',
+                    child: Text(t('Wholesale customer — wholesale prices from the first unit'),
                       style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                     ),
                   ),
                 CustomerPricesSection(customerId: customerId),
-                const SectionLabel('Ledger'),
+                SectionLabel(t('Ledger')),
                 if (entries.isEmpty)
-                  const EmptyState(
+                  EmptyState(
                     icon: Icons.receipt_long,
-                    message: 'No transactions yet',
+                    message: t('No transactions yet'),
                   )
                 else
                   CoachTarget(
@@ -431,7 +429,7 @@ class CustomerDetailScreen extends ConsumerWidget {
             if (onReverse != null)
               IconButton(
                 icon: const Icon(Icons.undo, size: 18),
-                tooltip: 'Reverse payment',
+                tooltip: t('Reverse payment'),
                 visualDensity: VisualDensity.compact,
                 onPressed: onReverse,
               ),

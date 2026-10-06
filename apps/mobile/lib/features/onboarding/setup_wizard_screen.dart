@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/pdf.dart';
@@ -94,11 +95,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       _ => true,
     };
     if (_step == 0 && _category == null) {
-      showError(context, 'Choose your type of shop');
+      showError(context, t('Choose your type of shop'));
       return;
     }
     if (_step == 2 && _registered && _band == null) {
-      showError(context, 'Choose your annual turnover');
+      showError(context, t('Choose your annual turnover'));
       return;
     }
     if (!ok) return;
@@ -147,7 +148,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       }
       await client.rpc('complete_onboarding', params: {'payload': _payload});
       await ref.read(appContextProvider.notifier).refresh();
-      if (mounted) showSuccess(context, 'Your shop is ready');
+      if (mounted) showSuccess(context, t('Your shop is ready'));
       // The router moves on to the dashboard once setup is done.
     } catch (e) {
       if (mounted) showError(context, e);
@@ -197,11 +198,11 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text('Set up your shop'),
+        title: Text(t('Set up your shop')),
         actions: [
           TextButton(
             onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-            child: const Text('Logout'),
+            child: Text(t('Logout')),
           ),
         ],
       ),
@@ -253,7 +254,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                           onPressed: _busy
                               ? null
                               : () => setState(() => _step--),
-                          child: const Text('Back'),
+                          child: Text(t('Back')),
                         ),
                       const Spacer(),
                       FilledButton(
@@ -288,9 +289,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'This decides which screens and product fields you see. You can '
-          'change it later in business settings.',
+        Text(t('This decides which screens and product fields you see. You can change it later in business settings.'),
           style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
         ),
         const SizedBox(height: 12),
@@ -330,27 +329,27 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           TextFormField(
             controller: _name,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Shop name *'),
+            decoration: InputDecoration(labelText: t('Shop name *')),
             validator: (v) => (v ?? '').trim().isEmpty ? 'Required' : null,
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _owner,
             textCapitalization: TextCapitalization.words,
-            decoration: const InputDecoration(labelText: 'Owner name'),
+            decoration: InputDecoration(labelText: t('Owner name')),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _phone,
             keyboardType: TextInputType.phone,
-            decoration: const InputDecoration(labelText: 'Phone number'),
+            decoration: InputDecoration(labelText: t('Phone number')),
           ),
           const SizedBox(height: 12),
           TextFormField(
             controller: _address,
             maxLines: 2,
-            decoration: const InputDecoration(
-              labelText: 'Shop address (printed on bills)',
+            decoration: InputDecoration(
+              labelText: t('Shop address (printed on bills)'),
             ),
           ),
         ],
@@ -365,10 +364,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           SegmentedButton<String>(
-            segments: const [
-              ButtonSegment(value: 'gst', label: Text('Regular GST')),
-              ButtonSegment(value: 'composition', label: Text('Composition')),
-              ButtonSegment(value: 'non_gst', label: Text('Not registered')),
+            segments: [
+              ButtonSegment(value: 'gst', label: Text(t('Regular GST'))),
+              ButtonSegment(value: 'composition', label: Text(t('Composition'))),
+              ButtonSegment(value: 'non_gst', label: Text(t('Not registered'))),
             ],
             selected: {_tax},
             onSelectionChanged: (s) => setState(() => _tax = s.first),
@@ -378,16 +377,14 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             if (_tax == 'composition')
               Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: Text(
-                  'Composition shops can\'t charge GST. Your bills will be '
-                  'printed as bills of supply with the composition declaration.',
+                child: Text(t('Composition shops can\'t charge GST. Your bills will be printed as bills of supply with the composition declaration.'),
                   style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ),
             TextFormField(
               controller: _gstin,
               textCapitalization: TextCapitalization.characters,
-              decoration: const InputDecoration(labelText: 'GSTIN *'),
+              decoration: InputDecoration(labelText: t('GSTIN *')),
               validator: (v) =>
                   (v ?? '').trim().isEmpty ? 'Required' : gstinError(v ?? ''),
               onChanged: (v) {
@@ -404,24 +401,23 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                 ),
               ),
             const SizedBox(height: 16),
-            const Text(
-              'Annual turnover (all your GST registrations together)',
+            Text(t('Annual turnover (all your GST registrations together)'),
               style: TextStyle(fontWeight: FontWeight.w600),
             ),
             RadioGroup<String>(
               groupValue: _band,
               onChanged: (v) => setState(() => _band = v),
-              child: const Column(
+              child: Column(
                 children: [
                   RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     value: 'up_to_5cr',
-                    title: Text('Up to ₹5 crore'),
+                    title: Text(t('Up to ₹5 crore')),
                   ),
                   RadioListTile(
                     contentPadding: EdgeInsets.zero,
                     value: 'above_5cr',
-                    title: Text('Above ₹5 crore'),
+                    title: Text(t('Above ₹5 crore')),
                   ),
                 ],
               ),
@@ -433,23 +429,18 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                   color: AppColors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Text(
-                  'Above ₹5 crore, GST needs e-invoicing (IRN), which Dukania '
-                  'doesn\'t support yet. Please contact SOFTRAXA support before '
-                  'billing with Dukania.',
+                child: Text(t('Above ₹5 crore, GST needs e-invoicing (IRN), which Dukania doesn\'t support yet. Please contact SOFTRAXA support before billing with Dukania.'),
                   style: TextStyle(color: AppColors.red, fontSize: 13),
                 ),
               ),
           ] else ...[
-            Text(
-              'Bills will be issued without GST. You can switch to GST later '
-              'in business settings once you register.',
+            Text(t('Bills will be issued without GST. You can switch to GST later in business settings once you register.'),
               style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             const SizedBox(height: 12),
             GstStateField(
               value: _state,
-              label: 'State',
+              label: t('State'),
               onChanged: (v) => setState(() => _state = v),
             ),
           ],
@@ -467,10 +458,10 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           TextFormField(
             controller: _upi,
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(
-              labelText: 'UPI ID (optional)',
-              hintText: 'shopname@okaxis',
-              helperText: 'Printed on bills as a "scan to pay" QR code',
+            decoration: InputDecoration(
+              labelText: t('UPI ID (optional)'),
+              hintText: t('shopname@okaxis'),
+              helperText: t('Printed on bills as a "scan to pay" QR code'),
             ),
             validator: (v) {
               final t = (v ?? '').trim();
@@ -483,9 +474,9 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
           TextFormField(
             controller: _prefix,
             textCapitalization: TextCapitalization.characters,
-            decoration: const InputDecoration(
-              labelText: 'Invoice prefix',
-              helperText: 'Up to 4 characters — bills become INV/26-27/0001',
+            decoration: InputDecoration(
+              labelText: t('Invoice prefix'),
+              helperText: t('Up to 4 characters — bills become INV/26-27/0001'),
             ),
             validator: (v) => _prefixPattern.hasMatch((v ?? '').trim())
                 ? null
@@ -500,9 +491,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text(
-          'Print a test page to check your printer now. You can skip this '
-          'and print from any bill later.',
+        Text(t('Print a test page to check your printer now. You can skip this and print from any bill later.'),
           style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
         ),
         const SizedBox(height: 16),
@@ -513,7 +502,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
               _name.text.trim().isEmpty ? 'Your shop' : _name.text.trim(),
             ),
             icon: const Icon(Icons.bluetooth),
-            label: const Text('Bluetooth receipt printer'),
+            label: Text(t('Bluetooth receipt printer')),
           ),
           const SizedBox(height: 8),
         ],
@@ -531,8 +520,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Ready to finish',
+                Text(t('Ready to finish'),
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 4),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -730,7 +731,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
           if (data.hasValue)
             IconButton(
               icon: const Icon(Icons.picture_as_pdf_outlined),
-              tooltip: 'Export PDF',
+              tooltip: t('Export PDF'),
               onPressed: () => _exportPdf(data.value!),
             ),
         ],
@@ -747,7 +748,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                 ref.invalidate(reportDataProvider(query));
               },
               icon: const Icon(Icons.local_shipping_outlined),
-              label: const Text('Reorder from supplier'),
+              label: Text(t('Reorder from supplier')),
             )
           : null,
       body: Column(
@@ -783,7 +784,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                   const SizedBox(width: 8),
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.bolt),
-                    tooltip: 'Quick ranges',
+                    tooltip: t('Quick ranges'),
                     onSelected: (v) {
                       final now = DateTime.now();
                       setState(() {
@@ -805,13 +806,13 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                         }
                       });
                     },
-                    itemBuilder: (_) => const [
-                      PopupMenuItem(value: 'today', child: Text('Today')),
-                      PopupMenuItem(value: 'week', child: Text('This week')),
-                      PopupMenuItem(value: 'month', child: Text('This month')),
+                    itemBuilder: (_) => [
+                      PopupMenuItem(value: 'today', child: Text(t('Today'))),
+                      PopupMenuItem(value: 'week', child: Text(t('This week'))),
+                      PopupMenuItem(value: 'month', child: Text(t('This month'))),
                       PopupMenuItem(
                         value: 'last_month',
-                        child: Text('Last month'),
+                        child: Text(t('Last month')),
                       ),
                     ],
                   ),
@@ -870,9 +871,9 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                         if (table != null) ...[
                           const SizedBox(height: 12),
                           if (rows.isEmpty)
-                            const EmptyState(
+                            EmptyState(
                               icon: Icons.table_chart_outlined,
-                              message: 'No data for this period',
+                              message: t('No data for this period'),
                             )
                           else
                             Card(

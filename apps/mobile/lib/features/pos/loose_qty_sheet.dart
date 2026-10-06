@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/formatters.dart';
@@ -317,7 +318,7 @@ class _LooseQtySheetState extends State<_LooseQtySheet> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(labelText: 'Amount ₹'),
+                  decoration: InputDecoration(labelText: t('Amount ₹')),
                   onSubmitted: (_) => _submit(),
                 ),
               ),

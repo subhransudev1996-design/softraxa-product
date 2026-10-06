@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -15,82 +16,83 @@ typedef StaffPermission = ({
   bool byDefault,
 });
 
-const List<StaffPermission> staffPermissions = [
+// A getter, not a const: labels are translated (t()) when read.
+List<StaffPermission> get staffPermissions => [
   (
     key: 'can_create_invoice',
-    label: 'Create bills (POS)',
+    label: t('Create bills (POS)'),
     chip: 'Billing',
     byDefault: true,
   ),
   (
     key: 'can_edit_prices',
-    label: 'Change prices & give discounts',
+    label: t('Change prices & give discounts'),
     chip: 'Prices',
     byDefault: false,
   ),
   (
     key: 'can_record_payments',
-    label: 'Receive customer payments',
+    label: t('Receive customer payments'),
     chip: 'Payments',
     byDefault: true,
   ),
   (
     key: 'can_edit_invoices',
-    label: 'Edit or cancel bills',
+    label: t('Edit or cancel bills'),
     chip: 'Edit bills',
     byDefault: false,
   ),
   (
     key: 'can_manage_returns',
-    label: 'Sale returns & refunds',
+    label: t('Sale returns & refunds'),
     chip: 'Returns',
     byDefault: false,
   ),
   (
     key: 'can_manage_products',
-    label: 'Add & edit products',
+    label: t('Add & edit products'),
     chip: 'Products',
     byDefault: true,
   ),
   (
     key: 'can_manage_stock',
-    label: 'Stock adjustments & cut pieces',
+    label: t('Stock adjustments & cut pieces'),
     chip: 'Stock',
     byDefault: false,
   ),
   (
     key: 'can_manage_purchases',
-    label: 'Purchases, suppliers & supplier payments',
+    label: t('Purchases, suppliers & supplier payments'),
     chip: 'Purchases',
     byDefault: false,
   ),
   (
     key: 'can_manage_expenses',
-    label: 'Expenses',
+    label: t('Expenses'),
     chip: 'Expenses',
     byDefault: false,
   ),
   (
     key: 'can_manage_cash',
-    label: 'Cash drawer & day closing',
+    label: t('Cash drawer & day closing'),
     chip: 'Cash',
     byDefault: false,
   ),
   (
     key: 'can_manage_services',
-    label: 'Services & job cards',
+    label: t('Services & job cards'),
     chip: 'Services',
     byDefault: true,
   ),
   (
     key: 'can_view_reports',
-    label: 'View reports',
+    label: t('View reports'),
     chip: 'Reports',
     byDefault: false,
   ),
   (
     key: 'can_view_profit',
-    label: 'See cost prices & profit',
+    label: t('See cost prices & profit'),
     chip: 'Profit',
     byDefault: false,
   ),
@@ -180,7 +182,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     final staffAsync = ref.watch(staffListProvider);
 
     final mainAction = ScreenAction(
-      label: 'Add staff',
+      label: t('Add staff'),
       icon: Icons.person_add,
       onPressed: () {
         if (ctx?.isStaffLimitReached ?? false) {
@@ -196,7 +198,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     final isOwner = ctx?.isOwner ?? false;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Staff & Permissions'),
+        title: Text(t('Staff & Permissions')),
         leading: appBarBack(context),
         actions: [
           IconButton(
@@ -260,10 +262,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               ),
               Expanded(
                 child: staffList.isEmpty
-                    ? const EmptyState(
+                    ? EmptyState(
                         icon: Icons.person_off_outlined,
-                        message:
-                            'No staff members registered.\nTap + to add a staff account.',
+                        message: t('No staff members registered.\nTap + to add a staff account.'),
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
@@ -375,7 +376,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                             }
                                           },
                                           itemBuilder: (_) => [
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'edit',
                                               child: Row(
                                                 children: [
@@ -384,11 +385,11 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                                     size: 18,
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Text('Edit Permissions'),
+                                                  Text(t('Edit Permissions')),
                                                 ],
                                               ),
                                             ),
-                                            const PopupMenuItem(
+                                            PopupMenuItem(
                                               value: 'delete',
                                               child: Row(
                                                 children: [
@@ -398,8 +399,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                                     size: 18,
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Text(
-                                                    'Remove User',
+                                                  Text(t('Remove User'),
                                                     style: TextStyle(
                                                       color: Colors.red,
                                                     ),
@@ -456,14 +456,14 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove Staff Member'),
+        title: Text(t('Remove Staff Member')),
         content: Text(
           'Are you sure you want to remove ${staff['full_name']} (${staff['email']})? They will immediately lose access to this store.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
@@ -476,7 +476,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                   params: {'p_profile_id': staff['id']},
                 );
                 if (mounted) {
-                  showSuccess(context, 'Staff member removed successfully.');
+                  showSuccess(context, t('Staff member removed successfully.'));
                   ref.read(staffListProvider.notifier).refresh();
                   ref.read(appContextProvider.notifier).refresh();
                 }
@@ -486,7 +486,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                 }
               }
             },
-            child: const Text('Remove', style: TextStyle(color: Colors.white)),
+            child: Text(t('Remove'), style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -585,7 +585,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
 
       if (mounted) {
         Navigator.pop(context);
-        showSuccess(context, 'Staff account created successfully!');
+        showSuccess(context, t('Staff account created successfully!'));
         ref.read(staffListProvider.notifier).refresh();
         ref.read(appContextProvider.notifier).refresh();
       }
@@ -600,7 +600,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Add New Staff User'),
+      title: Text(t('Add New Staff User')),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
@@ -610,7 +610,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
             children: [
               TextFormField(
                 controller: _nameCtrl,
-                decoration: const InputDecoration(labelText: 'Full Name *'),
+                decoration: InputDecoration(labelText: t('Full Name *')),
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Required' : null,
               ),
@@ -618,7 +618,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
               TextFormField(
                 controller: _emailCtrl,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Email Address *'),
+                decoration: InputDecoration(labelText: t('Email Address *')),
                 validator: (v) => (v == null || !v.contains('@'))
                     ? 'Valid email required'
                     : null,
@@ -627,14 +627,13 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
               TextFormField(
                 controller: _passwordCtrl,
                 obscureText: true,
-                decoration: const InputDecoration(labelText: 'Password *'),
+                decoration: InputDecoration(labelText: t('Password *')),
                 validator: (v) => (v == null || v.length < 8)
                     ? 'At least 8 characters'
                     : null,
               ),
               const SizedBox(height: 16),
-              const Text(
-                'Staff Access Permissions',
+              Text(t('Staff Access Permissions'),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -649,7 +648,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         ElevatedButton(
           onPressed: _busy ? null : _submit,
@@ -659,7 +658,7 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Create Account'),
+              : Text(t('Create Account')),
         ),
       ],
     );
@@ -707,7 +706,7 @@ class _EditPermissionsDialogState
   Future<void> _save() async {
     final limit = double.tryParse(_limit.text.trim()) ?? 0;
     if (limit < 0 || limit > 100) {
-      showError(context, 'The discount limit must be between 0 and 100%');
+      showError(context, t('The discount limit must be between 0 and 100%'));
       return;
     }
     setState(() => _busy = true);
@@ -734,7 +733,7 @@ class _EditPermissionsDialogState
 
       if (mounted) {
         Navigator.pop(context);
-        showSuccess(context, 'Permissions updated successfully!');
+        showSuccess(context, t('Permissions updated successfully!'));
         ref.read(staffListProvider.notifier).refresh();
       }
     } catch (e) {
@@ -765,11 +764,9 @@ class _EditPermissionsDialogState
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Discount limit %',
-                    helperText:
-                        'Most a bill may go below the default prices — price changes, '
-                        'line and bill discounts together',
+                  decoration: InputDecoration(
+                    labelText: t('Discount limit %'),
+                    helperText: t('Most a bill may go below the default prices — price changes, line and bill discounts together'),
                     helperMaxLines: 2,
                   ),
                 ),
@@ -780,7 +777,7 @@ class _EditPermissionsDialogState
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.pop(context),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         ElevatedButton(
           onPressed: _busy ? null : _save,
@@ -790,7 +787,7 @@ class _EditPermissionsDialogState
                   height: 16,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Save Permissions'),
+              : Text(t('Save Permissions')),
         ),
       ],
     );

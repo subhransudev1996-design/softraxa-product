@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -280,8 +281,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text(
-                    'Select supplier',
+                  Text(t('Select supplier'),
                     style: Theme.of(ctx).textTheme.titleMedium,
                   ),
                   const Spacer(),
@@ -293,7 +293,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                       }
                     },
                     icon: const Icon(Icons.add),
-                    label: const Text('New'),
+                    label: Text(t('New')),
                   ),
                 ],
               ),
@@ -418,8 +418,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Price ₹ (excl. GST)',
+                        decoration: InputDecoration(
+                          labelText: t('Price ₹ (excl. GST)'),
                         ),
                       ),
                     ),
@@ -429,15 +429,15 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                 TextField(
                   controller: gstC,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'GST %'),
+                  decoration: InputDecoration(labelText: t('GST %')),
                 ),
                 if (line.trackSerial) ...[
                   const SizedBox(height: 12),
                   TextField(
                     controller: serialsC,
                     maxLines: 4,
-                    decoration: const InputDecoration(
-                      labelText: 'IMEI / serial numbers (one per line)',
+                    decoration: InputDecoration(
+                      labelText: t('IMEI / serial numbers (one per line)'),
                     ),
                   ),
                 ],
@@ -447,12 +447,12 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -487,7 +487,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
   Future<void> _save() async {
     if (_lines.isEmpty) {
-      showError(context, 'Add at least one product');
+      showError(context, t('Add at least one product'));
       return;
     }
     final creditLimit = _supplier?['credit_limit'] == null
@@ -507,11 +507,11 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
       if (projectedDue > creditLimit) {
         final proceed = await confirmDialog(
           context,
-          title: 'Credit limit exceeded',
+          title: t('Credit limit exceeded'),
           message:
               '${_supplier?['name']}\'s due would become ${money(projectedDue)}, '
               'above their credit limit of ${money(creditLimit)}. Continue anyway?',
-          confirmText: 'Continue',
+          confirmText: t('Continue'),
         );
         if (!proceed) return;
       }
@@ -612,9 +612,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           if (_editing)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text(
-                'Correct anything that was entered wrong. Stock, the product cost '
-                'and the supplier\'s due are updated to match.',
+              child: Text(t('Correct anything that was entered wrong. Stock, the product cost and the supplier\'s due are updated to match.'),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
@@ -623,7 +621,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               leading: const Icon(Icons.local_shipping_outlined),
               title: Text(_supplier?['name'] as String? ?? 'Select supplier'),
               subtitle: _supplier == null
-                  ? const Text('Optional, needed for due tracking')
+                  ? Text(t('Optional, needed for due tracking'))
                   : Text(_supplier!['phone'] as String? ?? ''),
               trailing: const Icon(Icons.chevron_right),
               onTap: _pickSupplier,
@@ -635,8 +633,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               Expanded(
                 child: TextField(
                   controller: _billNo,
-                  decoration: const InputDecoration(
-                    labelText: 'Supplier bill no.',
+                  decoration: InputDecoration(
+                    labelText: t('Supplier bill no.'),
                   ),
                 ),
               ),
@@ -653,14 +651,14 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                     if (picked != null) setState(() => _date = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Date'),
+                    decoration: InputDecoration(labelText: t('Date')),
                     child: Text(dateStr(_date)),
                   ),
                 ),
               ),
             ],
           ),
-          const SectionLabel('Products'),
+          SectionLabel(t('Products')),
           for (var i = 0; i < _lines.length; i++)
             Card(
               margin: const EdgeInsets.only(bottom: 8),
@@ -695,13 +693,13 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           OutlinedButton.icon(
             onPressed: _addProduct,
             icon: const Icon(Icons.add),
-            label: const Text('Add product'),
+            label: Text(t('Add product')),
           ),
-          const SectionLabel('Charges'),
+          SectionLabel(t('Charges')),
           AmountOrPercentField(
             controller: _discount,
             isPercent: _discountIsPercent,
-            label: 'Discount',
+            label: t('Discount'),
             onModeChanged: (v) => setState(() => _discountIsPercent = v),
             onChanged: (_) => setState(() {}),
           ),
@@ -709,10 +707,10 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           TextField(
             controller: _extraCharges,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: const InputDecoration(labelText: 'Extra charges ₹'),
+            decoration: InputDecoration(labelText: t('Extra charges ₹')),
             onChanged: (_) => setState(() {}),
           ),
-          const SectionLabel('Payment'),
+          SectionLabel(t('Payment')),
           Wrap(
             spacing: 8,
             children: [
@@ -758,7 +756,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _notes,
-            decoration: const InputDecoration(labelText: 'Note (optional)'),
+            decoration: InputDecoration(labelText: t('Note (optional)')),
           ),
           const SizedBox(height: 16),
           Card(
@@ -941,7 +939,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: 'Search product',
+              hint: t('Search product'),
               autofocus: true,
               onChanged: _load,
             ),

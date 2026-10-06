@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/walkthrough.dart';
@@ -121,22 +122,22 @@ class ExpensesScreen extends ConsumerWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Add expense category'),
+        title: Text(t('Add expense category')),
         content: TextField(
           controller: name,
           autofocus: true,
           textCapitalization: TextCapitalization.words,
-          decoration: const InputDecoration(labelText: 'Name'),
+          decoration: InputDecoration(labelText: t('Name')),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -227,7 +228,7 @@ class ExpensesScreen extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(labelText: 'Amount ₹ *'),
+                  decoration: InputDecoration(labelText: t('Amount ₹ *')),
                 ),
                 const SizedBox(height: 12),
                 Row(
@@ -243,8 +244,8 @@ class ExpensesScreen extends ConsumerWidget {
                             categories.any((c) => c['id'] == categoryId)
                             ? categoryId
                             : null,
-                        decoration: const InputDecoration(
-                          labelText: 'Category',
+                        decoration: InputDecoration(
+                          labelText: t('Category'),
                         ),
                         items: [
                           const DropdownMenuItem(value: null, child: Text('—')),
@@ -262,7 +263,7 @@ class ExpensesScreen extends ConsumerWidget {
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Add category',
+                      tooltip: t('Add category'),
                       icon: const Icon(Icons.add_circle_outline),
                       onPressed: () => _addCategory(
                         context,
@@ -278,12 +279,12 @@ class ExpensesScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: mode,
-                  decoration: const InputDecoration(labelText: 'Paid via'),
-                  items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                    DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                    DropdownMenuItem(value: 'card', child: Text('Card')),
-                    DropdownMenuItem(value: 'other', child: Text('Bank/Other')),
+                  decoration: InputDecoration(labelText: t('Paid via')),
+                  items: [
+                    DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                    DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                    DropdownMenuItem(value: 'card', child: Text(t('Card'))),
+                    DropdownMenuItem(value: 'other', child: Text(t('Bank/Other'))),
                   ],
                   onChanged: (v) => setState(() => mode = v ?? 'cash'),
                 ),
@@ -299,15 +300,15 @@ class ExpensesScreen extends ConsumerWidget {
                     if (picked != null) setState(() => date = picked);
                   },
                   child: InputDecorator(
-                    decoration: const InputDecoration(labelText: 'Date'),
+                    decoration: InputDecoration(labelText: t('Date')),
                     child: Text(dateStr(date)),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: note,
-                  decoration: const InputDecoration(
-                    labelText: 'Note (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Note (optional)'),
                   ),
                 ),
               ],
@@ -316,12 +317,12 @@ class ExpensesScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -330,7 +331,7 @@ class ExpensesScreen extends ConsumerWidget {
     if (saved != true) return;
     final amt = double.tryParse(amount.text) ?? 0;
     if (amt <= 0) {
-      if (context.mounted) showError(context, 'Enter a valid amount');
+      if (context.mounted) showError(context, t('Enter a valid amount'));
       return;
     }
     try {
@@ -367,10 +368,10 @@ class ExpensesScreen extends ConsumerWidget {
   ) async {
     final ok = await confirmDialog(
       context,
-      title: 'Delete expense?',
+      title: t('Delete expense?'),
       message:
           '${money(e['amount'] as num?)} — ${(e['expense_categories'] as Map?)?['name'] ?? 'expense'}',
-      confirmText: 'Delete',
+      confirmText: t('Delete'),
     );
     if (!ok) return;
     try {
@@ -413,7 +414,7 @@ class ExpensesScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'Add expense',
+      label: t('Add expense'),
       icon: Icons.add,
       onPressed: () => _addOrEdit(context, ref),
       coachPage: 'expenses',
@@ -423,12 +424,12 @@ class ExpensesScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Expenses'),
+        title: Text(t('Expenses')),
         actions: [
           const GuideButton('expenses'),
           IconButton(
             icon: const Icon(Icons.date_range),
-            tooltip: 'Custom date range',
+            tooltip: t('Custom date range'),
             onPressed: () => _pickRange(context, ref),
           ),
           mainAction.inAppBar(context),
@@ -494,9 +495,9 @@ class ExpensesScreen extends ConsumerWidget {
                     ),
                     Expanded(
                       child: rows.isEmpty
-                          ? const EmptyState(
+                          ? EmptyState(
                               icon: Icons.payments_outlined,
-                              message: 'No expenses in this period',
+                              message: t('No expenses in this period'),
                             )
                           : isDesktop
                           ? Align(
@@ -570,7 +571,7 @@ class ExpensesScreen extends ConsumerWidget {
                                             size: 20,
                                           ),
                                           color: AppColors.inkSoft,
-                                          tooltip: 'Delete expense',
+                                          tooltip: t('Delete expense'),
                                           visualDensity: VisualDensity.compact,
                                           onPressed: () =>
                                               _delete(context, ref, e),
@@ -664,14 +665,14 @@ class _ExpenseCard extends StatelessWidget {
                   IconButton(
                     icon: const Icon(Icons.edit_outlined, size: 19),
                     color: AppColors.inkSoft,
-                    tooltip: 'Edit expense',
+                    tooltip: t('Edit expense'),
                     visualDensity: VisualDensity.compact,
                     onPressed: onEdit,
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 19),
                     color: AppColors.red,
-                    tooltip: 'Delete expense',
+                    tooltip: t('Delete expense'),
                     visualDensity: VisualDensity.compact,
                     onPressed: onDelete,
                   ),

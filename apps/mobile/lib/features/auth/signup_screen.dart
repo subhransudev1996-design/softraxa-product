@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -77,7 +78,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(title: Text(t('Create account'))),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -99,8 +100,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           TextFormField(
                             controller: _name,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(
-                              labelText: 'Your name',
+                            decoration: InputDecoration(
+                              labelText: t('Your name'),
                               prefixIcon: Icon(Icons.person_outline),
                             ),
                             validator: (v) => v == null || v.trim().isEmpty
@@ -111,8 +112,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                           TextFormField(
                             controller: _email,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(
-                              labelText: 'Email',
+                            decoration: InputDecoration(
+                              labelText: t('Email'),
                               prefixIcon: Icon(Icons.email_outlined),
                             ),
                             validator: (v) => v == null || !v.contains('@')
@@ -124,7 +125,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                             controller: _password,
                             obscureText: _obscure,
                             decoration: InputDecoration(
-                              labelText: 'Password',
+                              labelText: t('Password'),
                               prefixIcon: const Icon(Icons.lock_outline),
                               suffixIcon: IconButton(
                                 icon: Icon(
@@ -151,7 +152,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                                       strokeWidth: 2,
                                     ),
                                   )
-                                : const Text('Sign up'),
+                                : Text(t('Sign up')),
                           ),
                         ],
                       ),
@@ -191,8 +192,7 @@ class _VerifyPanel extends StatelessWidget {
           color: AppColors.primary,
         ),
         const SizedBox(height: 20),
-        Text(
-          'Check your email',
+        Text(t('Check your email'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
@@ -207,7 +207,7 @@ class _VerifyPanel extends StatelessWidget {
         const SizedBox(height: 28),
         FilledButton(
           onPressed: busy ? null : onGoToLogin,
-          child: const Text('Go to login'),
+          child: Text(t('Go to login')),
         ),
         const SizedBox(height: 8),
         TextButton(
@@ -218,7 +218,7 @@ class _VerifyPanel extends StatelessWidget {
                   width: 20,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Resend verification email'),
+              : Text(t('Resend verification email')),
         ),
       ],
     );

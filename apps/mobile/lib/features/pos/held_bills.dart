@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -56,7 +57,7 @@ void holdCurrentBill(BuildContext context, WidgetRef ref) {
   if (cart.lines.isEmpty) return;
   ref.read(heldBillsProvider.notifier).hold(cart);
   ref.read(cartProvider.notifier).clear();
-  showSuccess(context, 'Bill held — open "Held bills" to finish it');
+  showSuccess(context, t('Bill held — open "Held bills" to finish it'));
 }
 
 /// Lists held bills; tapping one brings it back to the counter. If the
@@ -68,14 +69,14 @@ Future<void> showHeldBills(BuildContext context, WidgetRef ref) async {
       builder: (ctx, ref, _) {
         final held = ref.watch(heldBillsProvider);
         return AlertDialog(
-          title: const Text('Held bills'),
+          title: Text(t('Held bills')),
           contentPadding: const EdgeInsets.fromLTRB(8, 12, 8, 0),
           content: SizedBox(
             width: 460,
             child: held.isEmpty
-                ? const Padding(
+                ? Padding(
                     padding: EdgeInsets.all(16),
-                    child: Text('No bills on hold.'),
+                    child: Text(t('No bills on hold.')),
                   )
                 : ListView(
                     shrinkWrap: true,
@@ -106,7 +107,7 @@ Future<void> showHeldBills(BuildContext context, WidgetRef ref) async {
                                 ),
                               ),
                               IconButton(
-                                tooltip: 'Discard',
+                                tooltip: t('Discard'),
                                 icon: const Icon(
                                   Icons.delete_outline,
                                   color: AppColors.red,
@@ -114,10 +115,10 @@ Future<void> showHeldBills(BuildContext context, WidgetRef ref) async {
                                 onPressed: () async {
                                   final ok = await confirmDialog(
                                     ctx,
-                                    title: 'Discard this held bill?',
+                                    title: t('Discard this held bill?'),
                                     message:
                                         '${h.label} — ${money(h.cart.total)}',
-                                    confirmText: 'Discard',
+                                    confirmText: t('Discard'),
                                   );
                                   if (ok) {
                                     ref
@@ -136,7 +137,7 @@ Future<void> showHeldBills(BuildContext context, WidgetRef ref) async {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
-              child: const Text('Close'),
+              child: Text(t('Close')),
             ),
           ],
         );
@@ -151,6 +152,6 @@ Future<void> showHeldBills(BuildContext context, WidgetRef ref) async {
   if (current.lines.isNotEmpty) held.hold(current);
   ref.read(cartProvider.notifier).restore(picked.cart);
   if (current.lines.isNotEmpty && context.mounted) {
-    showSuccess(context, 'The bill you were on is now held');
+    showSuccess(context, t('The bill you were on is now held'));
   }
 }

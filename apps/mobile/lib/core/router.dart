@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -72,8 +73,7 @@ class _SplashScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.wifi_off, size: 40, color: Colors.white70),
                 const SizedBox(height: 10),
-                const Text(
-                  'Could not load your account.',
+                Text(t('Could not load your account.'),
                   style: TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 12),
@@ -85,12 +85,11 @@ class _SplashScreen extends ConsumerWidget {
                   ),
                   onPressed: () =>
                       ref.read(appContextProvider.notifier).refresh(),
-                  child: const Text('Retry'),
+                  child: Text(t('Retry')),
                 ),
                 TextButton(
                   onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-                  child: const Text(
-                    'Logout',
+                  child: Text(t('Logout'),
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),

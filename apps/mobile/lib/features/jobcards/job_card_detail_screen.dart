@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -34,7 +35,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Update status'),
+          title: Text(t('Update status')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -54,8 +55,8 @@ class JobCardDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: note,
-                  decoration: const InputDecoration(
-                    labelText: 'Note (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Note (optional)'),
                   ),
                 ),
               ],
@@ -64,12 +65,12 @@ class JobCardDetailScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Update'),
+              child: Text(t('Update')),
             ),
           ],
         ),
@@ -89,7 +90,7 @@ class JobCardDetailScreen extends ConsumerWidget {
           );
       ref.invalidate(jobCardDetailProvider(jobId));
       ref.invalidate(jobCardsProvider);
-      if (context.mounted) showSuccess(context, 'Status updated');
+      if (context.mounted) showSuccess(context, t('Status updated'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -132,7 +133,7 @@ class JobCardDetailScreen extends ConsumerWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(labelText: 'Quantity'),
+              decoration: InputDecoration(labelText: t('Quantity')),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -140,27 +141,27 @@ class JobCardDetailScreen extends ConsumerWidget {
               keyboardType: const TextInputType.numberWithOptions(
                 decimal: true,
               ),
-              decoration: const InputDecoration(
-                labelText: 'Price ₹ (per unit, excl. GST)',
+              decoration: InputDecoration(
+                labelText: t('Price ₹ (per unit, excl. GST)'),
               ),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: gstC,
               keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: 'GST %'),
+              decoration: InputDecoration(labelText: t('GST %')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Add'),
+            child: Text(t('Add')),
           ),
         ],
       ),
@@ -192,7 +193,7 @@ class JobCardDetailScreen extends ConsumerWidget {
           );
       ref.invalidate(jobCardDetailProvider(jobId));
       invalidateStockData(ref);
-      if (context.mounted) showSuccess(context, 'Part added — stock deducted');
+      if (context.mounted) showSuccess(context, t('Part added — stock deducted'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -216,7 +217,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Add labor / service charge'),
+          title: Text(t('Add labor / service charge')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -225,13 +226,13 @@ class JobCardDetailScreen extends ConsumerWidget {
                   DropdownButtonFormField<Map<String, dynamic>>(
                     isExpanded: true,
                     initialValue: service,
-                    decoration: const InputDecoration(
-                      labelText: 'From service catalog (optional)',
+                    decoration: InputDecoration(
+                      labelText: t('From service catalog (optional)'),
                     ),
                     items: [
-                      const DropdownMenuItem(
+                      DropdownMenuItem(
                         value: null,
-                        child: Text('Type manually'),
+                        child: Text(t('Type manually')),
                       ),
                       for (final s in services)
                         DropdownMenuItem(
@@ -256,7 +257,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                 TextField(
                   controller: name,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Charge name *'),
+                  decoration: InputDecoration(labelText: t('Charge name *')),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -264,15 +265,15 @@ class JobCardDetailScreen extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Price ₹ (excl. GST)',
+                  decoration: InputDecoration(
+                    labelText: t('Price ₹ (excl. GST)'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: gst,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'GST %'),
+                  decoration: InputDecoration(labelText: t('GST %')),
                 ),
               ],
             ),
@@ -280,12 +281,12 @@ class JobCardDetailScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Add'),
+              child: Text(t('Add')),
             ),
           ],
         ),
@@ -310,7 +311,7 @@ class JobCardDetailScreen extends ConsumerWidget {
             },
           );
       ref.invalidate(jobCardDetailProvider(jobId));
-      if (context.mounted) showSuccess(context, 'Charge added');
+      if (context.mounted) showSuccess(context, t('Charge added'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -327,7 +328,7 @@ class JobCardDetailScreen extends ConsumerWidget {
             },
           );
       ref.invalidate(jobCardDetailProvider(jobId));
-      if (context.mounted) showSuccess(context, 'Diagnostic fee added');
+      if (context.mounted) showSuccess(context, t('Diagnostic fee added'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -344,7 +345,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       message: item['item_type'] == 'part'
           ? 'This will add the quantity back to stock.'
           : 'This charge will be removed from the bill.',
-      confirmText: 'Remove',
+      confirmText: t('Remove'),
     );
     if (!ok) return;
     try {
@@ -379,7 +380,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Close job & generate invoice'),
+          title: Text(t('Close job & generate invoice')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -390,9 +391,9 @@ class JobCardDetailScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: 12),
                 SegmentedButton<String>(
-                  segments: const [
-                    ButtonSegment(value: 'gst', label: Text('GST')),
-                    ButtonSegment(value: 'non_gst', label: Text('Non-GST')),
+                  segments: [
+                    ButtonSegment(value: 'gst', label: Text(t('GST'))),
+                    ButtonSegment(value: 'non_gst', label: Text(t('Non-GST'))),
                   ],
                   selected: {invoiceType},
                   onSelectionChanged: (s) =>
@@ -404,18 +405,18 @@ class JobCardDetailScreen extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Collect now ₹ (balance due)',
+                  decoration: InputDecoration(
+                    labelText: t('Collect now ₹ (balance due)'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
                   initialValue: mode,
-                  decoration: const InputDecoration(labelText: 'Payment mode'),
-                  items: const [
-                    DropdownMenuItem(value: 'cash', child: Text('Cash')),
-                    DropdownMenuItem(value: 'upi', child: Text('UPI')),
-                    DropdownMenuItem(value: 'card', child: Text('Card')),
+                  decoration: InputDecoration(labelText: t('Payment mode')),
+                  items: [
+                    DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
+                    DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
+                    DropdownMenuItem(value: 'card', child: Text(t('Card'))),
                   ],
                   onChanged: (v) => setState(() => mode = v ?? 'cash'),
                 ),
@@ -423,8 +424,8 @@ class JobCardDetailScreen extends ConsumerWidget {
                 TextField(
                   controller: warranty,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Warranty (days, optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Warranty (days, optional)'),
                   ),
                 ),
               ],
@@ -433,12 +434,12 @@ class JobCardDetailScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Generate invoice'),
+              child: Text(t('Generate invoice')),
             ),
           ],
         ),
@@ -485,7 +486,7 @@ class JobCardDetailScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Job card'),
+        title: Text(t('Job card')),
       ),
       body: AsyncView(
         value: data,
@@ -720,14 +721,14 @@ class JobCardDetailScreen extends ConsumerWidget {
                   label: Text('Status: ${jobStatusLabel(status)}'),
                 ),
                 if (needsEstimate) ...[
-                  const SectionLabel('Estimate'),
+                  SectionLabel(t('Estimate')),
                   EstimateSection(job: j),
                 ],
                 SectionLabel(needsEstimate ? 'Work done' : 'Parts & labor'),
                 if (items.isEmpty)
-                  const EmptyState(
+                  EmptyState(
                     icon: Icons.build_outlined,
-                    message: 'No parts or labor added yet',
+                    message: t('No parts or labor added yet'),
                   )
                 else
                   Card(
@@ -807,7 +808,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                     onPressed: () =>
                         markEstimateWorkDone(context, ref, jobId, items),
                     icon: const Icon(Icons.playlist_add_check),
-                    label: const Text('Add approved work'),
+                    label: Text(t('Add approved work')),
                   ),
                 ] else if (!closed) ...[
                   const SizedBox(height: 8),
@@ -817,7 +818,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => _addPart(context, ref),
                           icon: const Icon(Icons.inventory_2_outlined),
-                          label: const Text('Add part'),
+                          label: Text(t('Add part')),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -825,13 +826,13 @@ class JobCardDetailScreen extends ConsumerWidget {
                         child: OutlinedButton.icon(
                           onPressed: () => _addLabor(context, ref),
                           icon: const Icon(Icons.build_outlined),
-                          label: const Text('Add labor'),
+                          label: Text(t('Add labor')),
                         ),
                       ),
                     ],
                   ),
                 ],
-                const SectionLabel('Billing'),
+                SectionLabel(t('Billing')),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -863,22 +864,21 @@ class JobCardDetailScreen extends ConsumerWidget {
                         ? null
                         : () => _close(context, ref, j, total, advance),
                     icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('Close job & generate invoice'),
+                    label: Text(t('Close job & generate invoice')),
                   )
                 else
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 4),
-                    child: Text(
-                      'This job has been closed and billed.',
+                    child: Text(t('This job has been closed and billed.'),
                       style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12.5,
                       ),
                     ),
                   ),
-                const SectionLabel('Photos'),
+                SectionLabel(t('Photos')),
                 JobPhotosSection(job: j),
-                const SectionLabel('Status history'),
+                SectionLabel(t('Status history')),
                 Card(
                   child: Column(
                     children: [
@@ -1019,7 +1019,7 @@ class PartPickerState extends ConsumerState<PartPicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: 'Search product to use as spare part',
+              hint: t('Search product to use as spare part'),
               autofocus: true,
               onChanged: _load,
             ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -44,17 +45,17 @@ Future<String?> _showStockDialog(
           const SizedBox(height: 20),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'cancel'),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           const SizedBox(height: 8),
           OutlinedButton(
             onPressed: () => Navigator.pop(ctx, 'add_stock'),
-            child: const Text('Add stock first'),
+            child: Text(t('Add stock first')),
           ),
           const SizedBox(height: 8),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, 'add_anyway'),
-            child: const Text('Add anyway'),
+            child: Text(t('Add anyway')),
           ),
         ],
       ),
@@ -97,12 +98,12 @@ Future<String?> showImeiPicker(
                 controller: controller,
                 autofocus: true,
                 decoration: InputDecoration(
-                  labelText: 'Search or enter IMEI',
+                  labelText: t('Search or enter IMEI'),
                   suffixIcon: IconButton(
                     icon: const Icon(Icons.qr_code_scanner),
                     onPressed: () async {
                       final code = isDesktopPlatform
-                          ? await promptBarcode(context, title: 'Enter IMEI')
+                          ? await promptBarcode(context, title: t('Enter IMEI'))
                           : await context.push<String>('/scan?mode=return');
                       if (code != null && code.isNotEmpty && ctx.mounted) {
                         Navigator.pop(ctx, code);
@@ -120,8 +121,7 @@ Future<String?> showImeiPicker(
               if (serials.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    'No in-stock IMEIs found in database. Type or scan an IMEI above.',
+                  child: Text(t('No in-stock IMEIs found in database. Type or scan an IMEI above.'),
                     style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 )
@@ -154,7 +154,7 @@ Future<String?> showImeiPicker(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, null),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
@@ -162,7 +162,7 @@ Future<String?> showImeiPicker(
               final val = controller.text.trim();
               if (val.isNotEmpty) Navigator.pop(ctx, val);
             },
-            child: const Text('Confirm'),
+            child: Text(t('Confirm')),
           ),
         ],
       ),
@@ -528,7 +528,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (stock != null && newQty > stock) {
       final action = await _showStockDialog(
         context,
-        title: 'Not enough stock',
+        title: t('Not enough stock'),
         message:
             '${line.name} only has ${qty(stock)} in stock, but this bill would need '
             '${qty(newQty)}. Add stock first, or continue anyway?',
@@ -605,7 +605,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(labelText: 'Qty'),
+                        decoration: InputDecoration(labelText: t('Qty')),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -617,7 +617,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           decimal: true,
                         ),
                         decoration: InputDecoration(
-                          labelText: 'Price ₹',
+                          labelText: t('Price ₹'),
                           helperText: canEditPrices
                               ? priceSourceLabel(line.priceSource)
                               : 'Owner sets prices',
@@ -655,15 +655,15 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                     isPercent: discountIsPercent,
                     onModeChanged: (v) =>
                         setDialogState(() => discountIsPercent = v),
-                    label: 'Line discount',
+                    label: t('Line discount'),
                   ),
                 ],
                 if (line.trackSerial) ...[
                   const SizedBox(height: 12),
                   TextField(
                     controller: serial,
-                    decoration: const InputDecoration(
-                      labelText: 'IMEI / Serial no.',
+                    decoration: InputDecoration(
+                      labelText: t('IMEI / Serial no.'),
                     ),
                   ),
                 ],
@@ -673,12 +673,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -936,14 +936,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 backgroundColor: AppColors.primary,
                 child: const Icon(Icons.sync_problem),
               ),
-              tooltip: 'Pending offline bills',
+              tooltip: t('Pending offline bills'),
               onPressed: () => context.push('/offline-bills'),
             ),
           if (editing == null && exchange == null) ...[
             if (cart.lines.isNotEmpty)
               IconButton(
                 icon: const Icon(Icons.pause_circle_outline),
-                tooltip: 'Hold bill (F8)',
+                tooltip: t('Hold bill (F8)'),
                 onPressed: () => holdCurrentBill(context, ref),
               ),
             if (heldCount > 0)
@@ -953,20 +953,20 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                   backgroundColor: AppColors.orange,
                   child: const Icon(Icons.receipt_long_outlined),
                 ),
-                tooltip: 'Held bills',
+                tooltip: t('Held bills'),
                 onPressed: () => showHeldBills(context, ref),
               ),
           ],
           if (cart.lines.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_sweep_outlined),
-              tooltip: 'Clear bill',
+              tooltip: t('Clear bill'),
               onPressed: () async {
                 final ok = await confirmDialog(
                   context,
-                  title: 'Clear bill?',
-                  message: 'Remove all items from this bill?',
-                  confirmText: 'Clear',
+                  title: t('Clear bill?'),
+                  message: t('Remove all items from this bill?'),
+                  confirmText: t('Clear'),
                 );
                 if (ok) ref.read(cartProvider.notifier).clear();
               },
@@ -1000,7 +1000,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                             onPressed: () =>
                                                 context.push('/products/new'),
                                             icon: const Icon(Icons.add),
-                                            label: const Text('Add product'),
+                                            label: Text(t('Add product')),
                                           ),
                                         )
                                       : PosResultsTable(
@@ -1073,7 +1073,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                     onPressed: () =>
                                         context.push('/products/new'),
                                     icon: const Icon(Icons.add),
-                                    label: const Text('Add product'),
+                                    label: Text(t('Add product')),
                                   ),
                                 )
                               : ListView.separated(
@@ -1123,10 +1123,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         )
                       // ---- cart lines ----
                       : cart.lines.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.shopping_cart_outlined,
-                          message:
-                              'Bill is empty.\nSearch or scan products to add them.',
+                          message: t('Bill is empty.\nSearch or scan products to add them.'),
                         )
                       : CoachTarget(
                           page: 'pos',

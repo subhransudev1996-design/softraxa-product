@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/formatters.dart';
@@ -91,20 +92,19 @@ class PosCartTable extends StatelessWidget {
         children: [
           _HeaderRow([
             _cell(const Text('#'), width: 36),
-            _cell(const Text('ITEM'), flex: 5),
-            _cell(const Text('QTY'), width: 128),
-            _cell(const Text('RATE'), width: 110, end: true),
-            _cell(const Text('DISCOUNT'), width: 100, end: true),
-            _cell(const Text('GST'), width: 64, end: true),
-            _cell(const Text('AMOUNT'), width: 120, end: true),
+            _cell(Text(t('ITEM')), flex: 5),
+            _cell(Text(t('QTY')), width: 128),
+            _cell(Text(t('RATE')), width: 110, end: true),
+            _cell(Text(t('DISCOUNT')), width: 100, end: true),
+            _cell(Text(t('GST')), width: 64, end: true),
+            _cell(Text(t('AMOUNT')), width: 120, end: true),
             const SizedBox(width: 44),
           ]),
           Expanded(
             child: lines.isEmpty
-                ? const EmptyState(
+                ? EmptyState(
                     icon: Icons.shopping_cart_outlined,
-                    message:
-                        'No items yet.\nSearch above or scan a barcode to add products.',
+                    message: t('No items yet.\nSearch above or scan a barcode to add products.'),
                   )
                 : ListView.separated(
                     itemCount: lines.length,
@@ -247,7 +247,7 @@ class _CartRow extends StatelessWidget {
             SizedBox(
               width: 44,
               child: IconButton(
-                tooltip: 'Remove',
+                tooltip: t('Remove'),
                 iconSize: 18,
                 icon: Icon(Icons.close, color: AppColors.inkSoft),
                 onPressed: () => onRemove(line),
@@ -329,10 +329,10 @@ class PosResultsTable extends StatelessWidget {
       child: Column(
         children: [
           _HeaderRow([
-            _cell(const Text('PRODUCT'), flex: 5),
-            _cell(const Text('BARCODE / SKU'), flex: 2),
-            _cell(const Text('PRICE'), width: 120, end: true),
-            _cell(const Text('STOCK'), width: 120, end: true),
+            _cell(Text(t('PRODUCT')), flex: 5),
+            _cell(Text(t('BARCODE / SKU')), flex: 2),
+            _cell(Text(t('PRICE')), width: 120, end: true),
+            _cell(Text(t('STOCK')), width: 120, end: true),
           ]),
           Expanded(
             child: ListView.separated(
@@ -467,8 +467,7 @@ class PosBillPanel extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            child: Text(
-              'CUSTOMER',
+            child: Text(t('CUSTOMER'),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -487,8 +486,7 @@ class PosBillPanel extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               children: [
-                Text(
-                  'BILL SUMMARY',
+                Text(t('BILL SUMMARY'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -527,8 +525,7 @@ class PosBillPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Text(
-                        'Total',
+                      child: Text(t('Total'),
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,

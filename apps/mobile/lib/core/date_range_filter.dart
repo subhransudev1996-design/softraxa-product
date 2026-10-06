@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 
 import 'formatters.dart';
@@ -61,7 +62,7 @@ class DateRangeFilterChip extends StatelessWidget {
     if (from == null || to == null) {
       return ActionChip(
         avatar: const Icon(Icons.date_range, size: 18),
-        label: const Text('From – To dates'),
+        label: Text(t('From – To dates')),
         onPressed: () => _pick(context),
       );
     }

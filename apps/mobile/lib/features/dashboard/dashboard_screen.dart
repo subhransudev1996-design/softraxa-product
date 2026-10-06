@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'day_summary.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -203,9 +204,9 @@ Widget _recentInvoicesCard(
     value: invoices,
     onRetry: onRetry,
     builder: (rows) => rows.isEmpty
-        ? const EmptyState(
+        ? EmptyState(
             icon: Icons.receipt_long,
-            message: 'No invoices yet.\nCreate your first bill!',
+            message: t('No invoices yet.\nCreate your first bill!'),
           )
         : Container(
             decoration: BoxDecoration(
@@ -326,7 +327,7 @@ class _DesktopDashboard extends StatelessWidget {
                         OutlinedButton.icon(
                           onPressed: () => context.push('/products/new'),
                           icon: const Icon(Icons.add_box_outlined, size: 18),
-                          label: const Text('Add Product'),
+                          label: Text(t('Add Product')),
                         ),
                         OutlinedButton.icon(
                           onPressed: () => context.push('/purchases/new'),
@@ -334,7 +335,7 @@ class _DesktopDashboard extends StatelessWidget {
                             Icons.shopping_cart_outlined,
                             size: 18,
                           ),
-                          label: const Text('New Purchase'),
+                          label: Text(t('New Purchase')),
                         ),
                         CoachTarget(
                           page: 'home',
@@ -342,7 +343,7 @@ class _DesktopDashboard extends StatelessWidget {
                           child: FilledButton.icon(
                             onPressed: () => context.go('/pos'),
                             icon: const Icon(Icons.receipt_long, size: 18),
-                            label: const Text('New Bill'),
+                            label: Text(t('New Bill')),
                           ),
                         ),
                       ],
@@ -378,7 +379,7 @@ class _DesktopDashboard extends StatelessWidget {
                             const SizedBox(height: 8),
                             OutlinedButton(
                               onPressed: onRetryStats,
-                              child: const Text('Retry'),
+                              child: Text(t('Retry')),
                             ),
                           ],
                         ),
@@ -415,7 +416,7 @@ class _DesktopDashboard extends StatelessWidget {
                           onTap: () => context.push('/stock'),
                         ),
                         _StatCard(
-                          title: 'Low / Out of Stock',
+                          title: t('Low / Out of Stock'),
                           value: s == null
                               ? '…'
                               : '${s!['low_stock_count']} / ${s!['out_of_stock_count']}',
@@ -424,7 +425,7 @@ class _DesktopDashboard extends StatelessWidget {
                           onTap: () => context.push('/stock?filter=low'),
                         ),
                         _StatCard(
-                          title: 'To Collect',
+                          title: t('To Collect'),
                           value: s == null
                               ? '…'
                               : moneyCompact(s!['customer_due_total'] as num?),
@@ -433,7 +434,7 @@ class _DesktopDashboard extends StatelessWidget {
                           onTap: () => context.push('/customers'),
                         ),
                         _StatCard(
-                          title: 'To Pay',
+                          title: t('To Pay'),
                           value: s == null
                               ? '…'
                               : moneyCompact(s!['supplier_due_total'] as num?),
@@ -566,7 +567,7 @@ class _MobileDashboard extends StatelessWidget {
                     Consumer(
                       builder: (context, ref, _) => _HeaderIconButton(
                         icon: Icons.notifications_none,
-                        tooltip: 'Notifications',
+                        tooltip: t('Notifications'),
                         badge:
                             ref.watch(notificationsProvider).value?.length ?? 0,
                         onTap: () => showNotificationsDialog(
@@ -584,14 +585,14 @@ class _MobileDashboard extends StatelessWidget {
                     if (!isDesktopPlatform) ...[
                       _HeaderIconButton(
                         icon: Icons.qr_code_scanner,
-                        tooltip: 'Scan barcode',
+                        tooltip: t('Scan barcode'),
                         onTap: () => context.push('/scan'),
                       ),
                       const SizedBox(width: 8),
                     ],
                     _HeaderIconButton(
                       icon: Icons.help_outline,
-                      tooltip: 'App walkthrough',
+                      tooltip: t('App walkthrough'),
                       onTap: () => showWalkthrough(context, 'home'),
                     ),
                     // auto-opens the welcome tour on first launch
@@ -703,32 +704,32 @@ class _MobileDashboard extends StatelessWidget {
                   _QuickAction(
                     icon: Icons.receipt_long,
                     color: AppColors.primary,
-                    label: 'New Bill',
+                    label: t('New Bill'),
                     onTap: () => context.go('/pos'),
                   ),
                   _QuickAction(
                     icon: Icons.add_box_rounded,
                     color: AppColors.indigo,
-                    label: 'Add Product',
+                    label: t('Add Product'),
                     onTap: () => context.push('/products/new'),
                   ),
                   _QuickAction(
                     icon: Icons.shopping_cart_rounded,
                     color: AppColors.green,
-                    label: 'Purchase',
+                    label: t('Purchase'),
                     onTap: () => context.push('/purchases/new'),
                   ),
                   _QuickAction(
                     icon: Icons.insights_rounded,
                     color: AppColors.orange,
-                    label: 'Summary',
+                    label: t('Summary'),
                     onTap: () => showDaySummary(context),
                   ),
                   if (!isDesktopPlatform)
                     _QuickAction(
                       icon: Icons.qr_code_scanner,
                       color: AppColors.purple,
-                      label: 'Scan',
+                      label: t('Scan'),
                       onTap: () => context.push('/scan'),
                     ),
                 ],
@@ -753,7 +754,7 @@ class _MobileDashboard extends StatelessWidget {
                         const SizedBox(height: 8),
                         OutlinedButton(
                           onPressed: onRetryStats,
-                          child: const Text('Retry'),
+                          child: Text(t('Retry')),
                         ),
                       ],
                     ),
@@ -771,7 +772,7 @@ class _MobileDashboard extends StatelessWidget {
                       onTap: () => context.push('/stock'),
                     ),
                     _StatCard(
-                      title: 'Low / Out of Stock',
+                      title: t('Low / Out of Stock'),
                       value: s == null
                           ? '…'
                           : '${s!['low_stock_count']} / ${s!['out_of_stock_count']}',
@@ -780,7 +781,7 @@ class _MobileDashboard extends StatelessWidget {
                       onTap: () => context.push('/stock?filter=low'),
                     ),
                     _StatCard(
-                      title: 'To Collect',
+                      title: t('To Collect'),
                       value: s == null
                           ? '…'
                           : moneyCompact(s!['customer_due_total'] as num?),
@@ -789,7 +790,7 @@ class _MobileDashboard extends StatelessWidget {
                       onTap: () => context.push('/customers'),
                     ),
                     _StatCard(
-                      title: 'To Pay',
+                      title: t('To Pay'),
                       value: s == null
                           ? '…'
                           : moneyCompact(s!['supplier_due_total'] as num?),
@@ -807,13 +808,12 @@ class _MobileDashboard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Recent invoices',
+              Text(t('Recent invoices'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               TextButton(
                 onPressed: () => context.push('/invoices'),
-                child: const Text('View all'),
+                child: Text(t('View all')),
               ),
             ],
           ),
@@ -931,8 +931,7 @@ class _ExpiryBanner extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  'Renew now so billing doesn\'t stop.',
+                Text(t('Renew now so billing doesn\'t stop.'),
                   style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ],
@@ -949,7 +948,7 @@ class _ExpiryBanner extends ConsumerWidget {
                 child: RenewalPaymentCard(),
               ),
             ),
-            child: const Text('Renew'),
+            child: Text(t('Renew')),
           ),
         ],
       ),
@@ -1012,7 +1011,7 @@ class _TrialBanner extends ConsumerWidget {
             ),
           ),
           IconButton(
-            tooltip: 'Ask on WhatsApp',
+            tooltip: t('Ask on WhatsApp'),
             onPressed: () => launchWhatsAppContact(context, appContext),
             icon: const Icon(
               Icons.chat_outlined,
@@ -1023,7 +1022,7 @@ class _TrialBanner extends ConsumerWidget {
           TextButton(
             style: TextButton.styleFrom(foregroundColor: ink),
             onPressed: () => context.push('/subscription/plans'),
-            child: const Text('View plans'),
+            child: Text(t('View plans')),
           ),
         ],
       ),

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -164,32 +165,29 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Delete your account?'),
+        title: Text(t('Delete your account?')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'SOFTRAXA will delete your shop, its logins and its data, and '
-              'confirm on WhatsApp or by email. Bills may be kept for as long '
-              'as GST law requires. Export your data first if you want a copy.',
+            Text(t('SOFTRAXA will delete your shop, its logins and its data, and confirm on WhatsApp or by email. Bills may be kept for as long as GST law requires. Export your data first if you want a copy.'),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reason,
-              decoration: const InputDecoration(labelText: 'Reason (optional)'),
+              decoration: InputDecoration(labelText: t('Reason (optional)')),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           TextButton(
             style: TextButton.styleFrom(foregroundColor: AppColors.red),
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Ask to delete'),
+            child: Text(t('Ask to delete')),
           ),
         ],
       ),
@@ -205,7 +203,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       if (mounted) {
         showSuccess(
           context,
-          'Request sent — SOFTRAXA will confirm when your account is deleted',
+          t('Request sent — SOFTRAXA will confirm when your account is deleted'),
         );
       }
     } catch (e) {
@@ -224,7 +222,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           if (!isEdit)
             TextButton(
               onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-              child: const Text('Logout'),
+              child: Text(t('Logout')),
             ),
         ],
       ),
@@ -255,17 +253,17 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   ),
                 ),
               ),
-              const Center(
+              Center(
                 child: Padding(
                   padding: EdgeInsets.only(top: 6),
-                  child: Text('Business logo'),
+                  child: Text(t('Business logo')),
                 ),
               ),
-              const SectionLabel('Business details'),
+              SectionLabel(t('Business details')),
               TextFormField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Business name *'),
+                decoration: InputDecoration(labelText: t('Business name *')),
                 validator: (v) =>
                     v == null || v.trim().isEmpty ? 'Required' : null,
               ),
@@ -273,12 +271,12 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               TextFormField(
                 controller: _owner,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(labelText: 'Owner name'),
+                decoration: InputDecoration(labelText: t('Owner name')),
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
                 initialValue: _type,
-                decoration: const InputDecoration(labelText: 'Business type'),
+                decoration: InputDecoration(labelText: t('Business type')),
                 items: [
                   for (final c in businessCategories)
                     DropdownMenuItem(value: c.key, child: Text(c.label)),
@@ -289,35 +287,35 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               TextFormField(
                 controller: _phone,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone number'),
+                decoration: InputDecoration(labelText: t('Phone number')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(labelText: 'Business email'),
+                decoration: InputDecoration(labelText: t('Business email')),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _address,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Business address',
+                decoration: InputDecoration(
+                  labelText: t('Business address'),
                 ),
               ),
-              const SectionLabel('Tax & billing'),
+              SectionLabel(t('Tax & billing')),
               DropdownButtonFormField<String>(
                 initialValue: _taxPref,
-                decoration: const InputDecoration(labelText: 'Tax preference'),
-                items: const [
-                  DropdownMenuItem(value: 'gst', child: Text('GST billing')),
+                decoration: InputDecoration(labelText: t('Tax preference')),
+                items: [
+                  DropdownMenuItem(value: 'gst', child: Text(t('GST billing'))),
                   DropdownMenuItem(
                     value: 'composition',
-                    child: Text('Composition (bill of supply)'),
+                    child: Text(t('Composition (bill of supply)')),
                   ),
                   DropdownMenuItem(
                     value: 'non_gst',
-                    child: Text('Non-GST billing'),
+                    child: Text(t('Non-GST billing')),
                   ),
                 ],
                 onChanged: (v) => setState(() => _taxPref = v ?? 'gst'),
@@ -329,8 +327,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   child: TextFormField(
                     controller: _gst,
                     textCapitalization: TextCapitalization.characters,
-                    decoration: const InputDecoration(
-                      labelText: 'GST number (GSTIN)',
+                    decoration: InputDecoration(
+                      labelText: t('GST number (GSTIN)'),
                     ),
                     validator: (v) => gstinError(v ?? ''),
                     onChanged: (v) {
@@ -344,8 +342,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: GstStateField(
                     value: _state,
-                    label: 'State *',
-                    helperText: 'Decides CGST + SGST vs IGST on invoices',
+                    label: t('State *'),
+                    helperText: t('Decides CGST + SGST vs IGST on invoices'),
                     onChanged: (v) => setState(() => _state = v),
                     validator: (v) =>
                         (v ?? '').isEmpty ? 'Required for GST billing' : null,
@@ -356,19 +354,18 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: DropdownButtonFormField<String>(
                     initialValue: _band,
-                    decoration: const InputDecoration(
-                      labelText: 'Annual turnover',
-                      helperText:
-                          'Above ₹5 crore needs e-invoicing — contact SOFTRAXA',
+                    decoration: InputDecoration(
+                      labelText: t('Annual turnover'),
+                      helperText: t('Above ₹5 crore needs e-invoicing — contact SOFTRAXA'),
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'up_to_5cr',
-                        child: Text('Up to ₹5 crore'),
+                        child: Text(t('Up to ₹5 crore')),
                       ),
                       DropdownMenuItem(
                         value: 'above_5cr',
-                        child: Text('Above ₹5 crore'),
+                        child: Text(t('Above ₹5 crore')),
                       ),
                     ],
                     onChanged: (v) => setState(() => _band = v),
@@ -377,10 +374,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               TextFormField(
                 controller: _upi,
                 keyboardType: TextInputType.emailAddress,
-                decoration: const InputDecoration(
-                  labelText: 'UPI ID (optional)',
-                  hintText: 'shopname@okaxis',
-                  helperText: 'Printed on bills as a "scan to pay" QR code',
+                decoration: InputDecoration(
+                  labelText: t('UPI ID (optional)'),
+                  hintText: t('shopname@okaxis'),
+                  helperText: t('Printed on bills as a "scan to pay" QR code'),
                 ),
                 validator: (v) {
                   final t = (v ?? '').trim();
@@ -398,20 +395,18 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Default credit limit for new customers ₹',
-                  helperText:
-                      '0 = new customers get no credit until you set a limit',
+                decoration: InputDecoration(
+                  labelText: t('Default credit limit for new customers ₹'),
+                  helperText: t('0 = new customers get no credit until you set a limit'),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _returnWindow,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(
-                  labelText: 'Return window (days)',
-                  helperText:
-                      'Returns after this need the owner and a reason. 0 = no limit',
+                decoration: InputDecoration(
+                  labelText: t('Return window (days)'),
+                  helperText: t('Returns after this need the owner and a reason. 0 = no limit'),
                 ),
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
@@ -427,9 +422,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     child: TextFormField(
                       controller: _terms,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Payment terms (days)',
-                        helperText: 'Credit bills are due after this',
+                      decoration: InputDecoration(
+                        labelText: t('Payment terms (days)'),
+                        helperText: t('Credit bills are due after this'),
                       ),
                       validator: (v) {
                         final n = int.tryParse((v ?? '').trim());
@@ -442,9 +437,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     child: TextFormField(
                       controller: _grace,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Grace days',
-                        helperText: 'Before a bill counts as overdue',
+                      decoration: InputDecoration(
+                        labelText: t('Grace days'),
+                        helperText: t('Before a bill counts as overdue'),
                       ),
                       validator: (v) {
                         final n = int.tryParse((v ?? '').trim());
@@ -458,20 +453,17 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 contentPadding: EdgeInsets.zero,
                 value: _requireEstimate,
                 onChanged: (v) => setState(() => _requireEstimate = v),
-                title: const Text('Repairs need an approved estimate'),
-                subtitle: const Text(
-                  'Job card work starts only after the customer approves the '
-                  'estimate. Turn off if you don\'t do repairs.',
+                title: Text(t('Repairs need an approved estimate')),
+                subtitle: Text(t('Job card work starts only after the customer approves the estimate. Turn off if you don\'t do repairs.'),
                 ),
               ),
               const SizedBox(height: 12),
               TextFormField(
                 controller: _prefix,
                 textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
-                  labelText: 'Invoice prefix',
-                  helperText:
-                      'Up to 4 characters — bills become INV/26-27/0001',
+                decoration: InputDecoration(
+                  labelText: t('Invoice prefix'),
+                  helperText: t('Up to 4 characters — bills become INV/26-27/0001'),
                 ),
                 // Bill numbers must fit in 16 characters (migration 0048).
                 validator: (v) =>
@@ -497,14 +489,14 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 OutlinedButton.icon(
                   onPressed: () => exportAllData(context, ref),
                   icon: const Icon(Icons.download_outlined),
-                  label: const Text('Export all data (Excel)'),
+                  label: Text(t('Export all data (Excel)')),
                 ),
                 const SizedBox(height: 12),
                 TextButton.icon(
                   style: TextButton.styleFrom(foregroundColor: AppColors.red),
                   onPressed: _requestDeletion,
                   icon: const Icon(Icons.delete_forever_outlined),
-                  label: const Text('Delete my account'),
+                  label: Text(t('Delete my account')),
                 ),
               ],
               const SizedBox(height: 24),

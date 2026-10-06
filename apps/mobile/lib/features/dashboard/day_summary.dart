@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -239,7 +240,7 @@ class _DaySummaryDialogState extends ConsumerState<_DaySummaryDialog> {
       title: Row(
         children: [
           IconButton(
-            tooltip: 'Day before',
+            tooltip: t('Day before'),
             icon: const Icon(Icons.chevron_left),
             onPressed: () =>
                 setState(() => _day = _day.subtract(const Duration(days: 1))),
@@ -252,7 +253,7 @@ class _DaySummaryDialogState extends ConsumerState<_DaySummaryDialog> {
             ),
           ),
           IconButton(
-            tooltip: 'Next day',
+            tooltip: t('Next day'),
             icon: const Icon(Icons.chevron_right),
             onPressed: isToday
                 ? null
@@ -311,7 +312,7 @@ class _DaySummaryDialogState extends ConsumerState<_DaySummaryDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const Text('Close'),
+          child: Text(t('Close')),
         ),
         FilledButton.icon(
           style: dialogActionStyle,
@@ -326,7 +327,7 @@ class _DaySummaryDialogState extends ConsumerState<_DaySummaryDialog> {
                   subject: 'Day summary',
                 ),
           icon: const Icon(Icons.share, size: 18),
-          label: const Text('Share'),
+          label: Text(t('Share')),
         ),
       ],
     );

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -95,7 +96,7 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('GST returns'),
+        title: Text(t('GST returns')),
       ),
       body: Column(
         children: [
@@ -105,7 +106,7 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
               children: [
                 IconButton(
                   icon: const Icon(Icons.chevron_left),
-                  tooltip: 'Previous month',
+                  tooltip: t('Previous month'),
                   onPressed: () => _shiftMonth(-1),
                 ),
                 Expanded(
@@ -117,7 +118,7 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
                 ),
                 IconButton(
                   icon: const Icon(Icons.chevron_right),
-                  tooltip: 'Next month',
+                  tooltip: t('Next month'),
                   onPressed: _isCurrentMonth ? null : () => _shiftMonth(1),
                 ),
               ],
@@ -134,15 +135,15 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
                     padding: const EdgeInsets.all(16),
                     children: [
                       if (_isCurrentMonth)
-                        const _Notice(
+                        _Notice(
                           icon: Icons.info_outline,
                           color: AppColors.indigo,
-                          text: 'This month is still running — figures will change until it ends.',
+                          text: t('This month is still running — figures will change until it ends.'),
                         ),
                       if (d.warningCount > 0) _WarningsCard(data: d),
-                      const SectionLabel('GSTR-3B summary'),
+                      SectionLabel(t('GSTR-3B summary')),
                       _Gstr3bCard(data: d),
-                      const SectionLabel('GSTR-1 sections'),
+                      SectionLabel(t('GSTR-1 sections')),
                       _Gstr1Card(data: d),
                       const SizedBox(height: 16),
                       FilledButton.icon(
@@ -153,15 +154,11 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2),
                               )
                             : const Icon(Icons.download_outlined),
-                        label: const Text('Download Excel for your accountant'),
+                        label: Text(t('Download Excel for your accountant')),
                         onPressed: _exporting ? null : () => _download(d),
                       ),
                       const SizedBox(height: 8),
-                      Text(
-                        'One workbook with GSTR-1 (B2B, B2CL, B2CS, credit notes, '
-                        'HSN summary, documents), GSTR-3B and the purchase register. '
-                        'Your accountant should review it before filing. '
-                        'E-invoice (IRN) and e-way bills are not supported yet.',
+                      Text(t('One workbook with GSTR-1 (B2B, B2CL, B2CS, credit notes, HSN summary, documents), GSTR-3B and the purchase register. Your accountant should review it before filing. E-invoice (IRN) and e-way bills are not supported yet.'),
                         style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                       ),
                       const SizedBox(height: 24),
@@ -257,9 +254,7 @@ class _Gstr3bCard extends StatelessWidget {
             const Divider(height: 20),
             _taxRow('Net (before set-off)', net.igst, net.cgst, net.sgst, bold: true),
             const SizedBox(height: 6),
-            Text(
-              'A negative figure is credit to carry forward. Your accountant applies '
-              'credits across IGST, CGST and SGST in the order the GST portal requires.',
+            Text(t('A negative figure is credit to carry forward. Your accountant applies credits across IGST, CGST and SGST in the order the GST portal requires.'),
               style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
             ),
           ],

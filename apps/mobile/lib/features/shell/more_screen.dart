@@ -51,7 +51,7 @@ class MoreScreen extends ConsumerWidget {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('More')),
+      appBar: AppBar(title: Text(t('More'))),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -88,7 +88,7 @@ class MoreScreen extends ConsumerWidget {
               onTap: () => context.push('/settings/business'),
             ),
           ),
-          const SectionLabel('Sales'),
+          SectionLabel(t('Sales')),
           Card(
             child: Column(
               children: [
@@ -136,7 +136,7 @@ class MoreScreen extends ConsumerWidget {
               ],
             ),
           ),
-          const SectionLabel('Inventory'),
+          SectionLabel(t('Inventory')),
           Card(
             child: Column(
               children: [
@@ -185,7 +185,7 @@ class MoreScreen extends ConsumerWidget {
           ),
           // Hidden for categories that don't do jobs (garment, hardware).
           if (appContext?.category.jobCards ?? true) ...[
-            const SectionLabel('Services'),
+            SectionLabel(t('Services')),
             Card(
               child: Column(
                 children: [
@@ -212,7 +212,7 @@ class MoreScreen extends ConsumerWidget {
               ),
             ),
           ],
-          const SectionLabel('Money'),
+          SectionLabel(t('Money')),
           Card(
             child: ListTile(
               leading: const IconChip(
@@ -246,7 +246,7 @@ class MoreScreen extends ConsumerWidget {
                   '/cashbook',
                   color: AppColors.green,
                   enabled: appContext?.canManageCash ?? false,
-                  subtitle: 'Cash in the drawer, count and close the day',
+                  subtitle: t('Cash in the drawer, count and close the day'),
                 ),
                 const Divider(),
                 tile(
@@ -262,7 +262,7 @@ class MoreScreen extends ConsumerWidget {
             ),
           ),
           if (appContext?.isOwner == true) ...[
-            const SectionLabel('Store Management'),
+            SectionLabel(t('Store Management')),
             Card(
               child: Column(
                 children: [
@@ -272,7 +272,7 @@ class MoreScreen extends ConsumerWidget {
                     '/subscription/plans',
                     color: AppColors.primary,
                     enabled: true,
-                    subtitle: 'What your plan includes, usage and other plans',
+                    subtitle: t('What your plan includes, usage and other plans'),
                   ),
                   const Divider(),
                   tile(
@@ -281,13 +281,13 @@ class MoreScreen extends ConsumerWidget {
                     '/staff',
                     color: AppColors.teal,
                     enabled: true,
-                    subtitle: 'Manage store user accounts and permissions',
+                    subtitle: t('Manage store user accounts and permissions'),
                   ),
                 ],
               ),
             ),
           ],
-          const SectionLabel('Other'),
+          SectionLabel(t('Other')),
           Card(
             child: Column(
               children: [
@@ -304,12 +304,10 @@ class MoreScreen extends ConsumerWidget {
                     color: AppColors.purple,
                     size: 38,
                   ),
-                  title: const Text(
-                    'App walkthrough',
+                  title: Text(t('App walkthrough'),
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
-                  subtitle: const Text(
-                    'Replay the guided tour anytime',
+                  subtitle: Text(t('Replay the guided tour anytime'),
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
@@ -329,12 +327,10 @@ class MoreScreen extends ConsumerWidget {
                     color: Color(0xFF25D366),
                     size: 38,
                   ),
-                  title: const Text(
-                    'Contact Support on WhatsApp',
+                  title: Text(t('Contact Support on WhatsApp'),
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
-                  subtitle: const Text(
-                    'Get instant help or upgrade plan on WhatsApp',
+                  subtitle: Text(t('Get instant help or upgrade plan on WhatsApp'),
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
@@ -363,9 +359,8 @@ class MoreScreen extends ConsumerWidget {
                       Icons.bug_report_outlined,
                       color: AppColors.orange,
                     ),
-                    title: const Text('Verify Sentry setup'),
-                    subtitle: const Text(
-                      'Debug builds only: throws a test error',
+                    title: Text(t('Verify Sentry setup')),
+                    subtitle: Text(t('Debug builds only: throws a test error'),
                       style: TextStyle(fontSize: 13),
                     ),
                     onTap: () => throw StateError('This is test exception'),
@@ -374,16 +369,15 @@ class MoreScreen extends ConsumerWidget {
                 ],
                 ListTile(
                   leading: const Icon(Icons.logout, color: AppColors.red),
-                  title: const Text(
-                    'Logout',
+                  title: Text(t('Logout'),
                     style: TextStyle(color: AppColors.red),
                   ),
                   onTap: () async {
                     final ok = await confirmDialog(
                       context,
-                      title: 'Logout',
-                      message: 'Are you sure you want to logout?',
-                      confirmText: 'Logout',
+                      title: t('Logout'),
+                      message: t('Are you sure you want to logout?'),
+                      confirmText: t('Logout'),
                     );
                     if (ok) await ref.read(supabaseProvider).auth.signOut();
                   },

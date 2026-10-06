@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -130,7 +131,7 @@ class _OwnerInbox extends ConsumerWidget {
               ),
             ),
             actions: [
-              TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+              TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Cancel'))),
               FilledButton(
                 style: approve
                     ? dialogActionStyle
@@ -186,14 +187,14 @@ class _OwnerInbox extends ConsumerWidget {
         ];
         final done = [for (final r in rows) if (!open.contains(r)) r];
         if (rows.isEmpty) {
-          return const EmptyState(icon: Icons.verified_outlined, message: 'Nothing to approve');
+          return EmptyState(icon: Icons.verified_outlined, message: t('Nothing to approve'));
         }
         return RefreshIndicator(
           onRefresh: () async => ref.invalidate(ownerApprovalsProvider),
           child: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (open.isNotEmpty) const SectionLabel('Waiting for you'),
+              if (open.isNotEmpty) SectionLabel(t('Waiting for you')),
               for (final r in open)
                 _ApprovalCard(
                   r: r,
@@ -203,21 +204,21 @@ class _OwnerInbox extends ConsumerWidget {
                       ? [
                           FilledButton(
                             onPressed: () => _markReviewed(context, ref, r),
-                            child: const Text('Mark reviewed'),
+                            child: Text(t('Mark reviewed')),
                           ),
                         ]
                       : [
                           OutlinedButton(
                             onPressed: () => _decide(context, ref, r, false),
-                            child: const Text('Reject'),
+                            child: Text(t('Reject')),
                           ),
                           FilledButton(
                             onPressed: () => _decide(context, ref, r, true),
-                            child: const Text('Approve'),
+                            child: Text(t('Approve')),
                           ),
                         ],
                 ),
-              if (done.isNotEmpty) const SectionLabel('Last 7 days'),
+              if (done.isNotEmpty) SectionLabel(t('Last 7 days')),
               for (final r in done)
                 _ApprovalCard(
                   r: r,
@@ -296,9 +297,9 @@ class _MyRequests extends ConsumerWidget {
       onRetry: () => ref.invalidate(myApprovalsProvider),
       builder: (rows) {
         if (rows.isEmpty) {
-          return const EmptyState(
+          return EmptyState(
             icon: Icons.hourglass_empty,
-            message: 'No approval requests in the last 7 days',
+            message: t('No approval requests in the last 7 days'),
           );
         }
         return RefreshIndicator(
@@ -314,33 +315,33 @@ class _MyRequests extends ConsumerWidget {
                     'approved' => [
                       OutlinedButton(
                         onPressed: () => _withdraw(context, ref, r),
-                        child: const Text('Withdraw'),
+                        child: Text(t('Withdraw')),
                       ),
                       FilledButton(
                         onPressed: () => _complete(context, ref, r),
-                        child: const Text('Complete sale'),
+                        child: Text(t('Complete sale')),
                       ),
                     ],
                     'pending' => [
                       OutlinedButton(
                         onPressed: () => _withdraw(context, ref, r),
-                        child: const Text('Withdraw'),
+                        child: Text(t('Withdraw')),
                       ),
                       OutlinedButton(
                         onPressed: () => _revise(context, ref, r),
-                        child: const Text('Change the sale'),
+                        child: Text(t('Change the sale')),
                       ),
                     ],
                     'rejected' || 'expired' || 'withdrawn' => [
                       OutlinedButton(
                         onPressed: () => _revise(context, ref, r),
-                        child: const Text('Change the sale'),
+                        child: Text(t('Change the sale')),
                       ),
                     ],
                     'consumed' => [
                       TextButton(
                         onPressed: () => context.push('/invoices/${r['invoice_id']}'),
-                        child: const Text('Open bill'),
+                        child: Text(t('Open bill')),
                       ),
                     ],
                     _ => const [],

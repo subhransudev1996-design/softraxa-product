@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -88,7 +89,7 @@ class _MobileShell extends StatelessWidget {
                 child: FloatingActionButton(
                   heroTag: 'new_bill_fab',
                   onPressed: () => _go(1),
-                  tooltip: 'New Bill',
+                  tooltip: t('New Bill'),
                   elevation: current == 1 ? 1 : 4,
                   shape: const CircleBorder(),
                   child: Container(
@@ -129,22 +130,21 @@ class _MobileShell extends StatelessWidget {
               _NavItem(
                 icon: Icons.home_outlined,
                 activeIcon: Icons.home,
-                label: 'Home',
+                label: t('Home'),
                 selected: current == 0,
                 onTap: () => _go(0),
               ),
               _NavItem(
                 icon: Icons.inventory_2_outlined,
                 activeIcon: Icons.inventory_2,
-                label: 'Products',
+                label: t('Products'),
                 selected: current == 2,
                 onTap: () => _go(2),
               ),
-              const Expanded(
+              Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(top: 38),
-                  child: Text(
-                    'New Bill',
+                  child: Text(t('New Bill'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 11,
@@ -157,14 +157,14 @@ class _MobileShell extends StatelessWidget {
               _NavItem(
                 icon: Icons.bar_chart_outlined,
                 activeIcon: Icons.bar_chart,
-                label: 'Reports',
+                label: t('Reports'),
                 selected: current == 3,
                 onTap: () => _go(3),
               ),
               _NavItem(
                 icon: Icons.widgets_outlined,
                 activeIcon: Icons.widgets,
-                label: 'More',
+                label: t('More'),
                 selected: current == 4,
                 onTap: () => _go(4),
               ),
@@ -338,7 +338,7 @@ class AppSidebar extends ConsumerWidget {
               child: FilledButton.icon(
                 onPressed: () => context.go('/pos'),
                 icon: const Icon(Icons.receipt_long, size: 18),
-                label: const Text('New Bill'),
+                label: Text(t('New Bill')),
                 style: FilledButton.styleFrom(
                   minimumSize: const Size.fromHeight(40),
                 ),
@@ -352,35 +352,35 @@ class AppSidebar extends ConsumerWidget {
                 railTile(
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home,
-                  label: 'Dashboard',
+                  label: t('Dashboard'),
                   route: '/home',
                 ),
                 railTile(
                   icon: Icons.inventory_2_outlined,
                   activeIcon: Icons.inventory_2,
-                  label: 'Products',
+                  label: t('Products'),
                   route: '/products',
                 ),
                 railTile(
                   icon: Icons.bar_chart_outlined,
                   activeIcon: Icons.bar_chart,
-                  label: 'Reports',
+                  label: t('Reports'),
                   route: '/reports',
                 ),
                 ...section('Sales', [
                   link(
                     icon: Icons.receipt_long_outlined,
-                    label: 'All invoices',
+                    label: t('All invoices'),
                     route: '/invoices',
                   ),
                   link(
                     icon: Icons.assignment_return_outlined,
-                    label: 'Sale returns',
+                    label: t('Sale returns'),
                     route: '/sale-returns',
                   ),
                   link(
                     icon: Icons.people_outline,
-                    label: 'Customers',
+                    label: t('Customers'),
                     route: '/customers',
                   ),
                   // D18: the owner's approval inbox; staff see their requests.
@@ -398,28 +398,28 @@ class AppSidebar extends ConsumerWidget {
                 ...section('Inventory', [
                   link(
                     icon: Icons.warehouse_outlined,
-                    label: 'Stock',
+                    label: t('Stock'),
                     route: '/stock',
                   ),
                   link(
                     icon: Icons.shopping_cart_outlined,
-                    label: 'Purchases',
+                    label: t('Purchases'),
                     route: '/purchases',
                   ),
                   link(
                     icon: Icons.assignment_return_outlined,
-                    label: 'Purchase returns',
+                    label: t('Purchase returns'),
                     route: '/purchase-returns',
                   ),
                   link(
                     icon: Icons.local_shipping_outlined,
-                    label: 'Suppliers',
+                    label: t('Suppliers'),
                     route: '/suppliers',
                   ),
                   if (features?.featureOn('excel_import') ?? true)
                     link(
                       icon: Icons.upload_file_outlined,
-                      label: 'Import products',
+                      label: t('Import products'),
                       route: '/import',
                     ),
                 ]),
@@ -428,12 +428,12 @@ class AppSidebar extends ConsumerWidget {
                   ...section('Services', [
                     link(
                       icon: Icons.build_outlined,
-                      label: 'Service catalog',
+                      label: t('Service catalog'),
                       route: '/services',
                     ),
                     link(
                       icon: Icons.assignment_outlined,
-                      label: 'Job cards',
+                      label: t('Job cards'),
                       route: '/job-cards',
                     ),
                   ]),
@@ -441,13 +441,13 @@ class AppSidebar extends ConsumerWidget {
                   if (appContext?.canManageCash ?? false)
                     link(
                       icon: Icons.point_of_sale_outlined,
-                      label: 'Cashbook & day closing',
+                      label: t('Cashbook & day closing'),
                       route: '/cashbook',
                     ),
                   if (features?.featureOn('expense_module') ?? true)
                     link(
                       icon: Icons.payments_outlined,
-                      label: 'Expenses',
+                      label: t('Expenses'),
                       route: '/expenses',
                     ),
                 ]),
@@ -455,19 +455,19 @@ class AppSidebar extends ConsumerWidget {
                   ...section('Store management', [
                     link(
                       icon: Icons.badge_outlined,
-                      label: 'Staff & permissions',
+                      label: t('Staff & permissions'),
                       route: '/staff',
                     ),
                     link(
                       icon: Icons.workspace_premium_outlined,
-                      label: 'Your plan',
+                      label: t('Your plan'),
                       route: '/subscription/plans',
                     ),
                   ]),
                 ...section('Other', [
                   link(
                     icon: Icons.sync_outlined,
-                    label: 'Pending offline bills',
+                    label: t('Pending offline bills'),
                     route: '/offline-bills',
                   ),
                   link(
@@ -480,14 +480,14 @@ class AppSidebar extends ConsumerWidget {
                   ),
                   link(
                     icon: Icons.settings_outlined,
-                    label: 'Business settings',
+                    label: t('Business settings'),
                     route: '/settings/business',
                   ),
                 ]),
                 if (kDebugMode && crashReportingEnabled)
                   _RailTile(
                     icon: Icons.bug_report_outlined,
-                    label: 'Verify Sentry setup',
+                    label: t('Verify Sentry setup'),
                     selected: false,
                     color: AppColors.orange,
                     foregroundColor: _sidebarMuted,

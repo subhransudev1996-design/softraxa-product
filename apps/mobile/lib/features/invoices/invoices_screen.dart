@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -20,7 +21,7 @@ class InvoicesScreen extends ConsumerWidget {
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
-      label: 'New bill',
+      label: t('New bill'),
       icon: Icons.add,
       onPressed: () => context.go('/pos'),
     );
@@ -28,7 +29,7 @@ class InvoicesScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Invoices'),
+        title: Text(t('Invoices')),
         actions: [const GuideButton('invoices'), mainAction.inAppBar(context)],
       ),
       floatingActionButton: mainAction.fab(context),
@@ -40,7 +41,7 @@ class InvoicesScreen extends ConsumerWidget {
               page: 'invoices',
               id: 'search',
               child: SearchField(
-                hint: 'Search invoice no, customer, phone',
+                hint: t('Search invoice no, customer, phone'),
                 onChanged: (v) => ref
                     .read(invoiceFilterProvider.notifier)
                     .set(filter.copyWith(search: v)),
@@ -112,9 +113,9 @@ class InvoicesScreen extends ConsumerWidget {
                   value: invoices,
                   onRetry: () => ref.invalidate(invoicesProvider),
                   builder: (rows) => rows.isEmpty
-                      ? const EmptyState(
+                      ? EmptyState(
                           icon: Icons.receipt_long,
-                          message: 'No invoices found',
+                          message: t('No invoices found'),
                         )
                       : isDesktop
                       ? DesktopTable<Map<String, dynamic>>(
@@ -125,26 +126,26 @@ class InvoicesScreen extends ConsumerWidget {
                           trailingWidth: 110,
                           columns: [
                             DesktopTableColumn(
-                              label: 'Invoice #',
+                              label: t('Invoice #'),
                               flex: 2,
                               comparable: (r) =>
                                   r['invoice_no'] as String? ?? '',
                             ),
                             DesktopTableColumn(
-                              label: 'Customer',
+                              label: t('Customer'),
                               flex: 3,
                               comparable: (r) =>
                                   (r['customer_name'] as String? ?? '')
                                       .toLowerCase(),
                             ),
                             DesktopTableColumn(
-                              label: 'Date',
+                              label: t('Date'),
                               flex: 2,
                               comparable: (r) =>
                                   r['invoice_date'] as String? ?? '',
                             ),
                             DesktopTableColumn(
-                              label: 'Amount',
+                              label: t('Amount'),
                               flex: 2,
                               alignEnd: true,
                               comparable: (r) => toDouble(r['total']),
@@ -218,10 +219,10 @@ class _InvoiceRow extends StatelessWidget {
                       child: StatusChip(label, color: AppColors.purple),
                     ),
                   if (inv['offline_created'] == true)
-                    const Padding(
+                    Padding(
                       padding: EdgeInsets.only(left: 4),
                       child: Tooltip(
-                        message: 'Made offline — synced',
+                        message: t('Made offline — synced'),
 
                         child: Icon(
                           Icons.cloud_off,
@@ -327,10 +328,10 @@ class _InvoiceTile extends StatelessWidget {
                         if (returnLabel(inv) case final label?)
                           StatusChip(label, color: AppColors.purple),
                         if (inv['offline_created'] == true)
-                          const Padding(
+                          Padding(
                             padding: EdgeInsets.only(left: 4),
                             child: Tooltip(
-                              message: 'Made offline — synced',
+                              message: t('Made offline — synced'),
 
                               child: Icon(
                                 Icons.cloud_off,

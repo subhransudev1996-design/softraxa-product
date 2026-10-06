@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/approvals.dart';
@@ -50,13 +51,13 @@ Future<bool> showOwnerAcknowledge(
       builder: (ctx, setState) {
         final all = exceptions.every((e) => ticked.contains(e['kind']));
         return AlertDialog(
-          title: const Text('Check before billing'),
+          title: Text(t('Check before billing')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('This sale breaks your shop rules. Tick each one to go ahead:'),
+                Text(t('This sale breaks your shop rules. Tick each one to go ahead:')),
                 const SizedBox(height: 8),
                 ExceptionCheckList(
                   exceptions: exceptions,
@@ -67,11 +68,11 @@ Future<bool> showOwnerAcknowledge(
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Change the sale')),
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(t('Change the sale'))),
             FilledButton(
               style: dialogActionStyle,
               onPressed: all ? () => Navigator.pop(ctx, true) : null,
-              child: const Text('Acknowledge & bill'),
+              child: Text(t('Acknowledge & bill')),
             ),
           ],
         );
@@ -91,7 +92,7 @@ Future<String?> showRequestApproval(
   return showDialog<String>(
     context: context,
     builder: (ctx) => AlertDialog(
-      title: const Text('Owner approval needed'),
+      title: Text(t('Owner approval needed')),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -110,28 +111,26 @@ Future<String?> showRequestApproval(
                 ),
               ),
             const SizedBox(height: 4),
-            Text(
-              'The sale is kept as a pending request — nothing is sold yet. '
-              'Complete it once the owner approves (Approvals screen).',
+            Text(t('The sale is kept as a pending request — nothing is sold yet. Complete it once the owner approves (Approvals screen).'),
               style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
             ),
             const SizedBox(height: 8),
             TextField(
               controller: reason,
-              decoration: const InputDecoration(
-                labelText: 'Reason (optional)',
-                hintText: 'e.g. clearance, regular customer',
+              decoration: InputDecoration(
+                labelText: t('Reason (optional)'),
+                hintText: t('e.g. clearance, regular customer'),
               ),
             ),
           ],
         ),
       ),
       actions: [
-        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Change the sale')),
+        TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('Change the sale'))),
         FilledButton(
           style: dialogActionStyle,
           onPressed: () => Navigator.pop(ctx, reason.text.trim()),
-          child: const Text('Ask the owner'),
+          child: Text(t('Ask the owner')),
         ),
       ],
     ),

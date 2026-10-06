@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/walkthrough.dart';
@@ -27,17 +28,17 @@ class OfflineBillsScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Pending offline bills'),
+        title: Text(t('Pending offline bills')),
         actions: [
           const GuideButton('offline_bills'),
           IconButton(
             icon: const Icon(Icons.sync),
-            tooltip: 'Sync now',
+            tooltip: t('Sync now'),
             onPressed: () async {
               await ref.read(offlineServiceProvider).syncPendingBills();
               ref.invalidate(_pendingBillsProvider);
               ref.invalidate(pendingBillCountProvider);
-              if (context.mounted) showSuccess(context, 'Sync attempted');
+              if (context.mounted) showSuccess(context, t('Sync attempted'));
             },
           ),
         ],
@@ -49,8 +50,7 @@ class OfflineBillsScreen extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               color: AppColors.orangeSoft,
-              child: const Text(
-                'You are offline. Bills will sync automatically when internet returns.',
+              child: Text(t('You are offline. Bills will sync automatically when internet returns.'),
                 style: TextStyle(fontSize: 13),
               ),
             ),
@@ -59,9 +59,9 @@ class OfflineBillsScreen extends ConsumerWidget {
               value: bills,
               onRetry: () => ref.invalidate(_pendingBillsProvider),
               builder: (rows) => rows.isEmpty
-                  ? const EmptyState(
+                  ? EmptyState(
                       icon: Icons.cloud_done_outlined,
-                      message: 'All bills are synced!',
+                      message: t('All bills are synced!'),
                     )
                   : ListView.separated(
                       padding: const EdgeInsets.all(16),
@@ -102,7 +102,7 @@ class OfflineBillsScreen extends ConsumerWidget {
                                     children: [
                                       IconButton(
                                         icon: const Icon(Icons.refresh),
-                                        tooltip: 'Try again',
+                                        tooltip: t('Try again'),
                                         onPressed: () async {
                                           await ref
                                               .read(offlineServiceProvider)
@@ -118,14 +118,13 @@ class OfflineBillsScreen extends ConsumerWidget {
                                           Icons.delete_outline,
                                           color: AppColors.red,
                                         ),
-                                        tooltip: 'Discard bill',
+                                        tooltip: t('Discard bill'),
                                         onPressed: () async {
                                           final ok = await confirmDialog(
                                             context,
-                                            title: 'Discard bill?',
-                                            message:
-                                                'This offline bill will be permanently deleted. Stock was never deducted for it.',
-                                            confirmText: 'Discard',
+                                            title: t('Discard bill?'),
+                                            message: t('This offline bill will be permanently deleted. Stock was never deducted for it.'),
+                                            confirmText: t('Discard'),
                                           );
                                           if (!ok) return;
                                           await ref

@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -105,19 +106,19 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
         final create = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('Product not found'),
+            title: Text(t('Product not found')),
             content: Text(
               'No product with barcode $code.\nAdd it as a new product?',
             ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: const Text('Skip'),
+                child: Text(t('Skip')),
               ),
               FilledButton(
                 style: dialogActionStyle,
                 onPressed: () => Navigator.pop(ctx, true),
-                child: const Text('Add product'),
+                child: Text(t('Add product')),
               ),
             ],
           ),
@@ -172,12 +173,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
               ),
             ),
           ),
-          const Positioned(
+          Positioned(
             left: 0,
             right: 0,
             top: 100,
-            child: Text(
-              'Align barcode within the frame',
+            child: Text(t('Align barcode within the frame'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white70,

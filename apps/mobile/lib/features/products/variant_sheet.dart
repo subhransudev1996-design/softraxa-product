@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 
 import '../../core/business_category.dart';
@@ -261,7 +262,7 @@ class _VariantSheetState extends State<_VariantSheet> {
     };
     final name = attributes.values.join(' / ');
     if (name.isEmpty) {
-      showError(context, 'Fill at least one attribute');
+      showError(context, t('Fill at least one attribute'));
       return;
     }
     Navigator.pop(
@@ -292,7 +293,7 @@ class _VariantSheetState extends State<_VariantSheet> {
           widget.existing == null ? 'Add variant' : 'Edit variant',
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SectionLabel('Attributes'),
+        SectionLabel(t('Attributes')),
         if (widget.existing == null) ...[
           _FieldsSource(label: _sourceLabel, onPick: _usePreset),
           const SizedBox(height: 12),
@@ -312,8 +313,8 @@ class _VariantSheetState extends State<_VariantSheet> {
                         controller: _rows[i].name,
                         onChanged: (_) => setState(() {}),
                         textCapitalization: TextCapitalization.words,
-                        decoration: const InputDecoration(
-                          labelText: 'Field name',
+                        decoration: InputDecoration(
+                          labelText: t('Field name'),
                         ),
                       ),
                     ),
@@ -323,11 +324,11 @@ class _VariantSheetState extends State<_VariantSheet> {
                       child: TextField(
                         controller: _rows[i].value,
                         onChanged: (_) => setState(() {}),
-                        decoration: const InputDecoration(labelText: 'Value'),
+                        decoration: InputDecoration(labelText: t('Value')),
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Remove field',
+                      tooltip: t('Remove field'),
                       icon: const Icon(
                         Icons.remove_circle_outline,
                         color: AppColors.red,
@@ -347,19 +348,19 @@ class _VariantSheetState extends State<_VariantSheet> {
         OutlinedButton.icon(
           onPressed: _addField,
           icon: const Icon(Icons.add),
-          label: const Text('Add field'),
+          label: Text(t('Add field')),
         ),
-        const SectionLabel('Codes'),
+        SectionLabel(t('Codes')),
         TextField(
           controller: _sku,
-          decoration: const InputDecoration(labelText: 'SKU (optional)'),
+          decoration: InputDecoration(labelText: t('SKU (optional)')),
         ),
         const SizedBox(height: 12),
         TextField(
           controller: _barcode,
-          decoration: const InputDecoration(labelText: 'Barcode (optional)'),
+          decoration: InputDecoration(labelText: t('Barcode (optional)')),
         ),
-        const SectionLabel('Pricing (leave blank to use product price)'),
+        SectionLabel(t('Pricing (leave blank to use product price)')),
         Row(
           children: [
             Expanded(
@@ -368,7 +369,7 @@ class _VariantSheetState extends State<_VariantSheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Purchase ₹'),
+                decoration: InputDecoration(labelText: t('Purchase ₹')),
               ),
             ),
             const SizedBox(width: 12),
@@ -378,7 +379,7 @@ class _VariantSheetState extends State<_VariantSheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Selling ₹'),
+                decoration: InputDecoration(labelText: t('Selling ₹')),
               ),
             ),
             const SizedBox(width: 12),
@@ -388,12 +389,12 @@ class _VariantSheetState extends State<_VariantSheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'MRP ₹'),
+                decoration: InputDecoration(labelText: t('MRP ₹')),
               ),
             ),
           ],
         ),
-        const SectionLabel('Stock'),
+        SectionLabel(t('Stock')),
         Row(
           children: [
             if (widget.allowOpeningStock) ...[
@@ -403,7 +404,7 @@ class _VariantSheetState extends State<_VariantSheet> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(labelText: 'Opening stock'),
+                  decoration: InputDecoration(labelText: t('Opening stock')),
                 ),
               ),
               const SizedBox(width: 12),
@@ -414,15 +415,15 @@ class _VariantSheetState extends State<_VariantSheet> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(
-                  labelText: 'Low stock alert qty',
+                decoration: InputDecoration(
+                  labelText: t('Low stock alert qty'),
                 ),
               ),
             ),
           ],
         ),
         const SizedBox(height: 20),
-        FilledButton(onPressed: _save, child: const Text('Save variant')),
+        FilledButton(onPressed: _save, child: Text(t('Save variant'))),
         const SizedBox(height: 24),
       ],
     );
@@ -466,21 +467,20 @@ class _FieldsSource extends StatelessWidget {
             ),
           ),
           PopupMenuButton<int>(
-            tooltip: 'Use the fields of another product type',
+            tooltip: t('Use the fields of another product type'),
             onSelected: (i) => onPick(i < 0 ? null : variantPresets[i]),
             itemBuilder: (_) => [
               for (var i = 0; i < variantPresets.length; i++)
                 PopupMenuItem(value: i, child: Text(variantPresets[i].label)),
               const PopupMenuDivider(),
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: -1,
-                child: Text('My shop type\'s fields'),
+                child: Text(t('My shop type\'s fields')),
               ),
             ],
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Text(
-                'Change',
+              child: Text(t('Change'),
                 style: TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,

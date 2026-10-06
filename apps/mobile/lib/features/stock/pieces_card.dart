@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -78,25 +79,25 @@ class PiecesCard extends ConsumerWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Correct the length'),
+        title: Text(t('Correct the length')),
         content: TextField(
           controller: lengthC,
           autofocus: true,
           keyboardType: const TextInputType.numberWithOptions(decimal: true),
           decoration: InputDecoration(
             labelText: 'Actual length${_unit.isEmpty ? '' : ' ($_unit)'}',
-            helperText: 'Measured on the shelf',
+            helperText: t('Measured on the shelf'),
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Save'),
+            child: Text(t('Save')),
           ),
         ],
       ),
@@ -104,7 +105,7 @@ class PiecesCard extends ConsumerWidget {
     if (saved != true) return;
     final length = double.tryParse(lengthC.text) ?? 0;
     if (length <= 0) {
-      if (context.mounted) showError(context, 'Enter a valid length');
+      if (context.mounted) showError(context, t('Enter a valid length'));
       return;
     }
     try {
@@ -139,9 +140,9 @@ class PiecesCard extends ConsumerWidget {
             TextField(
               controller: reason,
               autofocus: true,
-              decoration: const InputDecoration(
-                labelText: 'Why? *',
-                helperText: 'e.g. bent, rusted, too short to sell',
+              decoration: InputDecoration(
+                labelText: t('Why? *'),
+                helperText: t('e.g. bent, rusted, too short to sell'),
               ),
             ),
           ],
@@ -149,14 +150,14 @@ class PiecesCard extends ConsumerWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () {
               if (reason.text.trim().isNotEmpty) Navigator.pop(ctx, true);
             },
-            child: const Text('Throw away'),
+            child: Text(t('Throw away')),
           ),
         ],
       ),
@@ -200,7 +201,7 @@ class PiecesCard extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: const Text('Cut length settings'),
+          title: Text(t('Cut length settings')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -213,7 +214,7 @@ class PiecesCard extends ConsumerWidget {
                   ),
                   decoration: InputDecoration(
                     labelText: 'Full length of 1 piece ($_unit)',
-                    helperText: '1 rod = 12 ft → 12. Empty for wire coils',
+                    helperText: t('1 rod = 12 ft → 12. Empty for wire coils'),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -222,21 +223,21 @@ class PiecesCard extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Charge for each cut ₹ (optional)',
-                    helperText: 'Added to the bill by itself',
+                  decoration: InputDecoration(
+                    labelText: t('Charge for each cut ₹ (optional)'),
+                    helperText: t('Added to the bill by itself'),
                   ),
                 ),
                 SwitchListTile(
                   contentPadding: EdgeInsets.zero,
                   value: returns,
                   onChanged: (v) => setState(() => returns = v),
-                  title: const Text('Customers can return cut pieces'),
+                  title: Text(t('Customers can return cut pieces')),
                 ),
                 if (!more)
                   TextButton(
                     onPressed: () => setState(() => more = true),
-                    child: const Text('More settings'),
+                    child: Text(t('More settings')),
                   )
                 else ...[
                   TextField(
@@ -246,7 +247,7 @@ class PiecesCard extends ConsumerWidget {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Throw away leftovers shorter than ($_unit)',
-                      helperText: 'Empty = keep every leftover',
+                      helperText: t('Empty = keep every leftover'),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -257,7 +258,7 @@ class PiecesCard extends ConsumerWidget {
                     ),
                     decoration: InputDecoration(
                       labelText: 'Lost at each cut by the saw ($_unit)',
-                      helperText: 'Usually empty',
+                      helperText: t('Usually empty'),
                     ),
                   ),
                 ],
@@ -267,12 +268,12 @@ class PiecesCard extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -293,7 +294,7 @@ class PiecesCard extends ConsumerWidget {
           })
           .eq('id', _productId);
       invalidateStockData(ref);
-      if (context.mounted) showSuccess(context, 'Saved');
+      if (context.mounted) showSuccess(context, t('Saved'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -324,8 +325,7 @@ class PiecesCard extends ConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Pieces in stock',
+                      Text(t('Pieces in stock'),
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 14,
@@ -345,7 +345,7 @@ class PiecesCard extends ConsumerWidget {
                   ),
                 ),
                 IconButton(
-                  tooltip: 'Settings',
+                  tooltip: t('Settings'),
                   icon: const Icon(Icons.tune, size: 20),
                   onPressed: () => _editSettings(context, ref),
                 ),
@@ -373,9 +373,7 @@ class PiecesCard extends ConsumerWidget {
                     if (rows.isEmpty && !mismatch)
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 4, 8, 4),
-                        child: Text(
-                          'No stock yet. When you add stock or a purchase, '
-                          'it shows up here as pieces.',
+                        child: Text(t('No stock yet. When you add stock or a purchase, it shows up here as pieces.'),
                           style: TextStyle(
                             fontSize: 12.5,
                             color: AppColors.inkSoft,
@@ -416,7 +414,7 @@ class PiecesCard extends ConsumerWidget {
                           ),
                           if (canFix)
                             PopupMenuButton<String>(
-                              tooltip: 'Change',
+                              tooltip: t('Change'),
                               icon: const Icon(Icons.more_vert, size: 18),
                               onSelected: (a) => a == 'edit'
                                   ? _editPiece(context, ref, g.pieces.first)
@@ -465,7 +463,7 @@ class PiecesCard extends ConsumerWidget {
                             if (canFix)
                               TextButton(
                                 onPressed: () => _matchToStock(context, ref),
-                                child: const Text('Match to stock'),
+                                child: Text(t('Match to stock')),
                               ),
                           ],
                         ),

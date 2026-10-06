@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,7 +50,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('I\'ve paid'),
+        title: Text(t('I\'ve paid')),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -60,21 +61,20 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
                 ),
-                decoration: const InputDecoration(labelText: 'Amount paid ₹ *'),
+                decoration: InputDecoration(labelText: t('Amount paid ₹ *')),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: utr,
-                decoration: const InputDecoration(
-                  labelText: 'UPI reference (UTR) *',
-                  helperText:
-                      '12-digit number in your UPI app\'s payment details',
+                decoration: InputDecoration(
+                  labelText: t('UPI reference (UTR) *'),
+                  helperText: t('12-digit number in your UPI app\'s payment details'),
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: note,
-                decoration: const InputDecoration(labelText: 'Note (optional)'),
+                decoration: InputDecoration(labelText: t('Note (optional)')),
               ),
             ],
           ),
@@ -82,12 +82,12 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Send'),
+            child: Text(t('Send')),
           ),
         ],
       ),
@@ -108,7 +108,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
       if (mounted) {
         showSuccess(
           context,
-          'Sent — you\'ll be unlocked as soon as SOFTRAXA confirms it',
+          t('Sent — you\'ll be unlocked as soon as SOFTRAXA confirms it'),
         );
       }
     } catch (e) {
@@ -120,8 +120,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
   Widget build(BuildContext context) {
     final appContext = ref.watch(appContextProvider).value;
     if (!(appContext?.isOwner ?? false)) {
-      return Text(
-        'Ask the shop owner to renew the subscription.',
+      return Text(t('Ask the shop owner to renew the subscription.'),
         textAlign: TextAlign.center,
         style: TextStyle(color: AppColors.inkSoft),
       );
@@ -148,8 +147,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const Text(
-                  'Renew your subscription',
+                Text(t('Renew your subscription'),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
                 if (pending != null) ...[
@@ -185,8 +183,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 ],
                 const SizedBox(height: 12),
                 if (upi.isEmpty)
-                  Text(
-                    'Contact SOFTRAXA on WhatsApp to renew.',
+                  Text(t('Contact SOFTRAXA on WhatsApp to renew.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.inkSoft),
                   )
@@ -218,11 +215,11 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                         style: const TextStyle(fontWeight: FontWeight.w600),
                       ),
                       IconButton(
-                        tooltip: 'Copy UPI ID',
+                        tooltip: t('Copy UPI ID'),
                         icon: const Icon(Icons.copy, size: 18),
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: upi));
-                          showSuccess(context, 'UPI ID copied');
+                          showSuccess(context, t('UPI ID copied'));
                         },
                       ),
                     ],
@@ -231,7 +228,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                   FilledButton.icon(
                     onPressed: _reportPayment,
                     icon: const Icon(Icons.check_circle_outline),
-                    label: const Text('I\'ve paid'),
+                    label: Text(t('I\'ve paid')),
                   ),
                 ],
                 const SizedBox(height: 8),
@@ -245,7 +242,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                         'Please tell me the renewal amount.',
                   ),
                   icon: const Icon(Icons.chat_outlined),
-                  label: const Text('Ask SOFTRAXA the amount on WhatsApp'),
+                  label: Text(t('Ask SOFTRAXA the amount on WhatsApp')),
                 ),
               ],
             ),

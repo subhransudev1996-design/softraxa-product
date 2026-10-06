@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
@@ -90,9 +91,7 @@ class EstimateSection extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(
-                    'No estimate yet. Work can start only after the customer '
-                    'approves an estimate.',
+                  Text(t('No estimate yet. Work can start only after the customer approves an estimate.'),
                     style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                   if (!closed) ...[
@@ -100,7 +99,7 @@ class EstimateSection extends ConsumerWidget {
                     FilledButton.icon(
                       onPressed: () => openEstimateEditor(context, ref, jobId),
                       icon: const Icon(Icons.request_quote_outlined),
-                      label: const Text('Create estimate'),
+                      label: Text(t('Create estimate')),
                     ),
                   ],
                 ],
@@ -136,7 +135,7 @@ class EstimateSection extends ConsumerWidget {
                         onPressed: () =>
                             showRecordAnswerDialog(context, ref, job, latest),
                         icon: const Icon(Icons.how_to_reg_outlined),
-                        label: const Text('Customer\'s answer'),
+                        label: Text(t('Customer\'s answer')),
                       ),
                     ),
                   ],
@@ -255,9 +254,8 @@ class _EstimateCard extends ConsumerWidget {
             const Divider(height: 16),
             Row(
               children: [
-                const Expanded(
-                  child: Text(
-                    'Total',
+                Expanded(
+                  child: Text(t('Total'),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -499,7 +497,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDialog) => AlertDialog(
-          title: const Text('Add labour'),
+          title: Text(t('Add labour')),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -508,13 +506,13 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                   DropdownButtonFormField<Map<String, dynamic>>(
                     isExpanded: true,
                     initialValue: service,
-                    decoration: const InputDecoration(
-                      labelText: 'From service catalog (optional)',
+                    decoration: InputDecoration(
+                      labelText: t('From service catalog (optional)'),
                     ),
                     items: [
-                      const DropdownMenuItem(
+                      DropdownMenuItem(
                         value: null,
-                        child: Text('Type manually'),
+                        child: Text(t('Type manually')),
                       ),
                       for (final s in services)
                         DropdownMenuItem(
@@ -539,7 +537,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                 TextField(
                   controller: name,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(labelText: 'Work *'),
+                  decoration: InputDecoration(labelText: t('Work *')),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -547,15 +545,15 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Price ₹ (excl. GST)',
+                  decoration: InputDecoration(
+                    labelText: t('Price ₹ (excl. GST)'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: gst,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(labelText: 'GST %'),
+                  decoration: InputDecoration(labelText: t('GST %')),
                 ),
               ],
             ),
@@ -563,12 +561,12 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Add'),
+              child: Text(t('Add')),
             ),
           ],
         ),
@@ -591,7 +589,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
 
   Future<void> _save() async {
     if (_lines.isEmpty) {
-      showError(context, 'Add at least one part or labour line');
+      showError(context, t('Add at least one part or labour line'));
       return;
     }
     for (final l in _lines) {
@@ -643,10 +641,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
           if (widget.base != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
-                'Saving makes a new version for the customer to approve. '
-                'Earlier answers stay on record. Work already done must stay '
-                'in the estimate at the same price.',
+              child: Text(t('Saving makes a new version for the customer to approve. Earlier answers stay on record. Work already done must stay in the estimate at the same price.'),
                 style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
               ),
             ),
@@ -697,8 +692,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                              decoration: const InputDecoration(
-                                labelText: 'Qty',
+                              decoration: InputDecoration(
+                                labelText: t('Qty'),
                                 isDense: true,
                               ),
                               onChanged: (_) => setState(() {}),
@@ -713,8 +708,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                                   const TextInputType.numberWithOptions(
                                     decimal: true,
                                   ),
-                              decoration: const InputDecoration(
-                                labelText: 'Price ₹',
+                              decoration: InputDecoration(
+                                labelText: t('Price ₹'),
                                 isDense: true,
                               ),
                               onChanged: (_) => setState(() {}),
@@ -725,8 +720,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                             child: TextField(
                               controller: _lines[i].gst,
                               keyboardType: TextInputType.number,
-                              decoration: const InputDecoration(
-                                labelText: 'GST %',
+                              decoration: InputDecoration(
+                                labelText: t('GST %'),
                                 isDense: true,
                               ),
                               onChanged: (_) => setState(() {}),
@@ -746,7 +741,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _addPart,
                   icon: const Icon(Icons.inventory_2_outlined),
-                  label: const Text('Add part'),
+                  label: Text(t('Add part')),
                 ),
               ),
               const SizedBox(width: 8),
@@ -754,7 +749,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                 child: OutlinedButton.icon(
                   onPressed: _addLabour,
                   icon: const Icon(Icons.build_outlined),
-                  label: const Text('Add labour'),
+                  label: Text(t('Add labour')),
                 ),
               ),
             ],
@@ -762,8 +757,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
           const SizedBox(height: 12),
           TextField(
             controller: _note,
-            decoration: const InputDecoration(
-              labelText: 'Note for this version (optional)',
+            decoration: InputDecoration(
+              labelText: t('Note for this version (optional)'),
             ),
           ),
           const SizedBox(height: 16),
@@ -772,9 +767,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
               padding: const EdgeInsets.all(12),
               child: Row(
                 children: [
-                  const Expanded(
-                    child: Text(
-                      'Estimate total',
+                  Expanded(
+                    child: Text(t('Estimate total'),
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -798,7 +792,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
                     width: 20,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Text('Save estimate'),
+                : Text(t('Save estimate')),
           ),
         ],
       ),
@@ -885,11 +879,11 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
 
   Future<void> _save() async {
     if (_name.text.trim().isEmpty) {
-      showError(context, 'Enter the name of the person who gave the answer');
+      showError(context, t('Enter the name of the person who gave the answer'));
       return;
     }
     if (_decision == 'some' && _chosen.isEmpty) {
-      showError(context, 'Tick the lines the customer approved');
+      showError(context, t('Tick the lines the customer approved'));
       return;
     }
     setState(() => _busy = true);
@@ -943,7 +937,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
         'Answer saved, but $failed photo(s) failed to upload. Add them again under Photos.',
       );
     } else {
-      showSuccess(context, 'Customer\'s answer recorded');
+      showSuccess(context, t('Customer\'s answer recorded'));
     }
   }
 
@@ -959,10 +953,10 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               SegmentedButton<String>(
-                segments: const [
-                  ButtonSegment(value: 'all', label: Text('Approved')),
-                  ButtonSegment(value: 'some', label: Text('Some lines')),
-                  ButtonSegment(value: 'rejected', label: Text('Rejected')),
+                segments: [
+                  ButtonSegment(value: 'all', label: Text(t('Approved'))),
+                  ButtonSegment(value: 'some', label: Text(t('Some lines'))),
+                  ButtonSegment(value: 'rejected', label: Text(t('Rejected'))),
                 ],
                 selected: {_decision},
                 onSelectionChanged: (s) => setState(() => _decision = s.first),
@@ -986,8 +980,8 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
               TextField(
                 controller: _name,
                 textCapitalization: TextCapitalization.words,
-                decoration: const InputDecoration(
-                  labelText: 'Answered by (customer name) *',
+                decoration: InputDecoration(
+                  labelText: t('Answered by (customer name) *'),
                 ),
               ),
               const SizedBox(height: 12),
@@ -1010,13 +1004,13 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
                       ? 'Answered just now'
                       : 'Answered ${dateTimeStr(_when!.toIso8601String())}',
                 ),
-                trailing: const Text('Change'),
+                trailing: Text(t('Change')),
                 onTap: _pickWhen,
               ),
               TextField(
                 controller: _notes,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (optional)',
+                decoration: InputDecoration(
+                  labelText: t('Notes (optional)'),
                 ),
               ),
               const SizedBox(height: 8),
@@ -1037,14 +1031,12 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
                   TextButton.icon(
                     onPressed: _addPhoto,
                     icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-                    label: const Text('Photo / screenshot'),
+                    label: Text(t('Photo / screenshot')),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(
-                'Saved as a staff-recorded answer with your name — not a digital '
-                'signature by the customer.',
+              Text(t('Saved as a staff-recorded answer with your name — not a digital signature by the customer.'),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ],
@@ -1054,7 +1046,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
       actions: [
         TextButton(
           onPressed: _busy ? null : () => Navigator.pop(context, false),
-          child: const Text('Cancel'),
+          child: Text(t('Cancel')),
         ),
         FilledButton(
           style: dialogActionStyle,
@@ -1065,7 +1057,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
                   width: 18,
                   child: CircularProgressIndicator(strokeWidth: 2),
                 )
-              : const Text('Save'),
+              : Text(t('Save')),
         ),
       ],
     );
@@ -1091,7 +1083,7 @@ Future<void> markEstimateWorkDone(
   if (!context.mounted) return;
   final current = currentApprovedEstimate(estimates);
   if (current == null) {
-    showError(context, 'Record the customer\'s approval of an estimate first');
+    showError(context, t('Record the customer\'s approval of an estimate first'));
     return;
   }
   final used = <String, double>{};
@@ -1110,7 +1102,7 @@ Future<void> markEstimateWorkDone(
   if (open.isEmpty) {
     showError(
       context,
-      'All approved work is already added. Revise the estimate for more work.',
+      t('All approved work is already added. Revise the estimate for more work.'),
     );
     return;
   }
@@ -1164,12 +1156,12 @@ Future<void> markEstimateWorkDone(
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
+            child: Text(t('Cancel')),
           ),
           FilledButton(
             style: dialogActionStyle,
             onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Add'),
+            child: Text(t('Add')),
           ),
         ],
       ),
@@ -1244,8 +1236,7 @@ class JobPhotosSection extends ConsumerWidget {
               Icons.add_a_photo_outlined,
               color: AppColors.indigo,
             ),
-            title: const Text(
-              'Add photo',
+            title: Text(t('Add photo'),
               style: TextStyle(color: AppColors.indigo),
             ),
             onTap: () => _add(context, ref, jobId),
@@ -1267,7 +1258,7 @@ class JobPhotosSection extends ConsumerWidget {
         kind: atIntake ? 'intake_photo' : 'other',
       );
       ref.invalidate(jobAttachmentsProvider(jobId));
-      if (context.mounted) showSuccess(context, 'Photo saved');
+      if (context.mounted) showSuccess(context, t('Photo saved'));
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -1287,13 +1278,12 @@ Future<XFile?> pickJobPhoto(BuildContext context) async {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined),
-              title: const Text('Take a photo'),
+              title: Text(t('Take a photo')),
               onTap: () => Navigator.pop(ctx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: const Text(
-                'Choose from gallery (e.g. WhatsApp screenshot)',
+              title: Text(t('Choose from gallery (e.g. WhatsApp screenshot)'),
               ),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
@@ -1381,16 +1371,16 @@ Future<void> viewJobAttachment(
                 child: InteractiveViewer(
                   child: Image.network(
                     url,
-                    errorBuilder: (_, _, _) => const Padding(
+                    errorBuilder: (_, _, _) => Padding(
                       padding: EdgeInsets.all(24),
-                      child: Text('Couldn\'t load the photo'),
+                      child: Text(t('Couldn\'t load the photo')),
                     ),
                   ),
                 ),
               ),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: const Text('Close'),
+                child: Text(t('Close')),
               ),
             ],
           ),

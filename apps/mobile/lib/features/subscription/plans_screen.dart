@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -58,10 +59,10 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Your plan'),
+        title: Text(t('Your plan')),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: t('Refresh'),
             icon: const Icon(Icons.refresh),
             onPressed: () => ref.invalidate(plansForAppProvider),
           ),
@@ -98,8 +99,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                         ),
                         if (others.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text(
-                            'Other plans',
+                          Text(t('Other plans'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -125,7 +125,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                                 'I would like to know more about the Dukania plans for my shop.',
                           ),
                           icon: const Icon(Icons.chat_outlined),
-                          label: const Text('Talk to SOFTRAXA on WhatsApp'),
+                          label: Text(t('Talk to SOFTRAXA on WhatsApp')),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -258,19 +258,19 @@ class _CurrentPlanCard extends StatelessWidget {
               children: [
                 _UsageRow(
                   icon: Icons.badge_outlined,
-                  label: 'Users (owner + staff)',
+                  label: t('Users (owner + staff)'),
                   used: (usage['users'] as num?)?.toInt() ?? 0,
                   limit: (usage['user_limit'] as num?)?.toInt(),
                 ),
                 _UsageRow(
                   icon: Icons.inventory_2_outlined,
-                  label: 'Products',
+                  label: t('Products'),
                   used: (usage['products'] as num?)?.toInt() ?? 0,
                   limit: (usage['product_limit'] as num?)?.toInt(),
                 ),
                 _UsageRow(
                   icon: Icons.receipt_long_outlined,
-                  label: 'Bills this month',
+                  label: t('Bills this month'),
                   used: (usage['bills_this_month'] as num?)?.toInt() ?? 0,
                   limit: (usage['invoice_limit'] as num?)?.toInt(),
                 ),
@@ -407,8 +407,7 @@ class _PlanCard extends StatelessWidget {
                     color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'RECOMMENDED',
+                  child: Text(t('RECOMMENDED'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
@@ -461,7 +460,7 @@ class _PlanCard extends StatelessWidget {
                 ? OutlinedButton.icon(
                     onPressed: null,
                     icon: const Icon(Icons.hourglass_top, size: 18),
-                    label: const Text('Requested — SOFTRAXA will contact you'),
+                    label: Text(t('Requested — SOFTRAXA will contact you')),
                   )
                 : FilledButton.icon(
                     onPressed: busy ? null : onAsk,

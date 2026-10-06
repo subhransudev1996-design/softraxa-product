@@ -1,3 +1,4 @@
+import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +72,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.error_outline,
           color: AppColors.red,
-          title: 'Out of stock',
+          title: t('Out of stock'),
           subtitle: '$out product${out == 1 ? '' : 's'} at zero stock',
           route: '/stock',
         ),
@@ -82,7 +83,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.warning_amber_outlined,
           color: AppColors.orange,
-          title: 'Low stock',
+          title: t('Low stock'),
           subtitle: '$low product${low == 1 ? '' : 's'} below alert level',
           route: '/stock',
         ),
@@ -114,7 +115,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.event_busy_outlined,
           color: AppColors.red,
-          title: 'Expired products',
+          title: t('Expired products'),
           subtitle:
               '${buckets.expired} product${buckets.expired == 1 ? '' : 's'} past expiry date',
           route: '/products',
@@ -126,7 +127,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.schedule_outlined,
           color: AppColors.orange,
-          title: 'Expiring soon',
+          title: t('Expiring soon'),
           subtitle:
               '${buckets.nearExpiry} product${buckets.nearExpiry == 1 ? '' : 's'} expiring within $kNearExpiryDays days',
           route: '/products',
@@ -152,7 +153,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.build_outlined,
           color: AppColors.indigo,
-          title: 'Jobs due for delivery',
+          title: t('Jobs due for delivery'),
           subtitle:
               '${rows.length} job card${rows.length == 1 ? '' : 's'} due today or overdue',
           route: '/job-cards',
@@ -168,7 +169,7 @@ final notificationsProvider = FutureProvider.autoDispose<List<AppNotification>>(
         AppNotification(
           icon: Icons.wifi_off_outlined,
           color: AppColors.purple,
-          title: 'Offline bills waiting',
+          title: t('Offline bills waiting'),
           subtitle: '$pending bill${pending == 1 ? '' : 's'} not yet synced',
           route: '/offline-bills',
         ),
@@ -196,7 +197,7 @@ Future<void> showNotificationsDialog(
       builder: (c, r, _) {
         final async = r.watch(notificationsProvider);
         return AlertDialog(
-          title: const Text('Notifications'),
+          title: Text(t('Notifications')),
           contentPadding: const EdgeInsets.fromLTRB(0, 12, 0, 8),
           content: SizedBox(
             width: 380,
@@ -257,7 +258,7 @@ Future<void> showNotificationsDialog(
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(dialogCtx),
-              child: const Text('Close'),
+              child: Text(t('Close')),
             ),
           ],
         );

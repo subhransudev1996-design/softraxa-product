@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/walkthrough.dart';
@@ -62,16 +63,16 @@ class ServicesScreen extends ConsumerWidget {
                   controller: name,
                   autofocus: existing == null,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Service name *',
+                  decoration: InputDecoration(
+                    labelText: t('Service name *'),
                   ),
                 ),
                 const SizedBox(height: 12),
                 TextField(
                   controller: category,
                   textCapitalization: TextCapitalization.words,
-                  decoration: const InputDecoration(
-                    labelText: 'Category (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Category (optional)'),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -83,8 +84,8 @@ class ServicesScreen extends ConsumerWidget {
                         keyboardType: const TextInputType.numberWithOptions(
                           decimal: true,
                         ),
-                        decoration: const InputDecoration(
-                          labelText: 'Price ₹ *',
+                        decoration: InputDecoration(
+                          labelText: t('Price ₹ *'),
                         ),
                       ),
                     ),
@@ -92,7 +93,7 @@ class ServicesScreen extends ConsumerWidget {
                     Expanded(
                       child: DropdownButtonFormField<double>(
                         initialValue: gstRate,
-                        decoration: const InputDecoration(labelText: 'GST %'),
+                        decoration: InputDecoration(labelText: t('GST %')),
                         items: const [
                           DropdownMenuItem(value: 0.0, child: Text('0%')),
                           DropdownMenuItem(value: 5.0, child: Text('5%')),
@@ -109,10 +110,9 @@ class ServicesScreen extends ConsumerWidget {
                 TextField(
                   controller: sacCode,
                   keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'SAC code (optional)',
-                    helperText:
-                        '6 digits starting 99 — needed on B2B GST bills',
+                  decoration: InputDecoration(
+                    labelText: t('SAC code (optional)'),
+                    helperText: t('6 digits starting 99 — needed on B2B GST bills'),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -121,10 +121,9 @@ class ServicesScreen extends ConsumerWidget {
                   keyboardType: const TextInputType.numberWithOptions(
                     decimal: true,
                   ),
-                  decoration: const InputDecoration(
-                    labelText: 'Diagnostic fee ₹ (optional)',
-                    helperText:
-                        'Charged for checking, even if the repair is declined',
+                  decoration: InputDecoration(
+                    labelText: t('Diagnostic fee ₹ (optional)'),
+                    helperText: t('Charged for checking, even if the repair is declined'),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -134,8 +133,8 @@ class ServicesScreen extends ConsumerWidget {
                       child: TextField(
                         controller: minutes,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Est. time (minutes)',
+                        decoration: InputDecoration(
+                          labelText: t('Est. time (minutes)'),
                         ),
                       ),
                     ),
@@ -144,8 +143,8 @@ class ServicesScreen extends ConsumerWidget {
                       child: TextField(
                         controller: warrantyDays,
                         keyboardType: TextInputType.number,
-                        decoration: const InputDecoration(
-                          labelText: 'Warranty (days)',
+                        decoration: InputDecoration(
+                          labelText: t('Warranty (days)'),
                         ),
                       ),
                     ),
@@ -155,8 +154,8 @@ class ServicesScreen extends ConsumerWidget {
                 TextField(
                   controller: description,
                   maxLines: 2,
-                  decoration: const InputDecoration(
-                    labelText: 'Description (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Description (optional)'),
                   ),
                 ),
               ],
@@ -165,12 +164,12 @@ class ServicesScreen extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx, false),
-              child: const Text('Cancel'),
+              child: Text(t('Cancel')),
             ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: () => Navigator.pop(ctx, true),
-              child: const Text('Save'),
+              child: Text(t('Save')),
             ),
           ],
         ),
@@ -217,9 +216,8 @@ class ServicesScreen extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: 'Remove "${service['name']}"?',
-      message:
-          'This only hides it from the service catalog; past job cards are unaffected.',
-      confirmText: 'Remove',
+      message: t('This only hides it from the service catalog; past job cards are unaffected.'),
+      confirmText: t('Remove'),
     );
     if (!ok) return;
     try {
@@ -239,7 +237,7 @@ class ServicesScreen extends ConsumerWidget {
     final services = ref.watch(servicesProvider);
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
     final mainAction = ScreenAction(
-      label: 'Add service',
+      label: t('Add service'),
       icon: Icons.add,
       onPressed: () => _addOrEdit(context, ref),
       coachPage: 'services',
@@ -249,7 +247,7 @@ class ServicesScreen extends ConsumerWidget {
       backgroundColor: AppColors.canvas,
       appBar: AppBar(
         leading: appBarBack(context),
-        title: const Text('Service catalog'),
+        title: Text(t('Service catalog')),
         actions: [const GuideButton('services'), mainAction.inAppBar(context)],
       ),
       floatingActionButton: mainAction.fab(context),
@@ -257,10 +255,9 @@ class ServicesScreen extends ConsumerWidget {
         value: services,
         onRetry: () => ref.invalidate(servicesProvider),
         builder: (rows) => rows.isEmpty
-            ? const EmptyState(
+            ? EmptyState(
                 icon: Icons.build_outlined,
-                message:
-                    'No services yet.\nAdd repair/labor charges you offer.',
+                message: t('No services yet.\nAdd repair/labor charges you offer.'),
               )
             : isDesktop
             ? DesktopTable<Map<String, dynamic>>(
@@ -268,19 +265,19 @@ class ServicesScreen extends ConsumerWidget {
                 trailingWidth: 90,
                 columns: [
                   DesktopTableColumn(
-                    label: 'Service',
+                    label: t('Service'),
                     flex: 3,
                     comparable: (s) =>
                         (s['name'] as String? ?? '').toLowerCase(),
                   ),
                   DesktopTableColumn(
-                    label: 'Category',
+                    label: t('Category'),
                     flex: 2,
                     comparable: (s) =>
                         (s['category'] as String? ?? '').toLowerCase(),
                   ),
                   DesktopTableColumn(
-                    label: 'Price',
+                    label: t('Price'),
                     flex: 2,
                     alignEnd: true,
                     comparable: (s) => toDouble(s['price']),

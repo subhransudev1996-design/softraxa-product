@@ -1,3 +1,4 @@
+import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -188,9 +189,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (missingSerial && _docType != 'estimate') {
       final proceed = await confirmDialog(
         context,
-        title: 'Missing IMEI/serial',
-        message: 'Some items have no IMEI/serial number. Continue anyway?',
-        confirmText: 'Continue',
+        title: t('Missing IMEI/serial'),
+        message: t('Some items have no IMEI/serial number. Continue anyway?'),
+        confirmText: t('Continue'),
       );
       if (!proceed) return;
     }
@@ -201,7 +202,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (_splitMode && _docType != 'estimate') {
       final hasAnyEntry = _splitEntries.any((e) => e.$2 > 0);
       if (!hasAnyEntry) {
-        showError(context, 'Enter an amount for at least one payment method');
+        showError(context, t('Enter an amount for at least one payment method'));
         return;
       }
       // Credit rows aren't real payments — they're excluded from what's
@@ -361,7 +362,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       Navigator.pop(context); // close sheet
       showSuccess(
         context,
-        'Sent to the owner. Complete the sale from Approvals once it is approved.',
+        t('Sent to the owner. Complete the sale from Approvals once it is approved.'),
       );
     } catch (e) {
       if (mounted) showError(context, e);
@@ -454,7 +455,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
   }) async {
     final cart = ref.read(cartProvider);
     if (cart.lines.isEmpty) {
-      showError(context, 'Add at least one item to the bill');
+      showError(context, t('Add at least one item to the bill'));
       return;
     }
     final missingSerial = cart.lines.any(
@@ -463,9 +464,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (missingSerial) {
       final proceed = await confirmDialog(
         context,
-        title: 'Missing IMEI/serial',
-        message: 'Some items have no IMEI/serial number. Continue anyway?',
-        confirmText: 'Continue',
+        title: t('Missing IMEI/serial'),
+        message: t('Some items have no IMEI/serial number. Continue anyway?'),
+        confirmText: t('Continue'),
       );
       if (!proceed) return;
     }
@@ -633,19 +634,19 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   SegmentedButton<String>(
                     segments: [
                       if (appContext?.gstEnabled ?? true)
-                        const ButtonSegment(value: 'gst', label: Text('GST')),
-                      const ButtonSegment(
+                        ButtonSegment(value: 'gst', label: Text(t('GST'))),
+                      ButtonSegment(
                         value: 'non_gst',
-                        label: Text('Non-GST'),
+                        label: Text(t('Non-GST')),
                       ),
-                      const ButtonSegment(
+                      ButtonSegment(
                         value: 'cash_memo',
-                        label: Text('Cash memo'),
+                        label: Text(t('Cash memo')),
                       ),
                       if (exchange == null)
-                        const ButtonSegment(
+                        ButtonSegment(
                           value: 'estimate',
-                          label: Text('Estimate'),
+                          label: Text(t('Estimate')),
                         ),
                     ],
                     selected: {_docType},
@@ -655,13 +656,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   if (_docType == 'estimate')
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Estimates do not deduct stock or record payment.',
+                      child: Text(t('Estimates do not deduct stock or record payment.'),
                         style: TextStyle(fontSize: 13, color: AppColors.orange),
                       ),
                     ),
                 ],
-                const SectionLabel('Customer'),
+                SectionLabel(t('Customer')),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -755,8 +755,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   },
                                 ),
                               ] else
-                                Text(
-                                  'No customer selected',
+                                Text(t('No customer selected'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.inkSoft,
@@ -791,7 +790,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   style: TextButton.styleFrom(
                                     foregroundColor: AppColors.inkSoft,
                                   ),
-                                  child: const Text('Remove'),
+                                  child: Text(t('Remove')),
                                 ),
                             ],
                           ),
@@ -799,7 +798,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     ),
                   ),
                 ),
-                const SectionLabel('Bill summary'),
+                SectionLabel(t('Bill summary')),
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -820,7 +819,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         if (appContext?.canEditPrices ?? false) ...[
                           const SizedBox(height: 10),
                           AmountOrPercentField(
-                            label: 'Bill discount',
+                            label: t('Bill discount'),
                             controller: _discount,
                             isPercent: _discountIsPercent,
                             onModeChanged: (v) => setState(() {
@@ -897,14 +896,14 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                           const SizedBox(height: 8),
                           if (exchange.hasCustomer)
                             SegmentedButton<String>(
-                              segments: const [
+                              segments: [
                                 ButtonSegment(
                                   value: 'advance',
-                                  label: Text('Keep as advance'),
+                                  label: Text(t('Keep as advance')),
                                 ),
                                 ButtonSegment(
                                   value: 'refund',
-                                  label: Text('Refund now'),
+                                  label: Text(t('Refund now')),
                                 ),
                               ],
                               selected: {_excess},
@@ -912,8 +911,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   setState(() => _excess = s.first),
                             )
                           else
-                            Text(
-                              'Walk-in customer: it will be refunded.',
+                            Text(t('Walk-in customer: it will be refunded.'),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 color: AppColors.inkSoft,
@@ -951,7 +949,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const SectionLabel('Payment'),
+                      SectionLabel(t('Payment')),
                       TextButton.icon(
                         onPressed: () => _toggleSplit(payable),
                         icon: Icon(
@@ -998,7 +996,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               decimal: true,
                             ),
                             decoration: InputDecoration(
-                              labelText: 'Paid amount ₹',
+                              labelText: t('Paid amount ₹'),
                               hintText: payable.toStringAsFixed(2),
                               // One tap: the customer paid the whole bill.
                               suffixIcon: Padding(
@@ -1011,7 +1009,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                     _paid.text = payable.toStringAsFixed(2);
                                     _paidTouched = true;
                                   }),
-                                  child: const Text('Exact'),
+                                  child: Text(t('Exact')),
                                 ),
                               ),
                             ),
@@ -1075,29 +1073,29 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               flex: 5,
                               child: DropdownButtonFormField<String>(
                                 initialValue: _splits[i].mode,
-                                decoration: const InputDecoration(
-                                  labelText: 'Mode',
+                                decoration: InputDecoration(
+                                  labelText: t('Mode'),
                                 ),
-                                items: const [
+                                items: [
                                   DropdownMenuItem(
                                     value: 'cash',
-                                    child: Text('Cash'),
+                                    child: Text(t('Cash')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'upi',
-                                    child: Text('UPI'),
+                                    child: Text(t('UPI')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'card',
-                                    child: Text('Card'),
+                                    child: Text(t('Card')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'other',
-                                    child: Text('Bank/Other'),
+                                    child: Text(t('Bank/Other')),
                                   ),
                                   DropdownMenuItem(
                                     value: 'credit',
-                                    child: Text('Credit (Due)'),
+                                    child: Text(t('Credit (Due)')),
                                   ),
                                 ],
                                 onChanged: (v) => setState(
@@ -1115,8 +1113,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                       decimal: true,
                                     ),
                                 textAlign: TextAlign.right,
-                                decoration: const InputDecoration(
-                                  labelText: 'Amount',
+                                decoration: InputDecoration(
+                                  labelText: t('Amount'),
                                   prefixText: '₹ ',
                                 ),
                                 onChanged: (_) => setState(() {}),
@@ -1139,7 +1137,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       child: TextButton.icon(
                         onPressed: () => _addSplit(payable),
                         icon: const Icon(Icons.add, size: 16),
-                        label: const Text('Add payment method'),
+                        label: Text(t('Add payment method')),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -1149,8 +1147,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Collected',
+                            Text(t('Collected'),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -1168,8 +1165,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(
-                              'Due',
+                            Text(t('Due'),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -1193,8 +1189,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   if (due > 0 && cart.customer == null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(
-                        'Select a customer on the bill to track this due.',
+                      child: Text(t('Select a customer on the bill to track this due.'),
                         style: TextStyle(fontSize: 13, color: AppColors.red),
                       ),
                     ),
@@ -1235,7 +1230,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                       },
                     ),
                 ] else if (editing != null) ...[
-                  const SectionLabel('Payment'),
+                  SectionLabel(t('Payment')),
                   Card(
                     child: Padding(
                       padding: const EdgeInsets.all(12),
@@ -1287,8 +1282,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _notes,
-                  decoration: const InputDecoration(
-                    labelText: 'Note (optional)',
+                  decoration: InputDecoration(
+                    labelText: t('Note (optional)'),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -1334,7 +1329,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 children: [
                   TextButton(
                     onPressed: _busy ? null : () => Navigator.pop(context),
-                    child: const Text('Cancel'),
+                    child: Text(t('Cancel')),
                   ),
                   const SizedBox(width: 8),
                   Expanded(child: confirm),
@@ -1364,8 +1359,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Customer pays the difference now?',
+          Text(t('Customer pays the difference now?'),
             style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink),
           ),
           const SizedBox(height: 8),
@@ -1389,7 +1383,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 decimal: true,
               ),
               decoration: InputDecoration(
-                labelText: 'Amount received ₹',
+                labelText: t('Amount received ₹'),
                 helperText: 'Up to ${money(due)}; anything left stays as due',
               ),
               onChanged: (_) => setState(() => _collectTouched = true),
