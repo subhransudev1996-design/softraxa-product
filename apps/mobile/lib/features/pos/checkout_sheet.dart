@@ -944,7 +944,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 ],
                 const SizedBox(height: 8),
                 _ProfitBanner(
-                  profit: cart.estimatedProfit,
+                  profit: cart.profitFor(gst: _docType == 'gst'),
                   costMissing: cart.lines.any((l) => l.costPrice <= 0),
                 ),
                 if (editing == null && _docType != 'estimate') ...[

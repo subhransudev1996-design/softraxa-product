@@ -284,8 +284,15 @@ class CartState {
   /// split back across lines, so they're subtracted/added here directly —
   /// algebraically this equals `(total - taxTotal) - totalCost`, i.e. what
   /// was actually collected excluding tax, minus what the goods cost.
-  double get estimatedProfit =>
-      netTotal - billDiscountAmount + roundOff - totalCost;
+  double get estimatedProfit => profitFor(gst: applyGst);
+
+  /// [estimatedProfit] for a bill type: only a GST bill collects GST, so a
+  /// Non-GST bill / cash memo keeps the whole amount.
+  double profitFor({required bool gst}) =>
+      (gst ? lines.fold(0.0, (s, l) => s + l.net) : itemsGross) -
+      billDiscountAmount +
+      roundOff -
+      totalCost;
 
   CartState copyWith({
     List<CartLine>? lines,

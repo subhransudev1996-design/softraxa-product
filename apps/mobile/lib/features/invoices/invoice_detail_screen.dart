@@ -326,13 +326,32 @@ class InvoiceDetailScreen extends ConsumerWidget {
     }
   }
 
-  Future<void> _cancel(BuildContext context, WidgetRef ref) async {
+  Future<void> _cancel(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> inv,
+  ) async {
+    // A walk-in has no khata: the money paid goes back in hand (0041
+    // only moves a customer's payment to their advance).
+    final paid = toDouble(inv['paid_amount']);
+    final name = inv['customer_id'] == null
+        ? null
+        : ((inv['customer_name'] as String? ?? '').trim().isEmpty
+              ? 'the customer'
+              : (inv['customer_name'] as String).trim());
     final ok = await confirmDialog(
       context,
       title: 'Cancel invoice?',
-      message:
-          'Stock will be restored and customer due reversed. Any amount already '
-          'paid is kept as the customer\'s advance. This cannot be undone.',
+      message: [
+        'Stock will be restored.',
+        if (paid >= 0.01)
+          name == null
+              ? 'Give the ${money(paid)} paid back to the customer.'
+              : 'The ${money(paid)} paid is kept as $name\'s advance.'
+        else if (name != null)
+          'The due comes off $name\'s khata.',
+        'This cannot be undone.',
+      ].join(' '),
       confirmText: 'Cancel invoice',
     );
     if (!ok) return;
@@ -439,7 +458,7 @@ class InvoiceDetailScreen extends ConsumerWidget {
             PopupMenuButton<String>(
               onSelected: (v) {
                 if (v == 'edit') _editBill(context, ref, detail.value!);
-                if (v == 'cancel') _cancel(context, ref);
+                if (v == 'cancel') _cancel(context, ref, detail.value!);
                 if (v == 'due') _changeDueDate(context, ref, detail.value!);
                 if (v == 'customer') {
                   _changeCustomer(context, ref, detail.value!);

@@ -50,6 +50,23 @@ String ymd(DateTime d) => DateFormat('yyyy-MM-dd').format(d);
 double toDouble(dynamic v) => (v as num?)?.toDouble() ?? 0;
 
 /// "2 pcs", "1.5 kg"
+/// A cart quantity as said at the counter: under 1 kg / 1 L it reads in
+/// grams / ml ("100 g", not "0.1 kg"). Whole pieces read as a bare number.
+String cartQtyLabel(double q, String unit) {
+  final u = unit.trim();
+  final small = switch (u.toLowerCase()) {
+    'kg' => 'g',
+    'l' || 'ltr' || 'litre' => 'ml',
+    _ => null,
+  };
+  if (small != null && q > 0 && q < 1) {
+    final v = (q * 1000 * 100).round() / 100;
+    return '${v == v.roundToDouble() ? v.toInt() : v} $small';
+  }
+  final n = q == q.roundToDouble() ? q.toInt().toString() : qty(q);
+  return u.isEmpty || u == 'pcs' ? n : '$n $u';
+}
+
 String qtyUnit(num? q, String? unit) =>
     unit == null || unit.isEmpty ? qty(q) : '${qty(q)} $unit';
 

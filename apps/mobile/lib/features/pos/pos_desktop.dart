@@ -275,9 +275,6 @@ class _QtyBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final q = qty == qty.roundToDouble()
-        ? qty.toInt().toString()
-        : qty.toString();
     return Container(
       height: 32,
       decoration: BoxDecoration(
@@ -292,7 +289,7 @@ class _QtyBox extends StatelessWidget {
             constraints: const BoxConstraints(minWidth: 44),
             alignment: Alignment.center,
             child: Text(
-              unit.isEmpty || unit == 'pcs' ? q : '$q $unit',
+              cartQtyLabel(qty, unit),
               style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
             ),
           ),

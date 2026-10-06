@@ -31,10 +31,12 @@ Future<bool> applyAdvanceToInvoice(
     if (!ok || !context.mounted) return false;
   }
   try {
-    final res = await ref.read(supabaseProvider).rpc(
-      'apply_customer_advance',
-      params: {'p_invoice_id': invoiceId, 'p_amount': amount},
-    );
+    final res = await ref
+        .read(supabaseProvider)
+        .rpc(
+          'apply_customer_advance',
+          params: {'p_invoice_id': invoiceId, 'p_amount': amount},
+        );
     ref.invalidate(invoiceDetailProvider(invoiceId));
     ref.invalidate(invoicesProvider);
     ref.invalidate(customersProvider);

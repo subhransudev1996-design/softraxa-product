@@ -220,10 +220,16 @@ class _InvoiceRow extends StatelessWidget {
                   if (inv['offline_created'] == true)
                     const Padding(
                       padding: EdgeInsets.only(left: 4),
-                      child: Icon(
-                        Icons.cloud_off,
-                        size: 14,
-                        color: AppColors.orange,
+                      child: Tooltip(
+                        message: 'Made offline — synced',
+
+                        child: Icon(
+                          Icons.cloud_off,
+
+                          size: 14,
+
+                          color: AppColors.orange,
+                        ),
                       ),
                     ),
                 ],
@@ -323,10 +329,16 @@ class _InvoiceTile extends StatelessWidget {
                         if (inv['offline_created'] == true)
                           const Padding(
                             padding: EdgeInsets.only(left: 4),
-                            child: Icon(
-                              Icons.cloud_off,
-                              size: 14,
-                              color: AppColors.orange,
+                            child: Tooltip(
+                              message: 'Made offline — synced',
+
+                              child: Icon(
+                                Icons.cloud_off,
+
+                                size: 14,
+
+                                color: AppColors.orange,
+                              ),
                             ),
                           ),
                       ],

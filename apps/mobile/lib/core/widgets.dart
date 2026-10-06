@@ -252,19 +252,67 @@ void showError(BuildContext context, Object e) {
       ).read(appContextProvider.notifier).refreshSilently();
     } catch (_) {}
   }
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(friendlyError(e)),
-      backgroundColor: Colors.red.shade700,
-    ),
-  );
+  _showMessage(context, text, Colors.red.shade700);
 }
 
 void showSuccess(BuildContext context, String message) {
   if (!context.mounted) return;
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(content: Text(message), backgroundColor: Colors.green.shade700),
+  _showMessage(context, message, Colors.green.shade700);
+}
+
+/// A snackbar sits on the page, under any open dialog or bottom sheet — a
+/// message raised from inside one would be hidden behind it. There it goes
+/// on the top overlay instead, looking the same; tap to dismiss.
+void _showMessage(BuildContext context, String text, Color color) {
+  final overlay = ModalRoute.of(context) is PopupRoute
+      ? Overlay.maybeOf(context, rootOverlay: true)
+      : null;
+  if (overlay == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(text), backgroundColor: color),
+    );
+    return;
+  }
+  late final OverlayEntry entry;
+  void remove() {
+    if (entry.mounted) entry.remove();
+  }
+
+  entry = OverlayEntry(
+    builder: (_) => Positioned(
+      left: 16,
+      right: 16,
+      bottom: 24,
+      child: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 560),
+            child: Material(
+              key: const ValueKey('overlay-message'),
+              color: color,
+              elevation: 6,
+              borderRadius: BorderRadius.circular(8),
+              child: InkWell(
+                onTap: remove,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 14,
+                  ),
+                  child: Text(
+                    text,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
   );
+  overlay.insert(entry);
+  Future.delayed(const Duration(seconds: 4), remove);
 }
 
 Future<bool> confirmDialog(
