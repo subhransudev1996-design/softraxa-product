@@ -565,6 +565,9 @@ class CartNotifier extends Notifier<CartState> {
 
   void clear() => state = const CartState();
 
+  /// Puts a held bill back on the counter (held_bills.dart).
+  void restore(CartState cart) => state = cart;
+
   /// Wholesale-replaces the cart — used only to load an existing invoice's
   /// items into the cart for editing (see [invoiceItemsToCartLines]).
   void replaceAll(CartState newState) => state = newState;

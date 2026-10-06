@@ -570,6 +570,7 @@ class PosBillPanel extends StatelessWidget {
                     _Shortcut('F2', 'Search'),
                     _Shortcut('↑↓ Enter', 'Add item'),
                     _Shortcut('F4', 'Customer'),
+                    _Shortcut('F8', 'Hold'),
                     _Shortcut('Esc', 'Clear search'),
                   ],
                 ),

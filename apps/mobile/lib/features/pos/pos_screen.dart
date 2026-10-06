@@ -13,6 +13,7 @@ import '../customers/customer_picker.dart';
 import '../offline/offline_service.dart';
 import '../products/product_providers.dart' show parseWeightedBarcode;
 import '../returns/exchange.dart';
+import 'held_bills.dart';
 import '../stock/adjust_stock_sheet.dart';
 import 'cart.dart';
 import 'checkout_sheet.dart';
@@ -745,6 +746,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final products = ref.watch(posProductsProvider);
     final isOnline = ref.watch(isOnlineProvider).value ?? true;
     final pendingCount = ref.watch(pendingBillCountProvider).value ?? 0;
+    final heldCount = ref.watch(heldBillsProvider).length;
     final editing = ref.watch(editingInvoiceProvider);
     // Exchange mode only on its own route. Leaving it some other way (e.g.
     // switching tabs) must not turn the next ordinary bill into an exchange,
@@ -936,6 +938,24 @@ class _PosScreenState extends ConsumerState<PosScreen> {
               tooltip: 'Pending offline bills',
               onPressed: () => context.push('/offline-bills'),
             ),
+          if (editing == null && exchange == null) ...[
+            if (cart.lines.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.pause_circle_outline),
+                tooltip: 'Hold bill (F8)',
+                onPressed: () => holdCurrentBill(context, ref),
+              ),
+            if (heldCount > 0)
+              IconButton(
+                icon: Badge(
+                  label: Text('$heldCount'),
+                  backgroundColor: AppColors.orange,
+                  child: const Icon(Icons.receipt_long_outlined),
+                ),
+                tooltip: 'Held bills',
+                onPressed: () => showHeldBills(context, ref),
+              ),
+          ],
           if (cart.lines.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.delete_sweep_outlined),
@@ -1340,6 +1360,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           if (editing != null || exchange != null) return;
           final customer = await showCustomerPicker(context);
           if (customer != null) await setCartCustomer(ref, customer);
+        },
+        const SingleActivator(LogicalKeyboardKey.f8): () {
+          if (editing == null && exchange == null) {
+            holdCurrentBill(context, ref);
+          }
         },
         const SingleActivator(LogicalKeyboardKey.f12): () {
           if (ref.read(cartProvider).lines.isNotEmpty) {
