@@ -30,6 +30,7 @@ String? permissionRedirect(String loc, AppContext c) {
     _ when under('/import') ||
         loc == '/products/new' ||
         loc == '/products/master-data' ||
+        loc == '/products/suggested' ||
         (loc.startsWith('/products/') && loc.endsWith('/edit')) =>
       c.canManageProducts,
     _ when loc.startsWith('/invoices/') && loc.endsWith('/edit') =>

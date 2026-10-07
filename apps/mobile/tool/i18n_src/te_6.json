@@ -1,0 +1,20 @@
+{
+"Suggested products": "సూచించిన ఉత్పత్తులు",
+"Pick from suggested products": "సూచించిన ఉత్పత్తుల నుండి ఎంచుకోండి",
+"Search by name or brand": "పేరు లేదా బ్రాండ్‌తో వెతకండి",
+"My shop: {kind}": "నా షాప్: {kind}",
+"Everything": "అన్నీ",
+"All categories": "అన్ని వర్గాలు",
+"Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.": "మీరు అమ్మేవాటిపై టిక్ చేయండి, మీ అమ్మకపు ధర ఇవ్వండి, ఆపై అన్నింటినీ ఒకేసారి జోడించండి. మీ దగ్గర ఇప్పటికే ఉన్న ఉత్పత్తులు కనిపించవు.",
+"Selling price": "అమ్మకపు ధర",
+"Stock (optional)": "స్టాక్ (ఐచ్ఛికం)",
+"Add {n} products": "{n} ఉత్పత్తులు జోడించండి",
+"Show more ({n} left)": "ఇంకా చూపించు ({n} మిగిలాయి)",
+"Nothing found. Try another word, a category, or \"Everything\".": "ఏమీ దొరకలేదు. మరో పదం, వర్గం లేదా \"అన్నీ\" ప్రయత్నించండి.",
+"Enter a selling price for every ticked product": "టిక్ చేసిన ప్రతి ఉత్పత్తికి అమ్మకపు ధర ఇవ్వండి",
+"{added} products added": "{added} ఉత్పత్తులు జోడించబడ్డాయి",
+"{added} added, {skipped} were already in your list": "{added} జోడించబడ్డాయి, {skipped} ఇప్పటికే మీ జాబితాలో ఉన్నాయి",
+"Grocery / kirana store": "కిరాణా స్టోర్",
+"Stationery & gift shop": "స్టేషనరీ & గిఫ్ట్ షాప్",
+"Cosmetics & general store": "కాస్మెటిక్స్ & జనరల్ స్టోర్"
+}

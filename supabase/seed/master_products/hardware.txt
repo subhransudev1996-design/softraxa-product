@@ -1,0 +1,1759 @@
+# type: hardware
+# Hardware, building material, paint and plumbing shop.
+# pieces=1 marks items sold in cut lengths (the app tracks full pieces and leftovers).
+
+## Cement, Sand & Masonry | Bag | 2523 | 18
+UltraTech Cement PPC 50 kg | UltraTech
+UltraTech Cement OPC 53 Grade 50 kg | UltraTech
+UltraTech Super Cement 50 kg | UltraTech
+ACC Gold Water Shield Cement 50 kg | ACC
+ACC Suraksha Power Cement 50 kg | ACC
+ACC F2R Cement 50 kg | ACC
+Ambuja Plus Cement 50 kg | Ambuja
+Ambuja Kawach Cement 50 kg | Ambuja
+Ambuja Cool Walls Cement 50 kg | Ambuja
+Dalmia DSP Cement PSC 50 kg | Dalmia
+Dalmia Cement PPC 50 kg | Dalmia
+Dalmia OPC 53 Cement 50 kg | Dalmia
+JK Lakshmi Cement PPC 50 kg | JK Lakshmi
+JK Cement OPC 53 Grade 50 kg | JK Cement
+Shree Jung Rodhak Cement 50 kg | Shree
+Shree Ultra Red Max Cement 50 kg | Shree
+Birla Gold Cement 50 kg | Birla
+Birla A1 Cement 50 kg | Birla
+Ramco Cement Super Grade 50 kg | Ramco
+Coromandel King Cement 50 kg | Coromandel
+Konark Cement PPC 50 kg | Konark
+Nuvoco Concreto Cement 50 kg | Nuvoco
+Star Cement PPC 50 kg | Star Cement
+Heidelberg Mycem Cement 50 kg | Heidelberg
+Sagar Cement 50 kg | Sagar
+Orient Cement PPC 50 kg | Orient
+Birla White Cement 1 kg | Birla White | Packet
+Birla White Cement 5 kg | Birla White | Packet
+Birla White Cement 20 kg | Birla White | Bag
+Birla White Wall Care Putty 5 kg | Birla White | Packet | 3214
+Birla White Wall Care Putty 20 kg | Birla White | Bag | 3214
+Birla White Wall Care Putty 40 kg | Birla White | Bag | 3214
+JK Wall Putty 5 kg | JK | Packet | 3214
+JK Wall Putty 20 kg | JK | Bag | 3214
+JK Wall Putty 40 kg | JK | Bag | 3214
+Asian Paints Trucare Wall Putty 5 kg | Asian Paints | Packet | 3214
+Asian Paints Trucare Wall Putty 20 kg | Asian Paints | Bag | 3214
+Berger Wall Putty 20 kg | Berger | Bag | 3214
+Nerolac Wall Putty 20 kg | Nerolac | Bag | 3214
+Tile Adhesive MYK Laticrete 20 kg | MYK Laticrete | Bag | 3214
+Tile Adhesive Asian Paints 20 kg | Asian Paints | Bag | 3214
+Tile Adhesive Pidilite Roff 20 kg | Pidilite | Bag | 3214
+Tile Adhesive Ardex 20 kg | Ardex | Bag | 3214
+Tile Grout Roff 1 kg | Pidilite | Packet | 3214
+Tile Grout Laticrete 1 kg | MYK Laticrete | Packet | 3214
+River Sand | | Cubic Foot | 2505 | 5
+River Sand Cubic Metre | | Cubic Metre | 2505 | 5
+M Sand Manufactured Sand | | Cubic Foot | 2517 | 5
+Stone Chips 20 mm | | Cubic Foot | 2517 | 5
+Stone Chips 12 mm | | Cubic Foot | 2517 | 5
+Stone Dust | | Cubic Foot | 2517 | 5
+Boulders Stone | | Cubic Foot | 2516 | 5
+Red Bricks First Class | | Piece | 6901 | 5
+Red Bricks Second Class | | Piece | 6901 | 5
+Fly Ash Bricks | | Piece | 6815 | 5
+AAC Blocks 600 x 200 x 100 mm | | Piece | 6810 | 5?
+AAC Blocks 600 x 200 x 150 mm | | Piece | 6810 | 5?
+Concrete Hollow Blocks 8 inch | | Piece | 6810 | 5?
+Paver Blocks Grey | | Piece | 6810 | 5?
+Lime Quick | | Bag | 2522 | 5
+Lime Slaked Chuna | | Kg | 2522 | 5
+Plaster of Paris POP 25 kg | | Bag | 2520 | 18
+Plaster of Paris POP 5 kg | | Packet | 2520 | 18
+Gypsum Board 12 mm | | Sheet | 6809 | 18
+Gypsum Board 9 mm | | Sheet | 6809 | 18
+Fly Ash Cement Mortar Mix | | Bag | 3824 | 18
+Water Proofing Compound Dr Fixit Pidiproof LW+ 1 L | Dr. Fixit | Bottle | 3824 | 18
+Water Proofing Compound Dr Fixit Pidiproof LW+ 5 L | Dr. Fixit | Can | 3824 | 18
+Water Proofing Compound Dr Fixit Pidiproof LW+ 20 L | Dr. Fixit | Can | 3824 | 18
+Water Proofing Dr Fixit Raincoat 4 L | Dr. Fixit | Can | 3209 | 18
+Water Proofing Dr Fixit Roofseal 4 L | Dr. Fixit | Can | 3209 | 18
+Water Proofing Dr Fixit Crack X Putty 1 kg | Dr. Fixit | Packet | 3214 | 18
+Water Proofing Dr Fixit Fixmaster 5 L | Dr. Fixit | Can | 3824 | 18
+Water Proofing Asian Paints SmartCare Damp Proof 4 L | Asian Paints | Can | 3209 | 18
+Bitumen Emulsion 20 L | | Can | 2715 | 18
+Bitumen Cut Back Primer 20 L | | Can | 2715 | 18
+
+## TMT Bars, Steel & Wire | Rod | 7214 | 18 | pieces=1
+TMT Bar Tata Tiscon 8 mm 12 m | Tata Tiscon
+TMT Bar Tata Tiscon 10 mm 12 m | Tata Tiscon
+TMT Bar Tata Tiscon 12 mm 12 m | Tata Tiscon
+TMT Bar Tata Tiscon 16 mm 12 m | Tata Tiscon
+TMT Bar Tata Tiscon 20 mm 12 m | Tata Tiscon
+TMT Bar Tata Tiscon 25 mm 12 m | Tata Tiscon
+TMT Bar JSW Neosteel 8 mm 12 m | JSW Neosteel
+TMT Bar JSW Neosteel 10 mm 12 m | JSW Neosteel
+TMT Bar JSW Neosteel 12 mm 12 m | JSW Neosteel
+TMT Bar JSW Neosteel 16 mm 12 m | JSW Neosteel
+TMT Bar JSW Neosteel 20 mm 12 m | JSW Neosteel
+TMT Bar SAIL 8 mm 12 m | SAIL
+TMT Bar SAIL 10 mm 12 m | SAIL
+TMT Bar SAIL 12 mm 12 m | SAIL
+TMT Bar SAIL 16 mm 12 m | SAIL
+TMT Bar Kamdhenu 8 mm 12 m | Kamdhenu
+TMT Bar Kamdhenu 10 mm 12 m | Kamdhenu
+TMT Bar Kamdhenu 12 mm 12 m | Kamdhenu
+TMT Bar Jindal Panther 8 mm 12 m | Jindal Panther
+TMT Bar Jindal Panther 10 mm 12 m | Jindal Panther
+TMT Bar Jindal Panther 12 mm 12 m | Jindal Panther
+TMT Bar Jindal Panther 16 mm 12 m | Jindal Panther
+TMT Bar Shyam Steel 10 mm 12 m | Shyam Steel
+TMT Bar Shyam Steel 12 mm 12 m | Shyam Steel
+TMT Bar Vizag Steel 12 mm 12 m | Vizag Steel
+TMT Bar Local 8 mm 12 m
+TMT Bar Local 10 mm 12 m
+TMT Bar Local 12 mm 12 m
+TMT Bar Local 16 mm 12 m
+MS Round Bar 6 mm | | | 7214
+MS Round Bar 8 mm | | | 7214
+MS Round Bar 10 mm | | | 7214
+MS Round Bar 12 mm | | | 7214
+MS Round Bar 16 mm | | | 7214
+MS Round Bar 20 mm | | | 7214
+MS Square Bar 12 mm | | | 7214
+MS Square Bar 16 mm | | | 7214
+MS Flat 25 x 3 mm | | | 7216
+MS Flat 25 x 5 mm | | | 7216
+MS Flat 40 x 5 mm | | | 7216
+MS Flat 50 x 6 mm | | | 7216
+MS Angle 25 x 25 x 3 mm | | | 7216
+MS Angle 40 x 40 x 5 mm | | | 7216
+MS Angle 50 x 50 x 5 mm | | | 7216
+MS Angle 65 x 65 x 6 mm | | | 7216
+MS Channel 75 x 40 mm | | | 7216
+MS Channel 100 x 50 mm | | | 7216
+MS I Beam 100 x 50 mm | | | 7216
+MS Square Pipe 20 x 20 mm | | | 7306
+MS Square Pipe 25 x 25 mm | | | 7306
+MS Square Pipe 40 x 40 mm | | | 7306
+MS Rectangular Pipe 40 x 20 mm | | | 7306
+MS Rectangular Pipe 50 x 25 mm | | | 7306
+MS Round Pipe 1 inch | | | 7306
+MS Round Pipe 1.5 inch | | | 7306
+MS Round Pipe 2 inch | | | 7306
+GI Pipe Class B 1/2 inch | | | 7306
+GI Pipe Class B 3/4 inch | | | 7306
+GI Pipe Class B 1 inch | | | 7306
+GI Pipe Class B 1.5 inch | | | 7306
+GI Pipe Class B 2 inch | | | 7306
+GI Pipe Class C 1 inch | | | 7306
+Tata Pipe GI Medium 1 inch | Tata | | 7306
+Jindal Hisar GI Pipe 1 inch | Jindal | | 7306
+Apollo GI Pipe 1 inch | Apollo | | 7306
+SS Pipe 1 inch 304 | | | 7306
+Aluminium Section Window Frame 6 m | | | 7604
+Aluminium Angle 25 x 25 mm | | | 7604
+Aluminium Channel 25 mm | | | 7604
+Aluminium Flat 25 x 3 mm | | | 7604
+Aluminium Square Pipe 25 mm | | | 7604
+Binding Wire 18 Gauge 1 kg | | Kg | 7217 | | pieces=0
+Binding Wire 20 Gauge 1 kg | | Kg | 7217 | | pieces=0
+GI Wire 8 Gauge 1 kg | | Kg | 7217 | | pieces=0
+GI Wire 10 Gauge 1 kg | | Kg | 7217 | | pieces=0
+GI Wire 12 Gauge 1 kg | | Kg | 7217 | | pieces=0
+MS Wire 6 Gauge 1 kg | | Kg | 7217 | | pieces=0
+Barbed Wire 25 kg Roll | | Roll | 7313 | | pieces=0
+Barbed Wire 12 Gauge 1 kg | | Kg | 7313 | | pieces=0
+Chain Link Fencing 4 ft 10 m Roll | | Roll | 7314 | | pieces=0
+Chicken Mesh Wire Net 1 m x 10 m Roll | | Roll | 7314 | | pieces=0
+Welded Mesh Wire GI 3 ft x 30 ft | | Roll | 7314 | | pieces=0
+Wire Mesh Weld 6 x 6 inch Sheet | | Sheet | 7314 | | pieces=0
+GI Sheet Plain 0.5 mm 8 x 4 ft | | Sheet | 7210 | | pieces=0
+GI Sheet Plain 0.8 mm 8 x 4 ft | | Sheet | 7210 | | pieces=0
+GI Sheet Corrugated 8 ft | | Sheet | 7210 | | pieces=0
+GI Sheet Corrugated 10 ft | | Sheet | 7210 | | pieces=0
+Colour Coated Roofing Sheet 10 ft | | Sheet | 7210 | | pieces=0
+Tata Shaktee Roofing Sheet 10 ft | Tata Shaktee | Sheet | 7210 | | pieces=0
+Tata Bluescope Lysaght Roofing Sheet 10 ft | Tata Bluescope | Sheet | 7210 | | pieces=0
+MS Sheet 18 Gauge 8 x 4 ft | | Sheet | 7208 | | pieces=0
+MS Sheet 16 Gauge 8 x 4 ft | | Sheet | 7208 | | pieces=0
+MS Plate 6 mm 8 x 4 ft | | Sheet | 7208 | | pieces=0
+SS Sheet 304 1 mm 8 x 4 ft | | Sheet | 7219 | | pieces=0
+Checkered Plate 3 mm | | Sheet | 7208 | | pieces=0
+Aluminium Sheet 1 mm 8 x 4 ft | | Sheet | 7606 | | pieces=0
+Aluminium Composite Panel ACP 8 x 4 ft | | Sheet | 7606 | | pieces=0
+Polycarbonate Sheet 10 ft | | Sheet | 3920 | | pieces=0
+FRP Sheet Translucent 8 ft | | Sheet | 3920 | | pieces=0
+Wire Rope GI 6 mm per metre | | Metre | 7312 | | pieces=0
+Wire Rope SS 4 mm per metre | | Metre | 7312 | | pieces=0
+Iron Chain 6 mm per metre | | Metre | 7315 | | pieces=0
+Iron Chain 8 mm per metre | | Metre | 7315 | | pieces=0
+Anchor Chain SS 8 mm per metre | | Metre | 7315 | | pieces=0
+
+## Plywood, Boards & Laminates | Sheet | 4412 | 18
+Greenply Plywood Ecotec 19 mm 8 x 4 ft | Greenply
+Greenply Plywood Club Prime 19 mm 8 x 4 ft | Greenply
+Greenply Plywood Gold Seal 19 mm 8 x 4 ft | Greenply
+Greenply Plywood 12 mm 8 x 4 ft | Greenply
+Greenply Plywood 6 mm 8 x 4 ft | Greenply
+Century Plywood Sainik 19 mm 8 x 4 ft | Century
+Century Plywood Club Prime 19 mm 8 x 4 ft | Century
+Century Plywood 12 mm 8 x 4 ft | Century
+Century Plywood 6 mm 8 x 4 ft | Century
+Kitply Plywood 19 mm 8 x 4 ft | Kitply
+Kitply Plywood 12 mm 8 x 4 ft | Kitply
+Archid Plywood 19 mm 8 x 4 ft | Archid
+National Plywood 19 mm 8 x 4 ft | National
+Local Plywood 18 mm 8 x 4 ft
+Local Plywood 12 mm 8 x 4 ft
+Local Plywood 6 mm 8 x 4 ft
+Marine Plywood 19 mm 8 x 4 ft
+Marine Plywood 12 mm 8 x 4 ft
+Waterproof Plywood BWP 19 mm 8 x 4 ft
+Block Board 19 mm 8 x 4 ft | | | 4412
+Block Board 25 mm 8 x 4 ft | | | 4412
+Flush Door 30 mm 7 x 3 ft | | | 4418
+Flush Door 35 mm 7 x 3 ft | | | 4418
+Flush Door 30 mm 6.5 x 2.5 ft | | | 4418
+Membrane Door Panel | | | 4418
+PVC Door 7 x 2.5 ft | | | 3925
+FRP Door 7 x 2.5 ft | | | 3925
+Plain MDF Board 18 mm 8 x 4 ft | | | 4411
+Plain MDF Board 12 mm 8 x 4 ft | | | 4411
+HDHMR Board 18 mm 8 x 4 ft | | | 4411
+Particle Board 18 mm 8 x 4 ft | | | 4410
+Prelam Particle Board 18 mm 8 x 4 ft | | | 4410
+Hardboard 3 mm 8 x 4 ft | | | 4411
+Veneer 4 x 8 ft Teak | | | 4408
+Veneer 4 x 8 ft Oak | | | 4408
+Laminate Merino 1 mm 8 x 4 ft | Merino | | 4823 | 18
+Laminate Greenlam 1 mm 8 x 4 ft | Greenlam | | 4823 | 18
+Laminate Century 1 mm 8 x 4 ft | Century | | 4823 | 18
+Laminate Royale Touche 1 mm | Royale Touche | | 4823 | 18
+Laminate Virgo 1 mm | Virgo | | 4823 | 18
+Laminate Sunmica 1 mm | Sunmica | | 4823 | 18
+Laminate 0.8 mm 8 x 4 ft | | | 4823 | 18
+Acrylic Sheet 3 mm 8 x 4 ft | | | 3920 | 18
+Edge Band PVC per metre | | Metre | 3920 | 18
+Wooden Beading per metre | | Metre | 4409 | 18
+Wooden Door Frame Teak | | | 4418 | 18
+Wooden Door Frame Sal | | | 4418 | 18
+Wooden Window Frame | | | 4418 | 18
+Teak Wood Plank per cft | | Cubic Foot | 4407 | 18
+Sal Wood Plank per cft | | Cubic Foot | 4407 | 18
+Sissoo Wood Plank per cft | | Cubic Foot | 4407 | 18
+Mango Wood Plank per cft | | Cubic Foot | 4407 | 18
+Pine Wood Plank per cft | | Cubic Foot | 4407 | 18
+Bamboo Pole 20 ft | | Piece | 1401 | 0
+Bamboo Pole 12 ft | | Piece | 1401 | 0
+Bamboo Matting Sheet 8 x 4 ft | | Sheet | 4601 | 5?
+Thatch Roof Sheet | | Sheet | 4601 | 5?
+Glass Sheet 4 mm per sq ft | | Square Foot | 7005 | 18
+Glass Sheet 5 mm per sq ft | | Square Foot | 7005 | 18
+Glass Sheet 6 mm per sq ft | | Square Foot | 7005 | 18
+Glass Sheet 8 mm Toughened per sq ft | | Square Foot | 7007 | 18
+Glass Sheet 10 mm Toughened per sq ft | | Square Foot | 7007 | 18
+Mirror Glass 5 mm per sq ft | | Square Foot | 7009 | 18
+Frosted Glass 5 mm per sq ft | | Square Foot | 7005 | 18
+Float Glass Tinted per sq ft | | Square Foot | 7005 | 18
+
+## Tiles & Flooring | Square Foot | 6908 | 18
+Kajaria Floor Tile 2 x 2 ft Vitrified | Kajaria
+Kajaria Floor Tile 2 x 4 ft Vitrified | Kajaria
+Kajaria Wall Tile 1 x 1.5 ft Ceramic | Kajaria | | 6908
+Kajaria Parking Tile 1 x 1 ft | Kajaria | | 6908
+Somany Floor Tile 2 x 2 ft Vitrified | Somany
+Somany Wall Tile 1 x 1.5 ft Ceramic | Somany
+Johnson Floor Tile 2 x 2 ft | Johnson
+Nitco Floor Tile 2 x 2 ft | Nitco
+Orient Bell Floor Tile 2 x 2 ft | Orient Bell
+RAK Floor Tile 2 x 2 ft | RAK
+Simpolo Floor Tile 2 x 2 ft | Simpolo
+Bell Floor Tile 2 x 2 ft Parking 1 x 1 | Orient Bell
+Parking Tile 12 x 12 inch | | | 6908
+Kitchen Wall Tile 12 x 18 inch | | | 6908
+Bathroom Wall Tile 12 x 18 inch | | | 6908
+Bathroom Floor Tile 12 x 12 inch Anti Skid | | | 6908
+Elevation Tile Brick Look | | | 6908
+Mosaic Tile 12 x 12 inch | | | 6908
+Cera Tile Spacer Pack | Cera | Packet | 3926
+Tile Spacer 2 mm Pack of 100 | | Packet | 3926
+Tile Cutter Manual 24 inch | | Piece | 8205
+Tile Cutter Machine 4 inch Blade | | Piece | 8467
+Tile Cutter Blade Diamond 4 inch | | Piece | 6804
+Granite Slab Black per sq ft | | | 6802 | 18
+Granite Slab Green per sq ft | | | 6802 | 18
+Marble White Makrana per sq ft | | | 6802 | 18
+Marble Italian per sq ft | | | 6802 | 18
+Kota Stone per sq ft | | | 6802 | 18
+Shahabad Stone per sq ft | | | 6802 | 18
+Cuddapah Stone per sq ft | | | 6802 | 18
+Kadappa Black Stone per sq ft | | | 6802 | 18
+Vinyl Flooring Roll per sq ft | | | 3918 | 18
+Wooden Flooring Laminate per sq ft | | | 4411 | 18
+Rubber Flooring Mat | | Piece | 4016 | 18
+PVC Tile Flooring | | | 3918 | 18
+Artificial Grass per sq ft | | | 5703 | 18
+Skirting Tile 4 x 24 inch | | Piece | 6908 | 18
+Granite Edge Skirting per rft | | Running Foot | 6802 | 18
+
+## Nuts, Bolts, Screws & Nails | Packet | 7318 | 18
+Hex Bolt with Nut M6 x 25 mm
+Hex Bolt with Nut M8 x 40 mm
+Hex Bolt with Nut M10 x 50 mm
+Hex Bolt with Nut M12 x 75 mm
+Hex Bolt with Nut M16 x 100 mm
+Hex Nut M6
+Hex Nut M8
+Hex Nut M10
+Hex Nut M12
+Hex Nut M16
+Hex Nut M20
+Hex Nut Nylon Lock M8
+Wing Nut M6
+Wing Nut M8
+Cap Nut M8
+Flange Nut M10
+Square Nut M10
+Allen Bolt M5 x 20 mm
+Allen Bolt M6 x 25 mm
+Allen Bolt M8 x 30 mm
+Allen Bolt M10 x 40 mm
+Allen Key Set 9 pcs | | Set | 8204
+Allen Key Single 6 mm | | Piece | 8204
+Carriage Bolt M8 x 50 mm
+Eye Bolt M8
+U Bolt 2 inch
+U Bolt 4 inch
+J Bolt 10 mm
+Anchor Bolt 10 x 100 mm
+Anchor Bolt 12 x 120 mm
+Anchor Fastener Sleeve 10 mm
+Rawl Plug Plastic 6 mm Pack of 100
+Rawl Plug Plastic 8 mm Pack of 100
+Rawl Plug Plastic 10 mm Pack of 100
+Fischer Anchor Plug 8 mm Pack of 100
+Fischer Anchor Plug 10 mm Pack of 100
+Wall Plug Nylon Pack
+Washer Flat M6 per kg | | Kg
+Washer Flat M8 per kg | | Kg
+Washer Flat M10 per kg | | Kg
+Washer Spring M8 per kg | | Kg
+Washer Spring M10 per kg | | Kg
+Washer Plain M12 per kg | | Kg
+Threaded Rod 8 mm 1 m | | Piece
+Threaded Rod 10 mm 1 m | | Piece
+Threaded Rod 12 mm 1 m | | Piece
+Wood Screw 1 inch No. 6 Box 100 pcs | | Box
+Wood Screw 1.5 inch No. 8 Box 100 pcs | | Box
+Wood Screw 2 inch No. 8 Box 100 pcs | | Box
+Wood Screw 2.5 inch No. 10 Box 100 pcs | | Box
+Wood Screw 3 inch No. 10 Box 100 pcs | | Box
+Self Tapping Screw 1 inch Box 100 pcs | | Box
+Self Tapping Screw 1.5 inch Box 100 pcs | | Box
+Self Tapping Screw 2 inch Box 100 pcs | | Box
+Drywall Screw 1 inch Box | | Box
+Drywall Screw 1.5 inch Box | | Box
+Drywall Screw 2 inch Box | | Box
+Roofing Screw with Washer 2 inch Box | | Box
+Roofing Screw with Washer 3 inch Box | | Box
+Machine Screw M4 x 20 mm Pack of 100 | | Packet
+Machine Screw M5 x 25 mm Pack of 100 | | Packet
+Machine Screw M6 x 30 mm Pack of 100 | | Packet
+Grub Screw M6 Pack of 50 | | Packet
+Counter Sunk Screw 1 inch Pack of 100 | | Packet
+Pan Head Screw 1 inch Pack of 100 | | Packet
+Screw Hook 1 inch Pack of 50 | | Packet | 7317
+Cup Hook Brass 1 inch Pack of 20 | | Packet | 7317
+L Hook 1 inch Pack of 20 | | Packet | 7317
+Eye Screw 1 inch Pack of 20 | | Packet | 7317
+Rivet Pop 3.2 mm x 10 mm Pack of 100 | | Packet | 8308
+Rivet Pop 4 mm x 12 mm Pack of 100 | | Packet | 8308
+Rivet Pop 4.8 mm Pack of 100 | | Packet | 8308
+Rivet Gun Hand | | Piece | 8205
+Wire Nails 1 inch per kg | | Kg | 7317
+Wire Nails 1.5 inch per kg | | Kg | 7317
+Wire Nails 2 inch per kg | | Kg | 7317
+Wire Nails 3 inch per kg | | Kg | 7317
+Wire Nails 4 inch per kg | | Kg | 7317
+Wire Nails 6 inch per kg | | Kg | 7317
+Wire Nails 2.5 inch per kg | | Kg | 7317
+Concrete Nails 2 inch Pack | | Packet | 7317
+Concrete Nails 3 inch Pack | | Packet | 7317
+Roofing Nails Umbrella Head 100 g | | Packet | 7317
+Clout Nails 1 inch Pack | | Packet | 7317
+Brass Pins 1 inch Pack | | Packet | 7317
+Staple Pins U Shape Pack | | Packet | 7317
+Cotter Pin 3 mm Pack | | Packet | 7318
+Split Pin 3 mm Pack | | Packet | 7318
+Spring Pins Pack | | Packet | 7318
+Circlip Set Assorted | | Set | 7318
+Nuts Bolts Assorted Box 250 pcs | | Box | 7318
+Nuts Bolts Assorted Box 500 pcs | | Box | 7318
+Fasteners Assorted Kit 1000 pcs | | Box | 7318
+Cable Ties Nylon 4 inch Pack of 100 | | Packet | 3926
+Cable Ties Nylon 8 inch Pack of 100 | | Packet | 3926
+Cable Ties Nylon 12 inch Pack of 100 | | Packet | 3926
+Jubilee Clip Hose Clamp 1 inch | | Piece | 7326
+Jubilee Clip Hose Clamp 2 inch | | Piece | 7326
+Hose Clamp Worm Drive 1/2 inch | | Piece | 7326
+Pipe Clamp Saddle 1 inch Pack of 10 | | Packet | 7326
+Pipe Clamp Saddle 2 inch Pack of 10 | | Packet | 7326
+Chain Link 6 mm Zinc Piece | | Piece | 7315
+Shackle D 10 mm | | Piece | 7315
+Shackle Bow 10 mm | | Piece | 7315
+Turnbuckle 10 mm | | Piece | 7326
+Swivel Hook | | Piece | 7326
+Spring Hook Carabiner 10 mm | | Piece | 7326
+S Hook 4 inch Pack of 10 | | Packet | 7326
+Corner Brace Metal 3 inch Pack of 4 | | Packet | 8302
+Corner Bracket L Shape 4 inch | | Piece | 8302
+Shelf Bracket 6 inch Pair | | Pair | 8302
+Shelf Bracket 8 inch Pair | | Pair | 8302
+Shelf Bracket 10 inch Pair | | Pair | 8302
+Shelf Bracket Heavy Duty 12 inch Pair | | Pair | 8302
+Mending Plate 4 inch Pack | | Packet | 8302
+T Plate 4 inch Pack | | Packet | 8302
+Flat Plate Corner 3 inch Pack | | Packet | 8302
+
+## Door, Window & Furniture Fittings | Piece | 8302 | 18
+Butt Hinge 3 inch Steel Pair | | Pair
+Butt Hinge 4 inch Steel Pair | | Pair
+Butt Hinge 5 inch Steel Pair | | Pair
+Butt Hinge 3 inch Brass Pair | | Pair
+Butt Hinge 4 inch Brass Pair | | Pair
+Butt Hinge SS 4 inch Pair | | Pair
+Ball Bearing Hinge 4 inch Pair | | Pair
+Concealed Hinge Soft Close Pair | | Pair
+Concealed Hinge Cabinet 35 mm Pair | | Pair
+Piano Hinge 4 ft | | Piece
+Gate Hinge Heavy 6 inch | | Pair
+Gate Hinge Heavy 8 inch | | Pair
+Tower Bolt 4 inch Brass | | Piece
+Tower Bolt 6 inch Brass | | Piece
+Tower Bolt 8 inch Brass | | Piece
+Tower Bolt 10 inch Iron | | Piece
+Tower Bolt 12 inch Iron | | Piece
+Tower Bolt SS 6 inch | | Piece
+Tower Bolt SS 8 inch | | Piece
+Aldrop 6 inch Iron | | Piece
+Aldrop 8 inch Iron | | Piece
+Aldrop 10 inch Brass | | Piece
+Latch Door Handle Sliding | | Piece
+Barrel Bolt 4 inch | | Piece
+Barrel Bolt 6 inch | | Piece
+Door Handle Pull SS 10 inch Pair | | Pair
+Door Handle Pull SS 12 inch Pair | | Pair
+Door Handle Pull SS 18 inch Pair | | Pair
+Door Handle Brass 6 inch Pair | | Pair
+Door Handle Lock Set Mortise | | Set | 8301
+Door Handle Cylinder Lock Set | | Set | 8301
+Mortise Lock 6 Lever Godrej | Godrej | Piece | 8301
+Mortise Lock 6 Lever Link | Link | Piece | 8301
+Mortise Lock Harrison | Harrison | Piece | 8301
+Mortise Lock Dorset | Dorset | Piece | 8301
+Night Latch Godrej | Godrej | Piece | 8301
+Night Latch Link | Link | Piece | 8301
+Rim Lock Godrej 3 Lever | Godrej | Piece | 8301
+Cylindrical Lock Godrej | Godrej | Piece | 8301
+Door Lock Digital Smart | | Piece | 8301
+Pad Lock Godrej Navtal 7 Lever 70 mm | Godrej | Piece | 8301
+Pad Lock Godrej Navtal 65 mm | Godrej | Piece | 8301
+Pad Lock Godrej Navtal 50 mm | Godrej | Piece | 8301
+Pad Lock Godrej 3 Lever 40 mm | Godrej | Piece | 8301
+Pad Lock Godrej Pioneer 50 mm | Godrej | Piece | 8301
+Pad Lock Godrej Navtal 4 Lever 40 mm | Godrej | Piece | 8301
+Pad Lock Godrej Mini 25 mm | Godrej | Piece | 8301
+Pad Lock Harrison 7 Lever 70 mm | Harrison | Piece | 8301
+Pad Lock Harrison 50 mm | Harrison | Piece | 8301
+Pad Lock Harrison 40 mm | Harrison | Piece | 8301
+Pad Lock Link 50 mm | Link | Piece | 8301
+Pad Lock Link 40 mm | Link | Piece | 8301
+Pad Lock Link 65 mm | Link | Piece | 8301
+Pad Lock Dorset 50 mm | Dorset | Piece | 8301
+Pad Lock Dorset 40 mm | Dorset | Piece | 8301
+Pad Lock Dorset 60 mm | Dorset | Piece | 8301
+Pad Lock Steel Plain 50 mm | | Piece | 8301
+Pad Lock Brass 40 mm | | Piece | 8301
+Pad Lock Combination 4 Digit | | Piece | 8301
+Pad Lock Number Lock Bag | | Piece | 8301
+Cycle Lock Chain | | Piece | 8301
+Disc Lock Bike | | Piece | 8301
+Cupboard Lock Godrej | Godrej | Piece | 8301
+Cupboard Lock Link | Link | Piece | 8301
+Drawer Lock 3 Lever | | Piece | 8301
+Drawer Lock Link | Link | Piece | 8301
+Glass Door Lock Patch | | Piece | 8301
+Furniture Lock Cam | | Piece | 8301
+Lock Key Blank Pack | | Packet | 8301
+Door Closer Hydraulic 40 kg | | Piece
+Door Closer Hydraulic 60 kg | | Piece
+Door Closer Godrej | Godrej | Piece
+Door Closer Dorset | Dorset | Piece
+Floor Spring Door | | Piece
+Patch Fittings Glass Door Set | | Set
+Door Stopper Magnetic | | Piece
+Door Stopper Rubber Wedge | | Piece
+Door Stopper Spring | | Piece
+Door Stopper Floor Mounted | | Piece
+Door Eye Viewer Brass | | Piece
+Door Chain Guard | | Piece
+Door Knocker Brass | | Piece
+Door Nameplate Brass | | Piece | 8310
+Door Handle Knob Round | | Piece
+Cabinet Knob Brass | | Piece
+Cabinet Knob Glass | | Piece
+Cabinet Handle SS 96 mm | | Piece
+Cabinet Handle SS 128 mm | | Piece
+Cabinet Handle Zinc Alloy | | Piece
+Drawer Pull Handle SS 6 inch | | Piece
+Drawer Channel Telescopic 12 inch Pair | | Pair
+Drawer Channel Telescopic 14 inch Pair | | Pair
+Drawer Channel Telescopic 16 inch Pair | | Pair
+Drawer Channel Telescopic 18 inch Pair | | Pair
+Drawer Channel Telescopic 20 inch Pair | | Pair
+Drawer Channel Soft Close 16 inch Pair | | Pair
+Drawer Channel Soft Close 18 inch Pair | | Pair
+Drawer Channel Soft Close 20 inch Pair | | Pair
+Drawer Channel Soft Close 22 inch Pair | | Pair
+Drawer Channel Soft Close 24 inch Pair | | Pair
+Wardrobe Sliding Track 6 ft | | Piece
+Wardrobe Sliding Wheel | | Piece
+Wardrobe Rod 2 ft | | Piece
+Wardrobe Rod 4 ft | | Piece
+Wardrobe Rod 6 ft | | Piece
+Wardrobe Hook Hanger Rod End | | Piece
+Wardrobe Lock Cam | | Piece
+Magnetic Catch Door | | Piece
+Magnetic Catch Heavy | | Piece
+Cabinet Catch Roller | | Piece
+Cabinet Leg Adjustable | | Piece
+Cabinet Leg Steel 4 inch | | Piece
+Furniture Wheel Caster 2 inch | | Piece
+Furniture Wheel Caster 3 inch | | Piece
+Furniture Wheel Caster 4 inch | | Piece
+Furniture Wheel Caster with Brake 3 inch | | Piece
+Table Wheel Heavy Duty | | Piece
+Bed Fitting Set | | Set
+Bed Hinge Support | | Piece
+Gas Spring Lift Up | | Piece
+Slide Runner Table | | Piece
+Slide Runner Sliding Door 6 ft | | Piece
+Sliding Door Fitting Set Wood | | Set
+Sliding Door Track Aluminium 6 ft | | Piece
+Sliding Window Wheel Aluminium | | Piece
+Sliding Window Lock | | Piece
+Sliding Door Handle | | Piece
+Window Stay 12 inch Pair | | Pair
+Window Stay 18 inch Pair | | Pair
+Window Latch Aluminium | | Piece
+Window Fastener Brass | | Piece
+Window Handle Aluminium | | Piece
+Window Bolt SS 4 inch | | Piece
+Window Grill Fixed Plate | | Piece
+Window Mosquito Mesh per sq ft | | Square Foot | 5407
+Glass Door Handle SS Pair | | Pair
+Glass Door Hinge Pair | | Pair
+Glass Holder Shower | | Piece
+Glass Shelf Bracket Pair | | Pair
+Tempered Glass Shelf 12 inch | | Piece | 7007
+Pelmet Rod Curtain | | Piece
+Curtain Bracket Single | | Piece
+Curtain Bracket Double | | Piece
+Wooden Handle Door Drilled | | Piece | 4421
+Hasp and Staple 4 inch | | Piece
+Hasp and Staple 6 inch | | Piece
+Gate Latch Heavy | | Piece
+Gate Wheel V Groove 4 inch | | Piece
+Gate Track Rail 20 ft | | Piece
+Gate Hinge Pin Heavy | | Piece
+Sliding Gate Roller | | Piece
+
+## Hand Tools | Piece | 8205 | 18
+Taparia Claw Hammer 1 lb | Taparia
+Taparia Claw Hammer 0.5 lb | Taparia
+Taparia Ball Pein Hammer 1 lb | Taparia
+Taparia Ball Pein Hammer 2 lb | Taparia
+Taparia Sledge Hammer 4 lb | Taparia
+Taparia Rubber Mallet 1 lb | Taparia
+Taparia Brick Hammer | Taparia
+Stanley Claw Hammer 16 oz | Stanley
+Stanley Rubber Mallet | Stanley
+Stanley Combination Pliers 8 inch | Stanley | | 8203
+Taparia Combination Pliers 8 inch | Taparia | | 8203
+Taparia Combination Pliers 6 inch | Taparia | | 8203
+Taparia Nose Pliers 6 inch | Taparia | | 8203
+Taparia Cutting Pliers 6 inch | Taparia | | 8203
+Taparia Long Nose Pliers 8 inch | Taparia | | 8203
+Taparia Side Cutter 6 inch | Taparia | | 8203
+Taparia Wire Stripper | Taparia | | 8203
+Taparia Slip Joint Pliers 8 inch | Taparia | | 8203
+Taparia Circlip Pliers | Taparia | | 8203
+Taparia Pipe Wrench 12 inch | Taparia | | 8204
+Taparia Pipe Wrench 18 inch | Taparia | | 8204
+Taparia Pipe Wrench 24 inch | Taparia | | 8204
+Taparia Adjustable Wrench 8 inch | Taparia | | 8204
+Taparia Adjustable Wrench 10 inch | Taparia | | 8204
+Taparia Adjustable Wrench 12 inch | Taparia | | 8204
+Taparia Ring Spanner Set 12 pcs | Taparia | Set | 8204
+Taparia Open End Spanner Set 8 pcs | Taparia | Set | 8204
+Taparia Combination Spanner Set 12 pcs | Taparia | Set | 8204
+Taparia Socket Set 32 pcs | Taparia | Set | 8204
+Taparia Socket Wrench 1/2 inch | Taparia | | 8204
+Taparia Ratchet 1/2 inch | Taparia | | 8204
+Taparia Torque Wrench | Taparia | | 8204
+Taparia Allen Key Set | Taparia | Set | 8204
+Taparia Screwdriver Set 6 pcs | Taparia | Set | 8205
+Taparia Screwdriver Flat 6 inch | Taparia | | 8205
+Taparia Screwdriver Star 6 inch | Taparia | | 8205
+Taparia Screwdriver Tester | Taparia | | 8205
+Taparia Spirit Level 12 inch | Taparia | | 9015
+Taparia Chisel Set | Taparia | Set | 8205
+Taparia Cold Chisel 1 inch | Taparia | | 8205
+Taparia Centre Punch | Taparia | | 8205
+Taparia Hack Saw Frame | Taparia | | 8202
+Taparia Vice Bench 4 inch | Taparia | | 8205
+Stanley Tape Measure 3 m | Stanley | | 9017
+Stanley Tape Measure 5 m | Stanley | | 9017
+Stanley Tape Measure 7.5 m | Stanley | | 9017
+Stanley Spirit Level 24 inch | Stanley | | 9015
+Stanley Hacksaw Frame | Stanley | | 8202
+Stanley Combination Square | Stanley | | 9017
+Stanley Cutter Knife | Stanley | | 8211
+Stanley Cutter Blades Pack | Stanley | Packet | 8211
+Stanley Screwdriver Set 6 pcs | Stanley | Set | 8205
+Stanley Tool Kit 65 pcs | Stanley | Set | 8206
+Stanley Tool Box 19 inch | Stanley | | 3926
+Jhalani Claw Hammer | Jhalani
+Jhalani Hacksaw Frame | Jhalani | | 8202
+Eastman Hand Drill | Eastman | | 8205
+Eastman Pliers Set | Eastman | Set | 8203
+Venus Hammer | Venus
+Venus Pliers | Venus | | 8203
+Hacksaw Blade 12 inch Pack of 10 | | Packet | 8202
+Hacksaw Blade Bi Metal 12 inch Pack of 10 | | Packet | 8202
+Hacksaw Blade Hand Saw 18 inch | | | 8202
+Hand Saw Wood 18 inch | | | 8202
+Hand Saw Wood 22 inch | | | 8202
+Hand Saw Pruning | | | 8201
+Hand Saw Tenon | | | 8202
+Coping Saw | | | 8202
+Wood Chisel Set 4 pcs | | Set | 8205
+Wood Chisel 1 inch | | | 8205
+Wood Chisel 1/2 inch | | | 8205
+Wood Plane Jack | | | 8205
+Wood Plane Smoothing | | | 8205
+Wood File Half Round 10 inch | | | 8203
+Wood Rasp File 10 inch | | | 8203
+Steel File Flat 10 inch | | | 8203
+Steel File Round 8 inch | | | 8203
+Steel File Triangular 6 inch | | | 8203
+Steel File Set 5 pcs | | Set | 8203
+Needle File Set 10 pcs | | Set | 8203
+Crow Bar 3 ft | | | 8205
+Crow Bar 4 ft | | | 8205
+Crow Bar 5 ft | | | 8205
+Hand Drill Machine Manual | | | 8205
+Hand Auger Wood | | | 8205
+Brace Drill | | | 8205
+Spade Iron | | | 8201
+Spade Steel Long Handle | | | 8201
+Shovel Iron Round | | | 8201
+Kudal Pickaxe | | | 8201
+Pickaxe Head | | | 8201
+Phawra Hoe | | | 8201
+Axe Iron | | | 8201
+Axe Wood Handle | | | 8201
+Kodali Hoe Light | | | 8201
+Rake Garden Iron | | | 8201
+Sickle Khurpi | | | 8201
+Sickle Large | | | 8201
+Trowel Mason 6 inch | | | 8205
+Trowel Mason 8 inch | | | 8205
+Trowel Mason 10 inch | | | 8205
+Trowel Garden | | | 8201
+Putty Knife 2 inch | | | 8205
+Putty Knife 4 inch | | | 8205
+Putty Knife 6 inch | | | 8205
+Wall Scraper Steel 4 inch | | | 8205
+Wall Scraper Heavy Duty 6 inch | | | 8205
+Float Plastering Wooden | | | 4421
+Float Plastering Steel | | | 8205
+Float Sponge Plastering | | | 8205
+Plumb Bob Brass | | | 9015
+Spirit Level Aluminium 2 ft | | | 9015
+Spirit Level Aluminium 4 ft | | | 9015
+Line Dori Masonry Thread | | | 5607
+Measuring Tape Long Fibre 30 m | | | 9017
+Measuring Tape Long Fibre 50 m | | | 9017
+Measuring Wheel | | | 9017
+Marking Gauge | | | 9017
+Marking Thread Reel Chalk | | | 9017
+Steel Rule 12 inch | | | 9017
+Steel Rule 24 inch | | | 9017
+Try Square 12 inch | | | 9017
+Carpenter Square 24 inch | | | 9017
+Vernier Caliper 6 inch Steel | | | 9017
+Vernier Caliper Digital | | | 9017
+Micrometer Outside 0-25 mm | | | 9017
+Feeler Gauge | | | 9017
+Bench Vice Heavy 5 inch | | | 8205
+Pipe Vice | | | 8205
+Clamp C 4 inch | | | 8205
+Clamp C 6 inch | | | 8205
+Clamp G 8 inch | | | 8205
+Clamp Quick Release 6 inch | | | 8205
+Pipe Cutter 1 Inch | | | 8203
+Pipe Bender Hand | | | 8203
+Tube Cutter Copper | | | 8203
+Bolt Cutter 18 inch | | | 8203
+Bolt Cutter 24 inch | | | 8203
+Wire Cutter Heavy | | | 8203
+Tin Snips Straight | | | 8203
+Tin Snips Aviation Left | | | 8203
+Tin Snips Aviation Right | | | 8203
+Glass Cutter Diamond | | | 8205
+Glass Cutter Oil | | | 8205
+Heavy Duty Staple Gun | | | 8205
+Staple Gun Pins 6 mm Pack | | Packet | 8305
+Staple Gun Pins 8 mm Pack | | Packet | 8305
+Staple Gun Pins 10 mm Pack | | Packet | 8305
+Soldering Iron 25 W | | | 8515
+Soldering Iron 100 W | | | 8515
+Solder Wire 50 g Reel | | | 8311
+Soldering Flux Paste 50 g | | | 3810
+Gas Torch Blow Lamp | | | 8205
+Blow Torch Brass | | | 8205
+Blow Torch Nozzle | | | 8205
+Grease Gun Hand | | | 8413
+Oil Can Pump 500 ml | | | 8413
+Oil Can Pump 250 ml | | | 8413
+Hand Spray Pump Plastic | | | 8424
+Hand Spray Pump 1 L | | | 8424
+Hand Spray Pump 2 L | | | 8424
+Knapsack Sprayer 16 L Manual | | | 8424
+Knapsack Sprayer 16 L Battery | | | 8424
+Pesticide Sprayer Power 25 L | | | 8424
+Tool Kit Home 25 pcs | | Set | 8206
+Tool Kit Home 65 pcs | | Set | 8206
+Tool Kit Home 100 pcs | | Set | 8206
+Tool Kit Plumber | | Set | 8206
+Tool Kit Electrician | | Set | 8206
+Tool Kit Carpenter | | Set | 8206
+Tool Kit Mechanic | | Set | 8206
+Tool Bag Canvas | | | 4202
+Tool Bag Plastic | | | 3926
+Tool Box Plastic 16 inch | | | 3926
+Tool Box Plastic 19 inch | | | 3926
+Tool Box Steel 24 inch | | | 7326
+Tool Box Compartments | | | 3926
+Magnetic Pick Up Tool | | | 8505
+Magnetic Strip Tool Holder | | | 8505
+Work Light LED 20 W Rechargeable | | | 9405
+Work Light Halogen 500 W | | | 9405
+Inspection Mirror Telescopic | | | 7009
+Telescopic Magnet Pick Up | | | 8505
+Workmate Folding Bench | | | 9403
+Stool Folding Step | | | 9403
+Ladder Aluminium Folding 5 ft | | | 7616
+Ladder Aluminium Folding 6 ft | | | 7616
+Ladder Aluminium Folding 8 ft | | | 7616
+Ladder Aluminium Folding 10 ft | | | 7616
+Ladder Aluminium Telescopic 12 ft | | | 7616
+Ladder Aluminium Telescopic 16 ft | | | 7616
+Ladder Bamboo 8 ft | | | 4421
+Ladder Steel 6 ft | | | 7326
+Wheel Barrow 80 L | | | 8716
+Wheel Barrow 100 L | | | 8716
+Hand Trolley Steel | | | 8716
+Hand Cart | | | 8716
+Pulley Block 1 Ton | | | 8425
+Pulley Block 2 Ton | | | 8425
+Chain Pulley Block 1 Ton | | | 8425
+Chain Pulley Block 2 Ton | | | 8425
+Lever Hoist 1.5 Ton | | | 8425
+Hydraulic Jack 2 Ton | | | 8425
+Hydraulic Jack 3 Ton | | | 8425
+Hydraulic Jack 5 Ton | | | 8425
+Bottle Jack 2 Ton | | | 8425
+Trolley Jack 2 Ton | | | 8425
+Car Jack Scissor | | | 8425
+
+## Power Tools & Accessories | Piece | 8467 | 18 | warranty=12
+Bosch GSB 500 RE Impact Drill 10 mm | Bosch
+Bosch GSB 550 Impact Drill 13 mm | Bosch
+Bosch GSB 500 Cordless Impact Drill | Bosch
+Bosch GSB 120 Li Cordless Drill | Bosch
+Bosch GSR 120 Li Cordless Screwdriver | Bosch
+Bosch GBH 2-26 DRE Rotary Hammer | Bosch
+Bosch GBH 2-24 DRE Rotary Hammer | Bosch
+Bosch GWS 600 Angle Grinder 4 inch | Bosch
+Bosch GWS 750 Angle Grinder 4 inch | Bosch
+Bosch GWS 900-100 S Angle Grinder 4 inch | Bosch
+Bosch GWS 2200 Angle Grinder 9 inch | Bosch
+Bosch GST 700 Jigsaw | Bosch
+Bosch GKS 500 Circular Saw 7 inch | Bosch
+Bosch GKS 600 Circular Saw 7 inch | Bosch
+Bosch GHO 6500 Planer | Bosch
+Bosch GEX 125-1 AE Sander | Bosch
+Bosch GHG 500 Heat Gun | Bosch
+Bosch GBL 620 Blower | Bosch
+Bosch GCO 220 Cut Off Machine 14 inch | Bosch
+Bosch Laser Distance Meter GLM 40 | Bosch | | 9015
+Black+Decker Drill KR554RE 10 mm | Black+Decker
+Black+Decker Angle Grinder G720 4 inch | Black+Decker
+Black+Decker Cordless Drill | Black+Decker
+Black+Decker Hammer Drill HD400 | Black+Decker
+Makita Hammer Drill HP1630 13 mm | Makita
+Makita Angle Grinder 9553B 4 inch | Makita
+Makita Circular Saw 5008MG | Makita
+Makita Jigsaw 4329 | Makita
+Makita Cordless Drill DF330D | Makita
+Dewalt DWD024 Drill 10 mm | Dewalt
+Dewalt DWE8100S Angle Grinder 4 inch | Dewalt
+Stanley SDH700 Drill 13 mm | Stanley
+Stanley SGV80 Angle Grinder | Stanley
+Cumi Drill Machine 13 mm | Cumi
+Cumi Angle Grinder 4 inch | Cumi
+Ralli Wolf Drill Machine 13 mm | Ralli Wolf
+Ralli Wolf Angle Grinder 4 inch | Ralli Wolf
+Ralli Wolf Chop Saw 14 inch | Ralli Wolf
+Ralli Wolf Marble Cutter | Ralli Wolf
+Ralli Wolf Bench Grinder 6 inch | Ralli Wolf
+Ralli Wolf Planer | Ralli Wolf
+Ralli Wolf Jigsaw | Ralli Wolf
+Ralli Wolf Hand Router | Ralli Wolf
+Ralli Wolf Sander Belt | Ralli Wolf
+Ralli Wolf Hot Air Gun | Ralli Wolf
+Ralli Wolf Hammer Drill SDS | Ralli Wolf
+Drill Machine Mini Hand | | | | | warranty=6
+Mini Grinder Hand | | | | | warranty=6
+Electric Planer 82 mm | | | | | warranty=6
+Electric Chain Saw 18 inch | | | | | warranty=6
+Wood Router Hand | | | | | warranty=6
+Cordless Impact Wrench | | | | | warranty=6
+Pressure Washer 1500 W | | | 8424 | 18 | warranty=12
+Pressure Washer 1800 W | | | 8424 | 18 | warranty=12
+Blower Garden Electric | | | 8414 | 18 | warranty=12
+Air Compressor 25 L | | | 8414 | 18 | warranty=12
+Air Compressor 50 L | | | 8414 | 18 | warranty=12
+Air Spray Gun Paint | | | 8424 | 18
+Air Hose 10 m | | | 3917 | 18
+Hot Glue Gun | | | 8515
+Welding Machine Arc 200 A | | | 8515 | 18 | warranty=12
+Welding Machine Arc 250 A | | | 8515 | 18 | warranty=12
+Welding Machine Inverter 200 A | | | 8515 | 18 | warranty=12
+Welding Machine Inverter 250 A | | | 8515 | 18 | warranty=12
+Welding Machine MIG 200 A | | | 8515 | 18 | warranty=12
+Welding Machine Spot | | | 8515 | 18 | warranty=12
+Ador Welding Electrode 3.15 mm 1 kg | Ador | Kg | 8311
+Ador Welding Electrode 2.5 mm 1 kg | Ador | Kg | 8311
+Ador Welding Electrode 4 mm 1 kg | Ador | Kg | 8311
+Ador Welding Electrode 3.15 mm 5 kg | Ador | Packet | 8311
+Esab Welding Electrode 3.15 mm 1 kg | Esab | Kg | 8311
+Welding Rod 2.5 mm Pack | | Packet | 8311
+Welding Rod 3.15 mm Pack | | Packet | 8311
+Welding Mask Helmet Hand Held | | | 9020
+Welding Mask Auto Darkening | | | 9020
+Welding Glass Shade 10 | | | 7005
+Welding Gloves Leather | | Pair | 4203
+Welding Apron Leather | | | 4203
+Welding Holder Electrode | | | 8515
+Welding Earth Clamp | | | 8515
+Welding Cable 16 sq mm per metre | | Metre | 8544
+Welding Cable 25 sq mm per metre | | Metre | 8544
+Gas Cutting Torch Set | | Set | 8468
+Gas Regulator Oxygen | | | 8481
+Gas Regulator Acetylene | | | 8481
+Gas Hose per metre | | Metre | 3917
+Drill Bit HSS 2 mm | | | 8207
+Drill Bit HSS 3 mm | | | 8207
+Drill Bit HSS 4 mm | | | 8207
+Drill Bit HSS 5 mm | | | 8207
+Drill Bit HSS 6 mm | | | 8207
+Drill Bit HSS 8 mm | | | 8207
+Drill Bit HSS 10 mm | | | 8207
+Drill Bit HSS 12 mm | | | 8207
+Drill Bit HSS 13 mm | | | 8207
+Drill Bit HSS Set 13 pcs | | Set | 8207
+Drill Bit HSS Set 19 pcs | | Set | 8207
+Drill Bit HSS Set 25 pcs | | Set | 8207
+Drill Bit Masonry 5 mm | | | 8207
+Drill Bit Masonry 6 mm | | | 8207
+Drill Bit Masonry 8 mm | | | 8207
+Drill Bit Masonry 10 mm | | | 8207
+Drill Bit Masonry 12 mm | | | 8207
+Drill Bit Masonry Set 5 pcs | | Set | 8207
+Drill Bit Wood Brad Point 6 mm | | | 8207
+Drill Bit Wood Brad Point 8 mm | | | 8207
+Drill Bit Wood Brad Point 10 mm | | | 8207
+Drill Bit Wood Spade Set 6 pcs | | Set | 8207
+Drill Bit SDS Plus 6 mm | | | 8207
+Drill Bit SDS Plus 8 mm | | | 8207
+Drill Bit SDS Plus 10 mm | | | 8207
+Drill Bit SDS Plus 12 mm | | | 8207
+Drill Bit SDS Plus Set 5 pcs | | Set | 8207
+Drill Bit Tile Glass 6 mm | | | 8207
+Drill Bit Tile Glass 8 mm | | | 8207
+Drill Bit Titanium Coated Set 13 pcs | | Set | 8207
+Bosch Drill Bit Set Mixed 19 pcs | Bosch | Set | 8207
+Hole Saw Set Wood 8 pcs | | Set | 8202
+Hole Saw 2 inch Bimetal | | | 8202
+Hole Saw 3 inch Bimetal | | | 8202
+Core Drill Bit Concrete 2 inch | | | 8207
+Cutting Wheel 4 inch Metal Cumi | Cumi | | 6804
+Cutting Wheel 4 inch Metal Norton | Norton | | 6804
+Cutting Wheel 4 inch Stone Norton | Norton | | 6804
+Cutting Wheel 4 inch SS Pack of 10 | | Packet | 6804
+Cutting Wheel 14 inch Chop Saw | | | 6804
+Cutting Wheel 7 inch | | | 6804
+Cutting Wheel 9 inch | | | 6804
+Cutting Wheel Diamond Segmented 4 inch | | | 6804
+Cutting Wheel Diamond Turbo 4 inch | | | 6804
+Grinding Wheel 4 inch Metal | | | 6804
+Grinding Wheel 6 inch Bench | | | 6804
+Grinding Wheel 8 inch Bench | | | 6804
+Grinding Stone Bench 6 inch | | | 6804
+Flap Disc 4 inch 60 Grit | | | 6805
+Flap Disc 4 inch 80 Grit | | | 6805
+Flap Disc 4 inch 120 Grit | | | 6805
+Sanding Disc 5 inch Velcro Pack | | Packet | 6805
+Sanding Belt 75 x 533 mm | | | 6805
+Sanding Block Hand | | | 6805
+Sand Paper 60 Grit Sheet | | Sheet | 6805
+Sand Paper 80 Grit Sheet | | Sheet | 6805
+Sand Paper 100 Grit Sheet | | Sheet | 6805
+Sand Paper 120 Grit Sheet | | Sheet | 6805
+Sand Paper 150 Grit Sheet | | Sheet | 6805
+Sand Paper 180 Grit Sheet | | Sheet | 6805
+Sand Paper 220 Grit Sheet | | Sheet | 6805
+Sand Paper 320 Grit Sheet | | Sheet | 6805
+Sand Paper 400 Grit Water Proof Sheet | | Sheet | 6805
+Sand Paper 600 Grit Water Proof Sheet | | Sheet | 6805
+Sand Paper 800 Grit Water Proof Sheet | | Sheet | 6805
+Sand Paper 1000 Grit Water Proof Sheet | | Sheet | 6805
+Sand Paper Roll 40 Grit | | Roll | 6805
+Emery Cloth 100 Grit Sheet | | Sheet | 6805
+Emery Cloth Roll 80 Grit | | Roll | 6805
+Wire Brush Hand Steel | | | 9603
+Wire Brush Cup 4 inch | | | 9603
+Wire Brush Wheel 4 inch | | | 9603
+Wire Brush Drill Attachment | | | 9603
+Polishing Pad Wool 5 inch | | | 6805
+Polishing Compound Bar | | | 3405
+Buffing Wheel Cotton 6 inch | | | 6805
+Buffing Wheel Cotton 8 inch | | | 6805
+Chuck Key Drill | | | 8466
+Drill Chuck 13 mm | | | 8466
+Drill Stand Bench | | | 8466
+Router Bit Set 12 pcs | | Set | 8207
+Jigsaw Blade Wood Pack of 5 | | Packet | 8202
+Jigsaw Blade Metal Pack of 5 | | Packet | 8202
+Circular Saw Blade 7 inch 40 Teeth | | | 8202
+Circular Saw Blade 7 inch 60 Teeth | | | 8202
+Circular Saw Blade 10 inch 60 Teeth | | | 8202
+Circular Saw Blade 14 inch | | | 8202
+Bandsaw Blade | | | 8202
+Chain Saw Chain Replacement | | | 8202
+Planer Blade Pair | | Pair | 8208
+Extension Cord 5 m with Reel | | | 8544
+Extension Cord 10 m with Reel | | | 8544
+Extension Cord 20 m with Reel | | | 8544
+Extension Cord Heavy Duty 15 m | | | 8544
+Cable Reel 30 m | | | 8544
+Carbon Brush Drill Pair | | Pair | 8545
+Carbon Brush Grinder Pair | | Pair | 8545
+Power Tool Armature Grinder | | | 8503
+Power Tool Armature Drill | | | 8503
+Power Tool Spare Gear Drill | | | 8483
+
+## Paints & Coatings | Can | 3209 | 18
+Asian Paints Tractor Emulsion 1 L | Asian Paints
+Asian Paints Tractor Emulsion 4 L | Asian Paints
+Asian Paints Tractor Emulsion 10 L | Asian Paints
+Asian Paints Tractor Emulsion 20 L | Asian Paints
+Asian Paints Apcolite Premium Emulsion 1 L | Asian Paints
+Asian Paints Apcolite Premium Emulsion 4 L | Asian Paints
+Asian Paints Apcolite Premium Emulsion 10 L | Asian Paints
+Asian Paints Apcolite Premium Emulsion 20 L | Asian Paints
+Asian Paints Apcolite All Protek Exterior 4 L | Asian Paints
+Asian Paints Apcolite All Protek Exterior 10 L | Asian Paints
+Asian Paints Ace Exterior Emulsion 1 L | Asian Paints
+Asian Paints Ace Exterior Emulsion 4 L | Asian Paints
+Asian Paints Ace Exterior Emulsion 10 L | Asian Paints
+Asian Paints Ace Exterior Emulsion 20 L | Asian Paints
+Asian Paints Royale Luxury Emulsion 1 L | Asian Paints
+Asian Paints Royale Luxury Emulsion 4 L | Asian Paints
+Asian Paints Royale Luxury Emulsion 10 L | Asian Paints
+Asian Paints Royale Luxury Emulsion 20 L | Asian Paints
+Asian Paints Royale Shyne 4 L | Asian Paints
+Asian Paints Royale Glitz 4 L | Asian Paints
+Asian Paints Apex Ultima Exterior 4 L | Asian Paints
+Asian Paints Apex Ultima Exterior 10 L | Asian Paints
+Asian Paints Apex Ultima Exterior 20 L | Asian Paints
+Asian Paints Apex Ultima Protek 20 L | Asian Paints
+Asian Paints Apex Weatherproof 20 L | Asian Paints
+Asian Paints Utsav Interior Emulsion 20 L | Asian Paints
+Asian Paints Tractor Distemper 20 kg | Asian Paints | Bag | 3209
+Asian Paints Tractor Distemper 1 kg | Asian Paints | Packet | 3209
+Asian Paints Apcolite Premium Gloss Enamel 200 ml | Asian Paints | Can | 3208
+Asian Paints Apcolite Premium Gloss Enamel 500 ml | Asian Paints | Can | 3208
+Asian Paints Apcolite Premium Gloss Enamel 1 L | Asian Paints | Can | 3208
+Asian Paints Apcolite Premium Gloss Enamel 4 L | Asian Paints | Can | 3208
+Asian Paints Apcolite Premium Gloss Enamel 20 L | Asian Paints | Can | 3208
+Asian Paints Apcolite Satin Enamel 1 L | Asian Paints | Can | 3208
+Asian Paints Apcolite Rust Shield 1 L | Asian Paints | Can | 3208
+Asian Paints Ace Gloss Enamel 1 L | Asian Paints | Can | 3208
+Asian Paints Ace Gloss Enamel 4 L | Asian Paints | Can | 3208
+Asian Paints Tractor Synthetic Enamel 1 L | Asian Paints | Can | 3208
+Asian Paints Tractor Synthetic Enamel 4 L | Asian Paints | Can | 3208
+Asian Paints Primer Wall Tractor Acrylic 4 L | Asian Paints | Can | 3209
+Asian Paints Primer Wall Tractor Acrylic 20 L | Asian Paints | Can | 3209
+Asian Paints Primer Wall Interior Cement 4 L | Asian Paints | Can | 3209
+Asian Paints Primer Wood Pink 1 L | Asian Paints | Can | 3208
+Asian Paints Primer Metal Red Oxide 1 L | Asian Paints | Can | 3208
+Asian Paints Primer Metal Red Oxide 4 L | Asian Paints | Can | 3208
+Asian Paints Woodtech Melamyne Polish 1 L | Asian Paints | Can | 3208
+Asian Paints Woodtech PU Polish 1 L | Asian Paints | Can | 3208
+Asian Paints Colourants Tinter Single | Asian Paints | Bottle | 3204
+Berger Easy Clean Interior Emulsion 4 L | Berger
+Berger Easy Clean Interior Emulsion 10 L | Berger
+Berger Easy Clean Interior Emulsion 20 L | Berger
+Berger Silk Luxury Emulsion 4 L | Berger
+Berger Silk Luxury Emulsion 10 L | Berger
+Berger Weathercoat All Guard 4 L | Berger
+Berger Weathercoat All Guard 10 L | Berger
+Berger Weathercoat All Guard 20 L | Berger
+Berger Bison Acrylic Distemper 20 kg | Berger | Bag
+Berger Luxol Silk Emulsion 4 L | Berger
+Berger Easy Clean Fresh 20 L | Berger
+Berger Luxol Gold Enamel 1 L | Berger | Can | 3208
+Berger Rainbow Enamel 1 L | Berger | Can | 3208
+Berger Rainbow Enamel 4 L | Berger | Can | 3208
+Berger Bison Primer 4 L | Berger | Can | 3209
+Nerolac Excel Total Interior 4 L | Nerolac
+Nerolac Excel Total Interior 10 L | Nerolac
+Nerolac Excel Total Interior 20 L | Nerolac
+Nerolac Excel Mica Marble Exterior 4 L | Nerolac
+Nerolac Excel Mica Marble Exterior 10 L | Nerolac
+Nerolac Excel Mica Marble Exterior 20 L | Nerolac
+Nerolac Beauty Smooth Finish Emulsion 4 L | Nerolac
+Nerolac Impressions Ultra HD 4 L | Nerolac
+Nerolac Suraksha Distemper 20 kg | Nerolac | Bag
+Nerolac Synthetic Enamel 1 L | Nerolac | Can | 3208
+Nerolac Synthetic Enamel 4 L | Nerolac | Can | 3208
+Nerolac Primer Wall 4 L | Nerolac | Can | 3209
+Nerolac Primer Wall 20 L | Nerolac | Can | 3209
+Nerolac Primer Red Oxide 1 L | Nerolac | Can | 3208
+Dulux Weathershield Max 4 L | Dulux
+Dulux Weathershield Max 10 L | Dulux
+Dulux Weathershield Max 20 L | Dulux
+Dulux Velvet Touch Interior 4 L | Dulux
+Dulux Velvet Touch Interior 10 L | Dulux
+Dulux Promise Interior 4 L | Dulux
+Dulux Promise Exterior 4 L | Dulux
+Dulux Promise Exterior 10 L | Dulux
+Dulux Ambiance 4 L | Dulux
+Dulux Super Cover Interior 4 L | Dulux
+Dulux Trade Interior 20 L | Dulux
+Dulux Gloss Enamel 1 L | Dulux | Can | 3208
+Dulux Satin Enamel 1 L | Dulux | Can | 3208
+Birla Opus Style Interior Emulsion 4 L | Birla Opus
+Birla Opus Style Interior Emulsion 10 L | Birla Opus
+Birla Opus Style Interior Emulsion 20 L | Birla Opus
+Birla Opus One True Look 4 L | Birla Opus
+Birla Opus One True Look 10 L | Birla Opus
+Birla Opus Calista Neo Star 4 L | Birla Opus
+Birla Opus Calista Ever Wash 4 L | Birla Opus
+Birla Opus Prime Distemper 20 kg | Birla Opus | Bag
+Birla Opus Primer Wall 20 L | Birla Opus | Can
+Kansai Nerolac Gold Emulsion | Kansai Nerolac
+Shalimar Paints Emulsion 4 L | Shalimar
+Indigo Paints Emulsion 4 L | Indigo
+Indigo Paints Emulsion 10 L | Indigo
+Indigo Paints Emulsion 20 L | Indigo
+JSW Paints Emulsion 4 L | JSW
+JSW Paints Emulsion 10 L | JSW
+Jenson & Nicholson Enamel 1 L | Jenson & Nicholson | Can | 3208
+Sheenlac Wood Polish 1 L | Sheenlac | Can | 3208
+Sheenlac PU Sealer 1 L | Sheenlac | Can | 3208
+Sheenlac Melamine Polish Glossy 1 L | Sheenlac | Can | 3208
+Sheenlac Melamine Polish Matt 1 L | Sheenlac | Can | 3208
+Sheenlac Wood Stain 200 ml | Sheenlac | Can | 3208
+Pidilite Fevicol Marine 1 L | Pidilite | Can | 3506
+Pidilite Dr Fixit Primer | Pidilite | Can | 3209
+Pidilite Roff Cement Primer | Pidilite | Can | 3209
+Pidilite Roff Cement Primer 20 L | Pidilite | Can | 3209
+Pidilite Fevicryl Texture | Pidilite | Can | 3209
+Pidilite Fevicol SH 1 kg | Pidilite | Can | 3506
+Pidilite Fevicol SH 5 kg | Pidilite | Can | 3506
+Pidilite Fevicol SH 10 kg | Pidilite | Can | 3506
+Pidilite Fevicol SH 20 kg | Pidilite | Can | 3506
+Pidilite Fevicol SH 50 kg | Pidilite | Can | 3506
+Pidilite Fevicol MR 1 kg | Pidilite | Can | 3506
+Pidilite Fevicol MR 5 kg | Pidilite | Can | 3506
+Pidilite Fevicol MR 10 kg | Pidilite | Can | 3506
+Pidilite Fevicol Heatx 1 kg | Pidilite | Can | 3506
+Pidilite Fevicol Speedx 1 kg | Pidilite | Can | 3506
+Pidilite Fevicol 1 kg Pack | Pidilite | Bottle | 3506
+Pidilite Fevicol SR 998 1 kg | Pidilite | Can | 3506
+Pidilite Fevicol Hi-Per 1 L | Pidilite | Can | 3506
+Pidilite Fevikwik Pack of 12 | Pidilite | Box | 3506
+Pidilite M-Seal Super Quick 100 g | Pidilite | Packet | 3214
+Pidilite M-Seal Phataphat 50 g | Pidilite | Packet | 3214
+Pidilite M-Seal Regular 100 g | Pidilite | Packet | 3214
+Pidilite M-Seal Regular 500 g | Pidilite | Packet | 3214
+Pidilite M-Seal Regular 1 kg | Pidilite | Packet | 3214
+Pidilite M-Seal Hand Mix 25 g | Pidilite | Packet | 3214
+Pidilite Araldite Standard 24 g | Pidilite | Packet | 3506
+Pidilite Araldite Standard 100 g | Pidilite | Packet | 3506
+Pidilite Araldite Rapid 24 g | Pidilite | Packet | 3506
+Pidilite Araldite Professional | Pidilite | Packet | 3506
+Pidilite Silicone Sealant 280 ml | Pidilite | Bottle | 3214
+Dowsil Silicone Sealant Clear 295 ml | Dowsil | Bottle | 3214
+Dowsil Silicone Sealant White 295 ml | Dowsil | Bottle | 3214
+Dowsil Weather Proof Sealant 300 ml | Dowsil | Bottle | 3214
+Acrylic Sealant White 300 ml | | Bottle | 3214
+PU Foam Sealant 750 ml | | Can | 3214
+Gun Applicator Caulking | | Piece | 8205
+Silicone Gun Caulking | | Piece | 8205
+Epoxy Adhesive Two Part 100 g | | Packet | 3506
+Epoxy Adhesive Two Part 500 g | | Packet | 3506
+Epoxy Putty 100 g | | Packet | 3214
+Epoxy Grout 1 kg | | Packet | 3214
+Super Glue 3 g Pack of 5 | | Packet | 3506
+Wood Glue 100 g | | Packet | 3506
+Wood Glue 500 g | | Bottle | 3506
+Wood Glue 1 kg | | Bottle | 3506
+Contact Adhesive 100 ml | | Can | 3506
+Contact Adhesive 1 L | | Can | 3506
+Contact Adhesive 5 L | | Can | 3506
+Spray Paint Black 400 ml | | Can | 3208
+Spray Paint White 400 ml | | Can | 3208
+Spray Paint Silver 400 ml | | Can | 3208
+Spray Paint Red 400 ml | | Can | 3208
+Spray Paint Gold 400 ml | | Can | 3208
+Spray Paint Blue 400 ml | | Can | 3208
+Spray Paint Green 400 ml | | Can | 3208
+Spray Paint Yellow 400 ml | | Can | 3208
+Spray Paint Clear Lacquer 400 ml | | Can | 3208
+Spray Paint Primer Grey 400 ml | | Can | 3208
+Spray Paint Fluorescent | | Can | 3208
+Spray Paint Chrome | | Can | 3208
+Spray Paint Matte Black | | Can | 3208
+Spray Paint Rust Remover 400 ml | | Can | 3402
+Spray WD-40 Multi Use 200 ml | WD-40 | Can | 3403
+Spray WD-40 Multi Use 400 ml | WD-40 | Can | 3403
+Spray WD-40 Multi Use 280 g | WD-40 | Can | 3403
+Spray Grease Lithium 400 ml | | Can | 3403
+Spray Contact Cleaner 200 ml | | Can | 3402
+Spray Silicone 300 ml | | Can | 3403
+Spray Chain Lube 100 ml | | Can | 3403
+Anti Rust Coating Red Oxide 1 L | | Can | 3208
+Anti Rust Coating Black Bitumen 1 L | | Can | 3208
+Anti Rust Coating Zinc Rich 1 L | | Can | 3208
+Anti Rust Coating Silver 1 L | | Can | 3208
+Aluminium Paint Silver 1 L | | Can | 3208
+Aluminium Paint Silver 4 L | | Can | 3208
+Road Marking Paint White 1 L | | Can | 3208
+Epoxy Floor Coating 4 L | | Can | 3208
+Epoxy Floor Coating 20 L | | Can | 3208
+Texture Paint Roller Pattern | | Can | 3209
+Stucco Texture Paint 5 kg | | Can | 3209
+Wall Stencil Set | | Set | 3926
+Paint Thinner 1 L | | Can | 3814
+Paint Thinner 5 L | | Can | 3814
+Paint Thinner 20 L | | Can | 3814
+Turpentine Oil 500 ml | | Bottle | 3805
+Turpentine Oil 1 L | | Bottle | 3805
+Kerosene 1 L | | Bottle | 2710
+Mineral Turpentine 1 L | | Can | 3814
+Varnish Clear Gloss 1 L | | Can | 3208
+Varnish Clear Matt 1 L | | Can | 3208
+Varnish Polyurethane 1 L | | Can | 3208
+Wood Stain Teak 200 ml | | Can | 3208
+Wood Stain Walnut 200 ml | | Can | 3208
+Wood Primer White 1 L | | Can | 3208
+Wood Putty 500 g | | Packet | 3214
+Wood Filler 250 g | | Packet | 3214
+Polish French Spirit 1 L | | Bottle | 3814
+Shellac Flake 250 g | | Packet | 3805
+Wax Polish Floor 500 g | | Can | 3405
+Brasso Metal Polish 100 ml | Brasso | Bottle | 3405
+Wall Paint Brush 1 inch | | Piece | 9603
+Wall Paint Brush 2 inch | | Piece | 9603
+Wall Paint Brush 3 inch | | Piece | 9603
+Wall Paint Brush 4 inch | | Piece | 9603
+Wall Paint Brush 6 inch | | Piece | 9603
+Paint Roller 4 inch | | Piece | 9603
+Paint Roller 7 inch | | Piece | 9603
+Paint Roller 9 inch | | Piece | 9603
+Paint Roller Refill 9 inch | | Piece | 9603
+Paint Roller Extension Pole 6 ft | | Piece | 9603
+Paint Roller Tray Metal | | Piece | 7323
+Paint Roller Tray Plastic | | Piece | 3926
+Paint Bucket 10 L Plastic | | Piece | 3923
+Paint Bucket 15 L Metal | | Piece | 7310
+Paint Can Opener | | Piece | 8205
+Paint Mixer Stirrer | | Piece | 8205
+Paint Mixer Drill Attachment | | Piece | 8205
+Paint Strainer Cloth | | Piece | 5911
+Mask Dust Painter Pack | | Packet | 6307
+Painter Gloves Cotton Pair | | Pair | 6116
+Painter Overall Cotton | | Piece | 6211
+Painter Cap | | Piece | 6505
+Masking Tape Painter 1 inch Pack | | Roll | 3919
+Masking Tape Painter 2 inch | | Roll | 3919
+Masking Paper Roll | | Roll | 4811
+Plastic Drop Sheet 9 x 12 ft | | Piece | 3920
+Plastic Drop Sheet 12 x 15 ft | | Piece | 3920
+Newspaper Rolls Covering | | Kg | 4701
+Airless Paint Sprayer | | Piece | 8424
+Paint Gun Spray HVLP | | Piece | 8424
+
+## Plumbing & Sanitary | Piece | 3917 | 18
+Supreme PVC Pipe 1/2 inch 3 m
+Supreme PVC Pipe 3/4 inch 3 m
+Supreme PVC Pipe 1 inch 3 m
+Supreme PVC Pipe 1.5 inch 3 m
+Supreme PVC Pipe 2 inch 3 m
+Supreme PVC Pipe 3 inch 3 m
+Supreme PVC Pipe 4 inch 3 m
+Supreme PVC Pipe 6 inch 3 m
+Supreme SWR Pipe 3 inch 3 m
+Supreme SWR Pipe 4 inch 3 m
+Supreme SWR Pipe 6 inch 3 m
+Supreme UPVC Pipe 1 inch 3 m
+Supreme UPVC Pipe 2 inch 3 m
+Supreme CPVC Pipe 1/2 inch 3 m
+Supreme CPVC Pipe 3/4 inch 3 m
+Supreme CPVC Pipe 1 inch 3 m
+Astral CPVC Pipe 1/2 inch 3 m | Astral
+Astral CPVC Pipe 3/4 inch 3 m | Astral
+Astral CPVC Pipe 1 inch 3 m | Astral
+Astral CPVC Pipe 1.25 inch 3 m | Astral
+Astral CPVC Pipe 1.5 inch 3 m | Astral
+Astral CPVC Pipe 2 inch 3 m | Astral
+Astral PVC Pipe 1 inch 3 m | Astral
+Astral PVC Pipe 2 inch 3 m | Astral
+Astral PVC Pipe 4 inch 3 m | Astral
+Astral SWR Pipe 4 inch 3 m | Astral
+Astral UPVC Pipe 1 inch 3 m | Astral
+Finolex PVC Pipe 1 inch 3 m | Finolex
+Finolex PVC Pipe 1.5 inch 3 m | Finolex
+Finolex PVC Pipe 2 inch 3 m | Finolex
+Finolex PVC Pipe 3 inch 3 m | Finolex
+Finolex PVC Pipe 4 inch 3 m | Finolex
+Finolex SWR Pipe 3 inch 3 m | Finolex
+Finolex SWR Pipe 4 inch 3 m | Finolex
+Finolex CPVC Pipe 1/2 inch 3 m | Finolex
+Finolex CPVC Pipe 3/4 inch 3 m | Finolex
+Finolex UPVC Pipe 1 inch 3 m | Finolex
+Prince PVC Pipe 1 inch 3 m | Prince
+Prince PVC Pipe 2 inch 3 m | Prince
+Prince PVC Pipe 4 inch 3 m | Prince
+Prince CPVC Pipe 1/2 inch 3 m | Prince
+Prince Swr Pipe 4 inch 3 m | Prince
+Ashirvad CPVC Pipe 1/2 inch 3 m | Ashirvad
+Ashirvad CPVC Pipe 3/4 inch 3 m | Ashirvad
+Ashirvad CPVC Pipe 1 inch 3 m | Ashirvad
+Ashirvad PVC Pipe 1 inch 3 m | Ashirvad
+Ashirvad SWR Pipe 4 inch 3 m | Ashirvad
+Kisan PVC Pipe 1 inch 3 m | Kisan
+Kisan PVC Pipe 2 inch 3 m | Kisan
+Sintex PVC Pipe 1 inch 3 m | Sintex
+Jain Irrigation PVC Pipe 2 inch 6 m | Jain
+HDPE Pipe 25 mm per metre | | Metre | 3917
+HDPE Pipe 32 mm per metre | | Metre | 3917
+HDPE Pipe 50 mm per metre | | Metre | 3917
+HDPE Pipe 63 mm per metre | | Metre | 3917
+HDPE Pipe 75 mm per metre | | Metre | 3917
+HDPE Pipe 90 mm per metre | | Metre | 3917
+HDPE Pipe 110 mm per metre | | Metre | 3917
+PPR Pipe 20 mm 4 m | | | 3917
+PPR Pipe 25 mm 4 m | | | 3917
+PPR Pipe 32 mm 4 m | | | 3917
+PPR Pipe 40 mm 4 m | | | 3917
+Garden Hose Pipe 0.5 inch 15 m | | | 3917
+Garden Hose Pipe 0.5 inch 30 m | | | 3917
+Garden Hose Pipe 3/4 inch 15 m | | | 3917
+Garden Hose Pipe 3/4 inch 30 m | | | 3917
+Garden Hose Pipe 1 inch per metre | | Metre | 3917
+Braided Hose Pipe Water 1 inch per metre | | Metre | 3917
+Braided Hose Pipe Reinforced 0.5 inch per metre | | Metre | 3917
+Flexible Connection Pipe SS 12 inch | | | 7307
+Flexible Connection Pipe SS 18 inch | | | 7307
+Flexible Connection Pipe SS 24 inch | | | 7307
+Flexible Connection Pipe SS 36 inch | | | 7307
+Flexible Connection Pipe Braided 24 inch | | | 7307
+Flexible Hose Shower Pipe 1.5 m | | | 7307
+Flexible Hose Shower Pipe 2 m | | | 7307
+Washing Machine Inlet Pipe 1.5 m | | | 3917
+Washing Machine Outlet Pipe 2 m | | | 3917
+Washing Machine Tap | | | 8481
+PVC Elbow 1/2 inch | | | 3917
+PVC Elbow 3/4 inch | | | 3917
+PVC Elbow 1 inch | | | 3917
+PVC Elbow 1.5 inch | | | 3917
+PVC Elbow 2 inch | | | 3917
+PVC Elbow 3 inch | | | 3917
+PVC Elbow 4 inch | | | 3917
+PVC Elbow 90 Degree 4 inch | | | 3917
+PVC Elbow 45 Degree 4 inch | | | 3917
+PVC Tee 1/2 inch | | | 3917
+PVC Tee 3/4 inch | | | 3917
+PVC Tee 1 inch | | | 3917
+PVC Tee 1.5 inch | | | 3917
+PVC Tee 2 inch | | | 3917
+PVC Tee 3 inch | | | 3917
+PVC Tee 4 inch | | | 3917
+PVC Coupler 1/2 inch | | | 3917
+PVC Coupler 3/4 inch | | | 3917
+PVC Coupler 1 inch | | | 3917
+PVC Coupler 1.5 inch | | | 3917
+PVC Coupler 2 inch | | | 3917
+PVC Coupler 3 inch | | | 3917
+PVC Coupler 4 inch | | | 3917
+PVC Reducer 1 x 1/2 inch | | | 3917
+PVC Reducer 1 x 3/4 inch | | | 3917
+PVC Reducer 2 x 1 inch | | | 3917
+PVC Reducer 2 x 1.5 inch | | | 3917
+PVC Reducer 3 x 2 inch | | | 3917
+PVC Reducer 4 x 3 inch | | | 3917
+PVC End Cap 1/2 inch | | | 3917
+PVC End Cap 3/4 inch | | | 3917
+PVC End Cap 1 inch | | | 3917
+PVC End Cap 2 inch | | | 3917
+PVC End Cap 4 inch | | | 3917
+PVC Union 1/2 inch | | | 3917
+PVC Union 3/4 inch | | | 3917
+PVC Union 1 inch | | | 3917
+PVC Union 2 inch | | | 3917
+PVC Bend 4 inch | | | 3917
+PVC Bend 3 inch | | | 3917
+PVC Bend 2 inch | | | 3917
+PVC Door Bend 4 inch | | | 3917
+PVC Door Bend 3 inch | | | 3917
+PVC Y Junction 4 inch | | | 3917
+PVC Y Junction 3 inch | | | 3917
+PVC Y Junction 2 inch | | | 3917
+PVC Floor Trap 4 inch | | | 3917
+PVC Floor Trap 3 inch | | | 3917
+PVC Floor Trap 2 inch | | | 3917
+PVC P Trap 4 inch | | | 3917
+PVC Bottle Trap Wash Basin | | | 3917
+PVC Gully Trap 4 inch | | | 3917
+PVC Clamp 1/2 inch Pack of 10 | | Packet | 3917
+PVC Clamp 3/4 inch Pack of 10 | | Packet | 3917
+PVC Clamp 1 inch Pack of 10 | | Packet | 3917
+PVC Clamp 2 inch Pack of 10 | | Packet | 3917
+PVC Clamp 4 inch Pack of 10 | | Packet | 3917
+PVC Threaded Adapter MTA 1/2 inch | | | 3917
+PVC Threaded Adapter FTA 1/2 inch | | | 3917
+PVC Threaded Adapter MTA 3/4 inch | | | 3917
+PVC Threaded Adapter FTA 3/4 inch | | | 3917
+PVC Threaded Adapter MTA 1 inch | | | 3917
+PVC Threaded Adapter FTA 1 inch | | | 3917
+PVC Nipple 1/2 inch | | | 3917
+PVC Nipple 3/4 inch | | | 3917
+PVC Nipple 1 inch | | | 3917
+PVC Plug 1/2 inch | | | 3917
+PVC Plug 3/4 inch | | | 3917
+PVC Plug 1 inch | | | 3917
+CPVC Elbow 1/2 inch | | | 3917
+CPVC Elbow 3/4 inch | | | 3917
+CPVC Elbow 1 inch | | | 3917
+CPVC Tee 1/2 inch | | | 3917
+CPVC Tee 3/4 inch | | | 3917
+CPVC Tee 1 inch | | | 3917
+CPVC Coupler 1/2 inch | | | 3917
+CPVC Coupler 3/4 inch | | | 3917
+CPVC Coupler 1 inch | | | 3917
+CPVC Reducer 3/4 x 1/2 inch | | | 3917
+CPVC Reducer 1 x 3/4 inch | | | 3917
+CPVC End Cap 1/2 inch | | | 3917
+CPVC End Cap 3/4 inch | | | 3917
+CPVC Union 1/2 inch | | | 3917
+CPVC Union 3/4 inch | | | 3917
+CPVC Brass Elbow FTA 1/2 inch | | | 3917
+CPVC Brass Elbow MTA 1/2 inch | | | 3917
+CPVC Brass Tee FTA 1/2 inch | | | 3917
+CPVC Brass Coupler FTA 1/2 inch | | | 3917
+CPVC Solvent Cement 118 ml | | Can | 3506
+CPVC Solvent Cement 237 ml | | Can | 3506
+PVC Solvent Cement 118 ml | | Can | 3506
+PVC Solvent Cement 237 ml | | Can | 3506
+PVC Solvent Cement 500 ml | | Can | 3506
+Astral Solvent Cement Pack | Astral | Can | 3506
+Supreme Solvent Cement Pack | Supreme | Can | 3506
+Teflon Tape White 10 m | | Roll | 3919
+Teflon Tape White 20 m | | Roll | 3919
+Teflon Tape Heavy | | Roll | 3919
+Thread Seal Tape 12 mm | | Roll | 3919
+Plumbers Hemp Fibre | | Packet | 5305
+Plumbers Putty 500 g | | Packet | 3214
+Brass Ball Valve 1/2 inch | | | 8481
+Brass Ball Valve 3/4 inch | | | 8481
+Brass Ball Valve 1 inch | | | 8481
+Brass Ball Valve 1.5 inch | | | 8481
+Brass Ball Valve 2 inch | | | 8481
+PVC Ball Valve 1/2 inch | | | 8481
+PVC Ball Valve 3/4 inch | | | 8481
+PVC Ball Valve 1 inch | | | 8481
+PVC Ball Valve 1.5 inch | | | 8481
+PVC Ball Valve 2 inch | | | 8481
+PVC Ball Valve 3 inch | | | 8481
+PVC Ball Valve 4 inch | | | 8481
+CPVC Ball Valve 1/2 inch | | | 8481
+CPVC Ball Valve 3/4 inch | | | 8481
+CPVC Ball Valve 1 inch | | | 8481
+Gate Valve Brass 1/2 inch | | | 8481
+Gate Valve Brass 3/4 inch | | | 8481
+Gate Valve Brass 1 inch | | | 8481
+Gate Valve Brass 1.5 inch | | | 8481
+Gate Valve Brass 2 inch | | | 8481
+Gate Valve Iron 2 inch | | | 8481
+Gate Valve Iron 3 inch | | | 8481
+Gate Valve Iron 4 inch | | | 8481
+Foot Valve Brass 1 inch | | | 8481
+Foot Valve Brass 1.5 inch | | | 8481
+Foot Valve PVC 1 inch | | | 8481
+Foot Valve PVC 1.5 inch | | | 8481
+Foot Valve PVC 2 inch | | | 8481
+Non Return Valve Brass 1 inch | | | 8481
+Non Return Valve Brass 1.5 inch | | | 8481
+Non Return Valve PVC 2 inch | | | 8481
+Float Valve Brass 1/2 inch | | | 8481
+Float Valve Brass 3/4 inch | | | 8481
+Float Valve Brass 1 inch | | | 8481
+Float Valve PVC 1/2 inch | | | 8481
+Float Valve PVC 3/4 inch | | | 8481
+Float Valve PVC 1 inch | | | 8481
+Float Ball Plastic 6 inch | | | 3926
+Float Ball Plastic 8 inch | | | 3926
+Float Ball Plastic 10 inch | | | 3926
+Pressure Reducing Valve | | | 8481
+Pressure Relief Valve | | | 8481
+Angle Valve Brass 1/2 inch | | | 8481
+Angle Valve CP 1/2 inch | | | 8481
+Angle Cock CP 1/2 inch | | | 8481
+Angle Cock ABS | | | 8481
+Bib Cock Brass 1/2 inch | | | 8481
+Bib Cock CP Brass 1/2 inch | | | 8481
+Bib Cock CP Brass Long Body | | | 8481
+Bib Cock Brass 3/4 inch | | | 8481
+Bib Cock PVC 1/2 inch | | | 8481
+Bib Cock ABS 1/2 inch | | | 8481
+Pillar Cock CP Brass | | | 8481
+Pillar Cock Brass 1/2 inch | | | 8481
+Pillar Cock Kitchen Sink | | | 8481
+Pillar Cock Basin | | | 8481
+Pillar Cock Long Neck | | | 8481
+Pillar Cock Swan Neck | | | 8481
+Swan Neck Tap Kitchen | | | 8481
+Swan Neck Tap Wall Mounted | | | 8481
+Swan Neck Tap Table Top | | | 8481
+Sink Cock Swan Neck | | | 8481
+Sink Mixer Table Top | | | 8481
+Sink Mixer Wall Mount | | | 8481
+Kitchen Faucet Pull Out | | | 8481
+Kitchen Faucet Single Lever | | | 8481
+Wall Mixer 2 in 1 | | | 8481
+Wall Mixer 3 in 1 | | | 8481
+Wall Mixer with Diverter | | | 8481
+Wall Mixer Telephonic | | | 8481
+Basin Mixer Single Lever | | | 8481
+Basin Mixer Dual Handle | | | 8481
+Basin Mixer Tall | | | 8481
+Basin Tap Single | | | 8481
+Basin Tap Hot Cold Pair | | | 8481
+Health Faucet ABS | | | 8481
+Health Faucet Brass | | | 8481
+Health Faucet Set Complete | | Set | 8481
+Health Faucet Hose 1.2 m | | | 3917
+Health Faucet Hose Stainless 1.2 m | | | 7307
+Health Faucet Holder | | | 3926
+Jet Spray Bidet | | | 8481
+Hand Shower ABS | | | 8481
+Hand Shower Round Chrome | | | 8481
+Rain Shower Overhead 8 inch | | | 8481
+Rain Shower Overhead 10 inch | | | 8481
+Rain Shower Overhead 12 inch | | | 8481
+Rain Shower Ceiling Mount | | | 8481
+Overhead Shower ABS | | | 8481
+Overhead Shower SS | | | 8481
+Shower Arm 12 inch | | | 8481
+Shower Arm 18 inch | | | 8481
+Shower Arm Ceiling | | | 8481
+Shower Hose 1.5 m PVC | | | 3917
+Shower Hose 1.5 m SS | | | 7307
+Shower Holder Wall Mount | | | 3926
+Shower Head Spray 3 Flow | | | 8481
+Shower Diverter | | | 8481
+Shower Panel | | | 8481
+Shower Enclosure Glass | | | 7020
+Shower Curtain PVC | | | 3924
+Shower Curtain Rod | | | 7326
+Shower Seat Plastic | | | 3924
+Shower Tray ABS | | | 3924
+Bathroom Geyser Connection Pipe Pair | | Pair | 7307
+Toilet Seat Cover Plastic | | | 3922
+Toilet Seat Cover Soft Close | | | 3922
+Toilet Seat Cover Wooden | | | 4421
+Toilet Seat Cover UF | | | 3922
+Toilet Paper Holder Chrome | | | 3924
+Toilet Paper Holder SS | | | 7324
+Toilet Brush with Holder | | | 9603
+Towel Rod 18 inch | | | 3924
+Towel Rod 24 inch | | | 3924
+Towel Rod SS 24 inch | | | 7324
+Towel Rack 2 Bar | | | 7324
+Towel Ring SS | | | 7324
+Towel Rail Heated | | | 8516
+Soap Dish Wall | | | 3924
+Soap Dish Ceramic | | | 6910
+Soap Dispenser Liquid Wall | | | 3924
+Soap Dispenser SS | | | 7324
+Tumbler Holder | | | 3924
+Tooth Brush Holder | | | 3924
+Bathroom Shelf Glass | | | 7020
+Bathroom Shelf SS | | | 7324
+Bathroom Hook Pack | | | 7324
+Bathroom Accessories Set 7 pcs | | Set | 7324
+Bathroom Accessories Set 5 pcs | | Set | 3924
+Bathroom Mirror 18 x 24 inch | | | 7009
+Bathroom Mirror 24 x 36 inch | | | 7009
+Bathroom Cabinet Mirror | | | 9403
+Bathroom Door Frame | | | 4418
+Bathroom Door PVC | | | 3925
+Bathroom Door FRP | | | 3925
+Bathroom Window PVC | | | 3925
+Exhaust Fan Window Frame | | | 8414
+Wash Basin Ceramic Wall Hung 18 inch | | | 6910
+Wash Basin Ceramic Wall Hung 20 inch | | | 6910
+Wash Basin Table Top Ceramic | | | 6910
+Wash Basin Pedestal Set | | | 6910
+Wash Basin Corner | | | 6910
+Wash Basin Counter Top | | | 6910
+Wash Basin Steel Kitchen | | | 7324
+Kitchen Sink SS Single Bowl | | | 7324
+Kitchen Sink SS Double Bowl | | | 7324
+Kitchen Sink SS Single Bowl Drainboard | | | 7324
+Kitchen Sink Granite | | | 6802
+Kitchen Sink Waste Coupling | | | 3917
+Kitchen Sink Trap | | | 3917
+Kitchen Sink Strainer | | | 7324
+Sink Waste Pipe | | | 3917
+Basin Waste Coupling | | | 3917
+Basin Waste Coupling Brass | | | 7412
+Basin Waste Pipe | | | 3917
+Basin Pedestal Standard | | | 6910
+Basin Bracket Wall Pair | | Pair | 7326
+Basin Trap | | | 3917
+Basin Trap Brass | | | 7412
+Basin Trap Chrome | | | 7412
+Urinal Wall Mount Ceramic | | | 6910
+Urinal Flush Valve | | | 8481
+Urinal Partition | | | 6910
+Urinal Waste Fitting | | | 3917
+Western Commode Wall Hung | | | 6910
+Western Commode Floor Mount S Trap | | | 6910
+Western Commode Floor Mount P Trap | | | 6910
+Western Commode One Piece | | | 6910
+Western Commode Two Piece | | | 6910
+Western Commode Wall Hung Concealed | | | 6910
+Indian Toilet Seat Orissa Pan 18 inch | | | 6910
+Indian Toilet Seat Orissa Pan 22 inch | | | 6910
+Indian Toilet Seat Anglo Indian | | | 6910
+Indian Toilet Seat Rural | | | 6910
+Indian Toilet Seat Squatting Plate | | | 6910
+Flush Tank Cistern PVC 10 L | | | 3922
+Flush Tank Cistern Ceramic | | | 6910
+Flush Tank Cistern Concealed | | | 3922
+Flush Tank PVC 12 L | | | 3922
+Flush Tank Fitting Set | | Set | 3922
+Flush Tank Pipe 32 mm | | | 3917
+Flush Tank Pipe 40 mm | | | 3917
+Flush Tank Pipe 50 mm | | | 3917
+Flush Tank Handle Chrome | | | 3922
+Flush Tank Push Button | | | 3922
+Flush Tank Dual Flush Mechanism | | | 3922
+Flush Valve 40 mm | | | 8481
+Flush Valve 32 mm | | | 8481
+Flush Valve Concealed | | | 8481
+Flush Valve Cable | | | 8481
+Flush Valve Water Closet | | | 8481
+Flush Valve Floor | | | 8481
+Cera Wash Basin | Cera | | 6910
+Cera Western Commode | Cera | | 6910
+Cera Cistern | Cera | | 3922
+Cera Cp Fittings Set | Cera | Set | 8481
+Hindware Wash Basin | Hindware | | 6910
+Hindware Western Commode | Hindware | | 6910
+Hindware Cistern | Hindware | | 3922
+Hindware Faucet Pillar Cock | Hindware | | 8481
+Hindware Faucet Bib Cock | Hindware | | 8481
+Hindware Faucet Basin Mixer | Hindware | | 8481
+Hindware Faucet Wall Mixer | Hindware | | 8481
+Parryware Wash Basin | Parryware | | 6910
+Parryware Western Commode | Parryware | | 6910
+Parryware Cistern | Parryware | | 3922
+Parryware Faucet Pillar Cock | Parryware | | 8481
+Jaquar Pillar Cock | Jaquar | | 8481
+Jaquar Bib Cock | Jaquar | | 8481
+Jaquar Basin Mixer | Jaquar | | 8481
+Jaquar Wall Mixer | Jaquar | | 8481
+Jaquar Health Faucet | Jaquar | | 8481
+Jaquar Overhead Shower | Jaquar | | 8481
+Jaquar Hand Shower | Jaquar | | 8481
+Jaquar Angle Cock | Jaquar | | 8481
+Jaquar Flush Valve | Jaquar | | 8481
+Jaquar Wash Basin | Jaquar | | 6910
+Jaquar Western Commode | Jaquar | | 6910
+Jaquar Cistern | Jaquar | | 3922
+Kohler Wash Basin | Kohler | | 6910
+Kohler Western Commode | Kohler | | 6910
+Kohler Faucet Basin Mixer | Kohler | | 8481
+Kohler Shower Head | Kohler | | 8481
+Kohler Cistern | Kohler | | 3922
+Marc Faucet Basin | Marc | | 8481
+Marc Faucet Kitchen | Marc | | 8481
+Marc Shower Set | Marc | Set | 8481
+Marc Bathroom Fittings Set | Marc | Set | 8481
+Sintex Water Tank 500 L | Sintex | | 3925
+Sintex Water Tank 750 L | Sintex | | 3925
+Sintex Water Tank 1000 L | Sintex | | 3925
+Sintex Water Tank 1500 L | Sintex | | 3925
+Sintex Water Tank 2000 L | Sintex | | 3925
+Sintex Water Tank 5000 L | Sintex | | 3925
+Sintex Triple Layer Tank 500 L | Sintex | | 3925
+Sintex Triple Layer Tank 1000 L | Sintex | | 3925
+Sintex Triple Layer Tank 2000 L | Sintex | | 3925
+Sintex Loft Tank 500 L | Sintex | | 3925
+Sintex Loft Tank 1000 L | Sintex | | 3925
+Sintex Horizontal Tank 1000 L | Sintex | | 3925
+Sintex Under Ground Tank 5000 L | Sintex | | 3925
+Supreme Water Tank 500 L | Supreme | | 3925
+Supreme Water Tank 1000 L | Supreme | | 3925
+Supreme Water Tank 2000 L | Supreme | | 3925
+Supreme Triple Layer Tank 1000 L | Supreme | | 3925
+Supreme Triple Layer Tank 2000 L | Supreme | | 3925
+Plasto Water Tank 500 L | Plasto | | 3925
+Plasto Water Tank 1000 L | Plasto | | 3925
+Plasto Water Tank 2000 L | Plasto | | 3925
+Plasto Triple Layer Tank 1000 L | Plasto | | 3925
+Plasto Triple Layer Tank 2000 L | Plasto | | 3925
+Kisan Water Tank 500 L | Kisan | | 3925
+Kisan Water Tank 1000 L | Kisan | | 3925
+Kisan Water Tank 2000 L | Kisan | | 3925
+Tank Cover Lid 500 L | | | 3925
+Tank Cover Lid 1000 L | | | 3925
+Tank Float Valve Set | | Set | 8481
+Tank Inlet Fitting | | | 3917
+Tank Outlet Fitting 1 inch | | | 3917
+Tank Outlet Fitting 1.5 inch | | | 3917
+Tank Outlet Fitting 2 inch | | | 3917
+Tank Level Indicator | | | 9026
+Tank Water Level Controller | | | 9026
+Tank Cleaning Brush | | | 9603
+Water Meter 1/2 inch | | | 9028
+Water Meter 3/4 inch | | | 9028
+Water Meter 1 inch | | | 9028
+Water Filter Sediment Housing | | | 8421
+Water Filter Cartridge Sediment | | | 8421
+Water Filter Cartridge Carbon | | | 8421
+Water Filter RO Membrane | | | 8421
+Water Filter Pre Filter | | | 8421
+Water Filter Whole House | | | 8421
+Water Pump Crompton 0.5 HP | Crompton | | 8413 | 18 | warranty=12
+Water Pump Crompton 1 HP | Crompton | | 8413 | 18 | warranty=12
+Water Pump Crompton 1.5 HP | Crompton | | 8413 | 18 | warranty=12
+Water Pump Kirloskar 0.5 HP | Kirloskar | | 8413 | 18 | warranty=12
+Water Pump Kirloskar 1 HP | Kirloskar | | 8413 | 18 | warranty=12
+Water Pump Kirloskar 1.5 HP | Kirloskar | | 8413 | 18 | warranty=12
+Water Pump Kirloskar 2 HP | Kirloskar | | 8413 | 18 | warranty=12
+Water Pump Havells 0.5 HP | Havells | | 8413 | 18 | warranty=12
+Water Pump Havells 1 HP | Havells | | 8413 | 18 | warranty=12
+Water Pump Havells 1.5 HP | Havells | | 8413 | 18 | warranty=12
+Water Pump Texmo 1 HP | Texmo | | 8413 | 18 | warranty=12
+Water Pump Texmo 1.5 HP | Texmo | | 8413 | 18 | warranty=12
+Water Pump Usha 1 HP | Usha | | 8413 | 18 | warranty=12
+Water Pump Bharat 1 HP | Bharat | | 8413 | 18 | warranty=12
+Water Pump V-Guard 1 HP | V-Guard | | 8413 | 18 | warranty=12
+Submersible Pump 0.5 HP | | | 8413 | 18 | warranty=12
+Submersible Pump 1 HP | | | 8413 | 18 | warranty=12
+Submersible Pump 1.5 HP | | | 8413 | 18 | warranty=12
+Submersible Pump 2 HP | | | 8413 | 18 | warranty=12
+Submersible Pump 3 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Borewell 1 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Borewell 2 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Borewell 3 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Borewell 5 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Open Well 1 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Open Well 2 HP | | | 8413 | 18 | warranty=12
+Submersible Pump Open Well 3 HP | | | 8413 | 18 | warranty=12
+Monoblock Pump 0.5 HP | | | 8413 | 18 | warranty=12
+Monoblock Pump 1 HP | | | 8413 | 18 | warranty=12
+Monoblock Pump 1.5 HP | | | 8413 | 18 | warranty=12
+Monoblock Pump 2 HP | | | 8413 | 18 | warranty=12
+Monoblock Pump 3 HP | | | 8413 | 18 | warranty=12
+Centrifugal Pump 1 HP | | | 8413 | 18 | warranty=12
+Centrifugal Pump 2 HP | | | 8413 | 18 | warranty=12
+Centrifugal Pump 3 HP | | | 8413 | 18 | warranty=12
+Centrifugal Pump 5 HP | | | 8413 | 18 | warranty=12
+Jet Pump 0.5 HP | | | 8413 | 18 | warranty=12
+Jet Pump 1 HP | | | 8413 | 18 | warranty=12
+Jet Pump 1.5 HP | | | 8413 | 18 | warranty=12
+Pressure Booster Pump | | | 8413 | 18 | warranty=12
+Hand Pump Cast Iron Complete | | | 8413 | 18
+Hand Pump Cast Iron Spare Parts | | | 8413 | 18
+Hand Pump PVC | | | 8413 | 18
+Hand Pump Aluminium | | | 8413 | 18
+Hand Pump Fitting India Mark II Set | | Set | 8413 | 18
+Pump Starter Capacitor 25 mfd | | | 8532 | 18
+Pump Starter Capacitor 36 mfd | | | 8532 | 18
+Pump Starter Capacitor 50 mfd | | | 8532 | 18
+Pump Starter Capacitor 100 mfd | | | 8532 | 18
+Pump Impeller Brass | | | 8413 | 18
+Pump Impeller Plastic | | | 8413 | 18
+Pump Mechanical Seal | | | 8484 | 18
+Pump Shaft Seal | | | 8484 | 18
+Pump Bearing 6203 | | | 8482 | 18
+Pump Bearing 6204 | | | 8482 | 18
+Pump Bearing 6205 | | | 8482 | 18
+Pump Motor Winding Wire per kg | | Kg | 8544 | 18
+Pump Water Level Switch | | | 9032 | 18
+Pump Control Panel Single Phase | | | 8537 | 18
+Pump Control Panel Three Phase | | | 8537 | 18
+Submersible Pump Cable per metre | | Metre | 8544 | 18
+Submersible Pump Starter | | | 8536 | 18
+Dry Run Protector | | | 9032 | 18
+Pressure Switch | | | 9032 | 18
+Pressure Tank 24 L | | | 8479 | 18
+Pressure Gauge 0-10 kg | | | 9026 | 18
+Pressure Gauge 0-16 kg | | | 9026 | 18
+Pressure Gauge 0-25 kg | | | 9026 | 18
+Water Heater Pipe Connection | | | 7307 | 18
+Geyser Inlet Valve | | | 8481 | 18
+Geyser Outlet Valve | | | 8481 | 18
+Geyser Thermostat | | | 9032 | 18
+Geyser Heating Element 2 kW | | | 8516 | 18
+Geyser Anode Rod | | | 7901 | 18
+Floor Drain Chrome 4 inch | | | 7324 | 18
+Floor Drain SS 4 inch | | | 7324 | 18
+Floor Drain SS 5 inch | | | 7324 | 18
+Floor Drain SS 6 inch | | | 7324 | 18
+Floor Drain Cockroach Trap | | | 7324 | 18
+Floor Drain Square Brass | | | 7412 | 18
+Floor Drain Round Brass | | | 7412 | 18
+Drainage Channel SS 24 inch | | | 7324 | 18
+Drainage Channel Plastic 24 inch | | | 3917 | 18
+Drain Cover Plastic 4 inch | | | 3917 | 18
+Drain Cover Plastic 6 inch | | | 3917 | 18
+Drain Pipe Cleaner Chemical 500 ml | | Bottle | 3808 | 18
+Drain Cleaning Spring 10 m | | | 7320 | 18
+Plunger Rubber | | | 4016 | 18
+Plunger Toilet Large | | | 4016 | 18
+Plunger Sink Small | | | 4016 | 18
+Drain Rod Flexible | | | 3917 | 18
+Septic Tank Cover Plastic | | | 3925 | 18
+Manhole Cover Cast Iron | | | 7325 | 18
+Manhole Cover Plastic | | | 3925 | 18
+Manhole Cover FRP | | | 3925 | 18
+Manhole Frame Cast Iron | | | 7325 | 18

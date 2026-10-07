@@ -8,7 +8,55 @@ import { BUSINESS_TYPES, businessTypeLabel } from "@/lib/business-types";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-const GST_RATES = ["0", "3", "5", "12", "18", "28"];
+const GST_RATES = ["0", "3", "5", "12", "18", "28", "40"];
+const PAGE = 100;
+
+// The columns of the download / upload sheet.
+const SHEET_COLUMNS = [
+  "name", "brand", "category", "unit_name", "hsn_code", "gst_rate", "barcode", "business_type",
+  "description", "secondary_unit_name", "conversion_factor", "track_serial", "track_pieces", "warranty_months",
+] as const;
+
+/** Text -> rows. Comma or tab separated (pasted from a sheet), quotes allowed. */
+function parseSheet(text: string): Record<string, string>[] {
+  const delim = text.split("\n", 1)[0].includes("\t") ? "\t" : ",";
+  const table: string[][] = [];
+  let row: string[] = [];
+  let cell = "";
+  let quoted = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (quoted) {
+      if (ch === '"' && text[i + 1] === '"') { cell += '"'; i++; }
+      else if (ch === '"') quoted = false;
+      else cell += ch;
+    } else if (ch === '"') quoted = true;
+    else if (ch === delim) { row.push(cell); cell = ""; }
+    else if (ch === "\n" || ch === "\r") {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      row.push(cell); cell = "";
+      if (row.some((c) => c.trim() !== "")) table.push(row);
+      row = [];
+    } else cell += ch;
+  }
+  row.push(cell);
+  if (row.some((c) => c.trim() !== "")) table.push(row);
+  if (table.length < 2) return [];
+  const head = table[0].map((h) => h.trim().toLowerCase().replace(/^\ufeff/, ""));
+  return table.slice(1).map((r) => {
+    const o: Record<string, string> = {};
+    head.forEach((h, i) => { if ((SHEET_COLUMNS as readonly string[]).includes(h)) o[h] = (r[i] ?? "").trim(); });
+    return o;
+  });
+}
+
+function toCsv(rows: any[]): string {
+  const q = (v: unknown) => {
+    const t = v === null || v === undefined ? "" : String(v);
+    return /[",\n\r]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t;
+  };
+  return [SHEET_COLUMNS.join(","), ...rows.map((r) => SHEET_COLUMNS.map((c) => q(r[c])).join(","))].join("\r\n");
+}
 
 // name, short name, sold in fractions. The first eight are the units every
 // new shop starts with (create_business), spelt the same way so a picked
@@ -84,8 +132,8 @@ const str = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 const pct = (v: unknown) => String(Number(v ?? 0));
 
 const notApplied = (message: string) =>
-  /get_admin_master_products|admin_save_master_product|admin_merge_master_products|admin_set_/.test(message)
-    ? "Migration 0057 isn't applied to this database yet."
+  /get_admin_master_products|admin_save_master_product|admin_merge_master_products|admin_set_|admin_import_master|admin_export_master/.test(message)
+    ? "Migrations 0057 and 0066 aren't both applied to this database yet."
     : message;
 
 /**
@@ -101,6 +149,11 @@ export default function CatalogPage() {
   const [typed, setTyped] = useState("");
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<string>("");
+  const [type, setType] = useState("");
+  const [category, setCategory] = useState("");
+  const [offset, setOffset] = useState(0);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [importing, setImporting] = useState(false);
   const [form, setForm] = useState<Form | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [merging, setMerging] = useState<any | null>(null);
@@ -109,13 +162,13 @@ export default function CatalogPage() {
   const [refresh, setRefresh] = useState(0);
 
   useEffect(() => {
-    supabase.rpc("get_admin_master_products", { p_search: search, p_status: status, p_limit: 300 })
+    supabase.rpc("get_admin_master_products", { p_search: search, p_status: status, p_limit: PAGE, p_type: type, p_category: category, p_offset: offset })
       .then(({ data, error }) => {
         if (error) setError(notApplied(error.message));
         else setData(data);
       });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search, status, refresh]);
+  }, [search, status, type, category, offset, refresh]);
 
   function startEdit(m: any | null) {
     setFormError(null);
@@ -174,6 +227,35 @@ export default function CatalogPage() {
     setRefresh((n) => n + 1);
   }
 
+  /** Any filter change starts again from the first page with nothing ticked. */
+  function filter(change: () => void) {
+    change();
+    setOffset(0);
+    setPicked(new Set());
+  }
+
+  async function setMany(next: string) {
+    const ids = Array.from(picked);
+    if (ids.length === 0) return;
+    const { error } = await supabase.rpc("admin_set_master_products_status", { p_ids: ids, p_status: next });
+    setNotice(error
+      ? { ok: false, text: notApplied(error.message) }
+      : { ok: true, text: `${ids.length} product${ids.length === 1 ? "" : "s"} ${next === "hidden" ? "hidden" : next === "pending" ? "held for approval" : "offered to shops"}.` });
+    setPicked(new Set());
+    setRefresh((n) => n + 1);
+  }
+
+  async function download() {
+    const { data: rows, error } = await supabase.rpc("admin_export_master_products", { p_type: type });
+    if (error) return setNotice({ ok: false, text: notApplied(error.message) });
+    const blob = new Blob(["\ufeff" + toCsv(rows ?? [])], { type: "text/csv;charset=utf-8" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `master-products${type ? `-${type}` : ""}.csv`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
   async function setAutoPublish(on: boolean) {
     const { error } = await supabase.rpc("admin_set_catalog_auto_publish", { p_on: on });
     setNotice(error
@@ -199,7 +281,11 @@ export default function CatalogPage() {
             name instead of typing everything again.
           </p>
         </div>
-        <Button onClick={() => startEdit(null)}>+ Add product</Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" onClick={download}>Download sheet</Button>
+          <Button variant="outline" onClick={() => setImporting(true)}>Upload sheet</Button>
+          <Button onClick={() => startEdit(null)}>+ Add product</Button>
+        </div>
       </div>
 
       <Notice notice={notice} />
@@ -232,7 +318,7 @@ export default function CatalogPage() {
           {FILTERS.map(([value, label, key]) => (
             <button
               key={key}
-              onClick={() => setStatus(value)}
+              onClick={() => filter(() => setStatus(value))}
               aria-pressed={status === value}
               className={`rounded-full px-3 py-1 text-xs font-semibold ring-1 ring-inset ${status === value ? "bg-ink text-white ring-ink" : "bg-white text-zinc-600 ring-zinc-200"}`}
             >
@@ -242,18 +328,62 @@ export default function CatalogPage() {
         </div>
         <form
           className="flex gap-2"
-          onSubmit={(e) => { e.preventDefault(); setSearch(typed.trim()); }}
+          onSubmit={(e) => { e.preventDefault(); filter(() => setSearch(typed.trim())); }}
         >
           <Input value={typed} onChange={(e) => setTyped(e.target.value)} placeholder="Name, brand or barcode" className="sm:w-64" />
           <Button type="submit" variant="outline">Search</Button>
         </form>
       </div>
 
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <Select value={type} onChange={(e) => filter(() => { setType(e.target.value); setCategory(""); })} className="sm:w-64">
+          <option value="">All kinds of shop ({counts.all ?? 0})</option>
+          {(data.types ?? []).map((t: any) => (
+            <option key={t.type} value={t.type}>{t.type ? businessTypeLabel(t.type) : "Any shop"} ({t.count})</option>
+          ))}
+        </Select>
+        <Select value={category} onChange={(e) => filter(() => setCategory(e.target.value))} className="sm:w-64">
+          <option value="">All categories</option>
+          {(data.categories ?? []).map((c: any) => <option key={c.category} value={c.category}>{c.category} ({c.count})</option>)}
+        </Select>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <label className="flex items-center gap-2 text-zinc-600">
+          <input
+            type="checkbox"
+            checked={rows.length > 0 && rows.every((m) => picked.has(m.id))}
+            onChange={(e) => setPicked(e.target.checked ? new Set(rows.map((m) => m.id)) : new Set())}
+          />
+          Tick this page
+        </label>
+        {picked.size > 0 && (
+          <>
+            <span className="font-semibold text-ink">{picked.size} ticked</span>
+            <button className="font-medium text-emerald-700 hover:underline" onClick={() => setMany("published")}>Offer to shops</button>
+            <button className="font-medium text-zinc-600 hover:underline" onClick={() => setMany("hidden")}>Hide</button>
+            <button className="font-medium text-zinc-600 hover:underline" onClick={() => setMany("pending")}>Hold for approval</button>
+          </>
+        )}
+      </div>
+
       <Card>
         <ul className="divide-y divide-zinc-100">
           {rows.map((m) => (
             <li key={m.id} className={`flex flex-col gap-3 px-5 py-4 lg:flex-row lg:items-center lg:justify-between ${m.status === "hidden" ? "opacity-60" : ""}`}>
-              <div className="min-w-0">
+              <div className="flex min-w-0 gap-3">
+                <input
+                  type="checkbox"
+                  className="mt-1 shrink-0"
+                  aria-label={`Tick ${m.name}`}
+                  checked={picked.has(m.id)}
+                  onChange={(e) => setPicked((prev) => {
+                    const next = new Set(prev);
+                    if (e.target.checked) next.add(m.id); else next.delete(m.id);
+                    return next;
+                  })}
+                />
+                <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-ink">{m.name}</span>
                   {m.status === "pending" && <Badge color="orange">waiting for you</Badge>}
@@ -275,6 +405,7 @@ export default function CatalogPage() {
                   {" · "}
                   {Number(m.shops) === 0 ? "no shop has it" : `in ${m.shops} shop${Number(m.shops) === 1 ? "" : "s"}`}
                 </p>
+                </div>
               </div>
               <div className="flex shrink-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm font-medium">
                 {m.status === "pending" && (
@@ -290,12 +421,31 @@ export default function CatalogPage() {
           ))}
           {rows.length === 0 && (
             <li className="px-5 py-10 text-center text-sm text-zinc-500">
-              {search || status ? "Nothing matches." : "The list is empty. It fills as shops add products — or add some yourself."}
+              {search || status || type || category ? "Nothing matches." : "The list is empty. It fills as shops add products — or add some yourself."}
             </li>
           )}
         </ul>
       </Card>
-      {rows.length >= 300 && <p className="text-xs text-zinc-500">Showing the newest 300. Search to find older ones.</p>}
+      <div className="flex items-center justify-between text-sm text-zinc-500">
+        <span>
+          {Number(data.total) === 0 ? "" : `${offset + 1}–${offset + rows.length} of ${data.total}`}
+        </span>
+        <div className="flex gap-2">
+          <Button variant="outline" disabled={offset === 0} onClick={() => { setOffset(Math.max(0, offset - PAGE)); setPicked(new Set()); }}>Previous</Button>
+          <Button variant="outline" disabled={offset + rows.length >= Number(data.total)} onClick={() => { setOffset(offset + PAGE); setPicked(new Set()); }}>Next</Button>
+        </div>
+      </div>
+
+      {importing && (
+        <ImportDialog
+          onClose={() => setImporting(false)}
+          onDone={(text) => {
+            setImporting(false);
+            setNotice({ ok: true, text });
+            setRefresh((n) => n + 1);
+          }}
+        />
+      )}
 
       {form && (
         <Modal title={form.id ? `Edit — ${form.name}` : "Add a product to the list"} onClose={() => setForm(null)} wide>
@@ -469,6 +619,78 @@ function MergeDialog({ from, onClose, onDone }: { from: any; onClose: () => void
             {rows.length === 0 && <li className="px-4 py-6 text-center text-zinc-500">Nothing found — try another search.</li>}
           </ul>
         )}
+      </div>
+    </Modal>
+  );
+}
+
+/** Paste or choose a sheet: new names are added, existing ones are updated. */
+function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: (text: string) => void }) {
+  const supabase = createClient();
+  const [text, setText] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [problems, setProblems] = useState<{ row: number; name: string; message: string }[]>([]);
+  const [error, setError] = useState<string | null>(null);
+
+  const rows = parseSheet(text);
+
+  async function send() {
+    setError(null);
+    setProblems([]);
+    if (rows.length === 0) return setError("Paste the sheet with its first row of column names, then the products.");
+    if (rows.length > 3000) return setError("Upload up to 3000 rows at a time.");
+    setBusy(true);
+    const { data, error } = await supabase.rpc("admin_import_master_products", {
+      p_rows: rows.map((r) => ({
+        ...r,
+        track_serial: /^(1|true|yes|y)$/i.test(r.track_serial ?? ""),
+        track_pieces: /^(1|true|yes|y)$/i.test(r.track_pieces ?? ""),
+      })),
+    });
+    setBusy(false);
+    if (error) return setError(notApplied(error.message));
+    const errors = (data?.errors ?? []) as { row: number; name: string; message: string }[];
+    if (errors.length > 0) {
+      setProblems(errors);
+      setError(`${data.added} added, ${data.updated} updated, ${errors.length} not imported — see below. Fix those rows and upload only them.`);
+      return;
+    }
+    onDone(`${data.added} added, ${data.updated} updated.`);
+  }
+
+  return (
+    <Modal title="Upload a product sheet" onClose={onClose} wide>
+      <div className="space-y-4 text-sm">
+        <p className="text-zinc-600">
+          Download the sheet first to see the columns, change it in Excel or Google Sheets, then paste it here
+          (or open the file). A name already in the list is updated; a new name is added. No prices.
+        </p>
+        <input
+          type="file"
+          accept=".csv,.tsv,.txt"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            if (f) setText(await f.text());
+          }}
+        />
+        <textarea
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          rows={10}
+          placeholder={SHEET_COLUMNS.join(",")}
+          className="w-full rounded-xl border border-zinc-200 p-3 font-mono text-xs"
+        />
+        <p className="text-xs text-zinc-500">{rows.length === 0 ? "Nothing read yet." : `${rows.length} product${rows.length === 1 ? "" : "s"} read.`}</p>
+        {error && <p className="font-medium text-red-600">{error}</p>}
+        {problems.length > 0 && (
+          <ul className="max-h-40 overflow-auto rounded-xl border border-zinc-200 p-3 text-xs text-zinc-600">
+            {problems.map((p) => <li key={p.row}>Row {p.row} — {p.name || "no name"}: {p.message}</li>)}
+          </ul>
+        )}
+        <div className="flex justify-end gap-2">
+          <Button variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button onClick={send} disabled={busy || rows.length === 0}>{busy ? "Uploading…" : "Upload"}</Button>
+        </div>
       </div>
     </Modal>
   );

@@ -111,7 +111,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   // The shared product list (migration 0057): while a NEW product's name is
   // typed, matching products are offered; picking one fills in everything
   // except prices and stock.
-  static const _gstRates = [0.0, 3.0, 5.0, 12.0, 18.0, 28.0];
+  static const _gstRates = [0.0, 3.0, 5.0, 12.0, 18.0, 28.0, 40.0];
   Timer? _searchTimer;
   List<Map<String, dynamic>> _suggestions = [];
   String? _masterProductId;

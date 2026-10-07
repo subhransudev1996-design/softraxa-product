@@ -3,7 +3,7 @@ import 'package:softraxa_inventory/core/business_category.dart';
 
 void main() {
   test('categories match the business_type values in the database', () {
-    // 0001 + 0047: the enum the app's keys must stay in step with.
+    // 0001 + 0047 + 0066: the enum the app's keys must stay in step with.
     const dbValues = {
       'mobile',
       'garment',
@@ -13,6 +13,9 @@ void main() {
       'electrical',
       'car_workshop',
       'bike_garage',
+      'grocery',
+      'stationery',
+      'cosmetics',
     };
     expect(businessCategories.map((c) => c.key).toSet(), dbValues);
   });

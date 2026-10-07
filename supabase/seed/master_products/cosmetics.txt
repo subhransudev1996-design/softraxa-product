@@ -1,0 +1,521 @@
+# type: cosmetics
+# Cosmetics, beauty and general store. Soap, shampoo, toothpaste, talc and
+# sanitary pads are in grocery.txt (a shop can pick them from either).
+
+## Face Cream & Moisturiser | Piece | 3304 | 18
+Pond's Cold Cream 100 ml | Pond's | Tube
+Pond's Super Light Gel 100 g | Pond's | Tube
+Pond's Light Moisturiser 100 ml | Pond's | Tube
+Pond's Age Miracle Day Cream 50 g | Pond's | Tube
+Pond's White Beauty Day Cream 35 g | Pond's | Tube
+Pond's Bright Beauty Cream 100 g | Pond's | Tube
+Pond's Vitamin E Moisturising Cream 100 ml | Pond's | Tube
+Nivea Soft Light Moisturiser 100 ml | Nivea | Tube
+Nivea Soft Light Moisturiser 200 ml | Nivea | Bottle
+Nivea Creme Tin 150 ml | Nivea | Can
+Nivea Creme Tin 60 ml | Nivea | Can
+Nivea Body Lotion Nourishing 400 ml | Nivea | Bottle
+Nivea Body Lotion Cocoa Nourish 400 ml | Nivea | Bottle
+Nivea Milk Delights Face Pack 25 g | Nivea | Packet
+Vaseline Intensive Care Body Lotion 400 ml | Vaseline | Bottle
+Vaseline Intensive Care Aloe Soothe 200 ml | Vaseline | Bottle
+Vaseline Petroleum Jelly 50 ml | Vaseline | Bottle
+Vaseline Petroleum Jelly 100 ml | Vaseline | Bottle
+Vaseline Petroleum Jelly 180 ml | Vaseline | Bottle
+Vaseline Lip Therapy Rosy 4.8 g | Vaseline | Piece
+Vaseline Lip Therapy Original 4.8 g | Vaseline | Piece
+Himalaya Nourishing Skin Cream 100 ml | Himalaya | Tube
+Himalaya Nourishing Skin Cream 50 ml | Himalaya | Tube
+Himalaya Aloe Vera Face Cream 100 ml | Himalaya | Tube
+Himalaya Moisturising Aloe Vera Gel 300 ml | Himalaya | Tube
+Himalaya Intensive Moisturizing Body Lotion 400 ml | Himalaya | Bottle
+Himalaya Cold Cream 100 ml | Himalaya | Tube
+Himalaya Winter Cream 50 ml | Himalaya | Tube
+Himalaya Baby Cream 100 ml | Himalaya | Tube
+Himalaya Baby Lotion 200 ml | Himalaya | Bottle
+Himalaya Baby Powder 200 g | Himalaya | Packet
+Johnson's Baby Lotion 200 ml | Johnson's | Bottle
+Johnson's Baby Cream 100 g | Johnson's | Tube
+Johnson's Baby Oil 200 ml | Johnson's | Bottle
+Johnson's Baby Oil 100 ml | Johnson's | Bottle
+Johnson's Baby Oil 500 ml | Johnson's | Bottle
+Boroline Antiseptic Cream 20 g | Boroline | Tube
+Boroline Antiseptic Cream 40 g | Boroline | Tube
+Boroplus Antiseptic Cream 40 ml | Boroplus | Tube
+Boroplus Antiseptic Cream 80 ml | Boroplus | Tube
+Dermi Cool Prickly Heat Powder 150 g | Dermi Cool | Packet
+Dermi Cool Prickly Heat Powder 300 g | Dermi Cool | Packet
+Parachute Advansed Body Lotion 400 ml | Parachute | Bottle
+Parachute Advansed Body Lotion 250 ml | Parachute | Bottle
+Glycerine 100 ml | | Bottle
+Rose Water 120 ml | | Bottle
+Coconut Oil Refined Cosmetic 100 ml | | Bottle
+Almond Oil Sweet 100 ml | | Bottle
+Castor Oil 100 ml | | Bottle | 1515 | 5
+Olive Oil Cosmetic 100 ml | | Bottle
+Aloe Vera Gel Pure 100 g | | Tube
+Multani Mitti Powder 100 g | | Packet
+Sandalwood Powder 50 g | | Packet
+Rose Petal Powder 50 g | | Packet
+Turmeric Face Pack 50 g | | Packet
+Besan Face Pack Powder 100 g | | Packet
+Neem Face Pack 50 g | | Packet
+Neutrogena Oil Free Moisture 118 ml | Neutrogena | Bottle
+Cetaphil Moisturising Lotion 100 ml | Cetaphil | Bottle
+Cetaphil Moisturising Lotion 250 ml | Cetaphil | Bottle
+Cetaphil Gentle Skin Cleanser 125 ml | Cetaphil | Bottle
+Olay Regenerist Micro-Sculpting Cream 50 g | Olay | Piece
+Olay Natural White Cream 50 g | Olay | Tube
+Lakme Peach Milk Moisturiser 120 ml | Lakme | Bottle
+Lakme Peach Milk Moisturiser 60 ml | Lakme | Bottle
+Lakme Absolute Perfect Radiance Cream 50 g | Lakme | Tube
+Lakme 9 to 5 Weightless Matte Mousse | Lakme | Piece
+Garnier Skin Naturals Light Complete Cream 45 g | Garnier | Tube
+Garnier Bright Complete Vitamin C Serum 30 ml | Garnier | Bottle
+Garnier Men Oil Clear Moisturiser 50 g | Garnier | Tube
+Fair & Lovely Advanced Multivitamin Cream 50 g | Fair & Lovely | Tube
+Glow & Lovely Cream 50 g | Glow & Lovely | Tube
+Glow & Handsome Cream Men 50 g | Glow & Handsome | Tube
+Emami Fair and Handsome Cream 60 g | Emami | Tube
+Emami Fair and Handsome Cream 30 g | Emami | Tube
+Emami Naturally Fair Cream 50 g | Emami | Tube
+Clean & Clear Facial Moisturiser 100 ml | Clean & Clear | Bottle
+Dr. Rashel Vitamin C Cream 50 g | Dr. Rashel | Tube
+Minimalist Vitamin C Serum 20 ml | Minimalist | Bottle
+Minimalist Niacinamide Serum 10 percent 30 ml | Minimalist | Bottle
+The Derma Co Niacinamide Serum 30 ml | The Derma Co | Bottle
+Plum Green Tea Face Moisturizer 50 ml | Plum | Tube
+Mamaearth Ubtan Face Cream 50 g | Mamaearth | Tube
+Mamaearth Vitamin C Face Serum 30 ml | Mamaearth | Bottle
+Mamaearth Onion Hair Oil 150 ml | Mamaearth | Bottle | 3305 | 5
+
+## Face Wash & Cleansing | Tube | 3304 | 18
+Himalaya Purifying Neem Face Wash 100 ml | Himalaya
+Himalaya Purifying Neem Face Wash 150 ml | Himalaya
+Himalaya Oil Clear Lemon Face Wash 100 ml | Himalaya
+Himalaya Gentle Exfoliating Walnut Scrub 100 ml | Himalaya
+Himalaya Fairness Face Wash Saffron 100 ml | Himalaya
+Himalaya Clear Complexion Face Wash 100 ml | Himalaya
+Garnier Men Oil Clear Face Wash 100 g | Garnier
+Garnier Bright Complete Vitamin C Face Wash 100 g | Garnier
+Garnier Pure Active Neem Face Wash 100 g | Garnier
+Garnier Skin Naturals Light Face Wash 150 g | Garnier
+Clean & Clear Morning Energy Face Wash 100 ml | Clean & Clear
+Clean & Clear Foaming Face Wash 150 ml | Clean & Clear
+Clean & Clear Oil Control Face Wash 80 ml | Clean & Clear
+Pond's Bright Beauty Face Wash 100 g | Pond's
+Pond's Pimple Clear Face Wash 100 g | Pond's
+Pond's Men Energy Bright Face Wash 100 g | Pond's
+Pond's Facial Foam Pure White 100 g | Pond's
+Neutrogena Oil Free Acne Wash 175 ml | Neutrogena | Bottle
+Neutrogena Fine Fairness Face Wash 100 ml | Neutrogena
+Cetaphil Gentle Skin Cleanser 250 ml | Cetaphil | Bottle
+Nivea Men Oil Control Face Wash 100 g | Nivea
+Nivea Men Dark Spot Reduction Face Wash 100 g | Nivea
+Nivea Fresh Active Face Wash 100 ml | Nivea
+Lakme Blush and Glow Strawberry Face Wash 100 g | Lakme
+Lakme Clean Up Face Wash 100 g | Lakme
+Lakme Sun Expert SPF 50 Sunscreen 50 ml | Lakme | Tube
+Lotus Herbals Safe Sun Sunscreen SPF 50 100 g | Lotus Herbals | Tube
+Lotus Herbals WhiteGlow Face Wash 100 g | Lotus Herbals
+Biotique Bio Papaya Face Wash 150 ml | Biotique
+Biotique Bio Neem Face Pack 50 g | Biotique | Packet
+Biotique Bio Almond Oil Face Wash 150 ml | Biotique
+Plum Green Tea Pore Cleansing Face Wash 75 ml | Plum
+Mamaearth Vitamin C Face Wash 100 ml | Mamaearth
+Mamaearth Tea Tree Face Wash 100 ml | Mamaearth
+Mamaearth Ubtan Face Wash 100 ml | Mamaearth
+Wow Skin Science Vitamin C Face Wash 100 ml | Wow
+Wow Skin Science Aloe Vera Gel 250 ml | Wow | Tube
+Simple Refreshing Face Wash 150 ml | Simple | Tube
+Ponds Cleansing Milk 100 ml | Pond's | Bottle
+Dove Deep Moisture Body Wash 250 ml | Dove | Bottle
+Dove Silk Glow Body Wash 190 ml | Dove | Bottle
+Fiama Shower Gel Honey 250 ml | Fiama | Bottle
+Nivea Body Wash Creme Soft 250 ml | Nivea | Bottle
+Pears Body Wash 250 ml | Pears | Bottle
+Lux Body Wash 245 ml | Lux | Bottle
+Dettol Body Wash 250 ml | Dettol | Bottle
+Margo Neem Body Wash 250 ml | Margo | Bottle
+Garnier Micellar Water 125 ml | Garnier | Bottle
+L'Oreal Micellar Water 400 ml | L'Oreal | Bottle
+Facial Wipes Pack of 25 | | Packet
+Make Up Remover Wipes Pack of 25 | | Packet
+Body Scrub Coffee 100 g | | Tube
+Lip Scrub 15 g | | Piece
+Peel Off Mask Charcoal 100 g | | Tube
+Sheet Face Mask 1 pc | | Piece
+Foot Cream Heel Repair 100 g | Himalaya | Tube
+Hand Cream Nivea 75 ml | Nivea | Tube
+Neutrogena Hydro Boost Water Gel 50 g | Neutrogena | Piece
+Cetaphil Daily Facial Cleanser 118 ml | Cetaphil | Bottle
+Sebamed Cleansing Bar 100 g | Sebamed | Piece | 3401 | 5?
+Eucerin DermoPurifyer Wash 200 ml | Eucerin | Bottle
+
+## Makeup | Piece | 3304 | 18
+Lakme Absolute Matte Lipstick Red Ruby | Lakme
+Lakme Absolute Matte Lipstick Pink | Lakme
+Lakme 9 to 5 Primer and Matte Lipstick Rosy Sunday | Lakme
+Lakme 9 to 5 Primer and Matte Lipstick Red Rush | Lakme
+Lakme Enrich Satin Lipstick Shade R5 | Lakme
+Lakme Enrich Satin Lipstick Shade P153 | Lakme
+Lakme Eyeconic Kajal Black 0.35 g | Lakme
+Lakme Eyeconic Kajal Black 0.25 g | Lakme
+Lakme Insta Eye Liner Black 9 ml | Lakme
+Lakme Absolute Mascara Black | Lakme
+Lakme Absolute Skin Dew Cream Foundation | Lakme
+Lakme 9 to 5 Naturale Compact Pink | Lakme
+Lakme Perfect Radiance Compact | Lakme
+Lakme Face Magic Compact | Lakme
+Lakme Lip Love Chapstick | Lakme
+Lakme Nail Colour Pink | Lakme
+Maybelline New York Colossal Kajal Black | Maybelline
+Maybelline New York Baby Skin Primer | Maybelline
+Maybelline New York Fit Me Foundation 30 ml | Maybelline
+Maybelline Color Sensational Lipstick Red | Maybelline
+Maybelline Fit Me Compact | Maybelline
+Maybelline Lash Sensational Mascara | Maybelline
+Maybelline Hyper Easy Eyeliner | Maybelline
+Maybelline New York Superstay Matte Ink | Maybelline
+L'Oreal Paris Infallible Foundation | L'Oreal
+L'Oreal Paris Color Riche Lipstick | L'Oreal
+L'Oreal Paris Kajal Magique | L'Oreal
+Revlon Super Lustrous Lipstick | Revlon
+Revlon Colorstay Foundation | Revlon
+Revlon Compact | Revlon
+Sugar Matte As Hell Crayon Lipstick | Sugar
+Sugar Smudge Me Not Liquid Lipstick | Sugar
+Sugar Arrested Development Kajal | Sugar
+Sugar Contour De Force Compact | Sugar
+Nykaa Matte to Last Lipstick | Nykaa
+Nykaa Kajal Bold | Nykaa
+Colorbar Lipstick | Colorbar
+Faces Canada Kajal Black | Faces Canada
+Faces Canada Compact | Faces Canada
+Swiss Beauty Lipstick | Swiss Beauty
+Swiss Beauty Eyeliner | Swiss Beauty
+Swiss Beauty Kajal | Swiss Beauty
+Swiss Beauty Compact Powder | Swiss Beauty
+Swiss Beauty Eyeshadow Palette | Swiss Beauty
+Insight Kajal Black | Insight
+Himalaya Kajal Black | Himalaya
+Himalaya Lip Balm Strawberry | Himalaya
+Himalaya Lip Balm Cherry | Himalaya
+Nivea Lip Balm Original Care 4.8 g | Nivea
+Nivea Lip Balm Fruity Shine | Nivea
+Nivea Lip Balm Strawberry | Nivea
+Maybelline Baby Lips Cherry Kiss | Maybelline
+Maybelline Baby Lips Lip Balm | Maybelline
+Eyetex Kajal | Eyetex
+Ayur Kajal Black | Ayur
+Kajal Pencil Black | | | 3304
+Eyebrow Pencil Black | | | 3304
+Eyebrow Pencil Brown | | | 3304
+Foundation Liquid Medium | | | 3304
+Concealer Stick | | | 3304
+Primer Face | | | 3304
+Compact Powder Pressed | | | 3304
+Setting Powder Loose | | | 3304
+Blush Powder Pink | | | 3304
+Highlighter Compact | | | 3304
+Eyeshadow Palette 12 Shades | | | 3304
+Lipstick Matte Assorted | | | 3304
+Lip Gloss Clear | | | 3304
+Lip Liner Pencil | | | 3304
+Liquid Lipstick Matte | | | 3304
+Nail Polish Remover 50 ml | | Bottle | 3304
+Nail Polish Remover 100 ml | | Bottle | 3304
+Nail Polish Assorted Colours | | | 3304
+Nail Polish Glitter | | | 3304
+Nail Polish Matte | | | 3304
+Nail Polish Top Coat | | | 3304
+Nail Art Stickers Sheet | | Sheet | 3304
+False Nails Press On 24 pcs | | Packet | 6704
+False Eyelashes Pair | | Pair | 6704
+Eyelash Glue | | Tube | 3506
+Beauty Blender Sponge | | | 3926
+Makeup Sponge Set 4 pcs | | Packet | 3926
+Makeup Brush Set 10 pcs | | Set | 9603
+Foundation Brush | | | 9603
+Blush Brush | | | 9603
+Eyeshadow Brush Single | | | 9603
+Makeup Brush Kit Travel | | Set | 9603
+Makeup Kit Combo | | Set | 3304
+Makeup Pouch | | | 4202
+Makeup Mirror Small | | | 7009
+Makeup Mirror with Light | | | 7009
+Compact Mirror | | | 7009
+Cotton Pads Round 80 pcs | | Packet | 5601 | 5?
+Bindi Packet Assorted | | Packet | 3926 | 18?
+Bindi Velvet Packet | | Packet | 3926 | 18?
+Sindoor Red 20 g | | | 3304
+Sindoor Kumkum Box | | | 3304
+Alta Packet | | Packet | 3304
+Mehendi Henna Cone | | | 3203 | 18
+Mehendi Henna Powder 100 g | | Packet | 3203 | 18
+Godrej Nupur Mehendi 100 g | Godrej | Packet | 3203 | 18
+Mehendi Cone Rajasthani 3 pcs | | Packet | 3203 | 18
+
+## Perfume & Deodorant | Bottle | 3303 | 18
+Fogg Fragrance Body Spray Marco 150 ml | Fogg | Can
+Fogg Fragrance Body Spray Scent Black 120 ml | Fogg | Can
+Fogg Fragrance Body Spray Napoleon 120 ml | Fogg | Can
+Fogg Fragrance Body Spray Absolute 150 ml | Fogg | Can
+Fogg Fragrance Body Spray Master 150 ml | Fogg | Can
+Axe Dark Temptation Body Spray 150 ml | Axe | Can
+Axe Signature Body Spray 154 ml | Axe | Can
+Axe Gold Temptation Body Spray 150 ml | Axe | Can
+Axe Pulse Deodorant Body Spray 150 ml | Axe | Can
+Nivea Men Fresh Active Deodorant 150 ml | Nivea | Can
+Nivea Men Deep Impact Deodorant 150 ml | Nivea | Can
+Nivea Men Fresh Ocean Deodorant 150 ml | Nivea | Can
+Nivea Fresh Pure Deodorant Women 150 ml | Nivea | Can
+Nivea Pearl and Beauty Deodorant 150 ml | Nivea | Can
+Engage Man Deodorant Spray 150 ml | Engage | Can
+Engage Woman Deodorant Spray 150 ml | Engage | Can
+Park Avenue Good Morning Deodorant 150 ml | Park Avenue | Can
+Park Avenue Storm Deodorant 150 ml | Park Avenue | Can
+Wild Stone Edge Perfume Spray 100 ml | Wild Stone | Bottle
+Wild Stone Code Platinum Deodorant 150 ml | Wild Stone | Can
+Wild Stone Forest Spice Deodorant 150 ml | Wild Stone | Can
+Denver Hamilton Deodorant 165 ml | Denver | Can
+Denver Black Code Deodorant 165 ml | Denver | Can
+Set Wet Charm Deodorant | Set Wet | Can
+Set Wet Swag Deodorant | Set Wet | Can
+Yardley London English Lavender Perfume 100 ml | Yardley | Bottle
+Yardley London Gentleman Perfume 100 ml | Yardley | Bottle
+Yardley Deodorant 150 ml | Yardley | Can
+Davidoff Cool Water 125 ml | Davidoff | Bottle
+Beardo Godfather Perfume 100 ml | Beardo | Bottle
+Beardo Whiskey Smoke Perfume 100 ml | Beardo | Bottle
+Skinn Titan Raw Perfume 50 ml | Skinn | Bottle
+Skinn Celeste Perfume 50 ml | Skinn | Bottle
+Titan Skinn Verge Perfume | Skinn | Bottle
+Layer'r Shot Wottagirl Deodorant 150 ml | Layer'r Shot | Can
+Layer'r Shot Pulse Deodorant 150 ml | Layer'r Shot | Can
+Adidas Pure Game Deodorant 150 ml | Adidas | Can
+Adidas Dynamic Pulse Deodorant 150 ml | Adidas | Can
+Roll On Deodorant Fogg 50 ml | Fogg | Bottle
+Roll On Deodorant Nivea Men 50 ml | Nivea | Bottle
+Roll On Deodorant Deo 50 ml | | Bottle
+Itar Attar Rose 6 ml | | Bottle
+Itar Attar Chandan 6 ml | | Bottle
+Itar Attar Jannat 6 ml | | Bottle
+Itar Attar Musk 6 ml | | Bottle
+Perfume Roll On Oil 6 ml Assorted | | Bottle
+Perfume Gift Set Men | | Set
+Perfume Gift Set Women | | Set
+Body Mist Women Assorted 100 ml | | Bottle
+Body Mist Vanilla 100 ml | | Bottle
+Body Mist Rose 100 ml | | Bottle
+Vanilla Body Spray Women 150 ml | | Can
+Talc Body Powder Men 100 g | | Packet | 3304 | 18?
+Deo Stick Men | | Piece
+Room Spray Fresh Linen 200 ml | | Can | 3307
+
+## Hair Care & Colour | Bottle | 3305 | 18
+Garnier Color Naturals Black 1 Cream | Garnier | Packet
+Garnier Color Naturals Natural Black 1.0 | Garnier | Packet
+Garnier Color Naturals Dark Brown 3 | Garnier | Packet
+Garnier Color Naturals Burgundy 3.16 | Garnier | Packet
+L'Oreal Paris Excellence Fashion Burgundy | L'Oreal | Packet
+L'Oreal Paris Casting Creme Gloss Dark Brown 3 | L'Oreal | Packet
+L'Oreal Paris Casting Creme Gloss Black 1 | L'Oreal | Packet
+L'Oreal Paris Total Repair 5 Shampoo 180 ml | L'Oreal | Bottle | 3305 | 5
+L'Oreal Paris Total Repair 5 Conditioner 180 ml | L'Oreal | Bottle
+Godrej Expert Rich Creme Hair Colour Natural Black | Godrej | Packet
+Godrej Expert Rich Creme Hair Colour Dark Brown | Godrej | Packet
+Godrej Expert Easy 5 Minute Hair Colour Natural Black | Godrej | Packet
+Godrej Nupur Henna Mehendi 120 g | Godrej | Packet | 3203
+Streax Professional Hair Colour Serum | Streax | Packet
+Streax Hair Colour Black | Streax | Packet
+Streax Hair Serum 100 ml | Streax | Bottle
+Revlon Colorsilk Hair Colour Black | Revlon | Packet
+Bigen Hair Colour Black | Bigen | Packet
+Indus Valley Natural Hair Colour Black | Indus Valley | Packet
+Vatika Henna Hair Colour Dark Brown | Vatika | Packet
+Kesh Kala Hair Colour | Kesh Kala | Packet
+Dove Hair Therapy Conditioner 175 ml | Dove | Bottle
+Dove Intense Repair Conditioner 180 ml | Dove | Bottle
+Tresemme Smooth and Shine Conditioner 190 ml | Tresemme | Bottle
+Pantene Hair Fall Control Conditioner 180 ml | Pantene | Bottle
+Sunsilk Stunning Black Shine Conditioner 180 ml | Sunsilk | Bottle
+Clinic Plus Conditioner 80 ml | Clinic Plus | Bottle
+Streax Hair Serum Walnut Oil 100 ml | Streax | Bottle
+Livon Hair Serum 100 ml | Livon | Bottle
+Livon Hair Serum 50 ml | Livon | Bottle
+Matrix Biolage Smooth Proof Serum 100 ml | Matrix | Bottle
+Indulekha Bringha Shampoo 200 ml | Indulekha | Bottle | 3305 | 5
+Tresemme Hair Mask 200 ml | Tresemme | Tube
+Dove Hair Mask 200 ml | Dove | Tube
+Vatika Hair Mask 200 ml | Vatika | Tube
+Hair Gel Set Wet Cool Hold 100 ml | Set Wet | Tube
+Hair Gel Park Avenue 100 ml | Park Avenue | Tube
+Hair Gel Wet Look 150 ml | | Tube
+Hair Wax Pomade 100 g | | Tube
+Hair Spray Strong Hold 200 ml | | Can
+Hair Spray Parachute Strong 150 ml | Parachute | Can
+Hair Cream Parachute Aftershower 100 g | Parachute | Tube
+Hair Cream Brylcreem 150 g | Brylcreem | Tube
+Hair Oil Almond Drops Bajaj 200 ml | Bajaj | Bottle | 3305 | 5
+Hair Oil Coconut Oil Cold Pressed 200 ml | | Bottle | 3305 | 5
+Hair Oil Bhringraj 100 ml | | Bottle | 3305 | 5
+Hair Oil Amla Brahmi 100 ml | | Bottle | 3305 | 5
+Vaseline Hair Tonic 100 ml | Vaseline | Bottle | 3305 | 5
+Beardo Beard Oil 30 ml | Beardo | Bottle
+Beardo Beard Wash 100 ml | Beardo | Bottle
+Beardo Hair Wax 50 g | Beardo | Tube
+Beardo Face Wash Men 100 ml | Beardo | Tube
+Ustraa Beard Growth Oil 60 ml | Ustraa | Bottle
+Philips Beard Trimmer BT1230 | Philips | Piece | 8510
+Philips Trimmer QT4001 | Philips | Piece | 8510
+Philips Trimmer BT1232 | Philips | Piece | 8510
+Havells Trimmer BT6151C | Havells | Piece | 8510
+Havells Beard Trimmer BT3103 | Havells | Piece | 8510
+Syska Trimmer HT200 | Syska | Piece | 8510
+Syska Trimmer HT1000 | Syska | Piece | 8510
+Nova Trimmer NHT 1071 | Nova | Piece | 8510
+Panasonic Trimmer ER-GB37 | Panasonic | Piece | 8510
+Hair Dryer 1200 W | | Piece | 8516
+Philips Hair Dryer 1000 W | Philips | Piece | 8516
+Philips Hair Dryer 1200 W | Philips | Piece | 8516
+Havells Hair Dryer HD3151 | Havells | Piece | 8516
+Syska Hair Dryer HD1600 | Syska | Piece | 8516
+Syska Hair Straightener HS6810 | Syska | Piece | 8516
+Philips Hair Straightener BHS386 | Philips | Piece | 8516
+Havells Straightener HS4101 | Havells | Piece | 8516
+Hair Curler Iron | | Piece | 8516
+Hair Brush Paddle | | Piece | 9603
+Hair Brush Round | | Piece | 9603
+Comb Fine Tooth | | Piece | 9615
+Comb Wide Tooth | | Piece | 9615
+Comb Pocket | | Piece | 9615
+Comb Rat Tail | | Piece | 9615
+Comb Beard Wooden | | Piece | 9615
+Detangler Brush | | Piece | 9603
+Hair Clips Assorted Pack | | Packet | 9615
+Hair Clip Claw Large | | Piece | 9615
+Hair Pins Black 50 pcs | | Packet | 7317
+Hair Rubber Bands 50 pcs | | Packet | 4016
+Hair Scrunchies 3 pcs | | Packet | 6217
+Hair Band Fabric | | Piece | 6217
+Hair Band Plastic | | Piece | 9615
+Hair Bun Maker | | Piece | 9615
+Hair Extensions Clip In | | Piece | 6704
+Hair Net | | Piece | 6704
+Shower Cap | | Piece | 3926
+Hair Removal Cream Veet 25 g | Veet | Tube
+Hair Removal Cream Veet 50 g | Veet | Tube
+Hair Removal Cream Veet 100 g | Veet | Tube
+Hair Removal Cream Nair 50 g | Nair | Tube
+Hair Removal Cream Dr. Rashel 50 g | Dr. Rashel | Tube
+Hair Removal Wax Strips Veet 20 pcs | Veet | Packet
+Hair Removal Wax Rica 800 g | Rica | Can
+Epilator Philips | Philips | Piece | 8510
+Ladies Razor Venus | Venus | Piece | 8212
+Ladies Razor Gillette Venus Breeze | Gillette | Piece | 8212
+Ladies Razor Set 3 pcs | | Packet | 8212
+Eyebrow Razor 3 pcs | | Packet | 8212
+Eyebrow Threading Thread | | Packet | 5204
+
+## Nail, Body & Wellness Tools | Piece | 8214 | 18
+Nail Cutter Large | | | 8214
+Nail Cutter Small | | | 8214
+Nail Clipper Set | | Set | 8214
+Nail File Metal | | | 8214
+Nail File Emery 5 pcs | | Packet | 8214
+Manicure Set 7 pcs | | Set | 8214
+Pedicure Set 5 pcs | | Set | 8214
+Cuticle Pusher | | | 8214
+Tweezers Slant | | | 8203
+Tweezers Pointed | | | 8203
+Eyelash Curler | | | 9615
+Foot Scrubber Pumice Stone | | | 6805
+Foot Scrubber Metal | | | 8214
+Body Loofah Sponge | | | 4601
+Bath Scrubber Gloves | | | 6116
+Bath Sponge Round | | | 3926
+Bath Brush Long Handle | | | 9603
+Back Scrubber | | | 9603
+Shower Loofah | | | 4601
+Massage Oil Body 100 ml | | Bottle | 3304
+Massage Roller Face | | | 9019
+Gua Sha Stone | | | 9019
+Face Steamer | | | 8516
+Weighing Machine Digital Bathroom | | | 8423
+Weighing Machine Mechanical | | | 8423
+Digital Thermometer | | | 9025
+Hot Water Bag Rubber | | | 4014
+Heating Pad Electric | | | 8516
+Eye Mask Sleeping | | | 6217
+Ear Plugs 2 pcs | | Packet | 6307
+Neck Pillow Travel | | | 9404
+Hand Mirror | | | 7009
+Wall Mirror Small | | | 7009
+Shaving Brush | | | 9603
+Shaving Bowl | | | 3926
+Razor Blade Pack 5 | | Packet | 8212
+Safety Razor Classic | | | 8212
+Alum Phitkari Block | | | 2833
+Aftershave Balm 100 ml | | Bottle | 3307
+Aftershave Alum Spray | | Bottle | 3307
+Aftershave Lotion Nivea Men 100 ml | Nivea | Bottle | 3307
+Shaving Gel Nivea Men 200 ml | Nivea | Can | 3307 | 5?
+Shaving Foam Gillette Classic 418 g | Gillette | Can | 3307 | 5?
+Shaving Foam Gillette Pro Glide 196 g | Gillette | Can | 3307 | 5?
+Shaving Foam Old Spice 400 g | Old Spice | Can | 3307 | 5?
+Shaving Cream Palmolive 78 g | Palmolive | Tube | 3307 | 5?
+Shaving Cream Godrej 70 g | Godrej | Tube | 3307 | 5?
+Shaving Stick | | | 3307 | 5?
+
+## Health Care & Wellness (general store items) | Piece | 3004 | 5?
+Dabur Chyawanprash 500 g | Dabur | Bottle | 2106
+Dabur Chyawanprash 1 kg | Dabur | Bottle | 2106
+Dabur Chyawanprash 2 kg | Dabur | Bottle | 2106
+Patanjali Chyawanprash 1 kg | Patanjali | Bottle | 2106
+Zandu Chyawanprash 450 g | Zandu | Bottle | 2106
+Baidyanath Chyawanprash 1 kg | Baidyanath | Bottle | 2106
+Dabur Hajmola Regular 120 Tablets | Dabur | Bottle | 2106
+Dabur Giloy Juice 500 ml | Dabur | Bottle | 2202
+Dabur Amla Juice 1 L | Dabur | Bottle | 2202
+Dabur Aloe Vera Juice 1 L | Dabur | Bottle | 2202
+Patanjali Aloe Vera Juice 1 L | Patanjali | Bottle | 2202
+Patanjali Amla Juice 1 L | Patanjali | Bottle | 2202
+Patanjali Giloy Juice 1 L | Patanjali | Bottle | 2202
+Patanjali Aloe Vera Gel 150 ml | Patanjali | Tube | 3304 | 18
+Patanjali Saundarya Face Wash 60 g | Patanjali | Tube | 3304 | 18
+Patanjali Haldi Chandan Face Pack 50 g | Patanjali | Packet | 3304 | 18
+Patanjali Kesh Kanti Hair Oil 100 ml | Patanjali | Bottle | 3305 | 5
+Zandu Balm 8 ml | Zandu | Bottle
+Zandu Balm 25 ml | Zandu | Bottle
+Vicks Vaporub 10 ml | Vicks | Bottle
+Vicks Vaporub 25 ml | Vicks | Bottle
+Vicks Action 500 Strip | Vicks | Strip
+Vicks Inhaler Nasal | Vicks | Piece
+Amrutanjan Balm 9 ml | Amrutanjan | Bottle
+Amrutanjan Pain Balm 35 g | Amrutanjan | Bottle
+Moov Pain Relief Cream 50 g | Moov | Tube
+Volini Gel 30 g | Volini | Tube
+Volini Spray 40 g | Volini | Can
+Iodex Balm 40 g | Iodex | Bottle
+Iodex Multipurpose Balm 9 g | Iodex | Bottle
+Tiger Balm Red 19 g | Tiger Balm | Bottle
+Tiger Balm White 19 g | Tiger Balm | Bottle
+Himalaya Rumalaya Gel 30 g | Himalaya | Tube
+Eno Fruit Salt Lemon 30 g Sachet | Eno | Packet
+Eno Regular 100 g | Eno | Bottle
+ORS Powder Electral 21.8 g | Electral | Packet
+Band-Aid Washproof 20 pcs | Band-Aid | Packet | 3005
+Band-Aid Plaster Roll | Band-Aid | Roll | 3005
+Dettol Antiseptic Liquid 60 ml | Dettol | Bottle | 3808 | 18
+Betadine Antiseptic Solution 50 ml | Betadine | Bottle
+Cotton Roll Absorbent 100 g | | Packet | 3005
+Bandage Crepe 6 inch | | Piece | 3005
+Dettol Hand Sanitizer 200 ml | Dettol | Bottle | 3808 | 18
+Face Mask Surgical 3 Ply 10 pcs | | Packet | 6307 | 5?
+Face Mask N95 | | Piece | 6307 | 5?
+Digital Thermometer Dr Trust | Dr Trust | Piece | 9025 | 18
+Pulse Oximeter Fingertip | | Piece | 9018 | 18
+BP Monitor Omron HEM 7120 | Omron | Piece | 9018 | 18
+Glucometer Accu-Chek Active | Accu-Chek | Piece | 9027 | 18
+Steamer Vaporizer | | Piece | 8516 | 18

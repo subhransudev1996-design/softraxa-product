@@ -1,0 +1,20 @@
+{
+"Suggested products": "ਸੁਝਾਏ ਗਏ ਪ੍ਰੋਡਕਟ",
+"Pick from suggested products": "ਸੁਝਾਏ ਗਏ ਪ੍ਰੋਡਕਟਾਂ ਵਿੱਚੋਂ ਚੁਣੋ",
+"Search by name or brand": "ਨਾਂ ਜਾਂ ਬ੍ਰਾਂਡ ਨਾਲ ਲੱਭੋ",
+"My shop: {kind}": "ਮੇਰੀ ਦੁਕਾਨ: {kind}",
+"Everything": "ਸਭ ਕੁਝ",
+"All categories": "ਸਾਰੀਆਂ ਸ਼੍ਰੇਣੀਆਂ",
+"Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.": "ਜੋ ਤੁਸੀਂ ਵੇਚਦੇ ਹੋ ਉਸ 'ਤੇ ਟਿੱਕ ਕਰੋ, ਆਪਣੀ ਵਿਕਰੀ ਕੀਮਤ ਪਾਓ, ਫਿਰ ਸਭ ਇਕੱਠੇ ਜੋੜੋ। ਜੋ ਪ੍ਰੋਡਕਟ ਤੁਹਾਡੇ ਕੋਲ ਪਹਿਲਾਂ ਹੀ ਹਨ ਉਹ ਨਹੀਂ ਦਿਸਦੇ।",
+"Selling price": "ਵਿਕਰੀ ਕੀਮਤ",
+"Stock (optional)": "ਸਟਾਕ (ਵਿਕਲਪਿਕ)",
+"Add {n} products": "{n} ਪ੍ਰੋਡਕਟ ਜੋੜੋ",
+"Show more ({n} left)": "ਹੋਰ ਦਿਖਾਓ ({n} ਬਾਕੀ)",
+"Nothing found. Try another word, a category, or \"Everything\".": "ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ। ਕੋਈ ਹੋਰ ਸ਼ਬਦ, ਸ਼੍ਰੇਣੀ ਜਾਂ \"ਸਭ ਕੁਝ\" ਅਜ਼ਮਾਓ।",
+"Enter a selling price for every ticked product": "ਟਿੱਕ ਕੀਤੇ ਹਰ ਪ੍ਰੋਡਕਟ ਦੀ ਵਿਕਰੀ ਕੀਮਤ ਪਾਓ",
+"{added} products added": "{added} ਪ੍ਰੋਡਕਟ ਜੋੜੇ ਗਏ",
+"{added} added, {skipped} were already in your list": "{added} ਜੋੜੇ ਗਏ, {skipped} ਪਹਿਲਾਂ ਹੀ ਤੁਹਾਡੀ ਸੂਚੀ ਵਿੱਚ ਸਨ",
+"Grocery / kirana store": "ਕਰਿਆਨਾ ਦੁਕਾਨ",
+"Stationery & gift shop": "ਸਟੇਸ਼ਨਰੀ ਅਤੇ ਗਿਫ਼ਟ ਦੁਕਾਨ",
+"Cosmetics & general store": "ਕਾਸਮੈਟਿਕਸ ਅਤੇ ਜਨਰਲ ਸਟੋਰ"
+}

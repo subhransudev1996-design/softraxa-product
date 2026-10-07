@@ -33,6 +33,11 @@ class ProductsScreen extends ConsumerWidget {
         actions: [
           const GuideButton('products'),
           IconButton(
+            icon: const Icon(Icons.playlist_add_check),
+            tooltip: t('Suggested products'),
+            onPressed: () => context.push('/products/suggested'),
+          ),
+          IconButton(
             icon: const Icon(Icons.category_outlined),
             tooltip: t('Categories, brands & units'),
             onPressed: () => context.push('/products/master-data'),
@@ -77,6 +82,11 @@ class ProductsScreen extends ConsumerWidget {
                       ? EmptyState(
                           icon: Icons.inventory_2_outlined,
                           message: t('No products yet.\nAdd your first product or import from Excel.'),
+                          action: FilledButton.icon(
+                            onPressed: () => context.push('/products/suggested'),
+                            icon: const Icon(Icons.playlist_add_check),
+                            label: Text(t('Pick from suggested products')),
+                          ),
                         )
                       : isDesktop
                       ? DesktopTable<Map<String, dynamic>>(

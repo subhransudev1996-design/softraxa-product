@@ -1,0 +1,20 @@
+{
+"Suggested products": "பரிந்துரைக்கப்பட்ட பொருட்கள்",
+"Pick from suggested products": "பரிந்துரைக்கப்பட்ட பொருட்களில் இருந்து தேர்வு செய்யுங்கள்",
+"Search by name or brand": "பெயர் அல்லது பிராண்டால் தேடுங்கள்",
+"My shop: {kind}": "என் கடை: {kind}",
+"Everything": "அனைத்தும்",
+"All categories": "அனைத்து வகைகள்",
+"Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.": "நீங்கள் விற்பவற்றில் டிக் செய்து, விற்பனை விலையை உள்ளிட்டு, எல்லாவற்றையும் ஒரே நேரத்தில் சேர்க்கவும். ஏற்கனவே உங்களிடம் உள்ள பொருட்கள் காட்டப்படாது.",
+"Selling price": "விற்பனை விலை",
+"Stock (optional)": "இருப்பு (விருப்பம்)",
+"Add {n} products": "{n} பொருட்களைச் சேர்",
+"Show more ({n} left)": "மேலும் காட்டு ({n} மீதம்)",
+"Nothing found. Try another word, a category, or \"Everything\".": "எதுவும் கிடைக்கவில்லை. வேறு சொல், வகை அல்லது \"அனைத்தும்\" முயற்சிக்கவும்.",
+"Enter a selling price for every ticked product": "டிக் செய்த ஒவ்வொரு பொருளுக்கும் விற்பனை விலையை உள்ளிடவும்",
+"{added} products added": "{added} பொருட்கள் சேர்க்கப்பட்டன",
+"{added} added, {skipped} were already in your list": "{added} சேர்க்கப்பட்டன, {skipped} ஏற்கனவே உங்கள் பட்டியலில் இருந்தன",
+"Grocery / kirana store": "மளிகைக் கடை",
+"Stationery & gift shop": "எழுதுபொருள் & பரிசுக் கடை",
+"Cosmetics & general store": "அழகு சாதனம் & பொது அங்காடி"
+}

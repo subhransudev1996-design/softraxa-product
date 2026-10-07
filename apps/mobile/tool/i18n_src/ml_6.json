@@ -1,0 +1,20 @@
+{
+"Suggested products": "നിർദ്ദേശിച്ച ഉൽപ്പന്നങ്ങൾ",
+"Pick from suggested products": "നിർദ്ദേശിച്ച ഉൽപ്പന്നങ്ങളിൽ നിന്ന് തിരഞ്ഞെടുക്കുക",
+"Search by name or brand": "പേര് അല്ലെങ്കിൽ ബ്രാൻഡ് വഴി തിരയുക",
+"My shop: {kind}": "എന്റെ കട: {kind}",
+"Everything": "എല്ലാം",
+"All categories": "എല്ലാ വിഭാഗങ്ങളും",
+"Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.": "നിങ്ങൾ വിൽക്കുന്നവയിൽ ടിക്ക് ചെയ്യുക, വിൽപ്പന വില നൽകുക, തുടർന്ന് എല്ലാം ഒരുമിച്ച് ചേർക്കുക. നിങ്ങളുടെ പക്കൽ ഇതിനകം ഉള്ള ഉൽപ്പന്നങ്ങൾ കാണിക്കില്ല.",
+"Selling price": "വിൽപ്പന വില",
+"Stock (optional)": "സ്റ്റോക്ക് (ഓപ്ഷണൽ)",
+"Add {n} products": "{n} ഉൽപ്പന്നങ്ങൾ ചേർക്കുക",
+"Show more ({n} left)": "കൂടുതൽ കാണിക്കുക ({n} ബാക്കി)",
+"Nothing found. Try another word, a category, or \"Everything\".": "ഒന്നും കണ്ടെത്തിയില്ല. മറ്റൊരു വാക്ക്, വിഭാഗം അല്ലെങ്കിൽ \"എല്ലാം\" പരീക്ഷിക്കുക.",
+"Enter a selling price for every ticked product": "ടിക്ക് ചെയ്ത ഓരോ ഉൽപ്പന്നത്തിനും വിൽപ്പന വില നൽകുക",
+"{added} products added": "{added} ഉൽപ്പന്നങ്ങൾ ചേർത്തു",
+"{added} added, {skipped} were already in your list": "{added} ചേർത്തു, {skipped} നേരത്തെ തന്നെ നിങ്ങളുടെ ലിസ്റ്റിൽ ഉണ്ടായിരുന്നു",
+"Grocery / kirana store": "പലചരക്ക് കട",
+"Stationery & gift shop": "സ്റ്റേഷനറി & ഗിഫ്റ്റ് ഷോപ്പ്",
+"Cosmetics & general store": "കോസ്മെറ്റിക്സ് & ജനറൽ സ്റ്റോർ"
+}

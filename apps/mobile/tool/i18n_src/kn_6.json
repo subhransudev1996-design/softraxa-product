@@ -1,0 +1,20 @@
+{
+"Suggested products": "ಸೂಚಿಸಿದ ಉತ್ಪನ್ನಗಳು",
+"Pick from suggested products": "ಸೂಚಿಸಿದ ಉತ್ಪನ್ನಗಳಿಂದ ಆರಿಸಿ",
+"Search by name or brand": "ಹೆಸರು ಅಥವಾ ಬ್ರಾಂಡ್‌ನಿಂದ ಹುಡುಕಿ",
+"My shop: {kind}": "ನನ್ನ ಅಂಗಡಿ: {kind}",
+"Everything": "ಎಲ್ಲವೂ",
+"All categories": "ಎಲ್ಲಾ ವರ್ಗಗಳು",
+"Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.": "ನೀವು ಮಾರುವುದರ ಮೇಲೆ ಟಿಕ್ ಮಾಡಿ, ಮಾರಾಟ ಬೆಲೆ ನಮೂದಿಸಿ, ನಂತರ ಎಲ್ಲವನ್ನೂ ಒಮ್ಮೆಲೇ ಸೇರಿಸಿ. ನಿಮ್ಮ ಬಳಿ ಈಗಾಗಲೇ ಇರುವ ಉತ್ಪನ್ನಗಳು ತೋರಿಸುವುದಿಲ್ಲ.",
+"Selling price": "ಮಾರಾಟ ಬೆಲೆ",
+"Stock (optional)": "ಸ್ಟಾಕ್ (ಐಚ್ಛಿಕ)",
+"Add {n} products": "{n} ಉತ್ಪನ್ನಗಳನ್ನು ಸೇರಿಸಿ",
+"Show more ({n} left)": "ಇನ್ನಷ್ಟು ತೋರಿಸಿ ({n} ಉಳಿದಿವೆ)",
+"Nothing found. Try another word, a category, or \"Everything\".": "ಏನೂ ಸಿಗಲಿಲ್ಲ. ಬೇರೆ ಪದ, ವರ್ಗ ಅಥವಾ \"ಎಲ್ಲವೂ\" ಪ್ರಯತ್ನಿಸಿ.",
+"Enter a selling price for every ticked product": "ಟಿಕ್ ಮಾಡಿದ ಪ್ರತಿ ಉತ್ಪನ್ನದ ಮಾರಾಟ ಬೆಲೆ ನಮೂದಿಸಿ",
+"{added} products added": "{added} ಉತ್ಪನ್ನಗಳನ್ನು ಸೇರಿಸಲಾಗಿದೆ",
+"{added} added, {skipped} were already in your list": "{added} ಸೇರಿಸಲಾಗಿದೆ, {skipped} ಈಗಾಗಲೇ ನಿಮ್ಮ ಪಟ್ಟಿಯಲ್ಲಿದ್ದವು",
+"Grocery / kirana store": "ದಿನಸಿ ಅಂಗಡಿ",
+"Stationery & gift shop": "ಸ್ಟೇಷನರಿ ಮತ್ತು ಗಿಫ್ಟ್ ಅಂಗಡಿ",
+"Cosmetics & general store": "ಸೌಂದರ್ಯ ವರ್ಧಕ ಮತ್ತು ಜನರಲ್ ಸ್ಟೋರ್"
+}

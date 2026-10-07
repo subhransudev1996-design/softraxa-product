@@ -1,0 +1,1538 @@
+# type: electrical
+# Electrical shop. Wires are sold by the metre from a coil (pieces=1 tracks the coils and leftovers).
+
+## House Wires & Cables | Metre | 8544 | 18 | pieces=1
+Polycab FR PVC Copper Wire 0.75 sq mm 90 m | Polycab
+Polycab FR PVC Copper Wire 1 sq mm 90 m | Polycab
+Polycab FR PVC Copper Wire 1.5 sq mm 90 m | Polycab
+Polycab FR PVC Copper Wire 2.5 sq mm 90 m | Polycab
+Polycab FR PVC Copper Wire 4 sq mm 90 m | Polycab
+Polycab FR PVC Copper Wire 6 sq mm 90 m | Polycab
+Polycab FRLS Copper Wire 1 sq mm 90 m | Polycab
+Polycab FRLS Copper Wire 1.5 sq mm 90 m | Polycab
+Polycab FRLS Copper Wire 2.5 sq mm 90 m | Polycab
+Polycab FRLS Copper Wire 4 sq mm 90 m | Polycab
+Polycab Green Wire Etira 1.5 sq mm 90 m | Polycab
+Polycab Green Wire Etira 2.5 sq mm 90 m | Polycab
+Polycab Flexible Cable 2 Core 1 sq mm 100 m | Polycab
+Polycab Flexible Cable 2 Core 1.5 sq mm 100 m | Polycab
+Polycab Flexible Cable 3 Core 1 sq mm 100 m | Polycab
+Polycab Flexible Cable 3 Core 1.5 sq mm 100 m | Polycab
+Polycab Flexible Cable 3 Core 2.5 sq mm 100 m | Polycab
+Polycab Flexible Cable 4 Core 1.5 sq mm 100 m | Polycab
+Polycab Armoured Cable 3 Core 4 sq mm | Polycab
+Havells Lifeline Plus S3 FR Wire 1 sq mm 90 m | Havells
+Havells Lifeline Plus S3 FR Wire 1.5 sq mm 90 m | Havells
+Havells Lifeline Plus S3 FR Wire 2.5 sq mm 90 m | Havells
+Havells Lifeline Plus S3 FR Wire 4 sq mm 90 m | Havells
+Havells Lifeline Plus S3 FRLS Wire 1.5 sq mm 90 m | Havells
+Havells Lifeline Plus S3 FRLS Wire 2.5 sq mm 90 m | Havells
+Havells Flexible Cable 3 Core 1.5 sq mm 100 m | Havells
+Havells Flexible Cable 3 Core 2.5 sq mm 100 m | Havells
+Finolex FR Copper Wire 1 sq mm 90 m | Finolex
+Finolex FR Copper Wire 1.5 sq mm 90 m | Finolex
+Finolex FR Copper Wire 2.5 sq mm 90 m | Finolex
+Finolex FR Copper Wire 4 sq mm 90 m | Finolex
+Finolex FRLS Copper Wire 1.5 sq mm 90 m | Finolex
+Finolex FRLS Copper Wire 2.5 sq mm 90 m | Finolex
+Finolex Flexible Cable 3 Core 1.5 sq mm 100 m | Finolex
+Finolex Flexible Cable 3 Core 2.5 sq mm 100 m | Finolex
+RR Kabel FR Copper Wire 1 sq mm 90 m | RR Kabel
+RR Kabel FR Copper Wire 1.5 sq mm 90 m | RR Kabel
+RR Kabel FR Copper Wire 2.5 sq mm 90 m | RR Kabel
+RR Kabel FR Copper Wire 4 sq mm 90 m | RR Kabel
+RR Kabel Flexible Cable 3 Core 1.5 sq mm 100 m | RR Kabel
+RR Kabel Flexible Cable 3 Core 2.5 sq mm 100 m | RR Kabel
+Anchor Fire Resistant Wire 1.5 sq mm 90 m | Anchor
+Anchor Fire Resistant Wire 2.5 sq mm 90 m | Anchor
+Anchor Flexible Cable 3 Core 1.5 sq mm 100 m | Anchor
+KEI Wire FRLS 1.5 sq mm 90 m | KEI
+KEI Wire FRLS 2.5 sq mm 90 m | KEI
+V-Guard Flexible Wire 1.5 sq mm 90 m | V-Guard
+V-Guard Flexible Wire 2.5 sq mm 90 m | V-Guard
+Orbit Wire FR 1.5 sq mm 90 m | Orbit
+Orbit Wire FR 2.5 sq mm 90 m | Orbit
+Gold Medal Wire FR 1.5 sq mm 90 m | Gold Medal
+Gold Medal Wire FR 2.5 sq mm 90 m | Gold Medal
+Gold Medal Flexible Cable 3 Core | Gold Medal
+Copper Wire Single Strand 1.5 sq mm per metre
+Copper Wire Single Strand 2.5 sq mm per metre
+Copper Wire Single Strand 4 sq mm per metre
+Copper Wire Multi Strand 0.5 sq mm per metre
+Copper Wire Multi Strand 0.75 sq mm per metre
+Copper Wire Multi Strand 1 sq mm per metre
+Copper Wire Multi Strand 1.5 sq mm per metre
+Copper Wire Multi Strand 2.5 sq mm per metre
+Copper Wire Multi Strand 4 sq mm per metre
+Copper Wire Multi Strand 6 sq mm per metre
+Copper Wire Multi Strand 10 sq mm per metre
+Aluminium Wire 4 sq mm per metre
+Aluminium Wire 6 sq mm per metre
+Aluminium Wire 10 sq mm per metre
+Aluminium Cable 3 Core 16 sq mm per metre
+Aluminium Cable 3.5 Core 25 sq mm per metre
+Aluminium Cable 4 Core 16 sq mm per metre
+Aluminium Armoured Cable 4 Core 25 sq mm per metre
+Aluminium Armoured Cable 3.5 Core 35 sq mm per metre
+Aluminium Armoured Cable 3.5 Core 50 sq mm per metre
+Copper Armoured Cable 3 Core 2.5 sq mm per metre
+Copper Armoured Cable 4 Core 6 sq mm per metre
+Copper Armoured Cable 4 Core 10 sq mm per metre
+Flat Cable 2 Core 1 sq mm per metre
+Flat Cable 2 Core 1.5 sq mm per metre
+Flat Cable 3 Core 1 sq mm per metre
+Flat Cable 3 Core 1.5 sq mm per metre
+Flat Cable 3 Core 2.5 sq mm per metre
+Round Cable 2 Core 1 sq mm per metre
+Round Cable 3 Core 0.75 sq mm per metre
+Round Cable 3 Core 1.5 sq mm per metre
+Round Cable 4 Core 1 sq mm per metre
+Round Cable 4 Core 2.5 sq mm per metre
+Round Cable 5 Core 1.5 sq mm per metre
+Round Cable 5 Core 2.5 sq mm per metre
+Submersible Flat Cable 3 Core 1.5 sq mm per metre
+Submersible Flat Cable 3 Core 2.5 sq mm per metre
+Submersible Flat Cable 4 Core 4 sq mm per metre
+Welding Wire Copper 16 sq mm per metre
+Earthing Wire Green 4 sq mm per metre
+Earthing Strip GI 25 x 3 mm per metre | | | 7216
+Earthing Strip GI 32 x 6 mm per metre | | | 7216
+Earthing Rod Copper Bonded 1.5 m | | Piece | 7407 | | pieces=0
+Earthing Rod GI 1 m | | Piece | 7306 | | pieces=0
+Earthing Plate GI 600 x 600 mm | | Piece | 7326 | | pieces=0
+Earthing Chemical Bag 25 kg | | Bag | 3824 | | pieces=0
+Earthing Pit Cover | | Piece | 3925 | | pieces=0
+Lightning Arrester Rod Copper | | Piece | 8535 | | pieces=0
+Speaker Cable Transparent per metre | | | 8544
+Speaker Cable 2 Core 0.75 sq mm per metre | | | 8544
+Speaker Cable 2 Core 1.5 sq mm per metre | | | 8544
+Speaker Cable Copper 2 x 40 per metre | | | 8544
+Coaxial Cable RG6 per metre | | | 8544
+Coaxial Cable RG59 per metre | | | 8544
+Coaxial Cable RG59 with Power CCTV per metre | | | 8544
+Coaxial Cable Dish TV per metre | | | 8544
+Telephone Wire 2 Pair per metre | | | 8544
+Telephone Wire 4 Pair per metre | | | 8544
+Intercom Cable 4 Core per metre | | | 8544
+Bell Wire Twin per metre | | | 8544
+Ethernet Cable Cat6 UTP per metre | | | 8544
+Ethernet Cable Cat5e UTP per metre | | | 8544
+Optical Fibre Patch Cord SC LC | | Piece | 8544 | | pieces=0
+Optical Fibre Cable Drop 2 Core per metre | | | 8544
+Control Cable 5 Core 0.75 sq mm per metre | | | 8544
+Control Cable 7 Core 1.5 sq mm per metre | | | 8544
+Control Cable 12 Core 1.5 sq mm per metre | | | 8544
+Solar Cable DC 4 sq mm per metre | | | 8544
+Solar Cable DC 6 sq mm per metre | | | 8544
+Solar MC4 Connector Pair | | Pair | 8536 | | pieces=0
+Heat Resistant Silicone Wire 1.5 sq mm per metre | | | 8544
+Heat Resistant Wire 2.5 sq mm per metre | | | 8544
+Fire Alarm Cable 2 Core per metre | | | 8544
+
+## Switches, Sockets & Plates | Piece | 8536 | 18
+Anchor Roma 6A Switch 1 Way White | Anchor
+Anchor Roma 6A Switch 2 Way White | Anchor
+Anchor Roma 16A Switch 1 Way White | Anchor
+Anchor Roma 6A Socket 2 Pin White | Anchor
+Anchor Roma 6A Socket 3 Pin White | Anchor
+Anchor Roma 16A Socket 3 Pin White | Anchor
+Anchor Roma 5 Pin Socket 6A / 16A | Anchor
+Anchor Roma Fan Regulator Step Type | Anchor
+Anchor Roma Fan Regulator Electronic | Anchor
+Anchor Roma Bell Push | Anchor
+Anchor Roma Indicator Neon | Anchor
+Anchor Roma Dimmer 400 W | Anchor
+Anchor Roma Telephone Jack | Anchor
+Anchor Roma TV Socket | Anchor
+Anchor Roma LAN Socket Cat6 | Anchor
+Anchor Roma USB Charger Socket 2.1 A | Anchor
+Anchor Roma Plate 1 Module White | Anchor
+Anchor Roma Plate 2 Module White | Anchor
+Anchor Roma Plate 3 Module White | Anchor
+Anchor Roma Plate 4 Module White | Anchor
+Anchor Roma Plate 6 Module White | Anchor
+Anchor Roma Plate 8 Module White | Anchor
+Anchor Roma Plate 12 Module White | Anchor
+Anchor Roma Blank Plate 1 Module | Anchor
+Anchor Penta 6A Switch 1 Way | Anchor
+Anchor Penta 16A Socket | Anchor
+Anchor Woods 6A Switch 1 Way | Anchor
+Anchor Rider 6A Switch | Anchor
+Anchor Ave Switch Socket Combo | Anchor
+Legrand Myrius 6A Switch 1 Way | Legrand
+Legrand Myrius 6A Switch 2 Way | Legrand
+Legrand Myrius 16A Switch | Legrand
+Legrand Myrius 6A Socket 3 Pin | Legrand
+Legrand Myrius 16A Socket | Legrand
+Legrand Myrius 5 Pin Socket | Legrand
+Legrand Myrius Fan Regulator | Legrand
+Legrand Myrius Bell Push | Legrand
+Legrand Myrius Plate 2 Module | Legrand
+Legrand Myrius Plate 4 Module | Legrand
+Legrand Myrius Plate 6 Module | Legrand
+Legrand Myrius Plate 8 Module | Legrand
+Legrand Lyncus Switch 6A 1 Way | Legrand
+Legrand Arteor Switch | Legrand
+Legrand Mylinc Switch | Legrand
+Havells Crabtree Athena 6A Switch 1 Way | Havells
+Havells Crabtree Athena 6A Switch 2 Way | Havells
+Havells Crabtree Athena 16A Switch | Havells
+Havells Crabtree Athena 6A Socket 3 Pin | Havells
+Havells Crabtree Athena 16A Socket | Havells
+Havells Crabtree Athena 5 Pin Socket | Havells
+Havells Crabtree Athena Fan Regulator | Havells
+Havells Crabtree Athena Plate 2 Module | Havells
+Havells Crabtree Athena Plate 4 Module | Havells
+Havells Crabtree Athena Plate 6 Module | Havells
+Havells Crabtree Athena Plate 8 Module | Havells
+Havells Crabtree Classic Switch 6A | Havells
+Havells Crabtree Classic Plate 2 Module | Havells
+Havells Reo Switch 6A | Havells
+Havells Standard Switch Socket Combo | Havells
+GM Modular 6A Switch | GM
+GM Modular 16A Switch | GM
+GM Modular 5 Pin Socket | GM
+GM Modular Fan Regulator | GM
+GM Modular Plate 2 Module | GM
+GM Modular Plate 4 Module | GM
+GM Modular Plate 6 Module | GM
+Schneider Zencelo 6A Switch | Schneider
+Schneider Zencelo 16A Socket | Schneider
+Schneider Zencelo Plate 4 Module | Schneider
+Schneider Livia 6A Switch | Schneider
+Schneider Opale 6A Switch | Schneider
+Schneider Opale Socket 16A | Schneider
+Philips Ivory Switch 6A | Philips
+Philips Ivory Socket 3 Pin 6A | Philips
+Philips Ivory Plate 4 Module | Philips
+Polycab Switch 6A | Polycab
+Polycab Socket 5 Pin | Polycab
+Polycab Plate 2 Module | Polycab
+Polycab Plate 4 Module | Polycab
+Crompton Switch Socket 6A | Crompton
+Wipro Switch Socket Combo | Wipro
+Norisys Switch 6A | Norisys
+Norisys Socket 16A | Norisys
+Standard Plastic Switch 6A Brown | | | 8536
+Standard Plastic Switch 6A White | | | 8536
+Standard Plastic Switch 16A White | | | 8536
+Standard Plastic Socket 6A 2 Pin | | | 8536
+Standard Plastic Socket 6A 3 Pin | | | 8536
+Standard Plastic Socket 16A 3 Pin | | | 8536
+Standard Plastic Plate 4 Switch | | | 8538
+Standard Plastic Plate 6 Switch | | | 8538
+Bakelite Switch 6A Brown | | | 8536
+Bakelite Plug Top 6A | | | 8536
+Bakelite Plug Top 16A | | | 8536
+Plug Top 3 Pin 6A Brown | | | 8536
+Plug Top 3 Pin 6A White | | | 8536
+Plug Top 3 Pin 16A | | | 8536
+Plug Top 2 Pin 6A | | | 8536
+Plug Top Multi 5 Pin | | | 8536
+Plug Top Heavy 32A | | | 8536
+Industrial Socket 16A 3 Pin | | | 8536
+Industrial Socket 32A 3 Pin | | | 8536
+Industrial Plug 16A 3 Pin | | | 8536
+Industrial Plug 32A 3 Pin | | | 8536
+Industrial Socket 63A 4 Pin | | | 8536
+Industrial Plug 63A 4 Pin | | | 8536
+Multiplug 3 Way | | | 8536
+Multiplug 5 Way | | | 8536
+Plug Adapter Universal Travel | | | 8536
+Plug Adapter 2 Pin to 3 Pin | | | 8536
+Changeover Switch 16A Single Phase | | | 8536
+Rotary Switch 20A | | | 8536
+Rotary Switch 32A | | | 8536
+Push Button Switch Green | | | 8536
+Push Button Switch Red | | | 8536
+Push Button Stop Start Station | | | 8536
+Emergency Stop Switch | | | 8536
+Limit Switch | | | 8536
+Toggle Switch 6A | | | 8536
+Rocker Switch 6A | | | 8536
+Rocker Switch Round | | | 8536
+Selector Switch 3 Position | | | 8536
+Foot Switch | | | 8536
+Float Switch Water | | | 9032
+Door Bell Switch Button | | | 8536
+Door Bell Ding Dong | | | 8531
+Door Bell Wireless | | | 8531
+Door Bell Musical | | | 8531
+Door Bell Cuckoo | | | 8531
+Door Bell Buzzer | | | 8531
+Door Bell Bird Sound | | | 8531
+Door Bell Battery Operated | | | 8531
+Door Bell Siren | | | 8531
+Intercom Basic 2 Way | | | 8517
+Video Door Phone 7 inch | | | 8517
+Door Alarm Magnetic | | | 8531
+Smart Switch Wi-Fi 1 Gang | | | 8536
+Smart Switch Wi-Fi 4 Gang | | | 8536
+Smart Plug Wi-Fi 16A | | | 8536
+Smart Fan Controller Wi-Fi | | | 8536
+Smart Curtain Switch | | | 8536
+Smart Touch Panel 4 Gang | | | 8536
+Motion Sensor Switch | | | 9032
+Occupancy Sensor Ceiling | | | 9032
+Light Sensor Photocell | | | 9032
+Timer Switch Digital | | | 9107
+Timer Switch Mechanical 24 hr | | | 9107
+Night Lamp LED Auto Sensor | | | 9405
+Power Strip 4 Socket 1.5 m | | | 8536
+Power Strip 6 Socket 3 m | | | 8536
+Power Strip 8 Socket 5 m with Surge | | | 8536
+Power Strip with Switch and Indicator | | | 8536
+Power Strip 4 Way Anchor | Anchor | | 8536
+Power Strip 4 Way Havells | Havells | | 8536
+Power Strip 6 Way Syska | Syska | | 8536
+Power Strip 6 Way Philips | Philips | | 8536
+Surge Protector Belkin | Belkin | | 8536
+Surge Protector 6 Socket Heavy | | | 8536
+Spike Guard 5 Socket | | | 8536
+Cord Extension Heavy Duty 15 A 10 m | | | 8544
+Cord Extension Household 6 A 5 m | | | 8544
+Cord Reel 25 m Heavy | | | 8544
+
+## MCB, Distribution & Meters | Piece | 8536 | 18 | warranty=12
+Havells MCB SP 6A C Curve | Havells
+Havells MCB SP 10A C Curve | Havells
+Havells MCB SP 16A C Curve | Havells
+Havells MCB SP 20A C Curve | Havells
+Havells MCB SP 32A C Curve | Havells
+Havells MCB SP 40A C Curve | Havells
+Havells MCB SP 63A C Curve | Havells
+Havells MCB DP 16A C Curve | Havells
+Havells MCB DP 32A C Curve | Havells
+Havells MCB DP 63A C Curve | Havells
+Havells MCB TP 32A C Curve | Havells
+Havells MCB TP 63A C Curve | Havells
+Havells RCCB 2 Pole 25A 30 mA | Havells
+Havells RCCB 2 Pole 40A 30 mA | Havells
+Havells RCCB 4 Pole 40A 30 mA | Havells
+Havells RCBO 32A 30 mA | Havells
+Havells MCCB 100A 3 Pole | Havells
+Havells Isolator 2 Pole 32A | Havells
+Havells Isolator 4 Pole 63A | Havells
+Havells Double Door DB 4 Way | Havells
+Havells Double Door DB 6 Way | Havells
+Havells Double Door DB 8 Way | Havells
+Havells Double Door DB 12 Way | Havells
+Havells Single Door DB 4 Way | Havells
+Havells Surface DB 6 Way | Havells
+Legrand MCB SP 6A | Legrand
+Legrand MCB SP 10A | Legrand
+Legrand MCB SP 16A | Legrand
+Legrand MCB SP 32A | Legrand
+Legrand MCB SP 63A | Legrand
+Legrand MCB DP 32A | Legrand
+Legrand MCB TP 63A | Legrand
+Legrand RCCB 2 Pole 40A 30 mA | Legrand
+Legrand RCCB 4 Pole 40A 30 mA | Legrand
+Legrand MCCB 100A | Legrand
+Legrand DB 4 Way | Legrand
+Legrand DB 6 Way | Legrand
+Legrand DB 8 Way | Legrand
+Schneider Easy9 MCB SP 6A | Schneider
+Schneider Easy9 MCB SP 16A | Schneider
+Schneider Easy9 MCB SP 32A | Schneider
+Schneider Easy9 MCB DP 32A | Schneider
+Schneider Easy9 RCCB 2 Pole 40A | Schneider
+Schneider Easy9 DB 6 Way | Schneider
+L&T MCB SP 16A | L&T
+L&T MCB SP 32A | L&T
+L&T MCB DP 32A | L&T
+L&T MCB TP 32A | L&T
+L&T RCCB 2 Pole 40A | L&T
+L&T MCCB 63A | L&T
+L&T MCCB 100A | L&T
+L&T Contactor 9A 3 Pole | L&T
+L&T Contactor 16A 3 Pole | L&T
+L&T Contactor 25A 3 Pole | L&T
+L&T Overload Relay 0.63-1 A | L&T
+L&T Overload Relay 4-6 A | L&T
+L&T Overload Relay 9-13 A | L&T
+L&T DOL Starter 5 HP | L&T
+L&T DOL Starter 7.5 HP | L&T
+L&T Star Delta Starter 10 HP | L&T
+Siemens MCB SP 16A | Siemens
+Siemens MCB SP 32A | Siemens
+Siemens MCB DP 32A | Siemens
+Siemens MCB TP 32A | Siemens
+Siemens RCCB 2 Pole 40A | Siemens
+Siemens Contactor 9A | Siemens
+Siemens Contactor 16A | Siemens
+Siemens Contactor 25A | Siemens
+Siemens Overload Relay | Siemens
+C&S MCB SP 16A | C&S
+C&S MCB SP 32A | C&S
+C&S MCB DP 32A | C&S
+Hager MCB SP 16A | Hager
+Hager MCB DP 32A | Hager
+Polycab MCB SP 16A | Polycab
+Polycab MCB SP 32A | Polycab
+Polycab MCB DP 32A | Polycab
+Polycab RCCB 2 Pole 40A | Polycab
+Polycab DB 6 Way | Polycab
+Indo Asian MCB SP 16A | Indo Asian
+Standard MCB Box 2 Way | | | 8537
+Standard MCB Box 4 Way | | | 8537
+Standard MCB Box 8 Way | | | 8537
+MCB Box Flush 4 Way | | | 8537
+MCB Box Surface 4 Way | | | 8537
+MCB Box Metal 6 Way | | | 8537
+Fuse Box Wall Mounted 16A | | | 8536
+Fuse Wire Roll 5 A | | | 8536
+Fuse Wire Roll 10 A | | | 8536
+Fuse Carrier 16A with Wire | | | 8536
+Fuse Cartridge 5A Glass | | | 8536
+Fuse Cartridge 10A Glass | | | 8536
+Fuse HRC 32A | | | 8536
+Fuse HRC 63A | | | 8536
+Fuse HRC 100A | | | 8536
+Fuse Base HRC 63A | | | 8536
+Fuse Switch Unit 32A | | | 8536
+Fuse Switch Unit 63A | | | 8536
+Fuse Switch Unit 100A | | | 8536
+Main Switch 2 Pole 32A Iron Clad | | | 8536
+Main Switch 2 Pole 63A Iron Clad | | | 8536
+Main Switch 4 Pole 63A Iron Clad | | | 8536
+Main Switch 4 Pole 100A Iron Clad | | | 8536
+Change Over Switch 63A | | | 8536
+Change Over Switch 100A | | | 8536
+Changeover Switch 125A | | | 8536
+Phase Selector Switch | | | 8536
+Phase Failure Relay | | | 9032
+Phase Protector Single Phase | | | 9032
+Phase Protector Three Phase | | | 9032
+Voltage Monitor Digital | | | 9030
+Voltmeter Digital | | | 9030
+Ammeter Digital | | | 9030
+Ammeter Analog 0-30 A | | | 9030
+Voltmeter Analog 0-500 V | | | 9030
+Power Factor Meter | | | 9030
+Frequency Meter | | | 9030
+Energy Meter Single Phase L&T | L&T | | 9028
+Energy Meter Single Phase Secure | Secure | | 9028
+Energy Meter Single Phase HPL | HPL | | 9028
+Energy Meter Three Phase L&T | L&T | | 9028
+Energy Meter Three Phase Secure | Secure | | 9028
+Energy Meter Three Phase HPL | HPL | | 9028
+Energy Meter Digital Prepaid | | | 9028
+Energy Meter DIN Rail | | | 9028
+Current Transformer 100/5 A | | | 8504
+Current Transformer 200/5 A | | | 8504
+Current Transformer 400/5 A | | | 8504
+Power Contactor 40A 3 Pole | | | 8536
+Relay Industrial 24 V | | | 8536
+Relay Industrial 230 V | | | 8536
+Relay Socket 8 Pin | | | 8536
+Relay Socket 11 Pin | | | 8536
+Time Delay Relay | | | 9107
+Timer Digital Programmable | | | 9107
+Star Delta Timer | | | 9107
+Capacitor 5 mfd Motor | | | 8532
+Capacitor 10 mfd Motor | | | 8532
+Capacitor 25 mfd Motor | | | 8532
+Capacitor 50 mfd Motor | | | 8532
+Capacitor 100 mfd Motor | | | 8532
+Capacitor Fan 1.5 mfd | | | 8532
+Capacitor Fan 2.5 mfd | | | 8532
+Capacitor Fan 3.5 mfd | | | 8532
+Capacitor Fan 4 mfd | | | 8532
+Capacitor Tube Light 4 mfd | | | 8532
+Capacitor Power Factor 10 kVAR | | | 8532
+Capacitor Power Factor 25 kVAR | | | 8532
+Meter Board Wooden | | | 4421
+Meter Board PVC | | | 3925
+Meter Box Single Phase | | | 8537
+Meter Box Three Phase | | | 8537
+Distribution Board Metal 12 Way | | | 8537
+Control Panel Box 400 x 300 mm | | | 8537
+Control Panel Box 600 x 400 mm | | | 8537
+Control Panel Box 800 x 600 mm | | | 8537
+Junction Box PVC 3 x 3 inch | | | 3925
+Junction Box PVC 4 x 4 inch | | | 3925
+Junction Box PVC 6 x 6 inch | | | 3925
+Junction Box Metal 4 x 4 inch | | | 7326
+Junction Box Weatherproof | | | 3925
+Modular Box GI 2 Module | | | 7326
+Modular Box GI 4 Module | | | 7326
+Modular Box GI 8 Module | | | 7326
+Modular Box PVC 2 Module | | | 3925
+Modular Box PVC 4 Module | | | 3925
+Modular Box PVC 8 Module | | | 3925
+Modular Box PVC 12 Module | | | 3925
+Ceiling Rose | | | 8536
+Cable Gland 20 mm Brass | | | 7412
+Cable Gland 25 mm Brass | | | 7412
+Cable Gland 32 mm Brass | | | 7412
+Cable Gland PVC 20 mm | | | 3926
+Cable Tray GI 100 mm per metre | | | 7326
+Cable Tray GI 150 mm per metre | | | 7326
+Cable Tray GI 300 mm per metre | | | 7326
+Cable Lug Copper 4 sq mm Pack | | Packet | 8536
+Cable Lug Copper 6 sq mm Pack | | Packet | 8536
+Cable Lug Copper 10 sq mm Pack | | Packet | 8536
+Cable Lug Copper 16 sq mm Pack | | Packet | 8536
+Cable Lug Copper 25 sq mm Pack | | Packet | 8536
+Cable Lug Aluminium 25 sq mm Pack | | Packet | 8536
+Cable Lug Aluminium 50 sq mm Pack | | Packet | 8536
+Cable Ferrule Pin Type Pack | | Packet | 8536
+Cable Ferrule Pin Type Assorted Kit | | Box | 8536
+Terminal Connector 3 Way | | | 8536
+Terminal Connector 6 Way | | | 8536
+Terminal Connector 12 Way | | | 8536
+Terminal Block 4 mm 12 Way | | | 8536
+Terminal Block 6 mm 12 Way | | | 8536
+Terminal Block 10 mm 12 Way | | | 8536
+Terminal Block DIN Rail | | | 8536
+DIN Rail 1 m | | | 7326
+Connector Wire Push In 2 Way Pack | | Packet | 8536
+Connector Wire Push In 3 Way Pack | | Packet | 8536
+Connector Wire Nuts Pack | | Packet | 8536
+
+## Lighting - LED Bulbs, Tubes & Panels | Piece | 8539 | 18 | warranty=12
+Philips Stellar Bright LED Bulb 9 W B22 | Philips
+Philips Stellar Bright LED Bulb 12 W B22 | Philips
+Philips Stellar Bright LED Bulb 14 W B22 | Philips
+Philips Ace Saver LED Bulb 9 W B22 | Philips
+Philips Ace Saver LED Bulb 12 W B22 | Philips
+Philips LED Candle E14 Bulb 4 W | Philips
+Philips LED Bulb 7 W E27 | Philips
+Philips LED Bulb 5 W B22 | Philips
+Philips LED Bulb 3 W B22 | Philips
+Philips LED Bulb 15 W B22 | Philips
+Philips LED Bulb 18 W B22 | Philips
+Philips Tubelight LED 20 W 4 ft | Philips
+Philips Tubelight LED 10 W 2 ft | Philips
+Philips LED Batten 20 W 4 ft | Philips
+Philips LED Panel 12 W Round | Philips
+Philips LED Panel 15 W Square | Philips
+Philips LED Panel 18 W Round | Philips
+Philips LED Panel 22 W Square | Philips
+Philips LED Downlight 5 W | Philips
+Philips LED Downlight 12 W | Philips
+Philips LED COB 7 W | Philips
+Philips LED Spotlight 3 W | Philips
+Philips LED Flood Light 30 W | Philips
+Philips LED Flood Light 50 W | Philips
+Philips LED Street Light 40 W | Philips
+Philips LED Strip 5 m RGB | Philips
+Philips LED Driver 12 V 5 A | Philips
+Syska LED Bulb 5 W B22 | Syska
+Syska LED Bulb 7 W B22 | Syska
+Syska LED Bulb 12 W B22 | Syska
+Syska LED Bulb 15 W B22 | Syska
+Syska LED Bulb 18 W B22 | Syska
+Syska LED Bulb 20 W B22 | Syska
+Syska LED Bulb 9 W E27 | Syska
+Syska Tubelight LED 20 W 4 ft | Syska
+Syska Tubelight LED 10 W 2 ft | Syska
+Syska LED Batten 22 W | Syska
+Syska LED Panel 12 W Round | Syska
+Syska LED Panel 15 W Round | Syska
+Syska LED Panel 18 W Square | Syska
+Syska LED Panel 24 W Square | Syska
+Syska LED Downlight 7 W | Syska
+Syska LED Spot COB 7 W | Syska
+Syska LED Flood Light 50 W | Syska
+Syska LED Flood Light 100 W | Syska
+Syska LED Street Light 50 W | Syska
+Syska LED Strip 5 m Warm White | Syska
+Syska Smart Bulb 9 W Wi-Fi | Syska
+Syska LED Emergency Bulb 9 W | Syska
+Havells LED Bulb Adore 9 W B22 | Havells
+Havells LED Bulb Adore 12 W B22 | Havells
+Havells LED Bulb Adore 15 W B22 | Havells
+Havells LED Bulb Adore 5 W B22 | Havells
+Havells LED Bulb Adore 7 W B22 | Havells
+Havells LED Bulb Adore 20 W B22 | Havells
+Havells LED Bulb Adore 9 W E27 | Havells
+Havells LED Tubelight 20 W 4 ft | Havells
+Havells LED Tubelight 10 W 2 ft | Havells
+Havells LED Batten Tubelight 22 W | Havells
+Havells LED Panel Slim 12 W | Havells
+Havells LED Panel Slim 15 W | Havells
+Havells LED Panel Slim 22 W | Havells
+Havells LED Downlight 12 W | Havells
+Havells LED Flood Light 50 W | Havells
+Havells LED Flood Light 100 W | Havells
+Havells LED Flood Light 200 W | Havells
+Havells LED Street Light 60 W | Havells
+Havells LED Street Light 100 W | Havells
+Havells LED Strip 5 m | Havells
+Wipro Garnet LED Bulb 5 W B22 | Wipro
+Wipro Garnet LED Bulb 12 W B22 | Wipro
+Wipro Garnet LED Bulb 15 W B22 | Wipro
+Wipro Garnet LED Bulb 7 W B22 | Wipro
+Wipro Garnet Tubelight LED 20 W | Wipro
+Wipro Garnet LED Panel 12 W | Wipro
+Wipro Garnet LED Panel 18 W | Wipro
+Wipro Garnet LED Flood Light 30 W | Wipro
+Wipro Garnet LED Flood Light 50 W | Wipro
+Wipro Smart LED Bulb 9 W | Wipro
+Wipro Smart LED Strip | Wipro
+Orient Electric LED Bulb 9 W B22 | Orient
+Orient Electric LED Bulb 12 W B22 | Orient
+Orient Electric LED Bulb 15 W B22 | Orient
+Orient Electric LED Tubelight 20 W | Orient
+Orient Electric LED Tubelight 10 W | Orient
+Orient Electric LED Panel 12 W | Orient
+Orient Electric LED Panel 18 W | Orient
+Orient Electric LED Flood Light 50 W | Orient
+Orient Electric LED Strip Light | Orient
+Crompton LED Bulb 9 W B22 | Crompton
+Crompton LED Bulb 12 W B22 | Crompton
+Crompton LED Bulb 15 W B22 | Crompton
+Crompton LED Bulb 5 W B22 | Crompton
+Crompton LED Tubelight 20 W | Crompton
+Crompton LED Tubelight 10 W | Crompton
+Crompton LED Panel 12 W | Crompton
+Crompton LED Panel 18 W | Crompton
+Crompton LED Flood Light 30 W | Crompton
+Crompton LED Flood Light 50 W | Crompton
+Bajaj LED Bulb 9 W B22 | Bajaj
+Bajaj LED Bulb 12 W B22 | Bajaj
+Bajaj LED Bulb 15 W B22 | Bajaj
+Bajaj LED Tubelight 20 W | Bajaj
+Bajaj LED Panel 15 W | Bajaj
+Bajaj LED Flood Light 50 W | Bajaj
+Eveready LED Bulb 5 W B22 | Eveready
+Eveready LED Bulb 12 W B22 | Eveready
+Eveready LED Bulb 15 W B22 | Eveready
+Eveready LED Tubelight 20 W | Eveready
+Eveready LED Panel 12 W | Eveready
+Eveready LED Flood Light 50 W | Eveready
+Eveready Emergency LED Bulb 9 W | Eveready
+Eveready Rechargeable LED Bulb 12 W | Eveready
+Surya LED Bulb 9 W B22 | Surya
+Surya LED Bulb 12 W B22 | Surya
+Surya LED Tubelight 20 W | Surya
+Surya LED Panel 15 W | Surya
+Surya LED Flood Light 50 W | Surya
+Polycab LED Bulb 9 W B22 | Polycab
+Polycab LED Bulb 12 W B22 | Polycab
+Polycab LED Panel 15 W | Polycab
+Polycab LED Tubelight 20 W | Polycab
+Polycab LED Flood Light 50 W | Polycab
+Bulb LED Generic 5 W B22
+Bulb LED Generic 7 W B22
+Bulb LED Generic 9 W B22
+Bulb LED Generic 12 W B22
+Bulb LED Generic 15 W B22
+Bulb LED Generic 18 W B22
+Bulb LED Generic 20 W B22
+Bulb LED Generic 9 W E27
+Bulb LED Generic 12 W E27
+Bulb LED Candle 3 W E14
+Bulb LED Candle 5 W E14
+Bulb LED Filament 4 W
+Bulb LED Filament 6 W
+Bulb LED Colour RGB 9 W
+Bulb LED Zero Watt 0.5 W
+Bulb LED Night Lamp 0.5 W
+Bulb Incandescent 40 W | | | 8539 | 18
+Bulb Incandescent 60 W | | | 8539 | 18
+Bulb Incandescent 100 W | | | 8539 | 18
+Bulb Halogen 50 W | | | 8539 | 18
+Bulb Halogen 300 W | | | 8539 | 18
+Bulb CFL 11 W | | | 8539 | 18
+Bulb CFL 15 W | | | 8539 | 18
+Bulb CFL 23 W | | | 8539 | 18
+Tubelight LED Generic 20 W 4 ft
+Tubelight LED Generic 10 W 2 ft
+Tubelight LED Batten 18 W
+Tubelight LED T5 Batten 22 W
+Tubelight LED T5 Batten 28 W
+Tubelight LED Double Row 36 W
+Tubelight Glass LED 20 W
+Tubelight Fluorescent 36 W | | | 8539 | 18
+Tubelight Fluorescent 40 W | | | 8539 | 18
+Tubelight Fluorescent 20 W | | | 8539 | 18
+Tubelight Choke 40 W | | | 8504 | 18
+Tubelight Choke 36 W | | | 8504 | 18
+Tubelight Starter | | | 8536 | 18
+Tubelight Fitting Single | | | 9405 | 18
+Tubelight Fitting 4 ft with Cover | | | 9405 | 18
+Tubelight Fitting Double | | | 9405 | 18
+Tubelight Holder Pair | | Pair | 8536 | 18
+Tubelight Holder Pair LED | | Pair | 8536 | 18
+Panel Light 12 W Round Concealed
+Panel Light 15 W Round Concealed
+Panel Light 18 W Round Concealed
+Panel Light 24 W Round Concealed
+Panel Light 12 W Square Concealed
+Panel Light 15 W Square Concealed
+Panel Light 18 W Square Concealed
+Panel Light 24 W Square Concealed
+Panel Light 12 W Surface Round
+Panel Light 18 W Surface Round
+Panel Light 24 W Surface Round
+Panel Light 12 W Surface Square
+Panel Light 18 W Surface Square
+Panel Light 24 W Surface Square
+Panel Light 36 W 2 x 2 ft
+Panel Light 40 W 2 x 2 ft
+Panel Light 48 W 2 x 2 ft
+Panel Light 36 W 1 x 4 ft
+Panel Light RGB 12 W
+Panel Light Backlit 36 W 2 x 2 ft
+Panel Light Backlit 40 W 2 x 2 ft
+Panel Light Backlit 60 W 2 x 2 ft
+Spot Light COB 3 W
+Spot Light COB 5 W
+Spot Light COB 7 W
+Spot Light COB 10 W
+Spot Light COB 12 W
+Spot Light COB 15 W
+Spot Light COB Adjustable 12 W
+Spot Light Track 12 W
+Spot Light Track 20 W
+Spot Light Track 30 W
+Spot Light Track Rail 1 m
+Spot Light Gimbal 7 W
+Spot Light Downlighter Deep 12 W
+Spot Light Recessed 3 W
+Spot Light Recessed 5 W
+Spot Light Recessed 9 W
+Spot Light GU10 5 W
+Spot Light MR16 5 W
+Spot Light Halogen Holder
+Spot Light Fitting Round
+Spot Light Fitting Square
+Flood Light LED 10 W
+Flood Light LED 20 W
+Flood Light LED 30 W
+Flood Light LED 50 W
+Flood Light LED 100 W
+Flood Light LED 150 W
+Flood Light LED 200 W
+Flood Light LED 300 W
+Flood Light LED 400 W
+Flood Light LED Solar 100 W
+Flood Light LED Solar 200 W
+Flood Light LED Sensor 30 W
+Flood Light LED RGB 50 W
+Flood Light Halogen 500 W | | | 9405 | 18
+Flood Light Halogen 1000 W | | | 9405 | 18
+Flood Light Metal Halide 250 W | | | 9405 | 18
+Flood Light Metal Halide 400 W | | | 9405 | 18
+Street Light LED 30 W
+Street Light LED 50 W
+Street Light LED 60 W
+Street Light LED 90 W
+Street Light LED 120 W
+Street Light LED Solar 30 W
+Street Light LED Solar 60 W
+Street Light LED Solar Integrated 100 W
+Street Light Pole GI 4 m | | | 7308 | 18
+Street Light Pole GI 6 m | | | 7308 | 18
+Street Light Bracket | | | 7326 | 18
+High Mast Light 400 W | | | 9405 | 18
+Bulkhead Light LED 12 W
+Bulkhead Light LED 18 W
+Bulkhead Light Round Outdoor
+Gate Light LED Pillar
+Gate Light LED Wall Mounted
+Wall Light LED Indoor
+Wall Light LED Outdoor
+Wall Light Up Down
+Wall Light Mirror LED
+Garden Light LED Spike
+Garden Light LED Bollard
+Garden Light Solar
+Garden Light Solar String 10 m
+Solar Garden Lamp Pack of 4 | | Packet
+Pendant Light Decorative
+Pendant Light Hanging Glass
+Pendant Light LED Round
+Pendant Light Cluster
+Chandelier Crystal 6 Light
+Chandelier Modern LED
+Ceiling Light Fancy
+Ceiling Light Surface LED 24 W
+Ceiling Light Surface LED 36 W
+Ceiling Light Surface LED 48 W
+Ceiling Light Round Decorative
+Table Lamp LED Study
+Table Lamp LED Rechargeable
+Table Lamp Decorative
+Table Lamp Touch Sensor
+Floor Lamp
+Floor Lamp Standing LED
+Study Lamp Clip On
+Reading Lamp Flexible
+Mirror Light LED
+Picture Light LED
+Strip Light LED 5 m Warm
+Strip Light LED 5 m Cool White
+Strip Light LED 5 m RGB Remote
+Strip Light LED 10 m
+Strip Light LED COB 5 m
+Strip Light LED Neon Flex per metre
+Strip Light LED Waterproof 5 m
+Strip Light LED Driver 12 V 2 A
+Strip Light LED Driver 12 V 5 A
+Strip Light LED Driver 12 V 10 A
+Strip Light LED Controller RGB
+Strip Light LED Aluminium Channel 1 m
+LED Driver 12 V 1 A
+LED Driver 12 W
+LED Driver 18 W
+LED Driver 24 W
+LED Driver 36 W
+LED Driver 50 W
+LED Driver Panel Light
+LED Driver Constant Current 300 mA
+LED Driver Constant Current 700 mA
+LED Driver Flood Light 50 W
+LED Driver Flood Light 100 W
+LED Driver Street Light
+LED Choke Tubelight
+Bulb Holder B22 Plastic
+Bulb Holder B22 Brass
+Bulb Holder B22 Batten
+Bulb Holder B22 Pendant
+Bulb Holder B22 Ceramic
+Bulb Holder E27 Plastic
+Bulb Holder E27 Brass
+Bulb Holder E27 Pendant
+Bulb Holder E27 Batten
+Bulb Holder E14 Candle
+Bulb Holder GU10
+Bulb Holder Waterproof
+Bulb Holder with Switch
+Bulb Holder Angle
+Emergency Light Rechargeable LED 6 W | | | 9405 | 18
+Emergency Light Rechargeable LED 12 W | | | 9405 | 18
+Emergency Light Rechargeable LED 20 W | | | 9405 | 18
+Emergency Light Eveready | Eveready | | 9405 | 18
+Emergency Light Philips | Philips | | 9405 | 18
+Emergency Light Havells | Havells | | 9405 | 18
+Emergency Lantern LED | | | 9405 | 18
+Emergency Lantern Solar | | | 9405 | 18
+Torch LED Rechargeable | | | 8513 | 18
+Torch LED Rechargeable Long Range | | | 8513 | 18
+Torch LED Rechargeable 1 W | | | 8513 | 18
+Torch LED Battery 2 Cell | | | 8513 | 18
+Torch LED Battery 3 Cell | | | 8513 | 18
+Torch LED Battery Pocket | | | 8513 | 18
+Torch Head Lamp LED | | | 8513 | 18
+Torch Eveready DL 98 | Eveready | | 8513 | 18
+Torch Eveready Rechargeable | Eveready | | 8513 | 18
+Torch Philips | Philips | | 8513 | 18
+Torch Mini Keychain | | | 8513 | 18
+Torch Mining Cap | | | 8513 | 18
+Camping Lantern LED | | | 9405 | 18
+Camping Lantern Rechargeable | | | 9405 | 18
+Fairy Light String 5 m | | | 9405 | 18
+Fairy Light String 10 m | | | 9405 | 18
+Fairy Light String 20 m | | | 9405 | 18
+Fairy Light Curtain | | | 9405 | 18
+Fairy Light Waterfall | | | 9405 | 18
+Fairy Light Icicle | | | 9405 | 18
+Fairy Light Rice String Warm | | | 9405 | 18
+Fairy Light Rice String Multi | | | 9405 | 18
+Fairy Light Rope Light per metre | | | 9405 | 18
+Fairy Light Controller | | | 9405 | 18
+Decorative Light Diwali Rice | | | 9405 | 18
+Decorative Light Diwali LED Rope | | | 9405 | 18
+Decorative Light Flower String | | | 9405 | 18
+Decorative Light Star String | | | 9405 | 18
+Decorative Light Led Net | | | 9405 | 18
+Christmas Tree Lights | | | 9405 | 18
+Neon Sign Custom | | | 9405 | 18
+UV Light Tube 20 W | | | 8539 | 18
+UV Light Insect Killer 20 W | | | 8543 | 18
+Insect Killer Lamp Electric | | | 8543 | 18
+Mosquito Killer Racquet Rechargeable | | | 8543 | 18
+Mosquito Killer Racquet Eveready | Eveready | | 8543 | 18
+Mosquito Killer Racquet Bat Quick | | | 8543 | 18
+
+## Fans & Coolers | Piece | 8414 | 18 | warranty=24
+Havells Stealth Air Ceiling Fan 1200 mm | Havells
+Havells Stealth Prime Ceiling Fan 1200 mm | Havells
+Havells Stealth Neo Ceiling Fan 1200 mm | Havells
+Havells Ventilair DSP 230 mm Exhaust Fan | Havells | | | | warranty=12
+Havells Ventilair DB 150 mm Exhaust Fan | Havells | | | | warranty=12
+Havells Ventilair DB 200 mm Exhaust Fan | Havells | | | | warranty=12
+Havells Ventilair DB 250 mm Exhaust Fan | Havells | | | | warranty=12
+Havells Ventilair DX Exhaust Fan 100 mm | Havells | | | | warranty=12
+Havells Pacer Pedestal Fan 400 mm | Havells | | | | warranty=24
+Havells Swing LX Table Fan 400 mm | Havells | | | | warranty=24
+Havells Ambrose Wall Fan 400 mm | Havells | | | | warranty=24
+Havells Gatik Neo Ceiling Fan 1400 mm | Havells
+Havells Festiva Ceiling Fan 1400 mm | Havells
+Havells Aeolus Ceiling Fan 1200 mm | Havells
+Havells Fusion Ceiling Fan | Havells
+Crompton Highspeed Briza Ceiling Fan 1200 mm | Crompton
+Crompton Aura Prime Ceiling Fan 1200 mm | Crompton
+Crompton Hill Briz Ceiling Fan 1200 mm | Crompton
+Crompton Aura Ceiling Fan 1400 mm | Crompton
+Crompton Aura Ceiling Fan 1200 mm | Crompton
+Crompton Windflow Ceiling Fan 1200 mm | Crompton
+Crompton Energion Ceiling Fan 1200 mm BLDC | Crompton
+Crompton Brio Ceiling Fan 1200 mm | Crompton
+Crompton Sea Wind Ceiling Fan 1200 mm | Crompton
+Crompton Table Fan Birdie 400 mm | Crompton | | | | warranty=24
+Crompton Pedestal Fan 400 mm | Crompton | | | | warranty=24
+Crompton Wall Fan High Speed 400 mm | Crompton | | | | warranty=24
+Crompton Exhaust Fan 150 mm | Crompton | | | | warranty=12
+Crompton Exhaust Fan 200 mm | Crompton | | | | warranty=12
+Crompton Exhaust Fan 250 mm | Crompton | | | | warranty=12
+Crompton Exhaust Fan 300 mm | Crompton | | | | warranty=12
+Orient Electric Aeroslim Ceiling Fan 1200 mm | Orient
+Orient Electric Aeroquiet Ceiling Fan 1200 mm | Orient
+Orient Electric Aeroquiet Ceiling Fan 1400 mm | Orient
+Orient Electric Apex FX Ceiling Fan 1200 mm | Orient
+Orient Electric Wendy Ceiling Fan 1200 mm | Orient
+Orient Electric Ujala Ceiling Fan | Orient
+Orient Electric Table Fan Desk 400 mm | Orient | | | | warranty=24
+Orient Electric Pedestal Fan 400 mm | Orient | | | | warranty=24
+Orient Electric Wall Fan 400 mm | Orient | | | | warranty=24
+Orient Electric Exhaust Fan 150 mm | Orient | | | | warranty=12
+Orient Electric Exhaust Fan 200 mm | Orient | | | | warranty=12
+Orient Electric Exhaust Fan 250 mm | Orient | | | | warranty=12
+Usha Striker Ceiling Fan 1200 mm | Usha
+Usha Maxx Air Ceiling Fan 1200 mm | Usha
+Usha Mist Air Ceiling Fan 1200 mm | Usha
+Usha Bloom Ceiling Fan 1200 mm | Usha
+Usha Technix Ceiling Fan | Usha
+Usha Table Fan Mist Air 400 mm | Usha | | | | warranty=24
+Usha Pedestal Fan Helix 400 mm | Usha | | | | warranty=24
+Usha Wall Fan Helix 400 mm | Usha | | | | warranty=24
+Usha Exhaust Fan Crisp Air 150 mm | Usha | | | | warranty=12
+Usha Exhaust Fan Crisp Air 200 mm | Usha | | | | warranty=12
+Bajaj Maxima Ceiling Fan 1200 mm | Bajaj
+Bajaj Midea Ceiling Fan 1200 mm | Bajaj
+Bajaj Bahar Ceiling Fan 1200 mm | Bajaj
+Bajaj Elite Ceiling Fan 1200 mm | Bajaj
+Bajaj Table Fan Esteem 400 mm | Bajaj | | | | warranty=24
+Bajaj Pedestal Fan Esteem 400 mm | Bajaj | | | | warranty=24
+Bajaj Wall Fan Esteem 400 mm | Bajaj | | | | warranty=24
+Bajaj Exhaust Fan Maxima 150 mm | Bajaj | | | | warranty=12
+Bajaj Exhaust Fan Maxima 200 mm | Bajaj | | | | warranty=12
+Atomberg Renesa BLDC Ceiling Fan 1200 mm | Atomberg
+Atomberg Efficio BLDC Ceiling Fan 1200 mm | Atomberg
+Atomberg Studio BLDC Ceiling Fan 1200 mm | Atomberg
+Atomberg Aris BLDC Ceiling Fan 1200 mm | Atomberg
+Atomberg Renesa Plus BLDC Ceiling Fan 1200 mm | Atomberg
+Atomberg Renesa Table Fan | Atomberg | | | | warranty=24
+Luminous Ceiling Fan Dreamz 1200 mm | Luminous
+Luminous Ceiling Fan Cruise 1200 mm | Luminous
+Luminous Ceiling Fan Mach 1200 mm | Luminous
+Luminous Ceiling Fan Tuffan 1200 mm | Luminous
+Luminous Table Fan 400 mm | Luminous | | | | warranty=24
+Luminous Exhaust Fan 200 mm | Luminous | | | | warranty=12
+Polycab Ceiling Fan Elegance 1200 mm | Polycab
+Polycab Ceiling Fan Superia 1200 mm | Polycab
+Polycab Ceiling Fan Eros 1200 mm | Polycab
+Polycab Table Fan | Polycab | | | | warranty=24
+Polycab Exhaust Fan 200 mm | Polycab | | | | warranty=12
+Khaitan Ceiling Fan 1200 mm | Khaitan
+Khaitan Table Fan 400 mm | Khaitan | | | | warranty=24
+Khaitan Exhaust Fan 150 mm | Khaitan | | | | warranty=12
+Anchor Ceiling Fan 1200 mm | Anchor
+Anchor Table Fan | Anchor | | | | warranty=24
+Almonard Ceiling Fan 1200 mm | Almonard
+Almonard Pedestal Fan | Almonard | | | | warranty=24
+Sameer Ceiling Fan 1200 mm | Sameer
+Sameer Table Fan | Sameer | | | | warranty=24
+Fan Ceiling Standard 900 mm
+Fan Ceiling Standard 1050 mm
+Fan Ceiling Standard 1200 mm
+Fan Ceiling Standard 1400 mm
+Fan Ceiling Standard 1500 mm
+Fan Ceiling Decorative 1200 mm
+Fan Ceiling Remote Controlled
+Fan Ceiling BLDC Remote
+Fan Ceiling Metal Body
+Fan Ceiling Aluminium Blade
+Fan Ceiling Antique
+Fan Ceiling Low Noise
+Fan Ceiling High Speed
+Fan Ceiling Kids
+Fan Ceiling Industrial 1500 mm
+Fan Ceiling Heavy Duty 1400 mm
+Fan Ceiling 3 Blade
+Fan Ceiling 4 Blade
+Fan Ceiling 5 Blade
+Fan Ceiling Inverter
+Fan Table 300 mm
+Fan Table 400 mm
+Fan Table 400 mm Oscillating
+Fan Table Mini USB
+Fan Table Rechargeable
+Fan Pedestal 400 mm
+Fan Pedestal 450 mm
+Fan Pedestal Industrial 600 mm
+Fan Pedestal Remote
+Fan Pedestal Rechargeable
+Fan Wall 300 mm
+Fan Wall 400 mm
+Fan Wall 450 mm
+Fan Wall Industrial 600 mm
+Fan Exhaust 100 mm
+Fan Exhaust 150 mm
+Fan Exhaust 200 mm
+Fan Exhaust 250 mm
+Fan Exhaust 300 mm
+Fan Exhaust 450 mm
+Fan Exhaust 600 mm
+Fan Exhaust Kitchen 300 mm
+Fan Exhaust Bathroom 100 mm
+Fan Exhaust Window Mount 200 mm
+Fan Exhaust Ceiling Mount
+Fan Exhaust Louver
+Fan Exhaust Industrial 24 inch
+Fan Exhaust Industrial 36 inch
+Fan Tower 36 inch
+Fan Tower 42 inch
+Fan Air Circulator 18 inch
+Fan Air Circulator 24 inch
+Fan Pressure Blower
+Fan Pedestal Air Circulator
+Fan Handheld Rechargeable
+Fan Neck Rechargeable
+Fan Clip On
+Air Cooler Symphony Diet 12T Personal | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Symphony Diet 22i | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Symphony Diet 50i | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Symphony Sumo 75 XL | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Symphony Hicool 27i | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Symphony Storm 100 XL | Symphony | | 8479 | 18 | warranty=24
+Air Cooler Bajaj PX97 Torque | Bajaj | | 8479 | 18 | warranty=24
+Air Cooler Bajaj Platini PX 97 | Bajaj | | 8479 | 18 | warranty=24
+Air Cooler Bajaj Frio New | Bajaj | | 8479 | 18 | warranty=24
+Air Cooler Bajaj DC 2025 Cool Duct | Bajaj | | 8479 | 18 | warranty=24
+Air Cooler Kenstar Turbo Cool | Kenstar | | 8479 | 18 | warranty=24
+Air Cooler Kenstar Double Blower | Kenstar | | 8479 | 18 | warranty=24
+Air Cooler Orient Electric Magicool | Orient | | 8479 | 18 | warranty=24
+Air Cooler Crompton Ozone Desert | Crompton | | 8479 | 18 | warranty=24
+Air Cooler Crompton Optimus | Crompton | | 8479 | 18 | warranty=24
+Air Cooler Havells Cool Air | Havells | | 8479 | 18 | warranty=24
+Air Cooler Usha Honeywell | Usha | | 8479 | 18 | warranty=24
+Air Cooler Maharaja Whiteline | Maharaja | | 8479 | 18 | warranty=24
+Air Cooler Voltas Jet | Voltas | | 8479 | 18 | warranty=24
+Air Cooler Room Large 90 L | | | 8479 | 18 | warranty=24
+Air Cooler Room Large 70 L | | | 8479 | 18 | warranty=24
+Air Cooler Desert 50 L | | | 8479 | 18 | warranty=24
+Air Cooler Personal 30 L | | | 8479 | 18 | warranty=24
+Air Cooler Tower 40 L | | | 8479 | 18 | warranty=24
+Air Cooler Pump Submersible | | | 8413 | 18
+Air Cooler Honeycomb Pad | | | 5603 | 18
+Air Cooler Motor | | | 8501 | 18
+Air Cooler Blower Blade | | | 8414 | 18
+Air Cooler Water Level Float | | | 8481 | 18
+Air Cooler Ice Chamber | | | 3926 | 18
+Air Cooler Remote | | | 8543 | 18
+Air Cooler Caster Wheels Set | | Set | 8302 | 18
+
+## Home Appliances & Heating | Piece | 8516 | 18 | warranty=12
+Bajaj Majesty Dry Iron DX 6 | Bajaj
+Bajaj Majesty Steam Iron | Bajaj
+Bajaj Popular Dry Iron 750 W | Bajaj
+Bajaj Dry Iron Light Weight | Bajaj
+Bajaj Steam Iron 1000 W | Bajaj
+Bajaj Immersion Water Heater 1000 W | Bajaj
+Bajaj Immersion Water Heater 1500 W | Bajaj
+Bajaj Immersion Water Heater 2000 W | Bajaj
+Bajaj Immersion Water Heater 1000 W Copper | Bajaj
+Bajaj Room Heater Radiant Blow 1000 W | Bajaj
+Bajaj Room Heater Fan 2000 W | Bajaj
+Bajaj Room Heater Rod 800 W | Bajaj
+Bajaj Room Heater Oil Filled 9 Fin | Bajaj
+Bajaj Room Heater Oil Filled 11 Fin | Bajaj
+Bajaj Room Heater Halogen | Bajaj
+Bajaj Majesty Kettle 1.8 L | Bajaj
+Bajaj Majesty Pop Up Toaster 2 Slice | Bajaj
+Bajaj Majesty Pop Up Toaster 4 Slice | Bajaj
+Bajaj Induction Cooktop Majesty | Bajaj
+Bajaj Rice Cooker Majesty 1.8 L | Bajaj
+Bajaj Rice Cooker Majesty 2.8 L | Bajaj
+Bajaj Mixer Grinder GX1 500 W | Bajaj | | 8509
+Bajaj Mixer Grinder Rex 500 W | Bajaj | | 8509
+Bajaj Mixer Grinder Rex 750 W | Bajaj | | 8509
+Bajaj Mixer Grinder Classic 750 W | Bajaj | | 8509
+Bajaj Mixer Grinder 3 Jar | Bajaj | | 8509
+Bajaj Juicer Mixer Grinder | Bajaj | | 8509
+Bajaj Hand Mixer | Bajaj | | 8509
+Bajaj OTG Majesty 9 L | Bajaj | | 8516
+Bajaj OTG Majesty 20 L | Bajaj | | 8516
+Bajaj Gas Stove 2 Burner | Bajaj | | 7321
+Bajaj Gas Stove 3 Burner | Bajaj | | 7321
+Bajaj Geyser Shakti 15 L | Bajaj | | 8516
+Bajaj Geyser Shakti 25 L | Bajaj | | 8516
+Bajaj Geyser Splendora 3 L Instant | Bajaj | | 8516
+Bajaj Geyser Splendora 6 L | Bajaj | | 8516
+Bajaj Geyser Kadet 10 L | Bajaj | | 8516
+Bajaj Geyser Majesty 15 L | Bajaj | | 8516
+Bajaj Geyser Amazon 25 L | Bajaj | | 8516
+Bajaj Geyser Flora 15 L | Bajaj | | 8516
+Bajaj Geyser Flora 25 L | Bajaj | | 8516
+Bajaj Geyser Neo 25 L | Bajaj | | 8516
+Bajaj Geyser Majesty 25 L | Bajaj | | 8516
+Havells Instanio Prime 3 L Water Heater | Havells
+Havells Instanio 10 L Water Heater | Havells
+Havells Instanio Prime 25 L Geyser | Havells
+Havells Monza 15 L Storage Water Heater | Havells
+Havells Monza 25 L Storage Water Heater | Havells
+Havells Adonia 15 L | Havells
+Havells Adonia 25 L | Havells
+Havells Splendour 15 L Storage Water Heater | Havells
+Havells Splendour 25 L Storage Water Heater | Havells
+Havells Splendour Neo 15 L | Havells
+Havells Splendour Neo 25 L | Havells
+Havells Genie 10 L | Havells
+Havells Genie 15 L | Havells
+Havells Genie 25 L | Havells
+Havells Calisto 15 L | Havells
+Havells Calisto 25 L | Havells
+Havells Immersion Water Heater 1000 W | Havells
+Havells Immersion Water Heater 1500 W | Havells
+Havells Immersion Water Heater 2000 W | Havells
+Havells Dry Iron Futura | Havells
+Havells Dry Iron Pace | Havells
+Havells Dry Iron Pacer | Havells
+Havells Steam Iron Gala | Havells
+Havells Steam Iron Aspira | Havells
+Havells Kettle Aqua Plus 1.2 L | Havells
+Havells Kettle Aqua Plus 1.5 L | Havells
+Havells Kettle Aqua Plus 1.8 L | Havells
+Havells Toaster Crust | Havells
+Havells Toaster Pop Up 2 Slice | Havells
+Havells Hair Dryer HD 3101 | Havells
+Havells Room Heater Cozio | Havells
+Havells Room Heater Calido | Havells
+Havells Room Heater Convector | Havells
+Havells Room Heater Fan | Havells
+Havells Room Heater Oil Filled | Havells
+Havells Induction Cooktop Insta Cook ST | Havells
+Havells Induction Cooktop Insta Cook Touch | Havells
+Havells Induction Cooktop Insta Cook PT | Havells
+Havells Air Purifier | Havells
+Havells Mixer Grinder Sprint 500 W | Havells | | 8509
+Havells Mixer Grinder Sprint 750 W | Havells | | 8509
+Havells Mixer Grinder Lite 500 W | Havells | | 8509
+Havells Mixer Grinder Aspro 500 W | Havells | | 8509
+Havells Juicer Mixer Grinder | Havells | | 8509
+Havells Food Processor | Havells | | 8509
+Havells Chimney 60 cm | Havells | | 8414
+Havells Chimney 90 cm | Havells | | 8414
+Havells Gas Hob 3 Burner | Havells | | 7321
+Havells Water Cooler Dispenser | Havells | | 8418
+Havells Room Cooler | Havells | | 8479
+Havells Trimmer | Havells | | 8510
+Racold Eterno Pro 15 L Geyser | Racold
+Racold Eterno Pro 25 L Geyser | Racold
+Racold Omega 15 L Geyser | Racold
+Racold Omega 25 L Geyser | Racold
+Racold Alfa Plus 15 L Geyser | Racold
+Racold Alfa Plus 25 L Geyser | Racold
+Racold Pronto Neo 3 L Instant | Racold
+Racold Pronto Neo 6 L Instant | Racold
+Racold Pronto Pro 3 L | Racold
+Racold Pronto Pro 6 L | Racold
+Racold Cdr Ultra 15 L Geyser | Racold
+Racold Cdr Ultra 25 L Geyser | Racold
+Racold Cdr Ultra 35 L Geyser | Racold
+Racold Mini Immersion Heater | Racold
+V-Guard Victo Plus 15 L Geyser | V-Guard
+V-Guard Victo Plus 25 L Geyser | V-Guard
+V-Guard Divino 15 L Geyser | V-Guard
+V-Guard Divino 25 L Geyser | V-Guard
+V-Guard Zio 3 L Instant Geyser | V-Guard
+V-Guard Zio 6 L Instant Geyser | V-Guard
+V-Guard Wave 3 L Instant Geyser | V-Guard
+V-Guard Wave 6 L Instant Geyser | V-Guard
+V-Guard Geyser Calino 6 L | V-Guard
+V-Guard Geyser Aura 10 L | V-Guard
+V-Guard Geyser Pebble 10 L | V-Guard
+V-Guard Geyser Pebble 15 L | V-Guard
+V-Guard Geyser Pebble 25 L | V-Guard
+V-Guard Geyser Rapid 15 L | V-Guard
+V-Guard Geyser Rapid 25 L | V-Guard
+V-Guard Geyser Ultra 15 L | V-Guard
+V-Guard Geyser Ultra 25 L | V-Guard
+V-Guard Geyser Ultra 35 L | V-Guard
+V-Guard Geyser Aero 10 L | V-Guard
+V-Guard Immersion Water Heater 1500 W | V-Guard
+Crompton Arno Neo 15 L Geyser | Crompton
+Crompton Arno Neo 25 L Geyser | Crompton
+Crompton Solarium Qube 3 L Geyser | Crompton
+Crompton Solarium Qube 6 L Geyser | Crompton
+Crompton Brio 3 L Geyser | Crompton
+Crompton Brio 6 L Geyser | Crompton
+Crompton Amica 15 L Geyser | Crompton
+Crompton Amica 25 L Geyser | Crompton
+Crompton Gracee 5 L Instant | Crompton
+Crompton Gracee 15 L Geyser | Crompton
+Crompton Gracee 25 L Geyser | Crompton
+Crompton Immersion Water Heater 1500 W | Crompton
+Crompton Immersion Water Heater 2000 W | Crompton
+Crompton Room Heater Fan | Crompton
+Crompton Room Heater Oil Filled | Crompton
+Crompton Dry Iron Pro | Crompton
+Crompton Iron Steam | Crompton
+Crompton Kettle 1.5 L | Crompton
+Crompton Toaster 2 Slice | Crompton
+Crompton Induction Cooktop | Crompton
+Crompton Mixer Grinder | Crompton | | 8509
+AO Smith HSE-SHS 15 L Geyser | AO Smith
+AO Smith HSE-SHS 25 L Geyser | AO Smith
+AO Smith SDS 15 L | AO Smith
+AO Smith SDS 25 L | AO Smith
+Orient Electric Immersion Water Heater | Orient
+Orient Electric Room Heater | Orient
+Orient Electric Steam Iron | Orient
+Orient Electric Dry Iron | Orient
+Orient Electric Kettle | Orient
+Orient Electric Geyser | Orient
+Orient Electric Induction | Orient
+Usha Steam Iron EI 3302 | Usha
+Usha Steam Iron Aurora | Usha
+Usha Steam Iron Spray | Usha
+Usha Dry Iron EI 1602 | Usha
+Usha Dry Iron Light | Usha
+Usha Room Heater | Usha
+Usha Room Heater Fan | Usha
+Usha Room Heater Oil Filled 9 Fin | Usha
+Usha Immersion Water Heater | Usha
+Usha Mixer Grinder | Usha | | 8509
+Usha Juicer Mixer Grinder | Usha | | 8509
+Usha Induction | Usha
+Usha Kettle 1.5 L | Usha
+Usha Toaster | Usha
+Philips Steam Iron GC1905 | Philips
+Philips Steam Iron GC1920 | Philips
+Philips Dry Iron HI114 | Philips
+Philips Dry Iron HI115 | Philips
+Philips Kettle HD9303 | Philips
+Philips Toaster HD2582 | Philips
+Philips Mixer Grinder HL7756 | Philips | | 8509
+Philips Mixer Grinder HL7707 | Philips | | 8509
+Philips Hand Blender HL1655 | Philips | | 8509
+Philips Juicer HL7778 | Philips | | 8509
+Philips Air Fryer HD9200 | Philips | | 8516
+Philips Air Fryer HD9252 | Philips | | 8516
+Philips Induction Cooktop HD4928 | Philips
+Philips Induction Cooktop HD4938 | Philips
+Philips Room Heater | Philips
+Philips Garment Steamer | Philips
+Philips Geyser | Philips
+Philips Water Heater Immersion | Philips
+Prestige Mixer Grinder Iris 750 W | Prestige | | 8509
+Prestige Mixer Grinder Stylo 750 W | Prestige | | 8509
+Prestige Mixer Grinder Deluxe | Prestige | | 8509
+Prestige Induction Cooktop PIC 20 | Prestige
+Prestige Induction Cooktop PIC 18 | Prestige
+Prestige Induction Cooktop PIC 16 | Prestige
+Prestige Induction Cooktop PIC 1.0 | Prestige
+Prestige Electric Kettle PKOSS 1.5 L | Prestige
+Prestige Electric Kettle 1.8 L | Prestige
+Prestige Rice Cooker Delight 1.8 L | Prestige
+Prestige Rice Cooker Delight 2.8 L | Prestige
+Prestige Pressure Cooker Svachh 5 L | Prestige | | 7615 | 5? | warranty=60
+Prestige Pressure Cooker Svachh 3 L | Prestige | | 7615 | 5? | warranty=60
+Prestige Pressure Cooker Popular 3 L | Prestige | | 7615 | 5? | warranty=60
+Prestige Pressure Cooker Popular 5 L | Prestige | | 7615 | 5? | warranty=60
+Prestige Gas Stove Royale | Prestige | | 7321
+Prestige Gas Stove 2 Burner Glass | Prestige | | 7321
+Prestige Gas Stove 3 Burner | Prestige | | 7321
+Prestige OTG | Prestige
+Prestige Sandwich Maker | Prestige
+Prestige Toaster 2 Slice | Prestige
+Prestige Hand Blender | Prestige | | 8509
+Prestige Food Processor | Prestige | | 8509
+Butterfly Mixer Grinder Jet Elite 750 W | Butterfly | | 8509
+Butterfly Mixer Grinder Smart 500 W | Butterfly | | 8509
+Butterfly Mixer Grinder Rapid 500 W | Butterfly | | 8509
+Butterfly Induction Cooktop | Butterfly
+Butterfly Gas Stove 2 Burner | Butterfly | | 7321
+Butterfly Gas Stove 3 Burner | Butterfly | | 7321
+Butterfly Electric Kettle | Butterfly
+Butterfly Pressure Cooker | Butterfly | | 7615 | 5? | warranty=60
+Preethi Mixer Grinder Zodiac 750 W | Preethi | | 8509
+Preethi Mixer Grinder Blue Leaf 750 W | Preethi | | 8509
+Preethi Mixer Grinder Eco Plus | Preethi | | 8509
+Preethi Mixer Grinder Steele | Preethi | | 8509
+Preethi Wet Grinder | Preethi | | 8509
+Sujata Mixer Grinder Dynamix 900 W | Sujata | | 8509
+Sujata Mixer Grinder Powermatic Plus 900 W | Sujata | | 8509
+Sujata Juicer Mixer Grinder Supermix | Sujata | | 8509
+Sujata Mixer Grinder Chutney | Sujata | | 8509
+Maharaja Whiteline Mixer Grinder | Maharaja | | 8509
+Maharaja Whiteline Hand Blender | Maharaja | | 8509
+Maharaja Whiteline Induction | Maharaja
+Maharaja Whiteline Toaster | Maharaja
+Maharaja Whiteline Iron | Maharaja
+Maharaja Whiteline Electric Kettle | Maharaja
+Kent Mixer Grinder | Kent | | 8509
+Kent Induction | Kent
+Kent Kettle | Kent
+Kent Rice Cooker | Kent
+Kent Chopper | Kent | | 8509
+Pigeon Induction Cooktop | Pigeon
+Pigeon Electric Kettle | Pigeon
+Pigeon Mixer Grinder | Pigeon | | 8509
+Pigeon Gas Stove 2 Burner | Pigeon | | 7321
+Pigeon Gas Stove 3 Burner | Pigeon | | 7321
+Pigeon Pressure Cooker | Pigeon | | 7615 | 5? | warranty=60
+Pigeon Rice Cooker | Pigeon
+Pigeon Sandwich Maker | Pigeon
+Pigeon Toaster | Pigeon
+Pigeon Chopper | Pigeon | | 8509
+Pigeon Hand Blender | Pigeon | | 8509
+Pigeon Lunch Box Electric | Pigeon
+Milton Electric Lunch Box | Milton
+Milton Electric Kettle | Milton
+Bosch Mixer Grinder | Bosch | | 8509
+Bosch Hand Blender | Bosch | | 8509
+Bosch Iron | Bosch
+Bosch Kettle | Bosch
+Bosch Toaster | Bosch
+Morphy Richards Induction | Morphy Richards
+Morphy Richards Kettle | Morphy Richards
+Morphy Richards Toaster | Morphy Richards
+Morphy Richards Iron | Morphy Richards
+Morphy Richards OTG | Morphy Richards
+Morphy Richards Room Heater | Morphy Richards
+Morphy Richards Mixer | Morphy Richards | | 8509
+Morphy Richards Air Fryer | Morphy Richards
+Inalsa Hand Blender | Inalsa | | 8509
+Inalsa Mixer Grinder | Inalsa | | 8509
+Inalsa Air Fryer | Inalsa
+Inalsa Kettle | Inalsa
+Inalsa Toaster | Inalsa
+Inalsa Chopper | Inalsa | | 8509
+Inalsa Juicer | Inalsa | | 8509
+Kitchen Chimney 60 cm Glen | Glen | | 8414
+Kitchen Chimney 90 cm Glen | Glen | | 8414
+Kitchen Chimney 60 cm Elica | Elica | | 8414
+Kitchen Chimney 90 cm Elica | Elica | | 8414
+Kitchen Chimney 60 cm Faber | Faber | | 8414
+Kitchen Chimney 90 cm Faber | Faber | | 8414
+Kitchen Chimney 60 cm Hindware | Hindware | | 8414
+Kitchen Chimney 90 cm Hindware | Hindware | | 8414
+Gas Hob 3 Burner Glen | Glen | | 7321
+Gas Hob 4 Burner Glen | Glen | | 7321
+Gas Hob 3 Burner Elica | Elica | | 7321
+Gas Hob 4 Burner Elica | Elica | | 7321
+Gas Hob 3 Burner Faber | Faber | | 7321
+Gas Hob 4 Burner Faber | Faber | | 7321
+Gas Hob 3 Burner Hindware | Hindware | | 7321
+Gas Hob 4 Burner Hindware | Hindware | | 7321
+Gas Stove 2 Burner Glass Top | | | 7321
+Gas Stove 3 Burner Glass Top | | | 7321
+Gas Stove 4 Burner Glass Top | | | 7321
+Gas Stove Steel Body 2 Burner | | | 7321
+Gas Stove Steel Body 3 Burner | | | 7321
+Gas Stove Auto Ignition 2 Burner | | | 7321
+Gas Stove Auto Ignition 3 Burner | | | 7321
+Gas Stove Manual 2 Burner | | | 7321
+Gas Stove Manual 3 Burner | | | 7321
+Gas Stove Single Burner | | | 7321
+Gas Tandoor | | | 7321
+Induction Cooktop 1800 W
+Induction Cooktop 2000 W
+Induction Cooktop Touch
+Induction Cooktop Push Button
+Induction Cooktop Glass Top
+Induction Cooktop Double Burner
+Induction Cooktop Portable
+Induction Cooktop Heavy Duty 3500 W
+Induction Cooker Commercial 5000 W
+Induction Pressure Cooker
+Immersion Rod 1000 W
+Immersion Rod 1500 W
+Immersion Rod 2000 W
+Immersion Rod Copper 1500 W
+Immersion Rod Heavy Duty 2000 W
+Immersion Heater Bucket 1500 W
+Immersion Heater Steel 2000 W
+Immersion Heater Water Bucket Auto Cut
+Room Heater Blower 2000 W
+Room Heater Fan Type 2000 W
+Room Heater Halogen 1200 W
+Room Heater Halogen 3 Rod
+Room Heater Rod Type 800 W
+Room Heater Rod Type 1000 W
+Room Heater Quartz 1000 W
+Room Heater Oil Filled 9 Fin
+Room Heater Oil Filled 11 Fin
+Room Heater Oil Filled 13 Fin
+Room Heater Convector
+Room Heater Panel
+Room Heater Mini
+Room Heater Floor
+Room Heater Wall Mount
+Room Heater Infrared
+Room Heater Gas
+Room Heater Ceramic PTC
+Room Heater Bathroom
+Foot Warmer Electric
+Hand Warmer Electric
+Heating Pad
+Electric Blanket Single
+Electric Blanket Double
+Water Heater Geyser 6 L Instant
+Water Heater Geyser 10 L Storage
+Water Heater Geyser 15 L Storage
+Water Heater Geyser 25 L Storage
+Water Heater Geyser 35 L Storage
+Water Heater Geyser 50 L Storage
+Water Heater Geyser 3 L Instant
+Water Heater Geyser Vertical
+Water Heater Geyser Horizontal
+Water Heater Geyser Gas
+Water Heater Geyser Solar 100 L | | | 8419
+Water Heater Geyser Solar 200 L | | | 8419
+Water Heater Geyser Solar 300 L | | | 8419
+Electric Iron Dry 1000 W
+Electric Iron Dry 750 W
+Electric Iron Steam 1200 W
+Electric Iron Steam 1800 W
+Electric Iron Steam 2000 W
+Electric Iron Cordless
+Electric Iron Travel
+Electric Iron Heavy Duty
+Electric Iron Spray
+Electric Iron Steam Garment
+Kettle Electric 1 L
+Kettle Electric 1.2 L
+Kettle Electric 1.5 L
+Kettle Electric 1.8 L
+Kettle Electric 2 L
+Kettle Electric Steel
+Kettle Electric Glass
+Kettle Electric Travel
+Kettle Electric Cordless
+Kettle Electric Auto Shut
+Toaster Pop Up 2 Slice
+Toaster Pop Up 4 Slice
+Toaster Sandwich 2 Slice
+Toaster Sandwich 4 Slice
+Toaster Grill
+Toaster Oven
+Sandwich Maker 2 Slice
+Sandwich Maker 4 Slice
+Sandwich Maker Grill
+Sandwich Maker Waffle
+Waffle Maker
+Roti Maker
+Roti Maker Electric
+Dosa Maker Electric
+Pop Corn Maker
+Egg Boiler
+Egg Boiler 7 Egg
+Egg Boiler 14 Egg
+Electric Rice Cooker 1 L
+Electric Rice Cooker 1.8 L
+Electric Rice Cooker 2.8 L
+Electric Rice Cooker 5 L
+Electric Rice Cooker Steamer
+Electric Cooker Multi
+Electric Cooker Mini
+Electric Pressure Cooker
+Electric Slow Cooker
+Electric Tandoor
+Electric Oven OTG 9 L
+Electric Oven OTG 19 L
+Electric Oven OTG 25 L
+Electric Oven OTG 35 L
+Electric Oven OTG 45 L
+Electric Oven OTG 60 L
+Electric Grill
+Electric Tawa
+Electric Fry Pan
+Electric Wok
+Air Fryer 2 L
+Air Fryer 3 L
+Air Fryer 4 L
+Air Fryer 5 L
+Air Fryer 6 L
+Air Fryer Digital
+Air Fryer Oven
+Microwave Oven Solo 20 L
+Microwave Oven Grill 23 L
+Microwave Oven Convection 25 L
+Microwave Oven Convection 30 L
+Microwave Oven Convection 32 L
+Microwave Oven Convection 34 L
+Microwave Oven Built In
+Microwave Oven LG 20 L
+Microwave Oven LG 28 L
+Microwave Oven Samsung 23 L
+Microwave Oven Samsung 28 L
+Microwave Oven IFB 25 L
+Microwave Oven IFB 30 L
+Microwave Oven Whirlpool 25 L
+Microwave Oven Bajaj 20 L
+Microwave Oven Panasonic 23 L
+Microwave Oven Godrej 20 L
+Microwave Oven Godrej 30 L
+
+## Fan & Cooler Parts | Piece | | 18
+Ceiling Fan Regulator Step 5 Step
+Ceiling Fan Regulator Electronic
+Ceiling Fan Regulator Havells
+Ceiling Fan Regulator Anchor
+Ceiling Fan Regulator Legrand
+Ceiling Fan Regulator Smart Remote
+Ceiling Fan Capacitor 2.5 mfd
+Ceiling Fan Capacitor 3 mfd
+Ceiling Fan Capacitor 3.5 mfd
+Ceiling Fan Capacitor 4 mfd
+Ceiling Fan Canopy Set
+Ceiling Fan Down Rod 6 inch
+Ceiling Fan Down Rod 12 inch
+Ceiling Fan Down Rod 24 inch
+Ceiling Fan Blade Set 3 pcs
+Ceiling Fan Blade Plastic 1200 mm
+Ceiling Fan Blade Aluminium
+Ceiling Fan Bearing Set
+Ceiling Fan Ball Bearing 6201
+Ceiling Fan Ball Bearing 6202
+Ceiling Fan Bush Set
+Ceiling Fan Motor Rewinding Wire
+Ceiling Fan Hook
+Ceiling Fan Hanging Clamp
+Ceiling Fan Cover
+Ceiling Fan Light Kit
+Ceiling Fan Remote Universal
+Ceiling Fan Remote Havells
+Ceiling Fan Receiver Module
+
+## Appliance Spare Parts & Accessories | Piece | | 18
+Gas Lighter Gun | | | 9613
+Gas Lighter Electric Spark | | | 9613
+Gas Regulator ISI | | | 8481
+Gas Regulator Hose 1.5 m | | | 3917
+Gas Regulator Hose 2 m | | | 3917
+Gas Burner Brass Spare | | | 7321
+Gas Burner Cap Set | | Set | 7321
+Gas Tandoor Cylinder | | | 7311
+Gas Cylinder Pipe Clamp | | | 7326
+Gas Leak Detector | | | 9027
+Gas Safety Device | | | 8481
+Induction Vessel Set
+Induction Kadai Steel
+Induction Tawa Steel
+Induction Pan Steel
+Induction Pot Set 3 pcs | | Set
+Water Heater Element 1500 W
+Water Heater Element 2000 W
+Water Heater Element 3000 W
+Water Heater Thermostat
+Water Heater Anode
+Water Heater Safety Valve
+Water Heater Inlet Pipe
+Water Heater Bracket
+Water Heater Cover
+Electric Iron Press Table
+Iron Press Table Folding
+Iron Cord
+Iron Plate Spare
+Iron Thermostat
+Iron Heating Element
+Iron Safety Fuse

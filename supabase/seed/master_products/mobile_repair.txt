@@ -1,0 +1,370 @@
+# type: mobile_repair
+# Mobile repair shop: spare parts for popular models, tools and consumables.
+# Parts are generic (compatible) unless a brand is named. HSN 8517 70 = parts of phones.
+
+## Display & Touch Combo | Piece | 851770 | 18
+LCD Display Combo for Redmi 9A
+LCD Display Combo for Redmi 9 Prime
+LCD Display Combo for Redmi 10
+LCD Display Combo for Redmi 10 Prime
+LCD Display Combo for Redmi 12
+LCD Display Combo for Redmi 12C
+LCD Display Combo for Redmi 13C
+LCD Display Combo for Redmi Note 9 Pro
+LCD Display Combo for Redmi Note 10
+LCD Display Combo for Redmi Note 10 Pro
+LCD Display Combo for Redmi Note 11
+LCD Display Combo for Redmi Note 11 Pro
+LCD Display Combo for Redmi Note 12 5G
+LCD Display Combo for Redmi Note 13 5G
+AMOLED Display Combo for Redmi Note 12 Pro
+AMOLED Display Combo for Redmi Note 13 Pro
+LCD Display Combo for Poco C3
+LCD Display Combo for Poco M2
+LCD Display Combo for Poco M3
+LCD Display Combo for Poco X3
+LCD Display Combo for Samsung Galaxy A12
+LCD Display Combo for Samsung Galaxy A13
+LCD Display Combo for Samsung Galaxy A22
+LCD Display Combo for Samsung Galaxy A32
+LCD Display Combo for Samsung Galaxy M12
+LCD Display Combo for Samsung Galaxy M21
+LCD Display Combo for Samsung Galaxy M31
+LCD Display Combo for Samsung Galaxy M32
+LCD Display Combo for Samsung Galaxy F12
+LCD Display Combo for Samsung Galaxy F22
+AMOLED Display Combo for Samsung Galaxy A50
+AMOLED Display Combo for Samsung Galaxy A51
+AMOLED Display Combo for Samsung Galaxy A52
+AMOLED Display Combo for Samsung Galaxy A71
+LCD Display Combo for realme C11
+LCD Display Combo for realme C12
+LCD Display Combo for realme C15
+LCD Display Combo for realme C21Y
+LCD Display Combo for realme C25
+LCD Display Combo for realme C35
+LCD Display Combo for realme C53
+LCD Display Combo for realme Narzo 20
+LCD Display Combo for realme Narzo 30
+LCD Display Combo for realme 5
+LCD Display Combo for realme 6
+LCD Display Combo for realme 7
+LCD Display Combo for realme 8
+AMOLED Display Combo for realme 8 Pro
+LCD Display Combo for vivo Y12
+LCD Display Combo for vivo Y15
+LCD Display Combo for vivo Y20
+LCD Display Combo for vivo Y21
+LCD Display Combo for vivo Y33s
+LCD Display Combo for vivo Y51
+LCD Display Combo for vivo Y71
+LCD Display Combo for vivo V15
+LCD Display Combo for vivo V17
+LCD Display Combo for vivo V20
+LCD Display Combo for OPPO A12
+LCD Display Combo for OPPO A15
+LCD Display Combo for OPPO A31
+LCD Display Combo for OPPO A54
+LCD Display Combo for OPPO A57
+LCD Display Combo for OPPO F11
+LCD Display Combo for OPPO F17
+LCD Display Combo for OnePlus Nord CE
+AMOLED Display Combo for OnePlus Nord
+LCD Display Combo for Infinix Hot 10
+LCD Display Combo for Infinix Hot 11
+LCD Display Combo for Tecno Spark 7
+LCD Display Combo for Tecno Spark 8
+LCD Display Combo for Moto G9 Power
+LCD Display Combo for Moto E7 Plus
+LCD Display Combo for Nokia 5.3
+LCD Display for iPhone 6
+LCD Display for iPhone 6S
+LCD Display for iPhone 7
+LCD Display for iPhone 8
+LCD Display for iPhone X
+LCD Display for iPhone XR
+LCD Display for iPhone 11
+OLED Display for iPhone 12
+Tempered Glass Replacement Glass Only Universal
+Touch Screen Digitizer Universal 6 inch
+Keypad Phone Display Nokia 105
+Keypad Phone Display Jio F90M
+Keypad Phone Display Itel
+Keypad Phone Display Lava
+Keypad Phone Keypad Membrane Nokia
+Display Ribbon Flex Universal
+
+## Batteries | Piece | 850760 | 18
+Battery for Redmi 9A BN56
+Battery for Redmi 9 Prime BN54
+Battery for Redmi 10 Prime BN5D
+Battery for Redmi Note 7 BN4A
+Battery for Redmi Note 8 BN46
+Battery for Redmi Note 9 Pro BN53
+Battery for Redmi Note 10 BN59
+Battery for Redmi Note 11 BN5G
+Battery for Redmi 8 BN51
+Battery for Poco M3 BN62
+Battery for Samsung Galaxy A12
+Battery for Samsung Galaxy A21s
+Battery for Samsung Galaxy A30
+Battery for Samsung Galaxy A50
+Battery for Samsung Galaxy M31
+Battery for Samsung Galaxy M12
+Battery for Samsung J7 Prime
+Battery for Samsung J2 Prime
+Battery for Samsung S Duos
+Battery for realme C11
+Battery for realme C12 BLP793
+Battery for realme C21Y
+Battery for realme 5 BLP729
+Battery for realme 6 BLP729
+Battery for realme Narzo 20
+Battery for vivo Y12 B-G7
+Battery for vivo Y15
+Battery for vivo Y20
+Battery for vivo Y21 B-P1
+Battery for vivo Y31
+Battery for vivo V9
+Battery for OPPO A5s BLP673
+Battery for OPPO A12
+Battery for OPPO A31
+Battery for OPPO F9
+Battery for OnePlus 6
+Battery for Infinix Hot 10
+Battery for Tecno Spark 7
+Battery for Moto G5 Plus
+Battery for Nokia 105 BL-5CB
+Battery for Nokia BL-4C
+Battery for Nokia BL-5C
+Battery for Jio F90M
+Battery for Jio F320B
+Battery for Itel IT2163
+Battery for Lava Keypad Phone
+Battery for iPhone 6
+Battery for iPhone 6S
+Battery for iPhone 7
+Battery for iPhone 8
+Battery for iPhone X
+Battery for iPhone 11
+Battery for iPhone 12
+Battery Universal Li-ion 3.7 V
+Battery Charger Universal Dock
+
+## Charging Port, Flex & Boards | Piece | 851770 | 18
+Charging Port Board for Redmi 9A
+Charging Port Board for Redmi 9 Prime
+Charging Port Board for Redmi Note 9 Pro
+Charging Port Board for Redmi Note 10
+Charging Port Board for Redmi Note 11
+Charging Port Board for Redmi Note 12
+Charging Port Board for Poco M3
+Charging Port Board for Samsung A12
+Charging Port Board for Samsung M31
+Charging Port Board for Samsung M12
+Charging Port Board for Samsung A50
+Charging Port Board for realme C11
+Charging Port Board for realme C21Y
+Charging Port Board for realme 5
+Charging Port Board for realme Narzo 20
+Charging Port Board for vivo Y12
+Charging Port Board for vivo Y15
+Charging Port Board for vivo Y20
+Charging Port Board for vivo Y21
+Charging Port Board for OPPO A12
+Charging Port Board for OPPO A31
+Charging Port Board for OPPO F9
+Charging Port Board for OnePlus Nord
+Charging Port Board for iPhone 7
+Charging Port Board for iPhone 8
+Charging Port Board for iPhone X
+Charging Port Board for iPhone 11
+Charging Port Flex Cable Universal Micro USB
+Charging Port Flex Cable Universal Type C
+Charging Pin Micro USB Connector
+Charging Pin Type C Connector
+Power Button Flex Cable Universal
+Volume Button Flex Cable Universal
+Power Volume Flex Cable Redmi Note 9
+Fingerprint Sensor Flex Cable Samsung
+Fingerprint Sensor Flex Cable Redmi
+Fingerprint Sensor Flex Cable vivo
+Home Button Flex iPhone 7
+Home Button Flex iPhone 8
+Mic Flex Cable Universal
+Mic Module Mobile Universal
+Earpiece Speaker Universal
+Loud Speaker Ringer Buzzer Universal
+Loud Speaker Ringer Redmi Note 9
+Loud Speaker Ringer Samsung A12
+Loud Speaker Ringer realme C11
+Loud Speaker Ringer vivo Y12
+Vibrator Motor Mobile
+Camera Module Rear Redmi Note 9
+Camera Module Front Redmi Note 9
+Camera Module Rear Samsung A12
+Camera Module Rear realme C11
+Camera Module Front vivo Y12
+Camera Lens Glass Cover Redmi
+Camera Lens Glass Cover Samsung
+Camera Lens Glass Cover iPhone 11
+Network Antenna Flex Cable Universal
+Signal Coaxial Cable Universal
+Sim Tray Universal Samsung
+Sim Tray Universal Redmi
+Sim Tray Universal realme
+Sim Tray iPhone
+Sim Tray Jio Phone
+Sim Connector Slot Universal
+Memory Card Connector Slot Universal
+Headphone Jack Connector Universal
+Motherboard Sub Board Universal
+Back Panel Housing Redmi Note 10
+Back Panel Housing Samsung A12
+Back Panel Housing realme C11
+Back Panel Housing vivo Y12
+Back Panel Housing iPhone 11
+Back Panel Housing iPhone 12
+Back Panel Housing Nokia 105
+Middle Frame Redmi Note 9
+Middle Frame Samsung M31
+Middle Frame Housing iPhone 8
+Battery Door Cover Nokia
+Battery Door Cover Jio F90M
+Battery Door Cover Samsung J2
+
+## ICs & Components | Piece | | 18
+Charging IC Universal
+Charging IC Redmi Note 9
+Charging IC Samsung A12
+Charging IC iPhone 7
+Charging IC iPhone 8
+Charging IC iPhone X
+Power IC Universal
+Power IC Redmi Note 9
+Power IC Samsung A12
+Power IC iPhone 7
+Audio IC iPhone 7
+Audio IC iPhone 8
+Touch IC iPhone 6S
+Touch IC iPhone 7
+Backlight IC iPhone
+Display IC Universal
+Flash IC Universal
+Wi-Fi IC Universal
+EMMC IC 16 GB
+EMMC IC 32 GB
+EMMC IC 64 GB
+EMMC IC 128 GB
+NAND IC iPhone 6 16 GB
+NAND IC iPhone 7 32 GB
+CPU Mobile Universal
+Capacitor SMD Assorted Kit
+Resistor SMD Assorted Kit
+Diode SMD Assorted Kit
+Transistor SMD Assorted Kit
+Crystal Oscillator 26 MHz
+Crystal Oscillator 32 KHz
+Jumper Wire Fine 0.1 mm
+Bga Solder Balls 0.3 mm
+Bga Solder Balls 0.4 mm
+Bga Stencil Set Universal
+Bga Stencil iPhone
+
+## Repair Tools & Consumables | Piece | | 18
+Screwdriver Set Mobile Repair 25 in 1
+Screwdriver Set Precision 8 in 1
+Screwdriver Pentalobe iPhone P2
+Screwdriver Torx T2 T4 T5
+Screwdriver Phillips 1.5 mm
+Screwdriver Tri Wing Y
+Opening Tool Pry Plastic Set
+Opening Tool Metal Spudger
+Opening Tool Suction Cup
+Opening Tool Guitar Pick Set 10 pcs
+Tweezers Anti Static Curved
+Tweezers Anti Static Straight
+Tweezers Set 5 pcs
+Soldering Iron 60 W
+Soldering Iron 40 W
+Soldering Iron Temperature Controlled
+Soldering Iron Tip Fine Pack
+Soldering Station 936
+Hot Air Gun Rework Station 858D
+Hot Air Gun Rework Station 8586
+Hot Air Nozzle Set Assorted
+Heat Gun for Mobile
+LCD Separator Machine Heating
+LCD Separator Machine Vacuum
+Magnifier Lamp LED 5X
+Magnifier Desk Lamp 8X
+Microscope Digital Mobile Repair
+Microscope Binocular Stereo
+Multimeter Digital
+Multimeter Digital Auto Range
+DC Power Supply 15 V 2 A
+DC Power Supply 30 V 5 A
+USB Tester Voltage Current Meter
+Battery Booster Cable Mobile
+Mobile Repair Mat Anti Static
+Mobile Repair Mat Silicone 40 x 30 cm
+Mobile Repair Tool Box
+Screw Tray Magnetic
+Phone Holder Repair Clamp
+Phone Repair Fixture Mould Universal
+Heating Pad Mobile Repair
+Ultrasonic Cleaner 3 L
+Ultrasonic Cleaner 6 L
+Brush Anti Static
+Brush ESD Cleaning Small
+Vacuum Pickup Pen
+Dust Blower Hand Air
+Compressed Air Cleaner Can
+Wire Stripper Fine
+Cutter Side Nipper
+Needle Nose Pliers Small
+Crimping Tool RJ45
+Desoldering Pump
+Desoldering Wick 2 mm
+Desoldering Braid
+Lead Free Solder Wire 0.5 mm
+Lead Free Solder Wire 0.8 mm
+Solder Wire 60/40 100 g
+Solder Paste Syringe 10 cc
+Solder Paste Mechanic 183 C
+Flux Paste Relife RMA 223
+Flux Paste Mechanic UV223
+Flux Liquid 30 ml
+Rosin Soldering Flux
+Isopropyl Alcohol 99 Percent 100 ml
+Isopropyl Alcohol 99 Percent 500 ml
+Isopropyl Alcohol 99 Percent 1 L
+PCB Cleaner Spray 400 ml
+Contact Cleaner Spray 400 ml
+Thermal Paste Tube
+Thermal Pad Sheet
+Kapton Tape Heat Resistant 10 mm
+Kapton Tape Heat Resistant 20 mm
+Conformal Coating Lacquer
+Glue B7000 15 ml
+Glue B7000 50 ml
+Glue T7000 Black 15 ml
+Glue T8000 Black 50 ml
+Glue E8000 15 ml
+UV Glue Light Cure
+OCA Glue Sheet Universal
+OCA Glue Sheet Samsung
+Double Sided Tape Mobile Battery
+Battery Tape Strip Pack
+Adhesive Frame Sticker Display Universal
+Water Proof Adhesive iPhone
+Sim Tray Pin Ejector 50 pcs
+Mobile Repair Software Box JTAG
+Mobile Repair Dongle Z3X
+Sim Unlocking Box
+Sim Eject Needle Pack
+Battery Spot Welder Mini
+Battery Tab Nickel Strip
+Multi Charging Cable Repair Combo
+Cable Tester USB
+Earphone Jack Soldering Kit

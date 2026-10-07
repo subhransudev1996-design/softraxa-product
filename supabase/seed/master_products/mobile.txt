@@ -1,0 +1,642 @@
+# type: mobile
+# Mobile shop: phones (IMEI tracked, 12 months warranty) and accessories.
+
+## Smartphones - Samsung | Piece | 85171300 | 18 | serial=1 | warranty=12
+Samsung Galaxy A05 | Samsung
+Samsung Galaxy A06 | Samsung
+Samsung Galaxy A15 5G | Samsung
+Samsung Galaxy A16 5G | Samsung
+Samsung Galaxy A25 5G | Samsung
+Samsung Galaxy A35 5G | Samsung
+Samsung Galaxy A55 5G | Samsung
+Samsung Galaxy A56 5G | Samsung
+Samsung Galaxy M05 | Samsung
+Samsung Galaxy M15 5G | Samsung
+Samsung Galaxy M35 5G | Samsung
+Samsung Galaxy M16 5G | Samsung
+Samsung Galaxy F15 5G | Samsung
+Samsung Galaxy F55 5G | Samsung
+Samsung Galaxy S24 | Samsung
+Samsung Galaxy S24 Ultra | Samsung
+Samsung Galaxy S24 FE | Samsung
+Samsung Galaxy S25 | Samsung
+Samsung Galaxy S25 Ultra | Samsung
+Samsung Galaxy Z Flip6 | Samsung
+Samsung Galaxy Z Fold6 | Samsung
+Samsung Galaxy Tab A9 | Samsung
+Samsung Galaxy Tab S9 FE | Samsung
+
+## Smartphones - Xiaomi, Redmi & POCO | Piece | 85171300 | 18 | serial=1 | warranty=12
+Redmi A3 | Redmi
+Redmi A4 5G | Redmi
+Redmi 13C | Redmi
+Redmi 13C 5G | Redmi
+Redmi 14C 5G | Redmi
+Redmi 13 5G | Redmi
+Redmi Note 13 5G | Redmi
+Redmi Note 13 Pro 5G | Redmi
+Redmi Note 13 Pro Plus 5G | Redmi
+Redmi Note 14 5G | Redmi
+Redmi Note 14 Pro 5G | Redmi
+Redmi Note 14 Pro Plus 5G | Redmi
+Xiaomi 14 Civi | Xiaomi
+Xiaomi 14 | Xiaomi
+Xiaomi 15 | Xiaomi
+POCO C61 | POCO
+POCO C65 | POCO
+POCO C75 5G | POCO
+POCO M6 5G | POCO
+POCO M6 Pro 5G | POCO
+POCO X6 5G | POCO
+POCO X6 Pro 5G | POCO
+POCO X7 Pro 5G | POCO
+POCO F6 | POCO
+POCO F7 | POCO
+
+## Smartphones - realme & Narzo | Piece | 85171300 | 18 | serial=1 | warranty=12
+realme C53 | realme
+realme C55 | realme
+realme C61 | realme
+realme C63 | realme
+realme C65 5G | realme
+realme C67 5G | realme
+realme C71 | realme
+realme Narzo N53 | realme
+realme Narzo N61 | realme
+realme Narzo 70 Pro 5G | realme
+realme Narzo 70x 5G | realme
+realme Narzo 80x 5G | realme
+realme 12 5G | realme
+realme 12 Pro 5G | realme
+realme 13 5G | realme
+realme 13 Pro 5G | realme
+realme 14 Pro 5G | realme
+realme P1 5G | realme
+realme P2 Pro 5G | realme
+realme GT 6T | realme
+
+## Smartphones - vivo & iQOO | Piece | 85171300 | 18 | serial=1 | warranty=12
+vivo Y18 | vivo
+vivo Y28 5G | vivo
+vivo Y29 5G | vivo
+vivo Y200e 5G | vivo
+vivo Y200 5G | vivo
+vivo Y300 5G | vivo
+vivo T3 5G | vivo
+vivo T3 Lite 5G | vivo
+vivo T3x 5G | vivo
+vivo T4 5G | vivo
+vivo V30e | vivo
+vivo V40 | vivo
+vivo V40e | vivo
+vivo V50 | vivo
+vivo X100 | vivo
+vivo X200 | vivo
+iQOO Z9 5G | iQOO
+iQOO Z9x 5G | iQOO
+iQOO Z9s 5G | iQOO
+iQOO Neo 9 Pro | iQOO
+iQOO 12 | iQOO
+iQOO 13 | iQOO
+iQOO Z10 5G | iQOO
+
+## Smartphones - OPPO, OnePlus & others | Piece | 85171300 | 18 | serial=1 | warranty=12
+OPPO A18 | OPPO
+OPPO A3x 5G | OPPO
+OPPO A38 | OPPO
+OPPO A57 | OPPO
+OPPO A60 | OPPO
+OPPO A78 5G | OPPO
+OPPO F25 Pro 5G | OPPO
+OPPO F27 Pro Plus 5G | OPPO
+OPPO Reno12 5G | OPPO
+OPPO Reno12 Pro 5G | OPPO
+OPPO Reno13 5G | OPPO
+OnePlus Nord CE4 | OnePlus
+OnePlus Nord CE4 Lite 5G | OnePlus
+OnePlus Nord CE3 Lite 5G | OnePlus
+OnePlus Nord 4 | OnePlus
+OnePlus 12R | OnePlus
+OnePlus 12 | OnePlus
+OnePlus 13R | OnePlus
+OnePlus 13 | OnePlus
+Motorola moto g45 5G | Motorola
+Motorola moto g64 5G | Motorola
+Motorola moto g85 5G | Motorola
+Motorola moto e14 | Motorola
+Motorola Edge 50 Fusion | Motorola
+Motorola Edge 50 Pro | Motorola
+Motorola razr 50 | Motorola
+Nothing Phone 2a | Nothing
+Nothing Phone 2a Plus | Nothing
+Nothing Phone 3a | Nothing
+CMF Phone 1 | Nothing
+Infinix Hot 40i | Infinix
+Infinix Hot 50 5G | Infinix
+Infinix Note 40 5G | Infinix
+Infinix Smart 8 | Infinix
+Tecno Spark 20 | Tecno
+Tecno Spark Go 2024 | Tecno
+Tecno Pova 6 Pro 5G | Tecno
+Lava Blaze 2 5G | Lava
+Lava Blaze Dragon 5G | Lava
+Lava Yuva 3 Pro | Lava
+Lava Agni 3 5G | Lava
+Google Pixel 8a | Google
+Google Pixel 9 | Google
+Honor X9b | Honor
+Itel A70 | Itel
+Itel P55 5G | Itel
+Itel S24 | Itel
+Jio Bharat J1 4G | Jio
+Jio Bharat B1 4G | Jio
+Jio Phone Prima 2 | Jio
+
+## Smartphones - Apple | Piece | 85171300 | 18 | serial=1 | warranty=12
+Apple iPhone 13 128 GB | Apple
+Apple iPhone 14 128 GB | Apple
+Apple iPhone 15 128 GB | Apple
+Apple iPhone 15 Plus 128 GB | Apple
+Apple iPhone 16 128 GB | Apple
+Apple iPhone 16 Plus 128 GB | Apple
+Apple iPhone 16 Pro 128 GB | Apple
+Apple iPhone 16 Pro Max 256 GB | Apple
+Apple iPhone 16e 128 GB | Apple
+
+## Apple iPad, Watch & Accessories | Piece | 85044090 | 18 | warranty=12
+Apple iPad 10th Generation | Apple | | 84713010 | 18 | serial=1
+Apple iPad Air M2 | Apple | | 84713010 | 18 | serial=1
+Apple Watch SE | Apple | | 91021100 | 18 | serial=1
+Apple AirPods 2nd Gen | Apple | | 85183000 | 18 | serial=1
+Apple AirPods Pro 2nd Gen | Apple | | 85183000 | 18 | serial=1
+Apple Original 20W USB-C Power Adapter | Apple
+Apple Original USB-C to Lightning Cable 1 m | Apple | | 85444299
+Apple Original USB-C Cable 1 m | Apple | | 85444299
+
+## Feature Phones & Keypad | Piece | 85171300 | 18 | serial=1 | warranty=12
+Nokia 105 Keypad Phone | Nokia
+Nokia 110 Keypad Phone | Nokia
+Nokia 130 Music | Nokia
+Nokia 150 Keypad Phone | Nokia
+Nokia 215 4G | Nokia
+Nokia 225 4G | Nokia
+Nokia 2780 Flip | Nokia
+Nokia 3210 4G | Nokia
+Nokia 8210 4G | Nokia
+Nokia 6310 | Nokia
+Lava Keypad Phone Pulse | Lava
+Lava Hero 600 | Lava
+Lava A1 Josh | Lava
+Itel Keypad Phone IT2163S | Itel
+Itel Magic X Play | Itel
+Itel Power 110 | Itel
+Samsung Guru Music 2 | Samsung
+Samsung Guru FM Plus | Samsung
+Karbonn K9 Keypad Phone | Karbonn
+Micromax X2410 Keypad | Micromax
+Micromax In Note 2 | Micromax
+Micromax Bharat 5 Pro | Micromax
+Jio Phone Keypad Bharat | Jio
+Kechaoda K115 Dual SIM | Kechaoda
+Senior Citizen Phone Big Button | | | 85171300
+
+## Chargers & Adapters | Piece | 85044090 | 18 | warranty=6
+Samsung 25W USB-C Super Fast Charger | Samsung | | | | warranty=6
+Samsung 45W USB-C Super Fast Charger | Samsung
+Samsung 15W Adaptive Fast Charger | Samsung
+Samsung 10W Charger with Micro USB Cable | Samsung
+Mi 33W SonicCharge 3.0 | Mi
+Mi 22.5W Charger with Cable | Mi
+Mi 67W SonicCharge 3.0 | Mi
+Mi 120W HyperCharge Adapter | Mi
+Redmi 10W Charger with Micro USB Cable | Redmi
+Redmi 18W Fast Charger | Redmi
+realme 33W Dart Charger | realme
+realme 65W SuperVOOC Charger | realme
+realme 80W SuperVOOC Charger | realme
+OnePlus 80W SUPERVOOC Power Adapter | OnePlus
+OnePlus 65W Warp Charge Power Adapter | OnePlus
+OPPO 33W SUPERVOOC Charger | OPPO
+OPPO 67W SUPERVOOC Charger | OPPO
+vivo 44W FlashCharge Adapter | vivo
+vivo 18W Fast Charger | vivo
+iQOO 120W FlashCharge Charger | iQOO
+Motorola TurboPower 33W Charger | Motorola
+Motorola TurboPower 68W Charger | Motorola
+Ambrane 20W Fast Wall Charger | Ambrane
+Ambrane 30W Fast Charger Type C | Ambrane
+Ambrane 65W GaN Wall Charger | Ambrane
+Ambrane 12W Charger 2.4A Dual USB | Ambrane
+Ambrane 18W Quick Charger | Ambrane
+boAt Wall Charger 20W | boAt
+boAt Wall Charger 65W GaN | boAt
+boAt WCD 2.4A Dual Port Charger | boAt
+Portronics Adapter 30 20W | Portronics
+Portronics Adapto 65 GaN Charger | Portronics
+Stuffcool 20W PD Charger | Stuffcool
+Syska 20W Fast Charger | Syska
+Syska 18W Charger | Syska
+Philips 20W PD Charger | Philips
+Belkin 25W USB-C PD Wall Charger | Belkin
+Anker 20W USB-C Charger | Anker
+Anker 30W Nano 3 Charger | Anker
+Universal Mobile Charger 1 Amp | | | | 18
+Universal Mobile Charger 2 Amp | | | | 18
+Dual USB Charger 2.1 A | | | | 18
+Fast Charger Type C 18W Generic | | | | 18
+Car Charger Dual USB 3.1 A | | | 85044090 | 18
+Car Charger Type C 30W | | | 85044090 | 18
+Boat Car Charger 18W | boAt | | 85044090 | 18
+Wireless Charger Pad 15W | | | 85044090 | 18
+Wireless Charger Stand 10W | | | 85044090 | 18
+Magsafe Compatible Charger 15W | | | 85044090 | 18
+Multi Port USB Charging Station 6 Port | | | 85044090 | 18
+Travel Adapter Universal | | | 85366990 | 18
+Extension Board 4 Socket with USB | | | 85366990 | 18
+Samsung Super Fast Charging Cable Type C 1 m | Samsung | | 85444299 | 18
+
+## Cables & Connectors | Piece | 85444299 | 18 | warranty=6
+Samsung Type C to Type C Cable 1 m | Samsung
+Samsung Micro USB Data Cable | Samsung
+Mi Type C Cable 1 m | Mi
+Mi Braided USB Type C Cable 1 m | Mi
+Mi Braided Micro USB Cable | Mi
+Redmi USB Type C Cable 1 m | Redmi
+realme Type C Cable 1 m | realme
+realme 65W Type C Cable | realme
+OnePlus Type C Cable Warp | OnePlus
+OnePlus Type C Cable 1 m Supervooc | OnePlus
+OPPO USB Type C Cable 1 m | OPPO
+vivo Type C Cable 1 m | vivo
+Ambrane Unbreakable 60W Type C Cable 1.5 m | Ambrane
+Ambrane Unbreakable 3A Micro USB Cable 1 m | Ambrane
+Ambrane Unbreakable 60W Type C to Lightning 1 m | Ambrane
+Ambrane Braided Type C Cable 1 m | Ambrane
+Ambrane Dual Cable 3 in 1 | Ambrane
+boAt Rugged Type C Cable 1.5 m | boAt
+boAt Rugged Micro USB Cable 1.5 m | boAt
+boAt Deuce USB 300 Type C Cable | boAt
+boAt Lightning Cable 1 m | boAt
+boAt Braided Type C to Type C Cable | boAt
+boAt 3 in 1 Cable | boAt
+Portronics Konnect Core Type C Cable | Portronics
+Portronics Konnect Link Micro USB Cable | Portronics
+Portronics Konnect B Lightning Cable | Portronics
+Stuffcool Braided Type C Cable 1 m | Stuffcool
+Stuffcool Lightning Cable 1 m | Stuffcool
+Syska Type C Cable 1 m | Syska
+Anker PowerLine III Type C Cable | Anker
+Belkin Lightning Cable 1 m | Belkin
+Micro USB Cable 1 m Generic | | | | 18
+Type C Cable 1 m Generic | | | | 18
+Lightning Cable 1 m Generic | | | | 18
+Type C to Type C Cable 1 m Generic | | | | 18
+Micro USB Cable 2 m Generic | | | | 18
+USB Extension Cable 1.5 m | | | 85444299 | 18
+OTG Cable Micro USB | | | 85444299 | 18
+OTG Adapter Type C | | | 85366990 | 18
+OTG Adapter Micro USB | | | 85366990 | 18
+USB Type C to 3.5 mm Audio Adapter | | | 85366990 | 18
+Lightning to 3.5 mm Audio Adapter | | | 85366990 | 18
+Type C to HDMI Cable 1.8 m | | | 85444299 | 18
+Type C to HDMI Adapter | | | 85366990 | 18
+HDMI Cable 1.5 m | | | 85444299 | 18
+HDMI Cable 3 m | | | 85444299 | 18
+AUX Cable 3.5 mm 1 m | | | 85444299 | 18
+AUX Cable 3.5 mm 1.5 m | | | 85444299 | 18
+AUX Cable Coiled Car | | | 85444299 | 18
+USB 2.0 Cable A to B Printer | | | 85444299 | 18
+Micro USB to Type C Adapter | | | 85366990 | 18
+Card Reader USB SD Micro SD | | | 84717090 | 18
+USB Hub 4 Port | | | 84718000 | 18
+USB Type C Hub 6 in 1 | | | 84718000 | 18
+
+## Earphones & Headphones | Piece | 85183000 | 18 | warranty=6
+boAt BassHeads 100 Wired Earphones | boAt
+boAt BassHeads 102 Wired Earphones | boAt
+boAt BassHeads 152 Wired Earphones | boAt
+boAt BassHeads 225 Type C Earphones | boAt
+boAt BassHeads 242 Earphones | boAt
+boAt Rockerz 255 Pro Plus Neckband | boAt
+boAt Rockerz 235 V2 Neckband | boAt
+boAt Rockerz 330 Pro Neckband | boAt
+boAt Rockerz 450 Headphones | boAt
+boAt Rockerz 550 Headphones | boAt
+boAt Rockerz 480 Headphones | boAt
+boAt Airdopes 91 TWS | boAt
+boAt Airdopes 111 TWS | boAt
+boAt Airdopes 131 TWS | boAt
+boAt Airdopes 141 TWS | boAt
+boAt Airdopes 161 TWS | boAt
+boAt Airdopes 175 TWS | boAt
+boAt Airdopes 311 Pro | boAt
+boAt Airdopes 441 Pro | boAt
+boAt Airdopes 800 | boAt
+Noise Buds VS104 | Noise
+Noise Buds VS102 | Noise
+Noise Buds N1 | Noise
+Noise Buds VS401 | Noise
+Noise Tune Active Neckband | Noise
+Noise Tune Flex Neckband | Noise
+Noise Air Buds Pro | Noise
+Noise Two Neckband | Noise
+realme Buds Wireless 3 Neckband | realme
+realme Buds Wireless 3 Neo | realme
+realme Buds T110 TWS | realme
+realme Buds T300 TWS | realme
+realme Buds Air 5 | realme
+realme Buds Q2 | realme
+realme Buds Classic Wired | realme
+OnePlus Bullets Wireless Z2 | OnePlus
+OnePlus Nord Buds 2 | OnePlus
+OnePlus Nord Buds 2r | OnePlus
+OnePlus Buds Z2 | OnePlus
+OnePlus Bullets Wired Type C | OnePlus
+Redmi Buds 5C | Redmi
+Redmi Buds 5 | Redmi
+Redmi Buds 4 Active | Redmi
+Mi Dual Driver In-Ear Earphones | Mi
+Mi Super Bass Earphones | Mi
+Mi Neckband Bluetooth Earphones | Mi
+Mi Sports Bluetooth Earphones | Mi
+JBL Tune 110 Wired Earphones | JBL
+JBL Tune 215BT Neckband | JBL
+JBL Tune 230NC TWS | JBL
+JBL Wave Buds | JBL
+JBL C100SI In Ear Headphones | JBL
+JBL Tune 510BT Headphones | JBL
+Sony WI-C100 Wireless Earphones | Sony
+Sony MDR-EX15AP Earphones | Sony
+Sony WH-CH520 Headphones | Sony
+Sony WF-C510 TWS | Sony
+Samsung Galaxy Buds 2 | Samsung
+Samsung Galaxy Buds FE | Samsung
+Samsung Galaxy Buds 3 | Samsung
+Samsung IG935 Type C Earphones | Samsung
+Samsung Level U2 Neckband | Samsung
+Ambrane Bassband Neckband | Ambrane
+Ambrane Dots Bluetooth TWS | Ambrane
+Ambrane In-ear Wired Earphones | Ambrane
+Ambrane Stringz Wired Earphones | Ambrane
+Portronics Conch Theta Earphones | Portronics
+Portronics Harmonics Twins Earbuds | Portronics
+Portronics Wireless Headphones Muffs | Portronics
+Zebronics Zeb Thunder Headphones | Zebronics
+Zebronics Zeb Bro Earphones | Zebronics
+Zebronics Zeb Duke Earbuds | Zebronics
+Zebronics Zeb Jaguar Headset | Zebronics
+Wireless Neckband Earphones Generic | | | | 18
+Wired Earphones with Mic Generic | | | | 18
+Type C Earphones Wired Generic | | | | 18
+TWS Earbuds Generic | | | | 18
+Headset Gaming with Mic | | | | 18
+Bluetooth Headphones Over Ear Generic | | | | 18
+Earphone Case Hard | | | 4202 | 18
+Ear Tips Silicone Set | | | 3926 | 18
+Mobile Phone Headset Single Ear Bluetooth | | | | 18
+Bluetooth Headset Jabra | Jabra | | | 18
+
+## Power Banks | Piece | 85076000 | 18 | warranty=6
+Mi Power Bank 3i 10000 mAh | Mi
+Mi Power Bank 3i 20000 mAh | Mi
+Mi Power Bank 4i 20000 mAh | Mi
+Redmi Power Bank 10000 mAh | Redmi
+Redmi Power Bank 20000 mAh | Redmi
+realme Power Bank 2 10000 mAh | realme
+realme Power Bank 2 20000 mAh | realme
+realme Power Bank 2i 10000 mAh | realme
+OnePlus Power Bank 10000 mAh | OnePlus
+Ambrane 10000 mAh Power Bank | Ambrane
+Ambrane 20000 mAh Power Bank | Ambrane
+Ambrane 27000 mAh Power Bank | Ambrane
+Ambrane 10000 mAh 22.5W Power Bank | Ambrane
+Ambrane Stylo 10000 mAh | Ambrane
+Syska 10000 mAh Power Bank | Syska
+Syska 20000 mAh Power Bank | Syska
+Syska 15000 mAh Power Bank | Syska
+Portronics Power Brick 10000 mAh | Portronics
+Portronics Luxcell 20000 mAh | Portronics
+Portronics Pocket Charger 10000 mAh | Portronics
+Boat EnergyShroom 10000 mAh | boAt
+boAt Energyshroom PB300 20000 mAh | boAt
+boAt EnergyShroom PB400 | boAt
+Stuffcool 10000 mAh Power Bank | Stuffcool
+Stuffcool 20000 mAh Power Bank | Stuffcool
+Anker PowerCore 10000 mAh | Anker
+Anker PowerCore 20000 mAh | Anker
+Anker 313 Power Bank 10000 mAh | Anker
+Samsung 10000 mAh 25W Power Bank | Samsung
+Samsung 20000 mAh 25W Power Bank | Samsung
+Philips Power Bank 10000 mAh | Philips
+Belkin Boost Charge Power Bank 10000 mAh | Belkin
+Power Bank Generic 10000 mAh | | | | 18
+Power Bank Generic 20000 mAh | | | | 18
+Power Bank Solar 20000 mAh | | | | 18
+Power Bank Wireless Magnetic 5000 mAh | | | | 18
+Power Bank Mini 5000 mAh | | | | 18
+
+## Cases, Covers & Screen Guards | Piece | 3926 | 18
+Back Cover Silicone Transparent Universal | | | 3926 
+Back Cover Silicone Black Universal | | | 3926 
+Back Cover Hard PC Assorted | | | 3926 
+Back Cover for Samsung Galaxy A15 | | | 3926 
+Back Cover for Samsung Galaxy A35 | | | 3926 
+Back Cover for Samsung Galaxy M15 | | | 3926 
+Back Cover for Redmi 13C | | | 3926 
+Back Cover for Redmi Note 13 5G | | | 3926 
+Back Cover for Redmi Note 13 Pro | | | 3926 
+Back Cover for Redmi Note 14 5G | | | 3926 
+Back Cover for realme Narzo 70x | | | 3926 
+Back Cover for realme C55 | | | 3926 
+Back Cover for realme 12 5G | | | 3926 
+Back Cover for vivo Y28 | | | 3926 
+Back Cover for vivo T3 5G | | | 3926 
+Back Cover for OPPO A18 | | | 3926 
+Back Cover for OnePlus Nord CE4 | | | 3926 
+Back Cover for iQOO Z9 | | | 3926 
+Back Cover for iPhone 13 | | | 3926 
+Back Cover for iPhone 14 | | | 3926 
+Back Cover for iPhone 15 | | | 3926 
+Back Cover for iPhone 16 | | | 3926 
+MagSafe Back Cover iPhone 15 | | | 3926 
+Spigen Rugged Armor Case iPhone 15 | Spigen | | 3926 
+Spigen Tough Armor Case Samsung S24 | Spigen | | 3926 
+Flip Cover Leather Samsung | | | 4202 
+Flip Cover Leather Redmi | | | 4202 
+Flip Cover Leather Universal | | | 4202 
+Pouch Mobile Universal Waterproof | | | 3926 
+Pouch Mobile Belt Clip | | | 4202 
+Mobile Cover Pop Socket Grip | | | 3926 
+Mobile Ring Holder | | | 3926 
+Tempered Glass Universal 6 inch | | | 7020 
+Tempered Glass 9H for Redmi 13C | | | 7020 
+Tempered Glass 9H for Redmi Note 13 5G | | | 7020 
+Tempered Glass 9H for Redmi Note 14 5G | | | 7020 
+Tempered Glass 9H for Samsung Galaxy A15 | | | 7020 
+Tempered Glass 9H for Samsung Galaxy A35 | | | 7020 
+Tempered Glass 9H for Samsung Galaxy M15 | | | 7020 
+Tempered Glass 9H for realme C55 | | | 7020 
+Tempered Glass 9H for realme Narzo 70x | | | 7020 
+Tempered Glass 9H for realme 12 5G | | | 7020 
+Tempered Glass 9H for vivo Y28 | | | 7020 
+Tempered Glass 9H for vivo T3 5G | | | 7020 
+Tempered Glass 9H for OPPO A18 | | | 7020 
+Tempered Glass 9H for OnePlus Nord CE4 | | | 7020 
+Tempered Glass 9H for iQOO Z9 | | | 7020 
+Tempered Glass for iPhone 13 | | | 7020 
+Tempered Glass for iPhone 14 | | | 7020 
+Tempered Glass for iPhone 15 | | | 7020 
+Tempered Glass for iPhone 16 | | | 7020 
+Tempered Glass 5D Full Cover Assorted | | | 7020 
+Tempered Glass Privacy Anti Spy | | | 7020 
+Tempered Glass Matte Gaming | | | 7020 
+Tempered Glass Edge to Edge UV | | | 7020 
+Screen Guard Matte Film Universal | | | 3919 
+Screen Guard Hydrogel Film | | | 3919 
+Camera Lens Protector Glass | | | 7020 
+Camera Lens Protector iPhone 15 | | | 7020 
+Back Skin Sticker Film | | | 3919 
+Smartwatch Screen Protector Film | | | 3919 
+Tablet Tempered Glass 10 inch | | | 7020 
+Tablet Cover Flip 10 inch | | | 4202 
+Laptop Sleeve 14 inch | | | 4202 
+Laptop Sleeve 15.6 inch | | | 4202 
+
+## Speakers, Smartwatches & Gadgets | Piece | 85182200 | 18 | warranty=6
+boAt Stone 135 Bluetooth Speaker | boAt
+boAt Stone 350 Bluetooth Speaker | boAt
+boAt Stone 352 Bluetooth Speaker | boAt
+boAt Stone 1000 Bluetooth Speaker | boAt
+boAt Stone SpinX 2.0 Speaker | boAt
+boAt Aavante Bar 1160 Soundbar | boAt
+boAt Aavante Bar 2000 Soundbar | boAt
+JBL Go 3 Bluetooth Speaker | JBL
+JBL Go Essential Speaker | JBL
+JBL Flip 6 Speaker | JBL
+JBL Clip 4 Speaker | JBL
+JBL Charge 5 Speaker | JBL
+JBL Partybox 110 | JBL
+Mi Pocket Speaker 2 | Mi
+Mi Portable Bluetooth Speaker 16 W | Mi
+Sony SRS-XB100 Speaker | Sony
+Sony SRS-XB13 Speaker | Sony
+Zebronics Zeb Sound Bomb Speaker | Zebronics
+Zebronics Zeb Rush Speaker | Zebronics
+Zebronics Computer Speaker 2.1 | Zebronics
+Portronics Sound Drum Speaker | Portronics
+Portronics Breeze Speaker | Portronics
+Bluetooth Speaker Mini Generic | | | | 18
+Karaoke Microphone Wireless | | | 85181000 | 18
+Collar Mic Wireless Pair | | | 85181000 | 18
+Lavalier Mic Wired Type C | | | 85181000 | 18
+Boya BY-M1 Lavalier Mic | Boya | | 85181000 | 18
+boAt Wave Call Smartwatch | boAt | | 91021100 | 18
+boAt Wave Lite Smartwatch | boAt | | 91021100 | 18
+boAt Wave Style Call | boAt | | 91021100 | 18
+boAt Xtend Smartwatch | boAt | | 91021100 | 18
+boAt Lunar Connect Smartwatch | boAt | | 91021100 | 18
+Noise ColorFit Pulse 3 | Noise | | 91021100 | 18
+Noise ColorFit Icon 2 | Noise | | 91021100 | 18
+Noise ColorFit Ultra 3 | Noise | | 91021100 | 18
+Noise Pulse 2 Max | Noise | | 91021100 | 18
+Fire-Boltt Ninja Call Pro Plus | Fire-Boltt | | 91021100 | 18
+Fire-Boltt Phoenix Smartwatch | Fire-Boltt | | 91021100 | 18
+Fire-Boltt Rock Smartwatch | Fire-Boltt | | 91021100 | 18
+Fire-Boltt Talk 2 Smartwatch | Fire-Boltt | | 91021100 | 18
+Fastrack Reflex Vox 2 | Fastrack | | 91021100 | 18
+Fastrack Limitless FS1 | Fastrack | | 91021100 | 18
+Amazfit Bip 5 | Amazfit | | 91021100 | 18
+Amazfit GTS 4 Mini | Amazfit | | 91021100 | 18
+Mi Smart Band 8 | Mi | | 91021100 | 18
+Mi Smart Band 9 | Mi | | 91021100 | 18
+Redmi Watch 5 Active | Redmi | | 91021100 | 18
+realme Watch 3 | realme | | 91021100 | 18
+OnePlus Nord Watch | OnePlus | | 91021100 | 18
+Smartwatch Strap Silicone 22 mm | | | 91139000 | 18
+Smartwatch Strap Metal 20 mm | | | 91139000 | 18
+Smartwatch Charger Magnetic | | | 85044090 | 18
+Smart Band Strap Mi Band 8 | | | 91139000 | 18
+Mobile Holder Car Dashboard | | | 3926 | 18
+Mobile Holder Car AC Vent | | | 3926 | 18
+Mobile Holder Bike Handle | | | 3926 | 18
+Mobile Holder Desk Foldable | | | 3926 | 18
+Mobile Holder Flexible Gooseneck | | | 3926 | 18
+Mobile Stand Metal | | | 7326 | 18
+Tripod Mobile Foldable | | | 96200000 | 18
+Tripod Stand 7 ft with Mobile Holder | | | 96200000 | 18
+Selfie Stick Bluetooth | | | 96200000 | 18
+Ring Light 10 inch with Stand | | | 94051000 | 18
+Ring Light 12 inch with Tripod | | | 94051000 | 18
+Gimbal Stabilizer Smartphone | | | 85258900 | 18
+Phone Cooling Fan Clip | | | 84145990 | 18
+Gaming Trigger Pair | | | 95045000 | 18
+Mobile Game Controller | | | 95045000 | 18
+Webcam 1080p USB | | | 85258900 | 18
+Mini Projector Portable | | | 85286900 | 18
+Fire TV Stick | Amazon | | 85176290 | 18
+Chromecast with Google TV | Google | | 85176290 | 18
+
+## Memory, Storage & Networking | Piece | 85235190 | 18 | warranty=12
+SanDisk Ultra 32 GB microSD Card | SanDisk
+SanDisk Ultra 64 GB microSD Card | SanDisk
+SanDisk Ultra 128 GB microSD Card | SanDisk
+SanDisk Ultra 256 GB microSD Card | SanDisk
+SanDisk Extreme 128 GB microSD Card | SanDisk
+SanDisk Extreme Pro 256 GB microSD Card | SanDisk
+Samsung Evo Plus 64 GB microSD Card | Samsung
+Samsung Evo Plus 128 GB microSD Card | Samsung
+Samsung Evo Plus 256 GB microSD Card | Samsung
+Samsung Pro Endurance 64 GB microSD Card | Samsung
+Kingston Canvas Select Plus 64 GB microSD | Kingston
+Kingston Canvas Select Plus 128 GB microSD | Kingston
+Lexar 633x 64 GB microSD | Lexar
+HP microSD Card 64 GB | HP
+SanDisk Cruzer Blade 16 GB Pen Drive | SanDisk | | 85235110
+SanDisk Cruzer Blade 32 GB Pen Drive | SanDisk | | 85235110
+SanDisk Cruzer Blade 64 GB Pen Drive | SanDisk | | 85235110
+SanDisk Ultra Flair 64 GB USB 3.0 | SanDisk | | 85235110
+SanDisk Ultra Dual Drive Go 64 GB Type C | SanDisk | | 85235110
+SanDisk Ultra Dual Drive 128 GB OTG | SanDisk | | 85235110
+Kingston DataTraveler 64 GB Pen Drive | Kingston | | 85235110
+Kingston DataTraveler Exodia 32 GB | Kingston | | 85235110
+HP v150w 32 GB Pen Drive | HP | | 85235110
+HP v236w 64 GB Pen Drive | HP | | 85235110
+Samsung BAR Plus 64 GB Pen Drive | Samsung | | 85235110
+Samsung Type C Flash Drive Fit Plus 64 GB | Samsung | | 85235110
+Pen Drive 128 GB Generic | | | 85235110
+WD My Passport 1 TB Portable HDD | WD | | 84717020
+WD Elements 1 TB Portable HDD | WD | | 84717020
+WD Elements 2 TB Portable HDD | WD | | 84717020
+Seagate Expansion 1 TB Portable HDD | Seagate | | 84717020
+Seagate Expansion 2 TB Portable HDD | Seagate | | 84717020
+Seagate Basic 1 TB Portable HDD | Seagate | | 84717020
+SanDisk Extreme Portable SSD 500 GB | SanDisk | | 85235110
+SanDisk Extreme Portable SSD 1 TB | SanDisk | | 85235110
+Samsung T7 Portable SSD 500 GB | Samsung | | 85235110
+Samsung T7 Portable SSD 1 TB | Samsung | | 85235110
+Crucial BX500 SSD 480 GB | Crucial | | 85235110
+Kingston A400 SSD 480 GB | Kingston | | 85235110
+Memory Card Case 4 Slot | | | 3926 | 18
+SIM Card Ejector Tool | | | 7326 | 18
+SIM Adapter Nano Micro Standard | | | 85176290 | 18
+TP-Link TL-WR840N Router | TP-Link | | 85176240
+TP-Link Archer C6 Router | TP-Link | | 85176240
+TP-Link Archer AX23 Wi-Fi 6 Router | TP-Link | | 85176240
+TP-Link Archer AX53 Wi-Fi 6 Router | TP-Link | | 85176240
+TP-Link TL-WN725N USB WiFi Adapter | TP-Link | | 85176290
+TP-Link Wi-Fi Range Extender TL-WA855RE | TP-Link | | 85176290
+D-Link DIR-615 Router | D-Link | | 85176240
+Netgear JNR1010 Router | Netgear | | 85176240
+Tenda N301 Router | Tenda | | 85176240
+Tenda AC6 Router | Tenda | | 85176240
+Jio Fiber Wi-Fi Router | Jio | | 85176240
+Jio Dongle JioFi Hotspot | Jio | | 85176290
+Airtel Amf Hotspot | Airtel | | 85176290
+4G Data Card USB Dongle | | | 85176290
+Ethernet Cable Cat6 2 m | | | 85444299
+Ethernet Cable Cat6 5 m | | | 85444299
+Ethernet Cable Cat6 10 m | | | 85444299
+Ethernet Cable Cat6 Roll 305 m Box | | Box | 85444299
+Wi-Fi Cable Cat5e Patch Cord 1 m | | | 85444299
+RJ45 Connector Pack 100 | | Packet | 85366990
+Network LAN Tester | | | 90304000

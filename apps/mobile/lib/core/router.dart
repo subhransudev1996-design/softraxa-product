@@ -31,6 +31,7 @@ import '../features/products/master_data_screen.dart';
 import '../features/products/product_detail_screen.dart';
 import '../features/products/product_form_screen.dart';
 import '../features/products/products_screen.dart';
+import '../features/products/suggested_products_screen.dart';
 import '../features/purchases/purchase_form_screen.dart';
 import '../features/purchases/purchases_screen.dart';
 import '../features/reports/gst_returns_screen.dart';
@@ -224,6 +225,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 initialBarcode: state.uri.queryParameters['barcode'],
               ),
             ),
+          ),
+          GoRoute(
+            path: '/products/suggested',
+            pageBuilder: (context, state) =>
+                _page(context, state, const SuggestedProductsScreen()),
           ),
           GoRoute(
             path: '/products/master-data',

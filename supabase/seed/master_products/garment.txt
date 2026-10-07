@@ -1,0 +1,888 @@
+# type: garment
+# Garment, cloth and footwear shop. Sizes and colours are variants the shop
+# adds itself. Apparel and footwear are 5% up to Rs 2,500 per piece and 18%
+# above that - the shop changes the rate on dearer items.
+
+## Men's Shirts | Piece | 6205 | 5?
+Men's Cotton Formal Shirt Full Sleeve
+Men's Cotton Formal Shirt Half Sleeve
+Men's Cotton Casual Shirt Check
+Men's Cotton Casual Shirt Printed
+Men's Cotton Casual Shirt Plain
+Men's Linen Shirt
+Men's Denim Shirt | | | 6205
+Men's Polyester Formal Shirt
+Men's Party Wear Shirt
+Men's Kurta Shirt
+Men's Flannel Shirt
+Peter England Men's Formal Shirt | Peter England
+Van Heusen Men's Formal Shirt | Van Heusen
+Allen Solly Men's Casual Shirt | Allen Solly
+Raymond Men's Formal Shirt | Raymond
+Arrow Men's Formal Shirt | Arrow
+Louis Philippe Men's Formal Shirt | Louis Philippe
+Indian Terrain Men's Casual Shirt | Indian Terrain
+Max Men's Casual Shirt | Max
+Pantaloons Men's Casual Shirt | Pantaloons
+Mufti Men's Casual Shirt | Mufti
+Highlander Men's Casual Shirt | Highlander
+Roadster Men's Casual Shirt | Roadster
+
+## Men's T-Shirts & Casual Tops | Piece | 6109 | 5?
+Men's Cotton Round Neck T-Shirt
+Men's Cotton V Neck T-Shirt
+Men's Cotton Polo T-Shirt
+Men's Cotton Printed T-Shirt
+Men's Sports T-Shirt Dry Fit
+Men's Full Sleeve T-Shirt
+Men's Henley T-Shirt
+Men's Sleeveless T-Shirt Gym
+Men's Oversized T-Shirt
+Men's Hooded T-Shirt
+Men's Track Suit Top
+Men's Sweatshirt Cotton | | | 6110
+Men's Hoodie Fleece | | | 6110
+Men's Sweater Woolen Full Sleeve | | | 6110
+Men's Sweater Woolen Half Sleeve | | | 6110
+Men's Sweater V Neck | | | 6110
+Men's Cardigan | | | 6110
+Men's Thermal Top Winter | | | 6109
+Men's Jacket Winter | | | 6201
+Men's Jacket Denim | | | 6201
+Men's Jacket Leather Look | | | 6201
+Men's Windcheater | | | 6201
+Men's Rain Jacket | | | 6201
+Men's Blazer Casual | | | 6203
+Men's Waistcoat Ethnic | | | 6211
+Nehru Jacket Men's | | | 6211
+Levi's Men's T-Shirt | Levi's
+Puma Men's T-Shirt | Puma
+Adidas Men's T-Shirt | Adidas
+Nike Men's T-Shirt | Nike
+Jockey Men's T-Shirt | Jockey
+U.S. Polo Assn. Men's Polo T-Shirt | U.S. Polo Assn.
+Wrogn Men's T-Shirt | Wrogn
+Fastrack Men's T-Shirt | Fastrack
+
+## Men's Trousers, Jeans & Shorts | Piece | 6203 | 5?
+Men's Formal Trouser Cotton
+Men's Formal Trouser Polyester Blend
+Men's Formal Trouser Slim Fit
+Men's Chinos Cotton
+Men's Cargo Pant
+Men's Cargo Shorts
+Men's Jeans Slim Fit
+Men's Jeans Regular Fit
+Men's Jeans Straight Fit
+Men's Jeans Skinny Fit
+Men's Jeans Stretchable
+Men's Jeans Ripped
+Men's Track Pants Cotton | | | 6103
+Men's Track Pants Polyester | | | 6103
+Men's Jogger Pants | | | 6103
+Men's Shorts Cotton | | | 6103
+Men's Shorts 3/4th Capri | | | 6103
+Men's Shorts Sports | | | 6103
+Men's Pyjama Cotton
+Men's Lowers Cotton
+Men's Lungi Cotton | | | 6304
+Men's Dhoti Cotton | | | 6304
+Men's Dhoti Silk Border | | | 6304
+Men's Uniform Pant
+Men's Safari Suit
+Men's Safari Pant
+Levi's 511 Slim Fit Jeans | Levi's
+Levi's 512 Slim Taper Jeans | Levi's
+Levi's 501 Original Jeans | Levi's
+Wrangler Men's Jeans | Wrangler
+Lee Men's Jeans | Lee
+Pepe Jeans Men's Jeans | Pepe Jeans
+Flying Machine Men's Jeans | Flying Machine
+Killer Men's Jeans | Killer
+Spykar Men's Jeans | Spykar
+Numero Uno Men's Jeans | Numero Uno
+Peter England Men's Trouser | Peter England
+Van Heusen Men's Trouser | Van Heusen
+Raymond Men's Trouser | Raymond
+Park Avenue Men's Trouser | Park Avenue
+Louis Philippe Men's Trouser | Louis Philippe
+Allen Solly Men's Trouser | Allen Solly
+
+## Men's Ethnic & Kurta | Piece | 6211 | 5?
+Men's Cotton Kurta Plain
+Men's Cotton Kurta Printed
+Men's Cotton Kurta Short
+Men's Cotton Kurta Long
+Men's Silk Blend Kurta
+Men's Khadi Kurta
+Men's Linen Kurta
+Men's Pathani Suit
+Men's Kurta Pyjama Set Cotton
+Men's Kurta Pyjama Set Silk
+Men's Kurta Pyjama Set Festive
+Men's Sherwani
+Men's Indo Western Set
+Men's Dhoti Kurta Set
+Men's Panjabi Odia Style Kurta
+Men's Pyjama Churidar
+Men's Pyjama Aligarhi
+Men's Pyjama Cotton Plain
+Men's Angavastram Shawl
+Men's Stole Silk
+Men's Turban Pagri
+Men's Cap Topi Gandhi | | | 6505
+Men's Kufi Cap | | | 6505
+
+## Men's Innerwear & Socks | Piece | 6107 | 5?
+Men's Brief Cotton
+Men's Brief Cotton Pack of 3 | | Packet
+Men's Trunk Cotton
+Men's Trunk Cotton Pack of 3 | | Packet
+Men's Boxer Cotton
+Men's Boxer Shorts Printed
+Men's Vest Cotton | | | 6109
+Men's Vest Cotton Pack of 3 | | Packet | 6109
+Men's Vest Sleeveless Gym | | | 6109
+Men's Vest Rib Cotton | | | 6109
+Men's Thermal Pyjama Winter | | | 6107
+Men's Thermal Set Winter | | Set | 6107
+Men's Underwear Pocket Brief
+Men's Bermuda Cotton
+Men's Sleepwear Set Cotton | | Set | 6107
+Men's Night Suit | | Set | 6107
+Jockey Men's Brief Pack of 2 | Jockey | Packet
+Jockey Men's Trunk Pack of 2 | Jockey | Packet
+Jockey Men's Vest Pack of 2 | Jockey | Packet | 6109
+Rupa Frontline Men's Brief | Rupa
+Rupa Frontline Men's Vest Pack of 3 | Rupa | Packet | 6109
+Rupa Jon Men's Brief | Rupa
+Rupa Hunk Men's Brief | Rupa
+Dollar Bigboss Men's Brief | Dollar
+Dollar Bigboss Men's Vest Pack of 3 | Dollar | Packet | 6109
+Dollar Lehar Vest | Dollar | | 6109
+Lux Cozi Men's Brief | Lux Cozi
+Lux Cozi Men's Vest | Lux Cozi | | 6109
+Amul Macho Men's Brief | Amul Macho
+Amul Macho Men's Vest | Amul Macho | | 6109
+Lux Venus Men's Vest | Lux Venus | | 6109
+VIP Men's Brief | VIP
+VIP Frenchie Brief | VIP
+Macroman Men's Brief | Macroman
+Hanes Men's Vest | Hanes | | 6109
+Socks Men's Cotton Ankle Length | | Pair | 6115
+Socks Men's Cotton Formal | | Pair | 6115
+Socks Men's Cotton Pack of 3 | | Packet | 6115
+Socks Men's Sports Pack of 3 | | Packet | 6115
+Socks Men's Woolen Winter | | Pair | 6115
+Socks Men's No Show | | Pair | 6115
+Handkerchief Men's Cotton Pack of 3 | | Packet | 6213
+Handkerchief Men's Cotton Single | | Piece | 6213
+Handkerchief Printed Pack of 6 | | Packet | 6213
+Gamcha Cotton Towel Small | | | 6302
+Gamcha Cotton Odia | | | 6302
+
+## Women's Sarees | Piece | | 5?
+Cotton Saree Plain
+Cotton Saree Printed
+Cotton Saree Handloom
+Cotton Saree Tant Bengal
+Cotton Saree Kota Doria
+Cotton Saree Mangalagiri
+Sambalpuri Cotton Saree
+Sambalpuri Silk Saree
+Sambalpuri Ikat Saree
+Bomkai Saree Cotton
+Bomkai Saree Silk
+Khandua Silk Saree
+Pasapalli Saree
+Berhampuri Pattu Saree
+Gopalpur Tussar Saree
+Tussar Silk Saree
+Eri Silk Saree
+Pure Silk Saree
+Banarasi Silk Saree
+Banarasi Georgette Saree
+Kanjivaram Silk Saree
+Mysore Silk Saree
+Chanderi Silk Cotton Saree
+Maheshwari Saree
+Paithani Saree
+Patola Saree
+Georgette Saree Plain
+Georgette Saree Printed
+Georgette Saree Embroidered
+Chiffon Saree Plain
+Chiffon Saree Printed
+Crepe Saree Printed
+Net Saree Embroidered
+Satin Saree
+Linen Saree
+Art Silk Saree
+Polyester Saree Casual
+Printed Saree Daily Wear
+Party Wear Saree Designer
+Bridal Saree Heavy
+Saree with Blouse Piece
+Ready to Wear Saree
+Lace Border Saree
+Saree Fall Pico Service
+Petticoat Cotton | | | 6208
+Petticoat Satin | | | 6208
+Petticoat Shapewear Saree | | | 6212
+Blouse Piece Cotton | | | 5208
+Blouse Piece Silk | | | 5007
+Blouse Readymade Cotton | | | 6206
+Blouse Readymade Padded | | | 6206
+Blouse Readymade Silk | | | 6206
+Stitched Blouse Back Open | | | 6206
+Mekhela Chador Assam | | |
+
+## Women's Kurtis & Ethnic | Piece | 6204 | 5?
+Women's Cotton Kurti Plain
+Women's Cotton Kurti Printed
+Women's Cotton Kurti Straight
+Women's Cotton Kurti A Line
+Women's Cotton Kurti Anarkali
+Women's Rayon Kurti Printed
+Women's Georgette Kurti Embroidered
+Women's Silk Blend Kurti
+Women's Long Kurti Daily Wear
+Women's Short Kurti Top
+Women's Kurti with Palazzo Set | | Set | 6211
+Women's Kurti with Pant Set | | Set | 6211
+Women's Salwar Suit Cotton Set | | Set | 6211
+Women's Salwar Suit Unstitched Cotton | | Set | 5208
+Women's Salwar Suit Unstitched Georgette | | Set | 5407
+Women's Salwar Suit Party Wear | | Set | 6211
+Women's Churidar Suit Set | | Set | 6211
+Women's Patiala Suit Set | | Set | 6211
+Women's Anarkali Suit Set | | Set | 6211
+Women's Sharara Set | | Set | 6211
+Women's Gharara Set | | Set | 6211
+Women's Palazzo Cotton | | | 6204
+Women's Palazzo Rayon | | | 6204
+Women's Leggings Cotton Ankle Length | | | 6115
+Women's Leggings Churidar | | | 6115
+Women's Leggings Colour Assorted | | | 6115
+Women's Jeggings Denim | | | 6115
+Women's Salwar Cotton | | | 6204
+Women's Salwar Patiala | | | 6204
+Women's Pant Cigarette Trouser | | | 6204
+Women's Pant Formal | | | 6204
+Women's Pant Wide Leg | | | 6204
+Women's Jeans Slim Fit | | | 6204
+Women's Jeans High Waist | | | 6204
+Women's Jeans Straight | | | 6204
+Women's Shorts | | | 6204
+Women's Skirt Long | | | 6204
+Women's Skirt Short | | | 6204
+Women's Top Casual Cotton | | | 6106
+Women's Top Party Wear | | | 6106
+Women's T-Shirt Round Neck | | | 6109
+Women's Shirt Casual | | | 6106
+Women's Tunic | | | 6106
+Women's Crop Top | | | 6106
+Women's Dress Maxi | | | 6204
+Women's Dress A Line | | | 6204
+Women's Dress Midi | | | 6204
+Women's Gown Party Wear | | | 6204
+Women's Jumpsuit | | | 6204
+Women's Cape Shrug | | | 6110
+Women's Cardigan Woolen | | | 6110
+Women's Sweater Woolen | | | 6110
+Women's Hoodie | | | 6110
+Women's Jacket Winter | | | 6202
+Women's Shawl Woolen | | | 6214
+Women's Stole Pashmina | | | 6214
+Women's Dupatta Cotton | | | 6214
+Women's Dupatta Georgette | | | 6214
+Women's Dupatta Chiffon | | | 6214
+Women's Dupatta Net Embroidered | | | 6214
+Women's Dupatta Phulkari | | | 6214
+Women's Dupatta Banarasi | | | 6214
+Women's Scarf Cotton | | | 6214
+Women's Scarf Silk | | | 6214
+Women's Lehenga Choli Set | | Set | 6204
+Women's Lehenga Choli Bridal | | Set | 6204
+Women's Lehenga Skirt Only | | | 6204
+Women's Ghagra Cotton | | | 6204
+Women's Burqa Abaya | | | 6204
+Women's Hijab Scarf | | | 6214
+Women's Nighty Cotton | | | 6208
+Women's Nighty Satin | | | 6208
+Women's Maxi Nighty | | | 6208
+Women's Night Suit Cotton Set | | Set | 6208
+Women's Night Dress Short | | | 6208
+Women's Dressing Gown Robe | | | 6208
+Women's Thermal Top Winter | | | 6109
+Women's Thermal Bottom Winter | | | 6108
+Women's Uniform Saree Hospital | | | 6204
+Women's Uniform Apron | | | 6211
+Biba Women's Kurti | Biba
+W Women's Kurti | W
+Libas Women's Kurti | Libas
+Aurelia Women's Kurti | Aurelia
+Global Desi Women's Kurti | Global Desi
+Max Women's Kurti | Max
+Pantaloons Women's Kurti | Pantaloons
+Vishudh Women's Kurti | Vishudh
+Fabindia Women's Kurta | Fabindia
+
+## Women's Innerwear & Socks | Piece | 6212 | 5?
+Women's Bra Cotton Non Padded
+Women's Bra Cotton Padded
+Women's Bra T-Shirt
+Women's Bra Sports
+Women's Bra Seamless
+Women's Bra Push Up
+Women's Bra Minimizer
+Women's Bra Nursing
+Women's Bra Strapless
+Women's Bra Full Coverage
+Women's Bra Pack of 2 | | Packet
+Women's Bra Pack of 3 | | Packet
+Women's Panty Cotton | | | 6108
+Women's Panty Cotton Pack of 3 | | Packet | 6108
+Women's Panty Hipster | | | 6108
+Women's Panty Bikini | | | 6108
+Women's Panty Boy Short | | | 6108
+Women's Camisole Cotton | | | 6109
+Women's Camisole Slip | | | 6108
+Women's Slip Full Cotton | | | 6108
+Women's Shapewear Tummy Tucker | | | 6212
+Women's Shapewear Thigh Shaper | | | 6212
+Women's Thermal Slip Winter | | | 6108
+Women's Churidar Leggings Pack of 2 | | Packet | 6115
+Women's Stockings Nylon | | Pair | 6115
+Women's Socks Cotton | | Pair | 6115
+Women's Socks Ankle Pack of 3 | | Packet | 6115
+Women's Socks Woolen | | Pair | 6115
+Women's Handkerchief Cotton Pack of 3 | | Packet | 6213
+Jockey Women's Bra | Jockey | | 6212
+Jockey Women's Panty Pack of 2 | Jockey | Packet | 6108
+Lux Cozi Women's Bra | Lux Cozi | | 6212
+Lux Lyra Women's Leggings | Lux Lyra | | 6115
+Lux Lyra Women's Bra | Lux Lyra | | 6212
+Lovable Women's Bra | Lovable | | 6212
+Enamor Women's Bra | Enamor | | 6212
+Zivame Women's Bra | Zivame | | 6212
+Amante Women's Bra | Amante | | 6212
+Clovia Women's Bra | Clovia | | 6212
+Little Lacy Women's Bra | Little Lacy | | 6212
+Triumph Women's Bra | Triumph | | 6212
+Go Colors Women's Leggings | Go Colors | | 6115
+Rupa Softline Women's Panty | Rupa | | 6108
+Dollar Missy Women's Leggings | Dollar | | 6115
+
+## Kids & Baby Wear | Piece | 6111 | 5?
+Baby Romper Cotton 0-6 Months
+Baby Romper Cotton 6-12 Months
+Baby Bodysuit Onesie Pack of 3 | | Packet
+Baby Jabla Cotton Pack of 3 | | Packet
+Baby Frock Cotton Newborn
+Baby Frock Party Wear
+Baby Gown Cotton
+Baby Sleeping Bag Cotton
+Baby Winter Suit Set | | Set
+Baby Cap Woolen | | | 6505
+Baby Cap Cotton | | | 6505
+Baby Socks Pair | | Pair | 6115
+Baby Socks Pack of 3 | | Packet | 6115
+Baby Mittens Cotton | | Pair | 6111
+Baby Booties Woolen | | Pair | 6111
+Baby Towel Hooded | | | 6302
+Baby Blanket Cotton | | | 6301
+Baby Bed Sheet Waterproof | | | 6302
+Baby Bib Cotton Pack of 3 | | Packet | 6111
+Baby Nappy Cloth Pack of 6 | | Packet | 6302
+Kids Frock Cotton
+Kids Frock Party Wear
+Kids Frock Net Layered
+Kids Skirt Cotton | | | 6204
+Kids Lehenga Choli | | Set | 6204
+Kids Ethnic Wear Girl Set | | Set | 6211
+Kids Ethnic Wear Boy Kurta Pyjama | | Set | 6211
+Kids Sherwani Boy | | Set | 6211
+Kids T-Shirt Boys Cotton | | | 6109
+Kids T-Shirt Girls Cotton | | | 6109
+Kids Shirt Boys Cotton | | | 6205
+Kids Shorts Boys | | | 6103
+Kids Jeans Boys | | | 6203
+Kids Jeans Girls | | | 6204
+Kids Trouser Boys | | | 6203
+Kids Track Suit | | Set | 6112
+Kids Track Pant | | | 6103
+Kids Leggings Girls | | | 6115
+Kids Sweater Woolen | | | 6110
+Kids Hoodie | | | 6110
+Kids Jacket Winter | | | 6201
+Kids Night Suit | | Set | 6208
+Kids Vest Cotton | | | 6109
+Kids Brief Cotton | | | 6107
+Kids Innerwear Pack of 3 | | Packet | 6107
+Kids Socks Pack of 3 | | Packet | 6115
+Kids Cap Cotton | | | 6505
+Kids School Uniform Shirt White | | | 6205
+Kids School Uniform Shirt Blue | | | 6205
+Kids School Uniform Trouser | | | 6203
+Kids School Uniform Shorts | | | 6203
+Kids School Uniform Skirt | | | 6204
+Kids School Uniform Pinafore | | | 6204
+Kids School Uniform Tie | | | 6215
+Kids School Uniform Belt | | | 6217
+Kids School Uniform Blazer | | | 6203
+Kids School Uniform Sweater | | | 6110
+Kids School Socks White Pair | | Pair | 6115
+Kids School Socks Pack of 3 | | Packet | 6115
+Kids Dungaree | | | 6203
+Kids Jumpsuit | | | 6203
+Kids Raincoat | | | 6210
+Kids Swimwear | | | 6112
+Babyhug Baby Romper | Babyhug | | 6111
+Mothercare Baby Bodysuit | Mothercare | | 6111
+FirstCry Baby Set | FirstCry | | 6111
+Gini and Jony Kids T-Shirt | Gini and Jony | | 6109
+Cucumber Kids Frock | Cucumber | | 6204
+Kidsville Kids Wear | Kidsville | | 6111
+
+## Home Textiles | Piece | 6302 | 5?
+Bedsheet Single Cotton
+Bedsheet Double Cotton
+Bedsheet King Size Cotton
+Bedsheet Double Printed Cotton Pack with 2 Pillow Covers | | Set
+Bedsheet King Printed Cotton Pack with 2 Pillow Covers | | Set
+Bedsheet Double Polycotton
+Bedsheet Double Satin
+Bedsheet Double Jaipuri Print | | Set
+Bedsheet Double Kantha Print | | Set
+Bedsheet Fitted Mattress | | | 6302
+Pillow Cover Cotton 17 x 27 inch
+Pillow Cover Cotton Pack of 2 | | Packet
+Pillow Cover Satin
+Pillow Cover Cotton Pack of 5 | | Packet
+Cushion Cover 16 x 16 inch Pack of 5 | | Packet
+Cushion Cover Embroidered
+Bolster Cover Cotton
+Mattress Protector Waterproof Double | | | 6307
+Mattress Protector Single | | | 6307
+Quilt Cover Double Cotton
+Quilt Razai Cotton Single | | | 6307
+Quilt Razai Cotton Double | | | 6307
+Quilt Razai Reversible Double | | | 6307
+Quilt AC Comforter Single | | | 6307
+Quilt AC Comforter Double | | | 6307
+Quilt Dohar Double | | | 6307
+Quilt Dohar Single | | | 6307
+Blanket Woolen Single | | | 6301
+Blanket Woolen Double | | | 6301
+Blanket Fleece Single | | | 6301
+Blanket Fleece Double | | | 6301
+Blanket Polyester Double | | | 6301
+Blanket Mink Double | | | 6301
+Blanket Travel Light | | | 6301
+Shawl Winter Woolen | | | 6214
+Pillow Fibre 17 x 27 inch | | | 9404
+Pillow Memory Foam | | | 9404
+Pillow Microfibre Pair | | Pair | 9404
+Bath Towel Cotton Large
+Bath Towel Cotton Medium
+Bath Towel Terry Large
+Bath Towel Microfibre
+Bath Towel Pack of 2 | | Packet
+Hand Towel Cotton Pack of 2 | | Packet
+Hand Towel Cotton Single
+Face Towel Cotton Pack of 6 | | Packet
+Face Towel Cotton Single
+Beach Towel Printed
+Kitchen Towel Cotton Pack of 3 | | Packet
+Bath Robe Cotton | | | 6208
+Napkin Table Cotton Pack of 6 | | Packet
+Table Cloth Cotton 4 Seater
+Table Cloth Cotton 6 Seater
+Table Cloth Waterproof Plastic
+Table Runner Embroidered
+Dining Mat Table Set 6 pcs | | Set
+Curtain Door Cotton 7 ft
+Curtain Door Polyester 7 ft
+Curtain Door Printed Pair | | Pair
+Curtain Window Polyester 5 ft
+Curtain Window Cotton 5 ft
+Curtain Long Door Blackout 9 ft
+Curtain Sheer Net 7 ft
+Curtain Shower Plastic | | | 3924
+Curtain Rod Steel 6 ft | | | 7326
+Curtain Rings Pack of 10 | | Packet | 7326
+Curtain Hooks Pack of 20 | | Packet | 3926
+Carpet Floor Rug Medium | | | 5703
+Carpet Floor Runner | | | 5703
+Carpet Living Room Large | | | 5703
+Door Mat Coir | | | 5702
+Door Mat Rubber Back | | | 5703
+Bath Mat Cotton | | | 6302
+Bath Mat Anti Slip | | | 6307
+Sofa Cover 3 Seater
+Sofa Cover 5 Seater
+Diwan Set Cotton 8 pcs | | Set
+Chair Pad Cotton
+Dining Chair Cover Pack of 6 | | Packet
+Mosquito Net Double Bed | | | 6304
+Mosquito Net Single Bed | | | 6304
+Mosquito Net Folding Double | | | 6304
+Mosquito Net Cot Baby | | | 6304
+Mosquito Net Cloth by Metre | | Metre | 6304
+Tent Cloth Canvas by Metre | | Metre | 5903
+Plastic Sheet Tarpaulin Small | | | 6306
+Washing Basket Plastic | | | 3924
+Cloth Clips Plastic Pack of 24 | | Packet | 3926
+Cloth Hangers Plastic Pack of 12 | | Packet | 3926
+Cloth Hangers Wooden Pack of 6 | | Packet | 4421
+Cloth Hangers Wire Pack of 12 | | Packet | 7326
+Cloth Hangers Velvet Pack of 10 | | Packet | 3926
+Cloth Drying Stand Folding | | | 7323
+Ironing Board Folding | | | 7323
+Garment Cover Zipper | | | 6307
+Storage Bag Quilt Non Woven | | | 6305
+Wardrobe Organiser Hanging | | | 6307
+Laundry Bag Mesh | | | 6307
+Shoe Rack Fabric Portable | | | 6307
+Shoe Cover Disposable Pack | | Packet | 6307
+Sari Cover Zip Pack of 6 | | Packet | 6307
+Suit Cover Zip | | | 6307
+
+## Fabric by the Metre | Metre | 5208 | 5?
+Cotton Fabric Plain White | | Metre | 5208
+Cotton Fabric Printed | | Metre | 5208
+Cotton Fabric Checks | | Metre | 5208
+Cotton Fabric Stripes | | Metre | 5208
+Cotton Fabric Dyed Colour | | Metre | 5208
+Cotton Fabric Handloom | | Metre | 5208
+Cotton Fabric Khadi | | Metre | 5208
+Cotton Fabric Muslin Mulmul | | Metre | 5208
+Cotton Fabric Cambric | | Metre | 5208
+Cotton Fabric Poplin | | Metre | 5208
+Cotton Fabric Voile | | Metre | 5208
+Cotton Fabric Lawn | | Metre | 5208
+Cotton Fabric Canvas | | Metre | 5209
+Cotton Fabric Drill | | Metre | 5209
+Cotton Fabric Twill | | Metre | 5209
+Cotton Fabric Denim | | Metre | 5209
+Cotton Fabric Flannel | | Metre | 5208
+Cotton Fabric Satin | | Metre | 5208
+Cotton Fabric Chambray | | Metre | 5208
+Cotton Fabric Jaipuri Print | | Metre | 5208
+Cotton Fabric Block Print | | Metre | 5208
+Cotton Fabric Ajrakh | | Metre | 5208
+Cotton Fabric Ikat | | Metre | 5208
+Cotton Fabric Kalamkari | | Metre | 5208
+Linen Fabric Pure | | Metre | 5309
+Linen Fabric Cotton Blend | | Metre | 5309
+Silk Fabric Pure Dupion | | Metre | 5007
+Silk Fabric Pure Tussar | | Metre | 5007
+Silk Fabric Art Silk | | Metre | 5407
+Silk Fabric Banarasi Brocade | | Metre | 5007
+Silk Fabric Satin | | Metre | 5007
+Georgette Fabric Plain | | Metre | 5407
+Georgette Fabric Printed | | Metre | 5407
+Chiffon Fabric Plain | | Metre | 5407
+Chiffon Fabric Printed | | Metre | 5407
+Crepe Fabric Plain | | Metre | 5407
+Crepe Fabric Printed | | Metre | 5407
+Net Fabric Plain | | Metre | 5407
+Net Fabric Embroidered | | Metre | 5407
+Polyester Fabric Plain | | Metre | 5407
+Polyester Fabric Printed | | Metre | 5407
+Polyester Fabric Satin | | Metre | 5407
+Polyester Fabric Lycra | | Metre | 5407
+Polyester Fabric Velvet | | Metre | 5801
+Polyester Fabric Corduroy | | Metre | 5801
+Rayon Fabric Plain | | Metre | 5516
+Rayon Fabric Printed | | Metre | 5516
+Viscose Fabric Plain | | Metre | 5516
+Viscose Fabric Printed | | Metre | 5516
+Suiting Fabric Terry Rayon | | Metre | 5515
+Suiting Fabric Polyester Viscose | | Metre | 5515
+Suiting Fabric Pure Wool | | Metre | 5112
+Suiting Fabric Tweed Wool | | Metre | 5112
+Raymond Suiting Fabric | Raymond | Metre | 5515
+Raymond Shirting Fabric | Raymond | Metre | 5208
+Vimal Suiting Fabric | Vimal | Metre | 5515
+Siyaram's Suiting Fabric | Siyaram's | Metre | 5515
+Siyaram's Shirting Fabric | Siyaram's | Metre | 5208
+Arvind Denim Fabric | Arvind | Metre | 5209
+Reid and Taylor Suiting Fabric | Reid & Taylor | Metre | 5515
+Shirting Fabric Cotton Formal | | Metre | 5208
+Shirting Fabric Cotton Check | | Metre | 5208
+Shirting Fabric Linen Blend | | Metre | 5309
+Shirting Fabric Polyester Cotton | | Metre | 5513
+Uniform Fabric Shirting | | Metre | 5513
+Uniform Fabric Trouser | | Metre | 5515
+Uniform Fabric Safari | | Metre | 5513
+Lining Fabric Polyester | | Metre | 5407
+Lining Fabric Cotton | | Metre | 5208
+Interlining Buckram | | Metre | 5903
+Interlining Fusible | | Metre | 5903
+Lace Cotton by Metre | | Metre | 5804
+Lace Net Border by Metre | | Metre | 5804
+Lace Gota Patti by Metre | | Metre | 5808
+Border Zari Saree Border by Metre | | Metre | 5808
+Border Gota by Metre | | Metre | 5808
+Elastic Flat 1 cm by Metre | | Metre | 5806
+Elastic Flat 2 cm by Metre | | Metre | 5806
+Elastic Round Cord by Metre | | Metre | 5606
+Piping Cord by Metre | | Metre | 5606
+Ribbon Satin 1 inch by Metre | | Metre | 5806
+Ribbon Satin 2 inch by Metre | | Metre | 5806
+Tape Cotton Twill by Metre | | Metre | 5806
+Velcro Tape by Metre | | Metre | 5806
+Cotton Drawstring Cord by Metre | | Metre | 5606
+School Uniform Fabric Check | | Metre | 5513
+Curtain Fabric Cotton | | Metre | 5208
+Curtain Fabric Polyester | | Metre | 5407
+Curtain Fabric Blackout | | Metre | 5903
+Upholstery Fabric Sofa | | Metre | 5407
+Mattress Cover Fabric | | Metre | 5407
+Terry Towel Fabric | | Metre | 5802
+Fleece Fabric | | Metre | 6001
+Knitted Fabric Cotton Jersey | | Metre | 6006
+Rib Fabric Cotton | | Metre | 6006
+Hosiery Fabric Single Jersey | | Metre | 6006
+Net Cloth Mosquito Nylon | | Metre | 6002
+Canvas Cloth Tent | | Metre | 5903
+Rexine Leather Cloth Sofa | | Metre | 5903
+PVC Leather Cloth | | Metre | 5903
+Plastic Cover Sheet Roll | | Metre | 3920
+
+## Tailoring Items & Accessories | Piece | | 18?
+Thread Cotton Reel Coats 100 m | Coats | Roll | 5401
+Thread Polyester Reel Anchor 200 m | Anchor | Roll | 5401
+Thread Polyester Spool 1000 m | | Roll | 5401
+Thread Overlock Cone | | Roll | 5401
+Thread Embroidery Anchor Set | Anchor | Set | 5401
+Thread Silk Embroidery Skein | | Piece | 5004
+Needle Hand Sewing Pack | | Packet | 7319
+Needle Machine Singer Pack of 10 | Singer | Packet | 8452
+Needle Machine Organ | Organ | Packet | 8452
+Safety Pin Pack | | Packet | 7319
+Pins Dress Maker Box | | Box | 7319
+Scissors Tailoring 10 inch | | | 8213
+Scissors Tailoring 12 inch | | | 8213
+Scissors Thread Cutter Small | | | 8213
+Pinking Shears | | | 8213
+Seam Ripper | | | 8213
+Measuring Tape Fibre 60 inch | | | 9017
+Measuring Tape Fibre 150 cm | | | 9017
+Tailor Chalk Triangle | | | 9609
+Tailor Chalk Pencil Pack | | Packet | 9609
+Tracing Wheel | | | 9017
+Thimble Metal | | | 7326
+Bobbin Metal Sewing Machine Pack | | Packet | 8452
+Bobbin Case | | | 8452
+Sewing Machine Foot Zipper | | | 8452
+Sewing Machine Oil 100 ml | | Bottle | 2710
+Sewing Machine Belt | | | 4010
+Usha Janome Sewing Machine Hand Operated | Usha | | 8452 | 5
+Usha Sewing Machine Stitch Magic | Usha | | 8452 | 5
+Singer Sewing Machine Promise | Singer | | 8452 | 5
+Button Plastic Assorted Pack | | Packet | 9606
+Button Shirt 4 Hole Pack of 100 | | Packet | 9606
+Button Coat Metal Pack | | Packet | 9606
+Button Wooden Pack | | Packet | 9606
+Button Press Snap Pack | | Packet | 9606
+Button Hook and Eye Pack | | Packet | 9606
+Zip Metal 6 inch | | Piece | 9607
+Zip Metal 8 inch | | Piece | 9607
+Zip Metal 12 inch | | Piece | 9607
+Zip Nylon 6 inch | | Piece | 9607
+Zip Nylon 20 inch | | Piece | 9607
+Zip Invisible 22 inch | | Piece | 9607
+Zip Jacket Open End 24 inch | | Piece | 9607
+Zip Bag 10 inch | | Piece | 9607
+Zip YKK Metal 8 inch | YKK | Piece | 9607
+Hook and Loop Velcro Roll | | Roll | 5806
+Shoulder Pad Foam | | Pair | 6307
+Bra Hook Pack | | Packet | 9606
+Bra Strap Silicone | | Pair | 6212
+Bra Extender Hook | | Piece | 6212
+Saree Pin Gold Plated Pack of 6 | | Packet | 7117
+Saree Pin Safety Pack | | Packet | 7319
+Saree Fall Cotton by Metre | | Metre | 5208
+Sequins Bag | | Packet | 9606
+Beads Glass Pack | | Packet | 7018
+Stone Rhinestone Pack | | Packet | 7018
+Pearl Beads String | | Piece | 7018
+Embroidery Frame Round | | Piece | 4421
+Embroidery Needle Pack | | Packet | 7319
+Mirror Work Shisha Pack | | Packet | 7013
+Zari Thread Gold Reel | | Roll | 5605
+Golden Thread Zari Kasab Reel | | Roll | 5605
+Patch Embroidered Badge | | Piece | 5810
+Applique Patch Cotton | | Piece | 5810
+Dress Form Mannequin | | Piece | 9618
+Hanger Stand Garment Rack | | Piece | 9403
+Iron Dry Bajaj | Bajaj | Piece | 8516 | 18
+Iron Steam Philips | Philips | Piece | 8516 | 18
+Iron Dry Usha | Usha | Piece | 8516 | 18
+
+## Belts, Wallets & Caps | Piece | 4203 | 18?
+Men's Belt Leather Formal
+Men's Belt Leather Casual
+Men's Belt Canvas
+Men's Belt Reversible
+Men's Belt Synthetic
+Women's Belt Fashion | | | 4203
+Kids Belt Elastic | | | 6217
+Wallet Men's Leather | | | 4202
+Wallet Men's Synthetic | | | 4202
+Wallet Women's Clutch | | | 4202
+Wallet Card Holder | | | 4202
+Purse Coin Pouch | | | 4202
+Hand Bag Women's | | | 4202
+Hand Bag Women's Tote | | | 4202
+Sling Bag Women's | | | 4202
+Sling Bag Men's | | | 4202
+Backpack Casual 20 L | | | 4202
+Backpack Laptop 30 L | | | 4202
+Travel Bag Duffel | | | 4202
+Cap Baseball Cotton | | | 6505 | 5?
+Cap Sports | | | 6505 | 5?
+Cap Woolen Winter | | | 6505 | 5?
+Cap Gandhi White | | | 6505 | 5?
+Hat Summer Straw | | | 6504 | 5?
+Muffler Woolen | | | 6117 | 5?
+Muffler Cotton | | | 6117 | 5?
+Gloves Woolen Pair | | Pair | 6116 | 5?
+Gloves Leather Pair | | Pair | 4203 | 5?
+Tie Men's Silk | | | 6215 | 5?
+Tie Men's Polyester | | | 6215 | 5?
+Bow Tie | | | 6215 | 5?
+Cufflinks Pair | | Pair | 7117 | 18
+Tie Pin | | | 7117 | 18
+Pocket Square | | | 6213 | 5?
+Suspenders Men's | | | 6217 | 5?
+Sunglasses Men's | | | 9004 | 18
+Sunglasses Women's | | | 9004 | 18
+Watch Men's Analog | | | 9102 | 18
+Watch Women's Analog | | | 9102 | 18
+Raincoat Adult | | | 6210 | 5?
+
+## Footwear - Men's | Pair | 6403 | 5?
+Men's Formal Shoes Leather Lace Up
+Men's Formal Shoes Leather Slip On
+Men's Formal Shoes Synthetic
+Men's Casual Shoes Sneakers
+Men's Casual Shoes Canvas
+Men's Casual Shoes Loafers
+Men's Sports Shoes Running | | | 6404
+Men's Sports Shoes Training | | | 6404
+Men's Sports Shoes Walking | | | 6404
+Men's Football Shoes | | | 6404
+Men's Cricket Shoes | | | 6404
+Men's Boots Leather | | | 6403
+Men's Sandals Leather
+Men's Sandals Floater | | | 6402
+Men's Sandals Velcro | | | 6402
+Men's Slippers Leather | | | 6405
+Men's Slippers Rubber Flip Flops | | | 6402
+Men's Slippers EVA | | | 6402
+Men's Chappal Kolhapuri | | | 6403
+Men's Chappal Peshawari | | | 6403
+Men's Jutti Mojari | | | 6405
+Men's Safety Shoes | | | 6401
+Men's Gumboots Rubber | | | 6401
+Bata Men's Formal Shoes | Bata
+Bata Power Men's Sports Shoes | Bata | | 6404
+Bata Men's Sandals | Bata
+Bata Hawaii Slippers | Bata | | 6402
+Bata Men's Casual Shoes | Bata
+Liberty Men's Formal Shoes | Liberty
+Liberty Gliders Slippers | Liberty | | 6402
+Liberty Force 10 Sports Shoes | Liberty | | 6404
+Paragon Men's Slippers | Paragon | | 6402
+Paragon Stimulus Sandals | Paragon | | 6402
+Paragon Vertex Slippers | Paragon | | 6402
+Relaxo Hawaii Slippers | Relaxo | | 6402
+Relaxo Flite Slippers | Relaxo | | 6402
+Relaxo Sparx Men's Sports Shoes | Sparx | | 6404
+Relaxo Sparx Men's Sandals | Sparx | | 6402
+Campus Men's Sports Shoes | Campus | | 6404
+Campus Men's Casual Shoes | Campus | | 6404
+Action Men's Sports Shoes | Action | | 6404
+Action Men's Casual Shoes | Action | | 6404
+Lakhani Men's Sports Shoes | Lakhani | | 6404
+Aqualite Men's Slippers | Aqualite | | 6402
+Walkaroo Men's Slippers | Walkaroo | | 6402
+VKC Pride Men's Slippers | VKC Pride | | 6402
+Puma Men's Sports Shoes | Puma | | 6404
+Adidas Men's Sports Shoes | Adidas | | 6404
+Nike Men's Sports Shoes | Nike | | 6404
+Woodland Men's Boots | Woodland | | 6403
+Red Chief Men's Shoes | Red Chief | | 6403
+Hush Puppies Men's Shoes | Hush Puppies | | 6403
+Mochi Men's Casual Shoes | Mochi | | 6403
+Sparx Men's Floaters | Sparx | | 6402
+Shoe Laces Pair | | Pair | 6307 | 18
+Shoe Polish Black Kiwi 40 ml | Kiwi | Piece | 3405 | 18
+Shoe Polish Brown Kiwi 40 ml | Kiwi | Piece | 3405 | 18
+Shoe Polish Liquid | | Bottle | 3405 | 18
+Shoe Brush | | Piece | 9603 | 18
+Shoe Horn | | Piece | 3926 | 18
+Shoe Insoles Pair | | Pair | 6406 | 5?
+Shoe Deodorant Spray | | Can | 3307 | 18
+
+## Footwear - Women's & Kids | Pair | 6402 | 5?
+Women's Sandals Flats
+Women's Sandals Heels | | | 6403
+Women's Sandals Wedges | | | 6403
+Women's Sandals Block Heel | | | 6403
+Women's Sandals Floaters | | | 6402
+Women's Ballerinas Bellies | | | 6402
+Women's Slippers Flip Flops | | | 6402
+Women's Slippers Daily Wear | | | 6402
+Women's Slippers Indoor Soft | | | 6402
+Women's Slippers Fur | | | 6402
+Women's Chappal Kolhapuri | | | 6403
+Women's Jutti Mojari | | | 6405
+Women's Peep Toe Heels | | | 6403
+Women's Pumps Formal | | | 6403
+Women's Boots Ankle | | | 6403
+Women's Sneakers Casual | | | 6404
+Women's Sports Shoes Running | | | 6404
+Women's Canvas Shoes | | | 6404
+Women's Loafers | | | 6403
+Women's Bridal Sandals | | | 6403
+Bata Women's Sandals | Bata | | 6402
+Bata Women's Heels | Bata | | 6403
+Bata Women's Bellies | Bata | | 6402
+Paragon Women's Slippers | Paragon | | 6402
+Paragon Women's Sandals | Paragon | | 6402
+Relaxo Hawaii Women's Slippers | Relaxo | | 6402
+Relaxo Sparx Women's Sandals | Sparx | | 6402
+Liberty Women's Sandals | Liberty | | 6402
+Liberty Women's Casuals | Liberty | | 6403
+Walkaroo Women's Sandals | Walkaroo | | 6402
+VKC Pride Women's Slippers | VKC Pride | | 6402
+Action Women's Sandals | Action | | 6402
+Kids School Shoes Black Lace Up | | | 6403
+Kids School Shoes Black Velcro | | | 6403
+Kids School Shoes White Canvas | | | 6404
+Kids Sports Shoes | | | 6404
+Kids Sandals Velcro | | | 6402
+Kids Sandals Boys | | | 6402
+Kids Sandals Girls | | | 6402
+Kids Slippers Cartoon | | | 6402
+Kids Slippers Flip Flops | | | 6402
+Kids Clogs | | | 6402
+Kids Shoes Light Up | | | 6404
+Kids Boots | | | 6403
+Kids Gumboots | | | 6401
+Baby Shoes Booties | | | 6404
+Baby Sandals Soft | | | 6402
+Bata Kids School Shoes | Bata | | 6403
+Bata Bubblegummers Kids Sandals | Bata | | 6402
+Bata Power Kids Sports Shoes | Bata | | 6404
+Liberty Kids Shoes | Liberty | | 6403
+Paragon Kids Slippers | Paragon | | 6402
+Relaxo Kids Slippers | Relaxo | | 6402
+Sparx Kids Shoes | Sparx | | 6404
+Campus Kids Shoes | Campus | | 6404
+Action Kids Shoes | Action | | 6404

@@ -38,6 +38,27 @@ class BusinessCategory {
 // A getter, not a const: labels are translated (t()) when read.
 List<BusinessCategory> get businessCategories => [
   BusinessCategory(
+    key: 'grocery',
+    label: t('Grocery / kirana store'),
+    description: 'Packed foods, loose items by weight, daily needs',
+    icon: Icons.local_grocery_store,
+    variantFields: ['Size/Weight', 'Flavour', 'Brand'],
+  ),
+  BusinessCategory(
+    key: 'stationery',
+    label: t('Stationery & gift shop'),
+    description: 'Books, pens, school and office supplies, gifts',
+    icon: Icons.edit_note,
+    variantFields: ['Size', 'Color', 'Brand'],
+  ),
+  BusinessCategory(
+    key: 'cosmetics',
+    label: t('Cosmetics & general store'),
+    description: 'Beauty, personal care, daily-use items',
+    icon: Icons.spa,
+    variantFields: ['Shade', 'Size/Weight', 'Brand'],
+  ),
+  BusinessCategory(
     key: 'mobile',
     label: t('Mobile shop'),
     description: 'Phones and accessories, IMEI tracking',
