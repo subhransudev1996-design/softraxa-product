@@ -17,6 +17,8 @@ import 'core/router.dart';
 import 'core/supabase_providers.dart';
 import 'core/theme.dart';
 import 'core/theme_mode.dart';
+import 'features/app_lock/app_lock.dart';
+import 'features/app_lock/lock_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
 import 'features/offline/offline_service.dart';
 
@@ -63,6 +65,7 @@ Future<void> _start() async {
   }
   await loadSavedThemeMode(); // desktop-only; no-op on phones
   await loadSavedLanguage();
+  await loadAppLock(); // locked from the first frame when it is on
   runApp(const ProviderScope(child: App()));
 }
 
@@ -102,6 +105,9 @@ class _AppState extends ConsumerState<App> {
     _authSub = ref.read(supabaseProvider).auth.onAuthStateChange.listen((
       state,
     ) {
+      if (state.event == AuthChangeEvent.signedOut) {
+        ref.read(appLockProvider.notifier).onSignedOut();
+      }
       if (state.event == AuthChangeEvent.passwordRecovery) {
         final ctx = rootNavigatorKey.currentContext;
         if (ctx != null && ctx.mounted) showSetNewPasswordDialog(ctx, ref);
@@ -149,7 +155,9 @@ class _AppState extends ConsumerState<App> {
       // the whole tree to rebuild. Keying the subtree on the mode does
       // exactly that (route state lives in GoRouter and survives).
       builder: (context, child) {
-        final content = child ?? const SizedBox();
+        // The app lock covers the screens (not the PC title bar, so the
+        // window can still be moved or closed).
+        final content = AppLockGate(child: child ?? const SizedBox());
         return KeyedSubtree(
           // Language too: t() is read at build time, so a new language
           // needs every screen rebuilt.

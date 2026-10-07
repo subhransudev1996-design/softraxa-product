@@ -10,6 +10,8 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import '../app_lock/app_lock.dart';
+import '../app_lock/app_lock_settings.dart';
 import '../approvals/approvals_screen.dart';
 import '../support/ticket_thread_screen.dart';
 
@@ -222,7 +224,10 @@ class MoreScreen extends ConsumerWidget {
               ),
               title: Text(
                 t('App language'),
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
               ),
               subtitle: Text(
                 appLanguages
@@ -234,6 +239,27 @@ class MoreScreen extends ConsumerWidget {
               ),
               trailing: const Icon(Icons.chevron_right, size: 20),
               onTap: () => showLanguagePicker(context, ref),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              key: const Key('app-lock-tile'),
+              leading: const IconChip(
+                Icons.lock_outline,
+                color: AppColors.teal,
+                size: 38,
+              ),
+              title: Text(
+                t('App lock'),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 14,
+                ),
+              ),
+              subtitle: Text(appLockSummary(ref.watch(appLockProvider))),
+              trailing: const Icon(Icons.chevron_right, size: 20),
+              onTap: () => showAppLockSettings(context),
             ),
           ),
           const SizedBox(height: 12),
@@ -272,7 +298,9 @@ class MoreScreen extends ConsumerWidget {
                     '/subscription/plans',
                     color: AppColors.primary,
                     enabled: true,
-                    subtitle: t('What your plan includes, usage and other plans'),
+                    subtitle: t(
+                      'What your plan includes, usage and other plans',
+                    ),
                   ),
                   const Divider(),
                   tile(
@@ -304,10 +332,12 @@ class MoreScreen extends ConsumerWidget {
                     color: AppColors.purple,
                     size: 38,
                   ),
-                  title: Text(t('App walkthrough'),
+                  title: Text(
+                    t('App walkthrough'),
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
-                  subtitle: Text(t('Replay the guided tour anytime'),
+                  subtitle: Text(
+                    t('Replay the guided tour anytime'),
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
@@ -327,10 +357,12 @@ class MoreScreen extends ConsumerWidget {
                     color: Color(0xFF25D366),
                     size: 38,
                   ),
-                  title: Text(t('Contact Support on WhatsApp'),
+                  title: Text(
+                    t('Contact Support on WhatsApp'),
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
                   ),
-                  subtitle: Text(t('Get instant help or upgrade plan on WhatsApp'),
+                  subtitle: Text(
+                    t('Get instant help or upgrade plan on WhatsApp'),
                     style: TextStyle(fontSize: 13),
                   ),
                   trailing: const Icon(Icons.chevron_right, size: 20),
@@ -360,7 +392,8 @@ class MoreScreen extends ConsumerWidget {
                       color: AppColors.orange,
                     ),
                     title: Text(t('Verify Sentry setup')),
-                    subtitle: Text(t('Debug builds only: throws a test error'),
+                    subtitle: Text(
+                      t('Debug builds only: throws a test error'),
                       style: TextStyle(fontSize: 13),
                     ),
                     onTap: () => throw StateError('This is test exception'),
@@ -369,7 +402,8 @@ class MoreScreen extends ConsumerWidget {
                 ],
                 ListTile(
                   leading: const Icon(Icons.logout, color: AppColors.red),
-                  title: Text(t('Logout'),
+                  title: Text(
+                    t('Logout'),
                     style: TextStyle(color: AppColors.red),
                   ),
                   onTap: () async {

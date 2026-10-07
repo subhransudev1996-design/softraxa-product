@@ -2,6 +2,7 @@ import 'i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:window_manager/window_manager.dart';
+import '../features/app_lock/app_lock.dart';
 
 import 'branding.dart';
 import 'notifications.dart';
@@ -65,6 +66,9 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
   Widget build(BuildContext context) {
     final businessName =
         ref.watch(appContextProvider).value?.businessName ?? '';
+    final lockOn = ref.watch(appLockProvider.select((s) => s.enabled));
+    // While locked only the window buttons work.
+    final locked = ref.watch(appLockProvider.select((s) => s.locked)) && lockOn;
     return Material(
       color: _barBg,
       child: SizedBox(
@@ -120,7 +124,7 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                 ),
               ),
             ),
-            if (businessName.isNotEmpty) ...[
+            if (businessName.isNotEmpty && !locked) ...[
               _ActionButton(
                 icon: Icons.help_outline,
                 onTap: () async {
@@ -146,6 +150,11 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                     : Icons.dark_mode_outlined,
                 onTap: () => ref.read(darkModeProvider.notifier).toggle(),
               ),
+              if (lockOn)
+                _ActionButton(
+                  icon: Icons.lock_outline,
+                  onTap: () => ref.read(appLockProvider.notifier).lockNow(),
+                ),
               _ActionButton(
                 icon: Icons.logout,
                 hoverForeground: Color(0xFFF87171),
