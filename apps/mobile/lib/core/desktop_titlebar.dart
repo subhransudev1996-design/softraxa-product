@@ -151,9 +151,13 @@ class _DesktopTitleBarState extends ConsumerState<DesktopTitleBar>
                 onTap: () => ref.read(darkModeProvider.notifier).toggle(),
               ),
               if (lockOn)
-                _ActionButton(
-                  icon: Icons.lock_outline,
-                  onTap: () => ref.read(appLockProvider.notifier).lockNow(),
+                // Counts as "inside" text boxes, so clicking it keeps the
+                // cursor where it was — and it comes back after unlocking.
+                TextFieldTapRegion(
+                  child: _ActionButton(
+                    icon: Icons.lock_outline,
+                    onTap: () => ref.read(appLockProvider.notifier).lockNow(),
+                  ),
                 ),
               _ActionButton(
                 icon: Icons.logout,

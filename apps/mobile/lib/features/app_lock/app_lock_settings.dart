@@ -30,74 +30,79 @@ Future<void> showAppLockSettings(BuildContext context, {bool? desktop}) {
           title: Text(t('App lock')),
           content: SizedBox(
             width: 420,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SwitchListTile(
-                  key: const Key('app-lock-switch'),
-                  contentPadding: EdgeInsets.zero,
-                  value: s.enabled,
-                  title: Text(
-                    t('Lock the app'),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  subtitle: Text(
-                    pc
-                        ? t('Ask for a PIN to open Dukania on this computer')
-                        : t(
-                            'Ask for your fingerprint or the phone screen lock to open Dukania',
-                          ),
-                  ),
-                  onChanged: (on) =>
-                      on ? _turnOn(ctx, lock, pc) : _turnOff(ctx, lock, pc),
-                ),
-                if (s.enabled) ...[
-                  const Divider(),
-                  Text(
-                    t('Lock again'),
-                    style: const TextStyle(fontWeight: FontWeight.w700),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    pc
-                        ? t('When the computer is not used for:')
-                        : t('After you leave the app:'),
-                    style: TextStyle(color: AppColors.inkSoft, fontSize: 12.5),
-                  ),
-                  const SizedBox(height: 8),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final sec in lockAfterChoices(desktop: pc))
-                        ChoiceChip(
-                          label: Text(lockAfterLabel(sec)),
-                          selected: s.lockAfterSeconds == sec,
-                          onSelected: (_) => lock.setLockAfter(sec),
-                        ),
-                    ],
-                  ),
-                  if (pc) ...[
-                    const SizedBox(height: 8),
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      leading: const Icon(Icons.password),
-                      title: Text(t('Change PIN')),
-                      onTap: () => _changePin(ctx, lock),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SwitchListTile(
+                    key: const Key('app-lock-switch'),
+                    contentPadding: EdgeInsets.zero,
+                    value: s.enabled,
+                    title: Text(
+                      t('Lock the app'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
                     ),
+                    subtitle: Text(
+                      pc
+                          ? t('Ask for a PIN to open Dukania on this computer')
+                          : t(
+                              'Ask for your fingerprint or the phone screen lock to open Dukania',
+                            ),
+                    ),
+                    onChanged: (on) =>
+                        on ? _turnOn(ctx, lock, pc) : _turnOff(ctx, lock, pc),
+                  ),
+                  if (s.enabled) ...[
+                    const Divider(),
                     Text(
-                      t(
-                        'Going away? Lock it now with the lock button at the top.',
-                      ),
+                      t('Lock again'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      pc
+                          ? t('When the computer is not used for:')
+                          : t('After you leave the app:'),
                       style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12.5,
                       ),
                     ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (final sec in lockAfterChoices(desktop: pc))
+                          ChoiceChip(
+                            label: Text(lockAfterLabel(sec)),
+                            selected: s.lockAfterSeconds == sec,
+                            onSelected: (_) => lock.setLockAfter(sec),
+                          ),
+                      ],
+                    ),
+                    if (pc) ...[
+                      const SizedBox(height: 8),
+                      ListTile(
+                        contentPadding: EdgeInsets.zero,
+                        leading: const Icon(Icons.password),
+                        title: Text(t('Change PIN')),
+                        onTap: () => _changePin(ctx, lock),
+                      ),
+                      Text(
+                        t(
+                          'Going away? Lock it now with the lock button at the top.',
+                        ),
+                        style: TextStyle(
+                          color: AppColors.inkSoft,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
                   ],
                 ],
-              ],
+              ),
             ),
           ),
           actions: [

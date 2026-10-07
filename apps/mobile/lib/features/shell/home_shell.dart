@@ -1,3 +1,4 @@
+import '../app_lock/app_lock_settings.dart';
 import '../../core/i18n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -144,7 +145,8 @@ class _MobileShell extends StatelessWidget {
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(top: 38),
-                  child: Text(t('New Bill'),
+                  child: Text(
+                    t('New Bill'),
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 11,
@@ -482,6 +484,18 @@ class AppSidebar extends ConsumerWidget {
                     icon: Icons.settings_outlined,
                     label: t('Business settings'),
                     route: '/settings/business',
+                  ),
+                  // Opens a dialog, not a page.
+                  (
+                    '#app-lock',
+                    _RailTile(
+                      icon: Icons.lock_outline,
+                      label: t('App lock'),
+                      foregroundColor: _sidebarMuted,
+                      selectedBackground: _sidebarActiveBg,
+                      selectedForeground: Colors.white,
+                      onTap: () => showAppLockSettings(context),
+                    ),
                   ),
                 ]),
                 if (kDebugMode && crashReportingEnabled)

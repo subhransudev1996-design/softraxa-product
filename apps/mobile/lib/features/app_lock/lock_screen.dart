@@ -29,6 +29,7 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
   Timer? _idleTimer;
   DateTime _lastUse = DateTime.now();
   FocusNode? _focusBeforeLock;
+  TextSelection? _selectionBeforeLock;
 
   @override
   void initState() {
@@ -55,6 +56,12 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
     }
   }
 
+  /// The text box [node] belongs to, if it is one.
+  TextEditingController? _textField(FocusNode? node) => node?.context
+      ?.findAncestorStateOfType<EditableTextState>()
+      ?.widget
+      .controller;
+
   bool _onKey(KeyEvent _) {
     _lastUse = DateTime.now();
     return false; // only watching, never handling
@@ -77,14 +84,26 @@ class _AppLockGateState extends ConsumerState<AppLockGate> {
     ) {
       if (now) {
         _focusBeforeLock = FocusManager.instance.primaryFocus;
+        _selectionBeforeLock = _textField(_focusBeforeLock)?.selection;
       } else {
         _lastUse = DateTime.now();
         final f = _focusBeforeLock;
+        final selection = _selectionBeforeLock;
         _focusBeforeLock = null;
+        _selectionBeforeLock = null;
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (f != null && f.context != null && f.canRequestFocus) {
-            f.requestFocus();
-          }
+          if (f == null || f.context == null || !f.canRequestFocus) return;
+          f.requestFocus();
+          // On the PC a text box selects all its text when it gets the
+          // cursor back — keep the cursor where it was instead, so the next
+          // key carries on rather than replacing the text.
+          if (selection == null) return;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            final c = _textField(f);
+            if (c != null && selection.end <= c.text.length) {
+              c.selection = selection;
+            }
+          });
         });
       }
     });
