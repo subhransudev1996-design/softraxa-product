@@ -282,71 +282,78 @@ class TopProductsPanel extends ConsumerWidget {
         builder: (rows) {
           if (rows.isEmpty) {
             return Center(
-              child: Text(t('No sales in the last 30 days.'),
+              child: Text(
+                t('No sales in the last 30 days.'),
                 style: TextStyle(color: AppColors.inkSoft),
               ),
             );
           }
           final best = toDouble(rows.first['revenue']);
-          return Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              for (final (i, r) in rows.indexed) ...[
-                if (i > 0) const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        '${r['product_name']}'
-                        '${(r['variant_name'] as String? ?? '').isNotEmpty ? ' (${r['variant_name']})' : ''}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+          // Scrolls when the panel is shorter than the list (it sits beside
+          // the sales chart and takes that height).
+          return SingleChildScrollView(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                for (final (i, r) in rows.indexed) ...[
+                  if (i > 0) const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          '${r['product_name']}'
+                          '${(r['variant_name'] as String? ?? '').isNotEmpty ? ' (${r['variant_name']})' : ''}',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        money(r['revenue'] as num?),
                         style: const TextStyle(
                           fontSize: 13,
-                          fontWeight: FontWeight.w700,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      money(r['revenue'] as num?),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(3),
-                        child: LinearProgressIndicator(
-                          value: best <= 0 ? 0 : toDouble(r['revenue']) / best,
-                          minHeight: 6,
-                          color: AppColors.primary,
-                          backgroundColor: AppColors.primarySoft,
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(3),
+                          child: LinearProgressIndicator(
+                            value: best <= 0
+                                ? 0
+                                : toDouble(r['revenue']) / best,
+                            minHeight: 6,
+                            color: AppColors.primary,
+                            backgroundColor: AppColors.primarySoft,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    SizedBox(
-                      width: 64,
-                      child: Text(
-                        t('{v1} sold', {'v1': qty(r['qty_sold'] as num?)}),
-                        textAlign: TextAlign.right,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: AppColors.inkSoft,
+                      const SizedBox(width: 10),
+                      SizedBox(
+                        width: 64,
+                        child: Text(
+                          t('{v1} sold', {'v1': qty(r['qty_sold'] as num?)}),
+                          textAlign: TextAlign.right,
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: AppColors.inkSoft,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           );
         },
       ),
@@ -404,7 +411,8 @@ class RecentInvoicesPanel extends StatelessWidget {
             child: Row(
               children: [
                 Expanded(
-                  child: Text(t('Recent bills'),
+                  child: Text(
+                    t('Recent bills'),
                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
                   ),
                 ),
@@ -433,7 +441,10 @@ class RecentInvoicesPanel extends StatelessWidget {
                 ? Padding(
                     padding: const EdgeInsets.all(32),
                     child: Center(
-                      child: Text(t('No bills yet — create your first bill with New Bill.'),
+                      child: Text(
+                        t(
+                          'No bills yet — create your first bill with New Bill.',
+                        ),
                         style: TextStyle(color: AppColors.inkSoft),
                       ),
                     ),

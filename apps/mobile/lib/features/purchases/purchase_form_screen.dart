@@ -11,6 +11,7 @@ import '../pos/cart.dart' show toBaseQty, roundOffFor;
 import '../pos/pos_providers.dart' show posProductColumns;
 import '../suppliers/suppliers.dart';
 import 'purchase_providers.dart';
+import 'quick_add_product.dart';
 import '../../core/theme.dart';
 
 class _PurchaseLine {
@@ -281,7 +282,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  Text(t('Select supplier'),
+                  Text(
+                    t('Select supplier'),
                     style: Theme.of(ctx).textTheme.titleMedium,
                   ),
                   const Spacer(),
@@ -329,12 +331,38 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
       ),
     );
     if (selected == null || !mounted) return;
+    if (selected['new'] != null) {
+      await _createProduct(selected['new'] as String);
+      return;
+    }
 
     final product = selected['product'] as Map<String, dynamic>;
     final variant = selected['variant'] as Map<String, dynamic>?;
     setState(() => _lines.add(_lineFor(product, variant)));
     // Jump straight into qty/price entry for the new line.
     if (mounted) _editLine(_lines.length - 1);
+  }
+
+  /// "Add new product" in the picker: a quick dialog (name filled in from
+  /// the search), then the new product joins this purchase.
+  Future<void> _createProduct(String name) async {
+    final id = await showQuickAddProduct(context, name: name);
+    if (id == null || !mounted) return;
+    try {
+      final product = Map<String, dynamic>.from(
+        await ref
+            .read(supabaseProvider)
+            .from('products')
+            .select(posProductColumns)
+            .eq('id', id)
+            .single(),
+      );
+      if (!mounted) return;
+      setState(() => _lines.add(_lineFor(product, null)));
+      _editLine(_lines.length - 1);
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
   }
 
   Future<void> _editLine(int index) async {
@@ -469,7 +497,13 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     if (!line.allowDecimal && newQty % 1 != 0) {
       showError(
         context,
-        t('{v1} is stocked in whole {v2} — quantity must come to a whole number', {'v1': line.name, 'v2': line.unitName.isEmpty ? 'units' : line.unitName}),
+        t(
+          '{v1} is stocked in whole {v2} — quantity must come to a whole number',
+          {
+            'v1': line.name,
+            'v2': line.unitName.isEmpty ? 'units' : line.unitName,
+          },
+        ),
       );
       newQty = line.qty;
     }
@@ -612,14 +646,19 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
           if (_editing)
             Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Text(t('Correct anything that was entered wrong. Stock, the product cost and the supplier\'s due are updated to match.'),
+              child: Text(
+                t(
+                  'Correct anything that was entered wrong. Stock, the product cost and the supplier\'s due are updated to match.',
+                ),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ),
           Card(
             child: ListTile(
               leading: const Icon(Icons.local_shipping_outlined),
-              title: Text(_supplier?['name'] as String? ?? t('Select supplier')),
+              title: Text(
+                _supplier?['name'] as String? ?? t('Select supplier'),
+              ),
               subtitle: _supplier == null
                   ? Text(t('Optional, needed for due tracking'))
                   : Text(_supplier!['phone'] as String? ?? ''),
@@ -869,7 +908,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
   @override
   void initState() {
     super.initState();
-    _load('');
+    _load(widget.searchController.text);
   }
 
   Future<void> _load(String search) async {
@@ -944,6 +983,28 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
               onChanged: _load,
             ),
           ),
+          ListTile(
+            leading: const Icon(
+              Icons.add_circle_outline,
+              color: AppColors.primary,
+            ),
+            title: Text(
+              widget.searchController.text.trim().isEmpty
+                  ? t('Add new product')
+                  : t('Add "{v1}" as a new product', {
+                      'v1': widget.searchController.text.trim(),
+                    }),
+              style: const TextStyle(
+                color: AppColors.primary,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            subtitle: Text(t('Not in your list yet? Add it here quickly')),
+            onTap: () => Navigator.pop(context, {
+              'new': widget.searchController.text.trim(),
+            }),
+          ),
+          const Divider(height: 1),
           Expanded(
             child: _loading
                 ? const Center(child: CircularProgressIndicator())
@@ -956,7 +1017,10 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
                       return ListTile(
                         title: Text(p['name'] as String),
                         subtitle: Text(
-                          t('Stock: {v1} • Purchase: {v2}', {'v1': qty(toDouble(p['current_stock'])), 'v2': money(p['purchase_price'] as num?)}),
+                          t('Stock: {v1} • Purchase: {v2}', {
+                            'v1': qty(toDouble(p['current_stock'])),
+                            'v2': money(p['purchase_price'] as num?),
+                          }),
                         ),
                         onTap: () => _select(p),
                       );

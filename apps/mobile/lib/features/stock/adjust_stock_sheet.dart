@@ -7,6 +7,7 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../../core/theme.dart';
+import 'pack_qty_input.dart';
 
 /// Manual stock adjustment / damaged-lost entry (PRD 7.11).
 Future<bool?> showAdjustStockSheet(
@@ -36,7 +37,8 @@ class _AdjustStockSheet extends ConsumerStatefulWidget {
 }
 
 class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
-  final _qty = TextEditingController();
+  final _qty = TextEditingController(); // loose units when counted in packs
+  final _packs = TextEditingController();
   final _note = TextEditingController();
   String _mode = 'add'; // add | remove | damage
   bool _busy = false;
@@ -44,8 +46,27 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
   double get currentStock =>
       toDouble((widget.variant ?? widget.product)['current_stock']);
 
+  /// The product's bulk unit (Box of 50), when it has one: stock is then
+  /// typed as full boxes + loose units.
+  String get _packName =>
+      (widget.product['secondary_unit_name'] as String? ?? '').trim();
+  double get _packSize => toDouble(widget.product['conversion_factor']);
+  bool get _inPacks => _packName.isNotEmpty && _packSize > 0;
+  String get _unitShort =>
+      (widget.product['units'] as Map?)?['short_name'] as String? ?? 'unit';
+
+  @override
+  void dispose() {
+    _qty.dispose();
+    _packs.dispose();
+    _note.dispose();
+    super.dispose();
+  }
+
   Future<void> _save() async {
-    final q = double.tryParse(_qty.text);
+    final q = _inPacks
+        ? packQtyTotal(_packs.text, _qty.text, _packSize)
+        : double.tryParse(_qty.text);
     if (q == null || q <= 0) {
       showError(context, t('Enter a valid quantity'));
       return;
@@ -95,7 +116,10 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(t('Adjust stock'), style: Theme.of(context).textTheme.titleLarge),
+          Text(
+            t('Adjust stock'),
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
           const SizedBox(height: 4),
           Text(
             '${widget.product['name']}${widget.variant != null ? ' — ${widget.variant!['name']}' : ''}'
@@ -125,12 +149,25 @@ class _AdjustStockSheetState extends ConsumerState<_AdjustStockSheet> {
             onSelectionChanged: (s) => setState(() => _mode = s.first),
           ),
           const SizedBox(height: 16),
-          TextField(
-            controller: _qty,
-            autofocus: true,
-            keyboardType: const TextInputType.numberWithOptions(decimal: true),
-            decoration: InputDecoration(labelText: t('Quantity')),
-          ),
+          if (_inPacks)
+            PackQtyInput(
+              packs: _packs,
+              loose: _qty,
+              packName: _packName,
+              unitShort: _unitShort,
+              factor: _packSize,
+              autofocus: true,
+              onChanged: () => setState(() {}),
+            )
+          else
+            TextField(
+              controller: _qty,
+              autofocus: true,
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+              decoration: InputDecoration(labelText: t('Quantity')),
+            ),
           const SizedBox(height: 12),
           TextField(
             controller: _note,

@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/business_category.dart';
 import '../../core/data_refresh.dart';
+import '../stock/pack_qty_input.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -51,7 +52,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   late final _wholesaleMinQty = TextEditingController(
     text: _num(widget.existing?['wholesale_min_qty']),
   );
-  late final _opening = TextEditingController();
+  late final _opening =
+      TextEditingController(); // loose units when a bulk unit is set
+  late final _openingPacks = TextEditingController();
   late final _lowStock = TextEditingController(
     text: _num(widget.existing?['low_stock_qty']),
   );
@@ -87,6 +90,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   bool _sellingFromPack = false;
 
   String? _categoryId;
+  int _manageVisits = 0; // rebuilds the dropdowns after Edit or delete
   String? _brandId;
   String? _unitId;
   late DateTime? _expiryDate = widget.existing?['expiry_date'] == null
@@ -244,6 +248,39 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     }
   }
 
+  static const _manage = '__manage__';
+
+  /// The last entry of the Category / Brand / Unit lists: opens the screen
+  /// where they are renamed or deleted (tab 0, 1, 2), then reloads them.
+  DropdownMenuItem<String> _manageItem() => DropdownMenuItem(
+    value: _manage,
+    child: Row(
+      children: [
+        Icon(Icons.edit_outlined, size: 18, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Flexible(
+          child: Text(
+            t('Edit or delete…'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(color: AppColors.primary),
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Future<void> _openManage(int tab) async {
+    // The dropdown shows the old choice again while the screen is open.
+    setState(() => _manageVisits++);
+    await context.push('/products/master-data?tab=$tab');
+    if (!mounted) return;
+    ref.invalidate(categoriesProvider);
+    ref.invalidate(brandsProvider);
+    ref.invalidate(unitsProvider);
+    setState(() => _manageVisits++);
+  }
+
   Future<void> _quickAddMaster(
     String table, {
     required void Function(String id) onAdded,
@@ -321,7 +358,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           onAdded(existingId);
           showSuccess(
             context,
-            t('{v1}{v2} "{trimmedName}" already exists', {'v1': label[0].toUpperCase(), 'v2': label.substring(1), 'trimmedName': trimmedName}),
+            t('{v1}{v2} "{trimmedName}" already exists', {
+              'v1': label[0].toUpperCase(),
+              'v2': label.substring(1),
+              'trimmedName': trimmedName,
+            }),
           );
         }
         return;
@@ -352,7 +393,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
           onAdded(existingId);
           showSuccess(
             context,
-            t('{v1}{v2} "{trimmedName}" already exists', {'v1': label[0].toUpperCase(), 'v2': label.substring(1), 'trimmedName': trimmedName}),
+            t('{v1}{v2} "{trimmedName}" already exists', {
+              'v1': label[0].toUpperCase(),
+              'v2': label.substring(1),
+              'trimmedName': trimmedName,
+            }),
           );
         }
         return;
@@ -382,7 +427,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
       if (mounted) {
         onAdded(newId);
-        showSuccess(context, t('New {label} "{trimmedName}" added', {'label': label, 'trimmedName': trimmedName}));
+        showSuccess(
+          context,
+          t('New {label} "{trimmedName}" added', {
+            'label': label,
+            'trimmedName': trimmedName,
+          }),
+        );
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -403,6 +454,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
 
   bool get _showPackPrices =>
       _secondaryUnitName.text.trim().isNotEmpty && !_hasVariants;
+
+  /// Opening stock is typed as full bulk units + loose units.
+  bool get _openingInPacks => _showPackPrices && (_packSize ?? 0) > 0;
+
+  /// Opening stock in base units, whichever way it was typed.
+  double get _openingQty => _openingInPacks
+      ? packQtyTotal(_openingPacks.text, _opening.text, _packSize!) ?? 0
+      : double.tryParse(_opening.text) ?? 0;
 
   /// Bulk cost typed -> per-unit purchase price (Rs 1600 a 50 kg bag -> Rs 32).
   void _packCostChanged() {
@@ -476,7 +535,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         (double.tryParse(_conversionFactor.text) ?? 0) <= 0) {
       showError(
         context,
-        t('Enter how many base units make one {v1} (e.g. 1 Bag = 50 kg)', {'v1': _secondaryUnitName.text.trim()}),
+        t('Enter how many base units make one {v1} (e.g. 1 Bag = 50 kg)', {
+          'v1': _secondaryUnitName.text.trim(),
+        }),
       );
       return;
     }
@@ -558,7 +619,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             }
           }
         } else {
-          final opening = double.tryParse(_opening.text) ?? 0;
+          final opening = _openingQty;
           if (opening > 0) {
             await client.rpc(
               'add_opening_stock',
@@ -586,7 +647,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
       _dirty = false;
       if (mounted) {
-        showSuccess(context, isEdit ? t('Product updated') : 'Product added');
+        showSuccess(
+          context,
+          isEdit ? t('Product updated') : t('Product added'),
+        );
         context.pop();
       }
     } catch (e) {
@@ -663,7 +727,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(t('In the product list — tap to fill in the details'),
+                              child: Text(
+                                t(
+                                  'In the product list — tap to fill in the details',
+                                ),
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
@@ -711,7 +778,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      key: ValueKey('category_$selectedCategory'),
+                      key: ValueKey(
+                        'category_${selectedCategory}_$_manageVisits',
+                      ),
                       // isExpanded: a dropdown sizes itself to its WIDEST menu
                       // item, so one long name overflows the half-width field.
                       isExpanded: true,
@@ -728,8 +797,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                        _manageItem(),
+                        _manageItem(),
                       ],
-                      onChanged: (v) => setState(() => _categoryId = v),
+                      onChanged: (v) => v == _manage
+                          ? _openManage(0)
+                          : setState(() => _categoryId = v),
                     ),
                   ),
                   IconButton(
@@ -743,7 +816,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   const SizedBox(width: 4),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      key: ValueKey('brand_$selectedBrand'),
+                      key: ValueKey('brand_${selectedBrand}_$_manageVisits'),
                       isExpanded: true,
                       initialValue: selectedBrand,
                       decoration: InputDecoration(labelText: t('Brand')),
@@ -758,8 +831,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                        _manageItem(),
                       ],
-                      onChanged: (v) => setState(() => _brandId = v),
+                      onChanged: (v) => v == _manage
+                          ? _openManage(1)
+                          : setState(() => _brandId = v),
                     ),
                   ),
                   IconButton(
@@ -778,7 +854,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      key: ValueKey('unit_$selectedUnit'),
+                      key: ValueKey('unit_${selectedUnit}_$_manageVisits'),
                       isExpanded: true,
                       initialValue: selectedUnit,
                       decoration: InputDecoration(labelText: t('Unit')),
@@ -794,7 +870,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             ),
                           ),
                       ],
-                      onChanged: (v) => setState(() => _unitId = v),
+                      onChanged: (v) => v == _manage
+                          ? _openManage(2)
+                          : setState(() => _unitId = v),
                     ),
                   ),
                   IconButton(
@@ -831,7 +909,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       decoration: InputDecoration(
                         labelText: t('= how many units?'),
                         helperText:
-                            '1 ${_secondaryUnitName.text.trim().isEmpty ? t('Bag') : _secondaryUnitName.text.trim()} = 50 kg → 50',
+                            (_packSize ?? 0) > 0 &&
+                                _secondaryUnitName.text.trim().isNotEmpty
+                            ? '1 ${_secondaryUnitName.text.trim()} = ${qty(_packSize!)} ${_unitShort()}'
+                            : t('e.g. 1 Bag = 50 kg → 50'),
                       ),
                       onChanged: (_) => _packSizeChanged(),
                     ),
@@ -850,8 +931,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           decimal: true,
                         ),
                         decoration: InputDecoration(
-                          labelText:
-                              t('Purchase price of 1 {v1} ₹', {'v1': _secondaryUnitName.text.trim()}),
+                          labelText: t('Purchase price of 1 {v1} ₹', {
+                            'v1': _secondaryUnitName.text.trim(),
+                          }),
                           helperText: _packCostHint(),
                           helperMaxLines: 2,
                         ),
@@ -866,8 +948,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                           decimal: true,
                         ),
                         decoration: InputDecoration(
-                          labelText:
-                              t('Selling price of 1 {v1} ₹', {'v1': _secondaryUnitName.text.trim()}),
+                          labelText: t('Selling price of 1 {v1} ₹', {
+                            'v1': _secondaryUnitName.text.trim(),
+                          }),
                           helperText: _packPriceHint(),
                           helperMaxLines: 2,
                         ),
@@ -900,9 +983,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
               SectionLabel(t('Codes')),
               TextFormField(
                 controller: _sku,
-                decoration: InputDecoration(
-                  labelText: t('SKU / product code'),
-                ),
+                decoration: InputDecoration(labelText: t('SKU / product code')),
               ),
               const SizedBox(height: 12),
               TextFormField(
@@ -1034,9 +1115,25 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 ),
               ],
               SectionLabel(t('Stock')),
+              if (!isEdit && _openingInPacks) ...[
+                Text(
+                  t('Opening stock'),
+                  style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+                ),
+                const SizedBox(height: 6),
+                PackQtyInput(
+                  packs: _openingPacks,
+                  loose: _opening,
+                  packName: _secondaryUnitName.text.trim(),
+                  unitShort: _unitShort(),
+                  factor: _packSize!,
+                  onChanged: () => setState(() {}),
+                ),
+                const SizedBox(height: 12),
+              ],
               Row(
                 children: [
-                  if (!isEdit && !_hasVariants) ...[
+                  if (!isEdit && !_hasVariants && !_openingInPacks) ...[
                     Expanded(
                       child: TextFormField(
                         controller: _opening,
@@ -1080,7 +1177,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 child: InputDecorator(
                   decoration: InputDecoration(
                     labelText: t('Expiry date (optional)'),
-                    helperText: t('Alerts appear when expired or within 30 days'),
+                    helperText: t(
+                      'Alerts appear when expired or within 30 days',
+                    ),
                     suffixIcon: _expiryDate == null
                         ? const Icon(Icons.event_outlined)
                         : IconButton(
@@ -1104,7 +1203,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 value: _trackPieces,
                 contentPadding: EdgeInsets.zero,
                 title: Text(t('Sold in cut lengths')),
-                subtitle: Text(t('Rods, pipes, wire, cloth — the app keeps count of full pieces and leftovers by itself'),
+                subtitle: Text(
+                  t(
+                    'Rods, pipes, wire, cloth — the app keeps count of full pieces and leftovers by itself',
+                  ),
                 ),
                 onChanged: (v) => setState(() {
                   _trackPieces = v;
@@ -1123,8 +1225,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     decimal: true,
                   ),
                   decoration: InputDecoration(
-                    labelText: t('Full length of 1 piece ({v1})', {'v1': _unitShort()}),
-                    helperText: t('1 rod = 12 ft → 12. New stock is split into full pieces. Empty = each purchase is one piece (wire coil).'),
+                    labelText: t('Full length of 1 piece ({v1})', {
+                      'v1': _unitShort(),
+                    }),
+                    helperText: t(
+                      '1 rod = 12 ft → 12. New stock is split into full pieces. Empty = each purchase is one piece (wire coil).',
+                    ),
                     helperMaxLines: 2,
                   ),
                 ),
@@ -1139,11 +1245,15 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(t('IMEI / Serial Numbers'),
+                        Text(
+                          t('IMEI / Serial Numbers'),
                           style: TextStyle(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 4),
-                        Text(t('Add or scan unique IMEI numbers for individual stock units.'),
+                        Text(
+                          t(
+                            'Add or scan unique IMEI numbers for individual stock units.',
+                          ),
                           style: TextStyle(
                             fontSize: 13,
                             color: AppColors.inkSoft,
@@ -1256,7 +1366,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     child: ListTile(
                       title: Text(_variants[i].name),
                       subtitle: Text(
-                        t('Stock: {v1}  •  ₹{v2}', {'v1': _variants[i].openingStock, 'v2': _variants[i].sellingPrice ?? _selling.text}),
+                        t('Stock: {v1}  •  ₹{v2}', {
+                          'v1': _variants[i].openingStock,
+                          'v2': _variants[i].sellingPrice ?? _selling.text,
+                        }),
                       ),
                       trailing: IconButton(
                         icon: const Icon(

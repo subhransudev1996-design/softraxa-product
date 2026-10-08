@@ -2,12 +2,17 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart' show ValueNotifier;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'business_category.dart';
 import 'network.dart';
+
+/// Set when this device was signed out because the owner ended the staff
+/// member's sessions (migration 0073); the login screen says so.
+final signedOutByOwner = ValueNotifier<bool>(false);
 
 final supabaseProvider = Provider<SupabaseClient>(
   (ref) => Supabase.instance.client,
@@ -248,6 +253,26 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
     state = const AsyncLoading();
     ref.invalidateSelf();
     await future;
+  }
+
+  /// Staff only: has the owner signed this login out (Staff & permissions →
+  /// Sign out from all devices)? Then sign out here at once rather than
+  /// when the access token runs out. Offline or an older database: no-op.
+  Future<void> checkSessionStillActive() async {
+    final client = ref.read(supabaseProvider);
+    final ctx = state.value;
+    if (client.auth.currentUser == null || ctx == null || ctx.isOwner) return;
+    try {
+      final active = await client
+          .rpc('my_session_active')
+          .timeout(const Duration(seconds: 10));
+      if (active == false) {
+        signedOutByOwner.value = true;
+        await client.auth.signOut(scope: SignOutScope.local);
+      }
+    } catch (_) {
+      // Offline, or the database doesn't have the check yet.
+    }
   }
 
   DateTime _lastSilentRefresh = DateTime.now();

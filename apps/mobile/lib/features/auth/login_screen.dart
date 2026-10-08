@@ -91,7 +91,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             emailRedirectTo: authCallbackUrl,
           );
       if (mounted) {
-        showSuccess(context, t('Verification email sent to {email}.', {'email': email}));
+        showSuccess(
+          context,
+          t('Verification email sent to {email}.', {'email': email}),
+        );
       }
     } catch (e) {
       if (mounted) showError(context, e);
@@ -117,6 +120,36 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    ValueListenableBuilder<bool>(
+                      valueListenable: signedOutByOwner,
+                      builder: (context, on, _) => !on
+                          ? const SizedBox.shrink()
+                          : Container(
+                              margin: const EdgeInsets.only(bottom: 20),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.orangeSoft,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(
+                                    Icons.logout,
+                                    color: AppColors.orange,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      t(
+                                        'The shop owner signed you out. Log in again to continue.',
+                                      ),
+                                      style: TextStyle(color: AppColors.ink),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    ),
                     // The app icon itself, so login matches the home screen
                     // icon and the splash.
                     Center(
@@ -148,7 +181,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       style: Theme.of(context).textTheme.headlineSmall,
                     ),
                     const SizedBox(height: 4),
-                    Text(t('Billing • Stock • GST'),
+                    Text(
+                      t('Billing • Stock • GST'),
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: AppColors.inkSoft,

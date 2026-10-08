@@ -10,12 +10,16 @@ import '../../core/theme.dart';
 
 /// Manage categories, brands and units (PRD 7.4).
 class MasterDataScreen extends ConsumerWidget {
-  const MasterDataScreen({super.key});
+  const MasterDataScreen({super.key, this.initialTab = 0});
+
+  /// 0 categories, 1 brands, 2 units.
+  final int initialTab;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
       length: 3,
+      initialIndex: initialTab.clamp(0, 2),
       child: Scaffold(
         backgroundColor: AppColors.canvas,
         appBar: AppBar(
@@ -57,9 +61,9 @@ class _MasterList extends ConsumerWidget {
     switch (table) {
       case 'categories':
         ref.invalidate(categoriesProvider);
-    // category/brand names are embedded in product rows; units drive
-    // decimal rules in POS — refresh those screens too
-    invalidateStockData(ref);
+        // category/brand names are embedded in product rows; units drive
+        // decimal rules in POS — refresh those screens too
+        invalidateStockData(ref);
       case 'brands':
         ref.invalidate(brandsProvider);
       default:
@@ -84,7 +88,7 @@ class _MasterList extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
-          title: Text(existing == null ? t('Add') : 'Edit'),
+          title: Text(existing == null ? t('Add') : t('Edit')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -199,12 +203,27 @@ class _MasterList extends ConsumerWidget {
                     subtitle: table == 'units'
                         ? Text(row['short_name'] as String? ?? '')
                         : null,
-                    trailing: IconButton(
-                      icon: const Icon(
-                        Icons.delete_outline,
-                        color: AppColors.red,
-                      ),
-                      onPressed: () => _delete(context, ref, row),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: t('Edit'),
+                          icon: const Icon(
+                            Icons.edit_outlined,
+                            color: AppColors.primary,
+                          ),
+                          onPressed: () =>
+                              _addOrEdit(context, ref, existing: row),
+                        ),
+                        IconButton(
+                          tooltip: t('Delete'),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: AppColors.red,
+                          ),
+                          onPressed: () => _delete(context, ref, row),
+                        ),
+                      ],
                     ),
                     onTap: () => _addOrEdit(context, ref, existing: row),
                   );

@@ -262,10 +262,10 @@ class _DesktopDashboard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // ---- top bar: identity + real primary actions ----
-              // Expanded+Wrap (not a plain Row) so the action buttons never
-              // overflow/clip on narrower desktop windows — they wrap onto a
-              // second line, right-aligned, instead.
+              // The buttons stay on one line, right-aligned; on a narrow
+              // window they shrink a little (FittedBox) instead of wrapping.
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     width: 42,
@@ -285,7 +285,7 @@ class _DesktopDashboard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 14),
-                  Flexible(
+                  Expanded(
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -311,42 +311,45 @@ class _DesktopDashboard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  Expanded(
-                    child: Wrap(
-                      alignment: WrapAlignment.end,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 10,
-                      runSpacing: 8,
-                      children: [
-                        const GuideButton('home'),
-                        OutlinedButton.icon(
-                          onPressed: () => showDaySummary(context),
-                          icon: const Icon(Icons.insights_outlined, size: 18),
-                          label: Text(t('Today\'s summary')),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => context.push('/products/new'),
-                          icon: const Icon(Icons.add_box_outlined, size: 18),
-                          label: Text(t('Add Product')),
-                        ),
-                        OutlinedButton.icon(
-                          onPressed: () => context.push('/purchases/new'),
-                          icon: const Icon(
-                            Icons.shopping_cart_outlined,
-                            size: 18,
+                  Flexible(
+                    flex: 3,
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 10,
+                        children: [
+                          const GuideButton('home'),
+                          OutlinedButton.icon(
+                            onPressed: () => showDaySummary(context),
+                            icon: const Icon(Icons.insights_outlined, size: 18),
+                            label: Text(t('Today\'s summary')),
                           ),
-                          label: Text(t('New Purchase')),
-                        ),
-                        CoachTarget(
-                          page: 'home',
-                          id: 'new_bill',
-                          child: FilledButton.icon(
-                            onPressed: () => context.go('/pos'),
-                            icon: const Icon(Icons.receipt_long, size: 18),
-                            label: Text(t('New Bill')),
+                          OutlinedButton.icon(
+                            onPressed: () => context.push('/products/new'),
+                            icon: const Icon(Icons.add_box_outlined, size: 18),
+                            label: Text(t('Add Product')),
                           ),
-                        ),
-                      ],
+                          OutlinedButton.icon(
+                            onPressed: () => context.push('/purchases/new'),
+                            icon: const Icon(
+                              Icons.shopping_cart_outlined,
+                              size: 18,
+                            ),
+                            label: Text(t('New Purchase')),
+                          ),
+                          CoachTarget(
+                            page: 'home',
+                            id: 'new_bill',
+                            child: FilledButton.icon(
+                              onPressed: () => context.go('/pos'),
+                              icon: const Icon(Icons.receipt_long, size: 18),
+                              label: Text(t('New Bill')),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ],
@@ -646,7 +649,9 @@ class _MobileDashboard extends StatelessWidget {
                             ),
                             const SizedBox(width: 4),
                             Text(
-                              t('Profit {v1}', {'v1': moneyCompact(s!['today_profit'] as num?)}),
+                              t('Profit {v1}', {
+                                'v1': moneyCompact(s!['today_profit'] as num?),
+                              }),
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 13,
@@ -662,7 +667,12 @@ class _MobileDashboard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
-                      t('{v1} {v2} today', {'v1': s!['today_invoice_count'], 'v2': s!['today_invoice_count'] == 1 ? 'invoice' : 'invoices'}),
+                      t('{v1} {v2} today', {
+                        'v1': s!['today_invoice_count'],
+                        'v2': s!['today_invoice_count'] == 1
+                            ? 'invoice'
+                            : 'invoices',
+                      }),
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.75),
                         fontSize: 13,
@@ -808,7 +818,8 @@ class _MobileDashboard extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(t('Recent invoices'),
+              Text(
+                t('Recent invoices'),
                 style: Theme.of(context).textTheme.titleMedium,
               ),
               TextButton(
@@ -931,7 +942,8 @@ class _ExpiryBanner extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(t('Renew now so billing doesn\'t stop.'),
+                Text(
+                  t('Renew now so billing doesn\'t stop.'),
                   style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                 ),
               ],

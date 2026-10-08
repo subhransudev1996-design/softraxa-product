@@ -188,7 +188,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
         if (ctx?.isStaffLimitReached ?? false) {
           showError(
             context,
-            t('Staff limit reached for your plan ({v1} allowed).', {'v1': ctx?.userLimit}),
+            t('Staff limit reached for your plan ({v1} allowed).', {
+              'v1': ctx?.userLimit,
+            }),
           );
         } else {
           _showAddStaffDialog();
@@ -210,7 +212,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       ),
       body: staffAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (err, stack) => Center(child: Text(t('Error: {err}', {'err': err}))),
+        error: (err, stack) =>
+            Center(child: Text(t('Error: {err}', {'err': err}))),
         data: (staffList) {
           final limit = ctx?.userLimit ?? 999;
           final isLimitReached = limit != 999 && staffList.length >= limit;
@@ -239,13 +242,18 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            t('Staff Accounts: {v1} / {v2}', {'v1': staffList.length, 'v2': limit == 999 ? t('Unlimited') : limit}),
+                            t('Staff Accounts: {v1} / {v2}', {
+                              'v1': staffList.length,
+                              'v2': limit == 999 ? t('Unlimited') : limit,
+                            }),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 2),
                           Text(
                             isLimitReached
-                                ? t('Plan limit reached. Upgrade plan to add more staff.')
+                                ? t(
+                                    'Plan limit reached. Upgrade plan to add more staff.',
+                                  )
                                 : 'Store owners can create accounts and assign permissions.',
                             style: TextStyle(
                               fontSize: 13,
@@ -264,7 +272,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                 child: staffList.isEmpty
                     ? EmptyState(
                         icon: Icons.person_off_outlined,
-                        message: t('No staff members registered.\nTap + to add a staff account.'),
+                        message: t(
+                          'No staff members registered.\nTap + to add a staff account.',
+                        ),
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.all(16),
@@ -371,6 +381,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                           onSelected: (val) {
                                             if (val == 'edit') {
                                               _showEditPermissionsDialog(staff);
+                                            } else if (val == 'signout') {
+                                              _confirmSignOutStaff(staff);
                                             } else if (val == 'delete') {
                                               _confirmDeleteStaff(staff);
                                             }
@@ -390,6 +402,23 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                               ),
                                             ),
                                             PopupMenuItem(
+                                              value: 'signout',
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.logout,
+                                                    size: 18,
+                                                  ),
+                                                  const SizedBox(width: 8),
+                                                  Text(
+                                                    t(
+                                                      'Sign out from all devices',
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            PopupMenuItem(
                                               value: 'delete',
                                               child: Row(
                                                 children: [
@@ -399,7 +428,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                                                     size: 18,
                                                   ),
                                                   SizedBox(width: 8),
-                                                  Text(t('Remove User'),
+                                                  Text(
+                                                    t('Remove User'),
                                                     style: TextStyle(
                                                       color: Colors.red,
                                                     ),
@@ -452,13 +482,45 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     );
   }
 
+  Future<void> _confirmSignOutStaff(Map<String, dynamic> staff) async {
+    final name = (staff['full_name'] as String? ?? '').trim().isEmpty
+        ? staff['email'] as String? ?? ''
+        : staff['full_name'] as String;
+    final ok = await confirmDialog(
+      context,
+      title: t('Sign {v1} out?', {'v1': name}),
+      message: t(
+        '{v1} will be signed out on every phone and computer within about a minute. Their account and permissions stay; they can log in again with their password.',
+        {'v1': name},
+      ),
+      confirmText: t('Sign out'),
+    );
+    if (!ok || !mounted) return;
+    try {
+      await ref
+          .read(supabaseProvider)
+          .rpc('sign_out_staff_user', params: {'p_profile_id': staff['id']});
+      if (mounted) {
+        showSuccess(
+          context,
+          t('{v1} has been signed out on all devices.', {'v1': name}),
+        );
+      }
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
   void _confirmDeleteStaff(Map<String, dynamic> staff) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t('Remove Staff Member')),
         content: Text(
-          t('Are you sure you want to remove {v1} ({v2})? They will immediately lose access to this store.', {'v1': staff['full_name'], 'v2': staff['email']}),
+          t(
+            'Are you sure you want to remove {v1} ({v2})? They will immediately lose access to this store.',
+            {'v1': staff['full_name'], 'v2': staff['email']},
+          ),
         ),
         actions: [
           TextButton(
@@ -633,7 +695,8 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
                     : null,
               ),
               const SizedBox(height: 16),
-              Text(t('Staff Access Permissions'),
+              Text(
+                t('Staff Access Permissions'),
                 style: TextStyle(fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
@@ -747,7 +810,9 @@ class _EditPermissionsDialogState
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(t('Edit Permissions ({v1})', {'v1': widget.staff['full_name']})),
+      title: Text(
+        t('Edit Permissions ({v1})', {'v1': widget.staff['full_name']}),
+      ),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -766,7 +831,9 @@ class _EditPermissionsDialogState
                   ),
                   decoration: InputDecoration(
                     labelText: t('Discount limit %'),
-                    helperText: t('Most a bill may go below the default prices — price changes, line and bill discounts together'),
+                    helperText: t(
+                      'Most a bill may go below the default prices — price changes, line and bill discounts together',
+                    ),
                     helperMaxLines: 2,
                   ),
                 ),

@@ -80,6 +80,7 @@ class _AppState extends ConsumerState<App> {
   StreamSubscription<AuthState>? _authSub;
   late final AppLifecycleListener _lifecycle;
   Timer? _contextTimer;
+  Timer? _sessionTimer;
 
   @override
   void initState() {
@@ -91,9 +92,16 @@ class _AppState extends ConsumerState<App> {
     // Changes made in the admin panel (renewal, suspension, plan, features)
     // reach an app that stays open: on return to the app and every 30 min.
     _lifecycle = AppLifecycleListener(
-      onResume: () => ref
-          .read(appContextProvider.notifier)
-          .refreshSilently(ifOlderThan: const Duration(minutes: 2)),
+      onResume: () {
+        final notifier = ref.read(appContextProvider.notifier);
+        notifier.checkSessionStillActive();
+        notifier.refreshSilently(ifOlderThan: const Duration(minutes: 2));
+      },
+    );
+    // A staff login the owner signed out ends within about a minute.
+    _sessionTimer = Timer.periodic(
+      const Duration(minutes: 1),
+      (_) => ref.read(appContextProvider.notifier).checkSessionStillActive(),
     );
     _contextTimer = Timer.periodic(
       const Duration(minutes: 30),
@@ -108,6 +116,9 @@ class _AppState extends ConsumerState<App> {
       if (state.event == AuthChangeEvent.signedOut) {
         ref.read(appLockProvider.notifier).onSignedOut();
       }
+      if (state.event == AuthChangeEvent.signedIn) {
+        signedOutByOwner.value = false;
+      }
       if (state.event == AuthChangeEvent.passwordRecovery) {
         final ctx = rootNavigatorKey.currentContext;
         if (ctx != null && ctx.mounted) showSetNewPasswordDialog(ctx, ref);
@@ -120,6 +131,7 @@ class _AppState extends ConsumerState<App> {
     _authSub?.cancel();
     _lifecycle.dispose();
     _contextTimer?.cancel();
+    _sessionTimer?.cancel();
     super.dispose();
   }
 

@@ -74,7 +74,8 @@ class _SplashScreen extends ConsumerWidget {
               children: [
                 const Icon(Icons.wifi_off, size: 40, color: Colors.white70),
                 const SizedBox(height: 10),
-                Text(t('Could not load your account.'),
+                Text(
+                  t('Could not load your account.'),
                   style: TextStyle(color: Colors.white),
                 ),
                 const SizedBox(height: 12),
@@ -90,7 +91,8 @@ class _SplashScreen extends ConsumerWidget {
                 ),
                 TextButton(
                   onPressed: () => ref.read(supabaseProvider).auth.signOut(),
-                  child: Text(t('Logout'),
+                  child: Text(
+                    t('Logout'),
                     style: TextStyle(color: Colors.white70),
                   ),
                 ),
@@ -233,8 +235,14 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/products/master-data',
-            pageBuilder: (context, state) =>
-                _page(context, state, const MasterDataScreen()),
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              MasterDataScreen(
+                initialTab:
+                    int.tryParse(state.uri.queryParameters['tab'] ?? '') ?? 0,
+              ),
+            ),
           ),
           GoRoute(
             path: '/products/:id/edit',
