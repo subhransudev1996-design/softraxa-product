@@ -38,5 +38,7 @@
 "In stock instead:": "ಇದರ ಬದಲಿಗೆ ಸ್ಟಾಕ್‌ನಲ್ಲಿ:",
 "Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ಈ ಉತ್ಪನ್ನ ಆರಿಸಿದಾಗ ಅಥವಾ ಸ್ಟಾಕ್ ಮುಗಿದಾಗ ಹೊಸ ಬಿಲ್ ಮತ್ತು ಜಾಬ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ. ಎರಡೂ ಕಡೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ.",
 "Or use instead:": "ಅಥವಾ ಇದರ ಬದಲಿಗೆ ಬಳಸಿ:",
-"Swap": "ಬದಲಿಸಿ"
+"Swap": "ಬದಲಿಸಿ",
+"Returning {v1} • {v2}": "ಹಿಂತಿರುಗಿಸುವುದು {v1} • {v2}",
+"{v1} already returned — {v2} left to return": "{v1} ಈಗಾಗಲೇ ಹಿಂತಿರುಗಿದೆ — {v2} ಉಳಿದಿದೆ"
 }

@@ -38,5 +38,7 @@
 "In stock instead:": "இதற்குப் பதிலாக இருப்பில்:",
 "Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "இந்தப் பொருள் தேர்ந்தெடுக்கப்படும்போது அல்லது இருப்பு தீரும்போது புதிய பில் மற்றும் ஜாப் கார்டில் காட்டப்படும். இரு பக்கமும் வேலை செய்யும்.",
 "Or use instead:": "அல்லது இதற்குப் பதிலாக:",
-"Swap": "மாற்று"
+"Swap": "மாற்று",
+"Returning {v1} • {v2}": "திருப்பம் {v1} • {v2}",
+"{v1} already returned — {v2} left to return": "{v1} ஏற்கனவே திருப்பப்பட்டது — {v2} மீதம்"
 }

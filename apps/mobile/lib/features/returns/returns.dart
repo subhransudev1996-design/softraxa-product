@@ -20,6 +20,8 @@ import 'exchange.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
 import 'credit_note_pdf.dart';
+import 'return_lines.dart';
+import '../stock/pack_qty_input.dart';
 
 /// Saves or shares the GST credit note (sale return) or debit note
 /// (purchase return) PDF for [row] (migration 0040).
@@ -120,6 +122,85 @@ Future<double?> _promptReturnQty(
   if (v < 0 || v > max) {
     if (context.mounted) {
       showError(context, t('Enter a quantity between 0 and {v1}', {'v1': qty(max)}));
+    }
+    return null;
+  }
+  return (v * 1000).round() / 1000;
+}
+
+/// Return quantity for a line sold by the box: full boxes + loose pieces,
+/// in base units (pieces).
+Future<double?> _promptPackReturnQty(
+  BuildContext context,
+  Map<String, dynamic> it, {
+  required double max,
+  required double current,
+}) async {
+  final size = linePackSize(it)!;
+  final packName = it['alt_unit_name'] as String? ?? '';
+  final unit = lineUnitShort(it);
+  final fullNow = (current / size + 1e-9).floorToDouble();
+  final looseNow = double.parse((current - fullNow * size).toStringAsFixed(3));
+  final packs = TextEditingController(text: fullNow > 0 ? qty(fullNow) : '');
+  final loose = TextEditingController(text: looseNow > 0 ? qty(looseNow) : '');
+  final v = await showDialog<double>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setState) => AlertDialog(
+        title: Text(
+          '${it['product_name']}',
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        content: SizedBox(
+          width: 380,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              PackQtyInput(
+                packs: packs,
+                loose: loose,
+                packName: packName,
+                unitShort: unit,
+                factor: size,
+                autofocus: true,
+                onChanged: () => setState(() {}),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                t('Max {v1}', {'v1': returnQtyLabel(max, it)}),
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t('Cancel')),
+          ),
+          FilledButton(
+            style: dialogActionStyle,
+            onPressed: () => Navigator.pop(
+              ctx,
+              packQtyTotal(packs.text, loose.text, size) ?? 0,
+            ),
+            child: Text(t('Set')),
+          ),
+        ],
+      ),
+    ),
+  );
+  packs.dispose();
+  loose.dispose();
+  if (v == null) return null;
+  if (v < 0 || v > max + 0.0005) {
+    if (context.mounted) {
+      showError(
+        context,
+        t('Enter a quantity between 0 and {v1}', {'v1': returnQtyLabel(max, it)}),
+      );
     }
     return null;
   }
@@ -906,11 +987,11 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
               'serial_no': it['serial_no'] ?? '',
               'quantity': e.value,
               'condition': e.key,
-              'unit_price': _lineInclRate(it),
+              // 0075: valued at this bill line's own price.
+              'invoice_item_id': it['id'],
+              'unit_price': returnUnitValue(it),
               'tax_amount': 0,
-              'line_total': double.parse(
-                (e.value * _lineInclRate(it)).toStringAsFixed(2),
-              ),
+              'line_total': returnRowValue(e.value, it, _discountFactor),
             },
   ];
 
@@ -972,7 +1053,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
         invoiceId: widget.invoice['id'] as String,
         invoiceNo: widget.invoice['invoice_no'] as String? ?? '',
         returnPayload: _returnPayloadBase,
-        returnValue: _total * invoiceDiscountFactor(widget.invoice),
+        returnValue: _total,
         originalDue: toDouble(widget.invoice['due_amount']),
         hasCustomer: customerId != null,
       ),
@@ -984,13 +1065,11 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
     context.push('/sale-returns/exchange');
   }
 
-  /// Already-returned quantity per product/variant on this invoice (from
-  /// earlier sale returns), keyed the same way as [_maxReturnable]. Loaded
-  /// best-effort on open so the qty stepper can't be pushed past what's
-  /// actually left to return — the server (`create_sale_return`) is the
-  /// real enforcement point, this is just so the UI doesn't let a cashier
-  /// try to return the same invoice twice and only find out after saving.
-  Map<String, double> _alreadyReturned = {};
+  /// What earlier sale returns already took from this bill, per line and
+  /// per product. Loaded best-effort on open so the qty stepper can't be
+  /// pushed past what's left — the server (`create_sale_return`) is the
+  /// real enforcement point.
+  ReturnedSoFar _returned = const ReturnedSoFar();
   bool _loadingReturned = true;
 
   @override
@@ -1000,49 +1079,52 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
   }
 
   Future<void> _loadAlreadyReturned() async {
+    final client = ref.read(supabaseProvider);
+    final invoiceId = widget.invoice['id'] as String;
+    List<Map<String, dynamic>> rows;
     try {
-      final rows = await ref
-          .read(supabaseProvider)
-          .from('sale_return_items')
-          .select(
-            'product_id, variant_id, quantity, sale_returns!inner(invoice_id)',
-          )
-          .eq('sale_returns.invoice_id', widget.invoice['id'] as String);
-      final map = <String, double>{};
-      for (final r in List<Map<String, dynamic>>.from(rows)) {
-        final key = '${r['product_id']}:${r['variant_id'] ?? ''}';
-        map[key] = (map[key] ?? 0) + toDouble(r['quantity']);
-      }
-      if (mounted) {
-        setState(() {
-          _alreadyReturned = map;
-          _loadingReturned = false;
-        });
-      }
+      rows = List<Map<String, dynamic>>.from(
+        await client
+            .from('sale_return_items')
+            .select(
+              'product_id, variant_id, quantity, invoice_item_id, '
+              'sale_returns!inner(invoice_id)',
+            )
+            .eq('sale_returns.invoice_id', invoiceId),
+      );
     } catch (_) {
-      // Best-effort only — the server still hard-blocks over-returning.
-      if (mounted) setState(() => _loadingReturned = false);
+      // A database before 0075 has no invoice_item_id: per product only.
+      try {
+        rows = List<Map<String, dynamic>>.from(
+          await client
+              .from('sale_return_items')
+              .select('product_id, variant_id, quantity, sale_returns!inner(invoice_id)')
+              .eq('sale_returns.invoice_id', invoiceId),
+        );
+      } catch (_) {
+        if (mounted) setState(() => _loadingReturned = false);
+        return;
+      }
+    }
+    if (mounted) {
+      setState(() {
+        _returned = ReturnedSoFar.fromRows(rows);
+        _loadingReturned = false;
+      });
     }
   }
 
-  bool get _isGst => widget.invoice['invoice_type'] == 'gst';
+  /// The bill discount's share (PD26), as the server applies it.
+  late final double _discountFactor = invoiceDiscountFactor(widget.invoice);
 
-  double _lineInclRate(Map<String, dynamic> it) =>
-      toDouble(it['unit_price']) *
-      (_isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1);
+  double _maxReturnable(Map<String, dynamic> it) =>
+      maxReturnableFrom(it, _items, _returned);
 
-  /// How much of this line is still returnable: originally sold minus
-  /// whatever earlier returns already took, floored at zero.
-  double _maxReturnable(Map<String, dynamic> it) {
-    final key = '${it['product_id']}:${it['variant_id'] ?? ''}';
-    final already = _alreadyReturned[key] ?? 0;
-    return (toDouble(it['quantity']) - already).clamp(0, double.infinity);
-  }
-
-  double get _total => _items.fold(0.0, (s, it) {
-    final q = _returnQty[it['id']] ?? 0;
-    return s + q * _lineInclRate(it);
-  });
+  /// The return's value, row by row as the server works it out.
+  double get _total => _payloadItems.fold(
+    0.0,
+    (s, row) => s + toDouble(row['line_total']),
+  );
 
   double get _refundAmount =>
       _refundTouched ? (double.tryParse(_refund.text) ?? 0) : _total;
@@ -1111,9 +1193,14 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                 final maxReturnable = _loadingReturned
                     ? 0.0
                     : _maxReturnable(it);
-                final already =
-                    _alreadyReturned['${it['product_id']}:${it['variant_id'] ?? ''}'] ??
-                    0;
+                final soldQty = toDouble(it['quantity']);
+                final already = (soldQty - maxReturnable).clamp(
+                  0.0,
+                  soldQty,
+                );
+                final packSize = linePackSize(it);
+                final billed = billedQty(it);
+                final returningQty = _returnQty[it['id']] ?? 0;
                 final canReturn = !_loadingReturned && maxReturnable > 0;
                 final lineId = it['id'] as String;
                 final returning = (_returnQty[lineId] ?? 0) > 0;
@@ -1138,12 +1225,38 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 ),
                               ),
                               Text(
-                                t('Sold: {v1} @ {v2}', {'v1': qty(it['quantity'] as num?), 'v2': money(_lineInclRate(it))}),
+                                t('Sold: {v1} @ {v2}', {
+                                  'v1': qtyUnit(
+                                    billed.qty,
+                                    packSize != null ? billed.unit : null,
+                                  ),
+                                  'v2': money(
+                                    returnUnitValue(it) * billed.per,
+                                  ),
+                                }),
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.inkSoft,
                                 ),
                               ),
+                              if (returningQty > 0)
+                                Text(
+                                  t('Returning {v1} • {v2}', {
+                                    'v1': returnQtyLabel(returningQty, it),
+                                    'v2': money(
+                                      returnRowValue(
+                                        returningQty,
+                                        it,
+                                        _discountFactor,
+                                      ),
+                                    ),
+                                  }),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
                               if (_loadingReturned)
                                 Text(t('Checking earlier returns…'),
                                   style: TextStyle(
@@ -1155,7 +1268,10 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                 Text(
                                   maxReturnable <= 0
                                       ? t('Already fully returned')
-                                      : '${qty(already)} already returned — ${qty(maxReturnable)} left to return',
+                                      : t('{v1} already returned — {v2} left to return', {
+                                          'v1': returnQtyLabel(already, it),
+                                          'v2': returnQtyLabel(maxReturnable, it),
+                                        }),
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
@@ -1172,10 +1288,14 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                           onPressed: !canReturn
                               ? null
                               : () => setState(() {
+                                  // A box line steps a whole box.
                                   final cur = _returnQty[it['id']] ?? 0;
                                   if (cur > 0) {
-                                    _returnQty[it['id'] as String] = (cur - 1)
-                                        .clamp(0, double.infinity);
+                                    _returnQty[it['id'] as String] =
+                                        (cur - (packSize ?? 1)).clamp(
+                                          0,
+                                          double.infinity,
+                                        );
                                   }
                                 }),
                         ),
@@ -1183,12 +1303,19 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                           onTap: !canReturn
                               ? null
                               : () async {
-                                  final v = await _promptReturnQty(
-                                    context,
-                                    name: '${it['product_name']}',
-                                    max: maxReturnable,
-                                    current: _returnQty[it['id']] ?? 0,
-                                  );
+                                  final v = packSize != null
+                                      ? await _promptPackReturnQty(
+                                          context,
+                                          it,
+                                          max: maxReturnable,
+                                          current: _returnQty[it['id']] ?? 0,
+                                        )
+                                      : await _promptReturnQty(
+                                          context,
+                                          name: '${it['product_name']}',
+                                          max: maxReturnable,
+                                          current: _returnQty[it['id']] ?? 0,
+                                        );
                                   if (v != null && mounted) {
                                     setState(
                                       () => _returnQty[it['id'] as String] = v,
@@ -1201,7 +1328,9 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                               vertical: 8,
                             ),
                             child: Text(
-                              qty(_returnQty[it['id']] ?? 0),
+                              packSize != null && returningQty > 0
+                                  ? returnQtyLabel(returningQty, it)
+                                  : qty(returningQty),
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -1215,8 +1344,11 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                               : () => setState(() {
                                   final cur = _returnQty[it['id']] ?? 0;
                                   if (cur < maxReturnable) {
-                                    _returnQty[it['id'] as String] = (cur + 1)
-                                        .clamp(0, maxReturnable);
+                                    _returnQty[it['id'] as String] =
+                                        (cur + (packSize ?? 1)).clamp(
+                                          0,
+                                          maxReturnable,
+                                        );
                                   }
                                 }),
                         ),

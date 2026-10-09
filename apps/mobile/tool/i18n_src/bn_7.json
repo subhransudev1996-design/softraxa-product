@@ -38,5 +38,7 @@
 "In stock instead:": "এর বদলে স্টকে আছে:",
 "Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "এই পণ্য বাছাই হলে বা স্টক শেষ হলে নতুন বিল ও জব কার্ডে দেখানো হয়। দুই দিকেই কাজ করে।",
 "Or use instead:": "অথবা এর বদলে নিন:",
-"Swap": "বদলান"
+"Swap": "বদলান",
+"Returning {v1} • {v2}": "ফেরত {v1} • {v2}",
+"{v1} already returned — {v2} left to return": "{v1} আগেই ফেরত — {v2} ফেরত বাকি"
 }

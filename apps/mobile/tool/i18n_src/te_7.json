@@ -38,5 +38,7 @@
 "In stock instead:": "దీనికి బదులుగా స్టాక్‌లో:",
 "Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ఈ ఉత్పత్తి ఎంచుకున్నప్పుడు లేదా స్టాక్ అయిపోయినప్పుడు కొత్త బిల్లు మరియు జాబ్ కార్డ్‌లలో చూపబడతాయి. రెండు వైపులా పని చేస్తుంది.",
 "Or use instead:": "లేదా దీనికి బదులుగా వాడండి:",
-"Swap": "మార్చు"
+"Swap": "మార్చు",
+"Returning {v1} • {v2}": "తిరిగి {v1} • {v2}",
+"{v1} already returned — {v2} left to return": "{v1} ఇప్పటికే తిరిగి ఇచ్చారు — {v2} మిగిలింది"
 }

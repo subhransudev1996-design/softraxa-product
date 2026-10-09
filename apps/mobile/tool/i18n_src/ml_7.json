@@ -38,5 +38,7 @@
 "In stock instead:": "ഇതിന് പകരം സ്റ്റോക്കിൽ:",
 "Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ഈ ഉൽപ്പന്നം തിരഞ്ഞെടുക്കുമ്പോഴോ സ്റ്റോക്ക് തീരുമ്പോഴോ പുതിയ ബില്ലിലും ജോബ് കാർഡിലും കാണിക്കും. ഇരുവശത്തും പ്രവർത്തിക്കും.",
 "Or use instead:": "അല്ലെങ്കിൽ ഇതിന് പകരം:",
-"Swap": "മാറ്റുക"
+"Swap": "മാറ്റുക",
+"Returning {v1} • {v2}": "തിരികെ {v1} • {v2}",
+"{v1} already returned — {v2} left to return": "{v1} ഇതിനകം തിരികെ — {v2} ബാക്കി"
 }
