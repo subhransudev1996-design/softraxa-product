@@ -272,6 +272,9 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
   bool _busy = false;
   final _qtyControllers = <String, TextEditingController>{};
 
+  /// Narrows the list shown; ticked items stay in the order either way.
+  String _search = '';
+
   @override
   void dispose() {
     for (final c in _qtyControllers.values) {
@@ -346,6 +349,15 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
   String _fileName(Map<String, dynamic>? supplier) =>
       'Order_${(supplier?['name'] as String? ?? 'supplier').replaceAll(' ', '_')}_${ymd(DateTime.now())}.pdf';
 
+  bool _matches(ReorderItem it) {
+    final q = _search.trim().toLowerCase();
+    if (q.isEmpty) return true;
+    final name =
+        '${it.product['name'] ?? ''} ${it.variant?['name'] ?? ''} '
+        '${it.product['sku'] ?? ''} ${it.product['barcode'] ?? ''}';
+    return name.toLowerCase().contains(q);
+  }
+
   @override
   Widget build(BuildContext context) {
     final data = ref.watch(_reorderDataProvider);
@@ -403,10 +415,16 @@ class _ReorderScreenState extends ConsumerState<ReorderScreen> {
                           style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                         ),
                         const SizedBox(height: 10),
+                        SearchField(
+                          hint: t('Search product'),
+                          onChanged: (v) => setState(() => _search = v),
+                        ),
+                        const SizedBox(height: 8),
                         Card(
                           child: Column(
                             children: [
-                              for (final it in items) _row(it),
+                              for (final it in items)
+                                if (_matches(it)) _row(it),
                             ],
                           ),
                         ),

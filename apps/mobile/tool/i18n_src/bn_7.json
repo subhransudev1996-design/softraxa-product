@@ -41,5 +41,8 @@
 "Swap": "বদলান",
 "Returning {v1} • {v2}": "ফেরত {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} আগেই ফেরত — {v2} ফেরত বাকি",
-"Modify": "পরিবর্তন"
+"Modify": "পরিবর্তন",
+"Search this report": "এই রিপোর্টে খুঁজুন",
+"{v1} of {v2} rows match": "{v2}টির মধ্যে {v1}টি সারি মিলেছে",
+"Nothing matches \"{v1}\"": "\"{v1}\" এর সাথে কিছু মেলেনি"
 }

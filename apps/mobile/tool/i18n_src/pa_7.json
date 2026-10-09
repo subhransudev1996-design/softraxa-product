@@ -41,5 +41,8 @@
 "Swap": "ਬਦਲੋ",
 "Returning {v1} • {v2}": "ਵਾਪਸੀ {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} ਪਹਿਲਾਂ ਹੀ ਵਾਪਸ — {v2} ਵਾਪਸੀ ਬਾਕੀ",
-"Modify": "ਸੋਧੋ"
+"Modify": "ਸੋਧੋ",
+"Search this report": "ਇਸ ਰਿਪੋਰਟ ਵਿੱਚ ਲੱਭੋ",
+"{v1} of {v2} rows match": "{v2} ਵਿੱਚੋਂ {v1} ਕਤਾਰਾਂ ਮਿਲੀਆਂ",
+"Nothing matches \"{v1}\"": "\"{v1}\" ਨਾਲ ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ"
 }

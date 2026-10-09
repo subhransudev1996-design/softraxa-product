@@ -41,5 +41,8 @@
 "Swap": "बदला",
 "Returning {v1} • {v2}": "परत {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} आधीच परत — {v2} परत करणे बाकी",
-"Modify": "बदल करा"
+"Modify": "बदल करा",
+"Search this report": "या अहवालात शोधा",
+"{v1} of {v2} rows match": "{v2} पैकी {v1} ओळी जुळल्या",
+"Nothing matches \"{v1}\"": "\"{v1}\" शी काहीही जुळले नाही"
 }

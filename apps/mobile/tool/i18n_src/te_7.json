@@ -41,5 +41,8 @@
 "Swap": "మార్చు",
 "Returning {v1} • {v2}": "తిరిగి {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} ఇప్పటికే తిరిగి ఇచ్చారు — {v2} మిగిలింది",
-"Modify": "మార్చు"
+"Modify": "మార్చు",
+"Search this report": "ఈ నివేదికలో వెతకండి",
+"{v1} of {v2} rows match": "{v2} లో {v1} వరుసలు సరిపోయాయి",
+"Nothing matches \"{v1}\"": "\"{v1}\" కి ఏదీ సరిపోలలేదు"
 }

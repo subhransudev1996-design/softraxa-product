@@ -41,5 +41,8 @@
 "Swap": "ବଦଳାନ୍ତୁ",
 "Returning {v1} • {v2}": "ଫେରସ୍ତ {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} ପୂର୍ବରୁ ଫେରସ୍ତ — {v2} ବାକି",
-"Modify": "ପରିବର୍ତ୍ତନ"
+"Modify": "ପରିବର୍ତ୍ତନ",
+"Search this report": "ଏହି ରିପୋର୍ଟରେ ଖୋଜନ୍ତୁ",
+"{v1} of {v2} rows match": "{v2} ମଧ୍ୟରୁ {v1} ଧାଡ଼ି ମିଳିଲା",
+"Nothing matches \"{v1}\"": "\"{v1}\" ସହ କିଛି ମିଳିଲା ନାହିଁ"
 }

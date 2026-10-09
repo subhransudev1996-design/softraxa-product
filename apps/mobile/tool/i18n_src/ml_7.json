@@ -41,5 +41,8 @@
 "Swap": "മാറ്റുക",
 "Returning {v1} • {v2}": "തിരികെ {v1} • {v2}",
 "{v1} already returned — {v2} left to return": "{v1} ഇതിനകം തിരികെ — {v2} ബാക്കി",
-"Modify": "മാറ്റം വരുത്തുക"
+"Modify": "മാറ്റം വരുത്തുക",
+"Search this report": "ഈ റിപ്പോർട്ടിൽ തിരയുക",
+"{v1} of {v2} rows match": "{v2} ൽ {v1} വരികൾ യോജിക്കുന്നു",
+"Nothing matches \"{v1}\"": "\"{v1}\" ന് ഒന്നും യോജിക്കുന്നില്ല"
 }

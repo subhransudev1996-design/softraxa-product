@@ -90,6 +90,37 @@ List<ChartPoint> topN(List<ChartPoint> points, int n) {
   return sorted.take(n).toList();
 }
 
+/// Reports whose table is worth searching (many rows of names / numbers).
+const searchableReports = {
+  'sales',
+  'products',
+  'stock',
+  'low_stock',
+  'customer_due',
+  'supplier_due',
+  'purchases',
+  'expenses',
+};
+
+/// Table rows with any cell containing [query] (case-insensitive; phone
+/// numbers also match without spaces). Empty query: all rows.
+List filterReportRows(List rows, String query) {
+  final q = query.trim().toLowerCase();
+  if (q.isEmpty) return rows;
+  final digits = q.replaceAll(RegExp(r'[^0-9]'), '');
+  return [
+    for (final row in rows)
+      if ((row as List).any((cell) {
+        final text = '$cell'.toLowerCase();
+        if (text.contains(q)) return true;
+        return digits.length >= 3 &&
+            digits.length == q.replaceAll(' ', '').length &&
+            text.replaceAll(RegExp(r'[^0-9]'), '').contains(digits);
+      }))
+        row,
+  ];
+}
+
 class ReportQuery {
   const ReportQuery(this.type, this.from, this.to);
   final String type;
@@ -529,6 +560,16 @@ class ReportDetailScreen extends ConsumerStatefulWidget {
 class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
   late DateTime _from;
   late DateTime _to;
+  final _searchController = TextEditingController();
+  String _search = '';
+
+  bool get _searchable => searchableReports.contains(widget.type);
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   static const _titles = {
     'sales': 'Sales report',
@@ -676,6 +717,11 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
               '${dateStr(_from)} to ${dateStr(_to)}',
               style: const pw.TextStyle(fontSize: 9),
             ),
+          if (_search.trim().isNotEmpty)
+            pw.Text(
+              'Rows matching "${_search.trim()}"',
+              style: const pw.TextStyle(fontSize: 9),
+            ),
           pw.SizedBox(height: 10),
           pw.Wrap(
             spacing: 16,
@@ -701,7 +747,10 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
               cellStyle: const pw.TextStyle(fontSize: 8),
               headers: table['headers'] as List,
               data: [
-                for (final row in table['rows'] as List)
+                for (final row in filterReportRows(
+                  table['rows'] as List,
+                  _search,
+                ))
                   [for (final cell in row as List) _pdfSafe('$cell')],
               ],
             ),
@@ -826,7 +875,8 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
               builder: (d) {
                 final summary = d['summary'] as List;
                 final table = d['table'] as Map<String, dynamic>?;
-                final rows = table?['rows'] as List? ?? [];
+                final allRows = table?['rows'] as List? ?? [];
+                final rows = filterReportRows(allRows, _search);
                 final chartCard = _buildChart(d);
                 return Center(
                   child: ConstrainedBox(
@@ -870,10 +920,48 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                         ],
                         if (table != null) ...[
                           const SizedBox(height: 12),
-                          if (rows.isEmpty)
+                          if (_searchable && allRows.isNotEmpty) ...[
+                            SearchField(
+                              controller: _searchController,
+                              hint: t('Search this report'),
+                              onChanged: (v) => setState(() => _search = v),
+                              suffix: _search.isEmpty
+                                  ? null
+                                  : IconButton(
+                                      icon: const Icon(Icons.close),
+                                      onPressed: () => setState(() {
+                                        _searchController.clear();
+                                        _search = '';
+                                      }),
+                                    ),
+                            ),
+                            if (_search.trim().isNotEmpty)
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(4, 6, 4, 0),
+                                child: Text(
+                                  t('{v1} of {v2} rows match', {
+                                    'v1': rows.length,
+                                    'v2': allRows.length,
+                                  }),
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    color: AppColors.inkSoft,
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 8),
+                          ],
+                          if (allRows.isEmpty)
                             EmptyState(
                               icon: Icons.table_chart_outlined,
                               message: t('No data for this period'),
+                            )
+                          else if (rows.isEmpty)
+                            EmptyState(
+                              icon: Icons.search_off,
+                              message: t('Nothing matches "{v1}"', {
+                                'v1': _search.trim(),
+                              }),
                             )
                           else
                             Card(
