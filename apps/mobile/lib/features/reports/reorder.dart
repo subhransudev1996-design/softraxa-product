@@ -244,7 +244,7 @@ final _reorderDataProvider = FutureProvider.autoDispose<
       .limit(1000);
   final items = lowStockItems(rows);
   final suppliers = List<Map<String, dynamic>>.from(
-    await client.from('suppliers').select('id, name, phone').eq('is_active', true).order('name'),
+    await client.from('suppliers').select('id, name, phone').eq('is_active', true).order('name', ascending: true),
   );
   if (items.isNotEmpty) {
     final history = await client

@@ -838,7 +838,6 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                             ),
                           ),
                         _manageItem(),
-                        _manageItem(),
                       ],
                       onChanged: (v) => v == _manage
                           ? _openManage(0)
@@ -909,6 +908,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
+                        _manageItem(),
                       ],
                       onChanged: (v) => v == _manage
                           ? _openManage(2)

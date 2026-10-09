@@ -17,7 +17,7 @@ final heldGoodsProvider =
           .watch(supabaseProvider)
           .from('stock_holds')
           .select()
-          .order('product_name')
+          .order('product_name', ascending: true)
           .limit(500);
       return List<Map<String, dynamic>>.from(rows);
     });

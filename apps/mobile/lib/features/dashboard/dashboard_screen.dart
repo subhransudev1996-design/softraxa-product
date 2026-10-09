@@ -264,95 +264,105 @@ class _DesktopDashboard extends StatelessWidget {
               // ---- top bar: identity + real primary actions ----
               // The buttons stay on one line, right-aligned; on a narrow
               // window they shrink a little (FittedBox) instead of wrapping.
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 42,
-                    height: 42,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.primary, AppColors.primaryDark],
+              LayoutBuilder(
+                builder: (context, box) => Row(
+                  children: [
+                    Container(
+                      width: 42,
+                      height: 42,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.storefront,
+                        color: Colors.white,
+                        size: 22,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.storefront,
-                      color: Colors.white,
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          appContext?.businessName ?? t('My Shop'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.ink,
-                          ),
-                        ),
-                        Text(
-                          dateStr(DateTime.now()),
-                          style: TextStyle(
-                            fontSize: 12.5,
-                            color: AppColors.inkSoft,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  Flexible(
-                    flex: 3,
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.centerRight,
-                      child: Row(
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        spacing: 10,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const GuideButton('home'),
-                          OutlinedButton.icon(
-                            onPressed: () => showDaySummary(context),
-                            icon: const Icon(Icons.insights_outlined, size: 18),
-                            label: Text(t('Today\'s summary')),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () => context.push('/products/new'),
-                            icon: const Icon(Icons.add_box_outlined, size: 18),
-                            label: Text(t('Add Product')),
-                          ),
-                          OutlinedButton.icon(
-                            onPressed: () => context.push('/purchases/new'),
-                            icon: const Icon(
-                              Icons.shopping_cart_outlined,
-                              size: 18,
+                          Text(
+                            appContext?.businessName ?? t('My Shop'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.ink,
                             ),
-                            label: Text(t('New Purchase')),
                           ),
-                          CoachTarget(
-                            page: 'home',
-                            id: 'new_bill',
-                            child: FilledButton.icon(
-                              onPressed: () => context.go('/pos'),
-                              icon: const Icon(Icons.receipt_long, size: 18),
-                              label: Text(t('New Bill')),
+                          Text(
+                            dateStr(DateTime.now()),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              color: AppColors.inkSoft,
                             ),
                           ),
                         ],
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(width: 16),
+                    // At most ¾ of the width, so the shop name keeps room.
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: box.maxWidth * 0.75,
+                      ),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerRight,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          spacing: 10,
+                          children: [
+                            const GuideButton('home'),
+                            OutlinedButton.icon(
+                              onPressed: () => showDaySummary(context),
+                              icon: const Icon(
+                                Icons.insights_outlined,
+                                size: 18,
+                              ),
+                              label: Text(t('Today\'s summary')),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: () => context.push('/products/new'),
+                              icon: const Icon(
+                                Icons.add_box_outlined,
+                                size: 18,
+                              ),
+                              label: Text(t('Add Product')),
+                            ),
+                            OutlinedButton.icon(
+                              onPressed: () => context.push('/purchases/new'),
+                              icon: const Icon(
+                                Icons.shopping_cart_outlined,
+                                size: 18,
+                              ),
+                              label: Text(t('New Purchase')),
+                            ),
+                            CoachTarget(
+                              page: 'home',
+                              id: 'new_bill',
+                              child: FilledButton.icon(
+                                onPressed: () => context.go('/pos'),
+                                icon: const Icon(Icons.receipt_long, size: 18),
+                                label: Text(t('New Bill')),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
 
               if (appContext != null && appContext.subscriptionState == 'trial')

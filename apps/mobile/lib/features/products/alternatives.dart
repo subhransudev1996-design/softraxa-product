@@ -342,7 +342,7 @@ class _AlternativePickerState extends ConsumerState<_AlternativePicker> {
           .eq('is_active', true);
       final term = text.trim().replaceAll(RegExp(r'[,%()]'), ' ');
       if (term.isNotEmpty) q = q.ilike('name', '%$term%');
-      final rows = await q.order('name').limit(40);
+      final rows = await q.order('name', ascending: true).limit(40);
       if (!mounted || gen != _generation) return;
       setState(() {
         _rows = [
