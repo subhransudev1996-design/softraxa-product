@@ -216,54 +216,6 @@ class MoreScreen extends ConsumerWidget {
           ],
           SectionLabel(t('Money')),
           Card(
-            child: ListTile(
-              leading: const IconChip(
-                Icons.translate,
-                color: AppColors.purple,
-                size: 38,
-              ),
-              title: Text(
-                t('App language'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-              subtitle: Text(
-                appLanguages
-                    .firstWhere(
-                      (l) => l.$1 == ref.watch(languageProvider),
-                      orElse: () => appLanguages.first,
-                    )
-                    .$2,
-              ),
-              trailing: const Icon(Icons.chevron_right, size: 20),
-              onTap: () => showLanguagePicker(context, ref),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              key: const Key('app-lock-tile'),
-              leading: const IconChip(
-                Icons.lock_outline,
-                color: AppColors.teal,
-                size: 38,
-              ),
-              title: Text(
-                t('App lock'),
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 14,
-                ),
-              ),
-              subtitle: Text(appLockSummary(ref.watch(appLockProvider))),
-              trailing: const Icon(Icons.chevron_right, size: 20),
-              onTap: () => showAppLockSettings(context),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
             child: Column(
               children: [
                 tile(
@@ -319,6 +271,50 @@ class MoreScreen extends ConsumerWidget {
           Card(
             child: Column(
               children: [
+                ListTile(
+                  leading: const IconChip(
+                    Icons.translate,
+                    color: AppColors.purple,
+                    size: 38,
+                  ),
+                  title: Text(
+                    t('App language'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: Text(
+                    appLanguages
+                        .firstWhere(
+                          (l) => l.$1 == ref.watch(languageProvider),
+                          orElse: () => appLanguages.first,
+                        )
+                        .$2,
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => showLanguagePicker(context, ref),
+                ),
+                const Divider(),
+                ListTile(
+                  key: const Key('app-lock-tile'),
+                  leading: const IconChip(
+                    Icons.lock_outline,
+                    color: AppColors.teal,
+                    size: 38,
+                  ),
+                  title: Text(
+                    t('App lock'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
+                  ),
+                  subtitle: Text(appLockSummary(ref.watch(appLockProvider))),
+                  trailing: const Icon(Icons.chevron_right, size: 20),
+                  onTap: () => showAppLockSettings(context),
+                ),
+                const Divider(),
                 tile(
                   Icons.sync_outlined,
                   'Pending offline bills',
