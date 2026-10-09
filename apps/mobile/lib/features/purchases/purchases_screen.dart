@@ -165,7 +165,7 @@ class PurchasesScreen extends ConsumerWidget {
                         initialSortIndex: 2,
                         initialAscending: false,
                         rows: rows,
-                        trailingWidth: 110,
+                        trailingWidth: 150,
                         columns: [
                           DesktopTableColumn(
                             label: t('Purchase #'),
@@ -290,14 +290,15 @@ class _DownloadButtonState extends ConsumerState<_DownloadButton> {
 
 // ==================== desktop: sortable data table ====================
 
-class _PurchaseRow extends StatelessWidget {
+class _PurchaseRow extends ConsumerWidget {
   const _PurchaseRow({required this.purchase});
 
   final Map<String, dynamic> purchase;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = purchase;
+    final canEdit = _canModifyPurchase(p, ref);
     return InkWell(
       onTap: () => context.push('/purchases/${p['id']}'),
       child: Padding(
@@ -346,10 +347,18 @@ class _PurchaseRow extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 110,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: StatusChip(p['payment_status'] as String? ?? ''),
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  StatusChip(p['payment_status'] as String? ?? ''),
+                  if (canEdit) IconButton(
+                    tooltip: t('Modify'),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => context.push('/purchases/${p['id']}/edit'),
+                  ) else const SizedBox(width: 40),
+                ],
               ),
             ),
           ],
@@ -361,14 +370,20 @@ class _PurchaseRow extends StatelessWidget {
 
 // ==================== mobile: card list (unchanged) ====================
 
-class _PurchaseTile extends StatelessWidget {
+/// Purchases the signed-in user may modify (opening balances excepted).
+bool _canModifyPurchase(Map<String, dynamic> p, WidgetRef ref) =>
+    p['is_opening'] != true &&
+    (ref.watch(appContextProvider).value?.canManagePurchases ?? false);
+
+class _PurchaseTile extends ConsumerWidget {
   const _PurchaseTile({required this.purchase});
 
   final Map<String, dynamic> purchase;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final p = purchase;
+    final canEdit = _canModifyPurchase(p, ref);
     // Built manually instead of ListTile: its trailing slot
     // enforces a fixed max height independent of contentPadding,
     // which this 2-line trailing column (amount + status chip)
@@ -422,6 +437,12 @@ class _PurchaseTile extends StatelessWidget {
                   StatusChip(p['payment_status'] as String? ?? ''),
                 ],
               ),
+              if (canEdit) IconButton(
+                    tooltip: t('Modify'),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => context.push('/purchases/${p['id']}/edit'),
+                  ),
             ],
           ),
         ),
@@ -451,6 +472,13 @@ class PurchaseDetailScreen extends ConsumerWidget {
           // Correct a wrong entry (migration 0063). Opening balances are
           // changed from the supplier's opening balance instead.
           if (p != null && canManage && p['is_opening'] != true)
+            ModifyButton(
+              onPressed: () async {
+                await context.push('/purchases/$purchaseId/edit');
+                ref.invalidate(purchaseDetailProvider(purchaseId));
+              },
+            ),
+          if (p != null && canManage && p['is_opening'] != true)
             PopupMenuButton<String>(
               onSelected: (v) async {
                 if (v == 'edit') {
@@ -462,7 +490,6 @@ class PurchaseDetailScreen extends ConsumerWidget {
                 }
               },
               itemBuilder: (_) => [
-                PopupMenuItem(value: 'edit', child: Text(t('Edit purchase'))),
                 PopupMenuItem(
                   value: 'delete',
                   child: Text(t('Delete purchase'),

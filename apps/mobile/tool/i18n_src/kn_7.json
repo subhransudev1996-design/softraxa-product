@@ -40,5 +40,6 @@
 "Or use instead:": "ಅಥವಾ ಇದರ ಬದಲಿಗೆ ಬಳಸಿ:",
 "Swap": "ಬದಲಿಸಿ",
 "Returning {v1} • {v2}": "ಹಿಂತಿರುಗಿಸುವುದು {v1} • {v2}",
-"{v1} already returned — {v2} left to return": "{v1} ಈಗಾಗಲೇ ಹಿಂತಿರುಗಿದೆ — {v2} ಉಳಿದಿದೆ"
+"{v1} already returned — {v2} left to return": "{v1} ಈಗಾಗಲೇ ಹಿಂತಿರುಗಿದೆ — {v2} ಉಳಿದಿದೆ",
+"Modify": "ಮಾರ್ಪಡಿಸಿ"
 }

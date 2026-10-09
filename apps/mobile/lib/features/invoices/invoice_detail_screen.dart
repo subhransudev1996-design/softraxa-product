@@ -21,6 +21,99 @@ import 'invoice_providers.dart';
 import 'thermal_printer.dart';
 import '../../core/theme.dart';
 
+/// Loads this invoice's items into the cart and opens it for editing —
+/// reuses the whole POS/checkout flow (see `pos_screen.dart` and
+/// `checkout_sheet.dart`'s `editingInvoiceProvider` branches) instead of a
+/// separate editor, so adding/removing/changing items works identically to
+/// building a new bill.
+Future<void> startModifyInvoice(
+BuildContext context,
+WidgetRef ref,
+Map<String, dynamic> inv,
+) async {
+final invoiceId = inv['id'] as String;
+  final liveCart = ref.read(cartProvider);
+  if (liveCart.lines.isNotEmpty && ref.read(editingInvoiceProvider) == null) {
+    final proceed = await confirmDialog(
+      context,
+      title: t('Replace current bill?'),
+      message: t('You have an unsaved bill in progress. Editing this invoice will replace it.'),
+      confirmText: t('Continue'),
+    );
+    if (!proceed) return;
+  }
+
+  Map<String, dynamic>? customer;
+  final customerId = inv['customer_id'] as String?;
+  if (customerId != null) {
+    try {
+      customer = Map<String, dynamic>.from(
+        await ref
+            .read(supabaseProvider)
+            .from('customers')
+            .select()
+            .eq('id', customerId)
+            .single(),
+      );
+    } catch (_) {
+      // Deleted/inaccessible customer — fall back to the invoice's own
+      // name/phone snapshot so the bill can still be edited.
+      customer = {
+        'id': customerId,
+        'name': inv['customer_name'],
+        'phone': inv['customer_phone'],
+      };
+    }
+  }
+
+  final items = List<Map<String, dynamic>>.from(
+    inv['invoice_items'] as List? ?? [],
+  );
+  if (!context.mounted) return;
+  ref
+      .read(cartProvider.notifier)
+      .replaceAll(
+        CartState(
+          lines: invoiceItemsToCartLines(items),
+          customer: customer,
+          billDiscount: toDouble(inv['discount_amount']),
+        ),
+      );
+  ref
+      .read(editingInvoiceProvider.notifier)
+      .set(
+        EditingInvoice(
+          id: invoiceId,
+          invoiceNo: inv['invoice_no'] as String,
+          invoiceType: inv['invoice_type'] as String,
+          paidAmount: toDouble(inv['paid_amount']),
+        ),
+      );
+  await context.push('/invoices/$invoiceId/edit');
+  ref.invalidate(invoiceDetailProvider(invoiceId));
+}
+
+
+/// Whether this bill can be modified by the signed-in user.
+bool canModifyInvoice(Map<String, dynamic> inv, AppContext? ctx) =>
+    inv['is_cancelled'] != true &&
+    inv['invoice_type'] != 'opening' &&
+    (ctx?.canEditInvoices ?? false);
+
+/// Modify from the bills list: loads the bill, then as on its own page.
+Future<void> modifyInvoiceById(
+  BuildContext context,
+  WidgetRef ref,
+  String id,
+) async {
+  try {
+    final inv = await ref.read(invoiceDetailProvider(id).future);
+    if (context.mounted) await startModifyInvoice(context, ref, inv);
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
+}
+
 class InvoiceDetailScreen extends ConsumerWidget {
   const InvoiceDetailScreen({
     super.key,
@@ -370,77 +463,6 @@ class InvoiceDetailScreen extends ConsumerWidget {
     }
   }
 
-  /// Loads this invoice's items into the cart and opens it for editing —
-  /// reuses the whole POS/checkout flow (see `pos_screen.dart` and
-  /// `checkout_sheet.dart`'s `editingInvoiceProvider` branches) instead of a
-  /// separate editor, so adding/removing/changing items works identically to
-  /// building a new bill.
-  Future<void> _editBill(
-    BuildContext context,
-    WidgetRef ref,
-    Map<String, dynamic> inv,
-  ) async {
-    final liveCart = ref.read(cartProvider);
-    if (liveCart.lines.isNotEmpty && ref.read(editingInvoiceProvider) == null) {
-      final proceed = await confirmDialog(
-        context,
-        title: t('Replace current bill?'),
-        message: t('You have an unsaved bill in progress. Editing this invoice will replace it.'),
-        confirmText: t('Continue'),
-      );
-      if (!proceed) return;
-    }
-
-    Map<String, dynamic>? customer;
-    final customerId = inv['customer_id'] as String?;
-    if (customerId != null) {
-      try {
-        customer = Map<String, dynamic>.from(
-          await ref
-              .read(supabaseProvider)
-              .from('customers')
-              .select()
-              .eq('id', customerId)
-              .single(),
-        );
-      } catch (_) {
-        // Deleted/inaccessible customer — fall back to the invoice's own
-        // name/phone snapshot so the bill can still be edited.
-        customer = {
-          'id': customerId,
-          'name': inv['customer_name'],
-          'phone': inv['customer_phone'],
-        };
-      }
-    }
-
-    final items = List<Map<String, dynamic>>.from(
-      inv['invoice_items'] as List? ?? [],
-    );
-    if (!context.mounted) return;
-    ref
-        .read(cartProvider.notifier)
-        .replaceAll(
-          CartState(
-            lines: invoiceItemsToCartLines(items),
-            customer: customer,
-            billDiscount: toDouble(inv['discount_amount']),
-          ),
-        );
-    ref
-        .read(editingInvoiceProvider.notifier)
-        .set(
-          EditingInvoice(
-            id: invoiceId,
-            invoiceNo: inv['invoice_no'] as String,
-            invoiceType: inv['invoice_type'] as String,
-            paidAmount: toDouble(inv['paid_amount']),
-          ),
-        );
-    await context.push('/invoices/$invoiceId/edit');
-    ref.invalidate(invoiceDetailProvider(invoiceId));
-  }
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(invoiceDetailProvider(invoiceId));
@@ -452,12 +474,16 @@ class InvoiceDetailScreen extends ConsumerWidget {
         leading: appBarBack(context),
         title: Text(detail.value?['invoice_no'] as String? ?? t('Invoice')),
         actions: [
+          if (detail.hasValue && canModifyInvoice(detail.value!, features))
+            ModifyButton(
+              onPressed: () => startModifyInvoice(context, ref, detail.value!),
+            ),
           if (detail.hasValue &&
               detail.value!['is_cancelled'] != true &&
               (features?.canEditInvoices ?? false))
             PopupMenuButton<String>(
               onSelected: (v) {
-                if (v == 'edit') _editBill(context, ref, detail.value!);
+                if (v == 'edit') startModifyInvoice(context, ref, detail.value!);
                 if (v == 'cancel') _cancel(context, ref, detail.value!);
                 if (v == 'due') _changeDueDate(context, ref, detail.value!);
                 if (v == 'customer') {
@@ -466,8 +492,6 @@ class InvoiceDetailScreen extends ConsumerWidget {
               },
               itemBuilder: (_) => [
                 // Opening balances can't be edited, only cancelled (0051).
-                if (detail.value!['invoice_type'] != 'opening')
-                  PopupMenuItem(value: 'edit', child: Text(t('Edit bill'))),
                 if (detail.value!['invoice_type'] != 'opening')
                   PopupMenuItem(
                     value: 'customer',

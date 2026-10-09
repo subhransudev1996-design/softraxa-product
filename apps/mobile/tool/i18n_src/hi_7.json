@@ -40,5 +40,6 @@
 "Or use instead:": "या इसकी जगह लें:",
 "Swap": "बदलें",
 "Returning {v1} • {v2}": "वापसी {v1} • {v2}",
-"{v1} already returned — {v2} left to return": "{v1} पहले ही वापस — {v2} वापसी बाकी"
+"{v1} already returned — {v2} left to return": "{v1} पहले ही वापस — {v2} वापसी बाकी",
+"Modify": "बदलें"
 }

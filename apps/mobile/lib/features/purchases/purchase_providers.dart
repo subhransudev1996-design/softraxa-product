@@ -105,7 +105,7 @@ final purchasesProvider =
         client,
         filter,
         'id, purchase_no, bill_no, supplier_name, purchase_date, total, '
-        'paid_amount, due_amount, payment_status',
+        'paid_amount, due_amount, payment_status, is_opening',
       ).limit(200);
       return List<Map<String, dynamic>>.from(rows);
     });

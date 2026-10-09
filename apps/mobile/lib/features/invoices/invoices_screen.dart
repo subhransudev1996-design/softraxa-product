@@ -8,6 +8,8 @@ import '../../core/date_range_filter.dart';
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/widgets.dart';
+import '../../core/supabase_providers.dart';
+import 'invoice_detail_screen.dart' show canModifyInvoice, modifyInvoiceById;
 import 'invoice_providers.dart';
 import '../../core/theme.dart';
 
@@ -123,7 +125,7 @@ class InvoicesScreen extends ConsumerWidget {
                           initialSortIndex: 2,
                           initialAscending: false,
                           rows: rows,
-                          trailingWidth: 110,
+                          trailingWidth: 150,
                           columns: [
                             DesktopTableColumn(
                               label: t('Invoice #'),
@@ -173,14 +175,15 @@ class InvoicesScreen extends ConsumerWidget {
 
 // ==================== desktop: sortable data table ====================
 
-class _InvoiceRow extends StatelessWidget {
+class _InvoiceRow extends ConsumerWidget {
   const _InvoiceRow({required this.invoice});
 
   final Map<String, dynamic> invoice;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inv = invoice;
+    final canEdit = canModifyInvoice(inv, ref.watch(appContextProvider).value);
     final cancelled = inv['is_cancelled'] == true;
     final customerName = (inv['customer_name'] as String?) ?? '';
 
@@ -264,14 +267,26 @@ class _InvoiceRow extends StatelessWidget {
               ),
             ),
             SizedBox(
-              width: 110,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: StatusChip(
-                  cancelled
-                      ? 'cancelled'
-                      : inv['payment_status'] as String? ?? '',
-                ),
+              width: 150,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  StatusChip(
+                    cancelled
+                        ? 'cancelled'
+                        : inv['payment_status'] as String? ?? '',
+                  ),
+                  if (canEdit) IconButton(
+                    tooltip: t('Modify'),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => modifyInvoiceById(
+                      context,
+                      ref,
+                      inv['id'] as String,
+                    ),
+                  ) else const SizedBox(width: 40),
+                ],
               ),
             ),
           ],
@@ -283,14 +298,15 @@ class _InvoiceRow extends StatelessWidget {
 
 // ==================== mobile: card list (unchanged) ====================
 
-class _InvoiceTile extends StatelessWidget {
+class _InvoiceTile extends ConsumerWidget {
   const _InvoiceTile({required this.invoice});
 
   final Map<String, dynamic> invoice;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final inv = invoice;
+    final canEdit = canModifyInvoice(inv, ref.watch(appContextProvider).value);
     final cancelled = inv['is_cancelled'] == true;
     final customerName = (inv['customer_name'] as String?) ?? '';
     // Built manually instead of ListTile (its trailing
@@ -372,6 +388,16 @@ class _InvoiceTile extends StatelessWidget {
                   ),
                 ],
               ),
+              if (canEdit) IconButton(
+                    tooltip: t('Modify'),
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.edit_outlined, size: 18),
+                    onPressed: () => modifyInvoiceById(
+                      context,
+                      ref,
+                      inv['id'] as String,
+                    ),
+                  ),
             ],
           ),
         ),

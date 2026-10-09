@@ -927,3 +927,27 @@ class PartyCard extends StatelessWidget {
     );
   }
 }
+
+/// "Modify" in a bill's top bar: icon and word on wide screens, a pencil on
+/// phones.
+class ModifyButton extends StatelessWidget {
+  const ModifyButton({super.key, required this.onPressed});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) => isWideLayout(context)
+      ? Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: OutlinedButton.icon(
+            onPressed: onPressed,
+            icon: const Icon(Icons.edit_outlined, size: 18),
+            label: Text(t('Modify')),
+          ),
+        )
+      : IconButton(
+          tooltip: t('Modify'),
+          icon: const Icon(Icons.edit_outlined),
+          onPressed: onPressed,
+        );
+}

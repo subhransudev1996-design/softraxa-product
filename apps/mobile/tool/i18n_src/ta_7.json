@@ -40,5 +40,6 @@
 "Or use instead:": "அல்லது இதற்குப் பதிலாக:",
 "Swap": "மாற்று",
 "Returning {v1} • {v2}": "திருப்பம் {v1} • {v2}",
-"{v1} already returned — {v2} left to return": "{v1} ஏற்கனவே திருப்பப்பட்டது — {v2} மீதம்"
+"{v1} already returned — {v2} left to return": "{v1} ஏற்கனவே திருப்பப்பட்டது — {v2} மீதம்",
+"Modify": "மாற்று"
 }
