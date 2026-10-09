@@ -28,5 +28,15 @@
 "Tell the customer on WhatsApp?": "வாடிக்கையாளருக்கு WhatsApp இல் தெரிவிக்கவா?",
 "WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "வேலை விவரம், மொத்தம், மீதி தட்டச்சு செய்யப்பட்டு WhatsApp திறக்கும். சரிபார்த்து அனுப்பு அழுத்தவும்.",
 "Send to customer on WhatsApp": "வாடிக்கையாளருக்கு WhatsApp இல் அனுப்பு",
-"No phone number on this job card — you will pick the chat yourself.": "இந்த ஜாப் கார்டில் போன் எண் இல்லை — அரட்டையை நீங்களே தேர்ந்தெடுப்பீர்கள்."
+"No phone number on this job card — you will pick the chat yourself.": "இந்த ஜாப் கார்டில் போன் எண் இல்லை — அரட்டையை நீங்களே தேர்ந்தெடுப்பீர்கள்.",
+"Add alternative": "மாற்றுப் பொருள் சேர்",
+"Add an alternative": "ஒரு மாற்றுப் பொருளைச் சேர்",
+"Alternative products": "மாற்றுப் பொருட்கள்",
+"Alternatives": "மாற்றுகள்",
+"Alternatives to {v1}": "{v1} க்கான மாற்றுகள்",
+"Hide": "மறை",
+"In stock instead:": "இதற்குப் பதிலாக இருப்பில்:",
+"Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "இந்தப் பொருள் தேர்ந்தெடுக்கப்படும்போது அல்லது இருப்பு தீரும்போது புதிய பில் மற்றும் ஜாப் கார்டில் காட்டப்படும். இரு பக்கமும் வேலை செய்யும்.",
+"Or use instead:": "அல்லது இதற்குப் பதிலாக:",
+"Swap": "மாற்று"
 }

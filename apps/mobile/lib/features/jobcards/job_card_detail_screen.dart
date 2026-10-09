@@ -15,6 +15,7 @@ import '../pos/pos_providers.dart';
 import '../services/service_providers.dart';
 import 'job_card_providers.dart';
 import 'job_whatsapp.dart';
+import '../products/alternatives.dart';
 import 'job_estimates.dart';
 
 /// Job card detail: status timeline, spare parts / labor lines, advance,
@@ -123,19 +124,39 @@ class JobCardDetailScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _addPart(BuildContext context, WidgetRef ref) async {
-    final search = TextEditingController();
-    final selected = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: PartPicker(searchController: search),
-      ),
+  /// [preset]: an alternative chosen in the part dialog — used directly
+  /// (a product with variants opens the list on it to pick the variant).
+  Future<void> _addPart(
+    BuildContext context,
+    WidgetRef ref, {
+    Map<String, dynamic>? preset,
+  }) async {
+    final Map<String, dynamic> product;
+    final Map<String, dynamic>? variant;
+    if (preset != null && preset['has_variants'] != true) {
+      product = preset;
+      variant = null;
+    } else {
+      final search = TextEditingController(
+        text: preset?['name'] as String? ?? '',
+      );
+      final selected = await showModalBottomSheet<Map<String, dynamic>>(
+        context: context,
+        isScrollControlled: true,
+        builder: (ctx) => Padding(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(ctx).viewInsets.bottom,
+          ),
+          child: PartPicker(searchController: search),
+        ),
+      );
+      if (selected == null || !context.mounted) return;
+      product = selected['product'] as Map<String, dynamic>;
+      variant = selected['variant'] as Map<String, dynamic>?;
+    }
+    final stock = toDouble(
+      variant?['current_stock'] ?? product['current_stock'],
     );
-    if (selected == null || !context.mounted) return;
-    final product = selected['product'] as Map<String, dynamic>;
-    final variant = selected['variant'] as Map<String, dynamic>?;
 
     final qtyC = TextEditingController(text: '1');
     final priceC = TextEditingController(
@@ -146,39 +167,60 @@ class JobCardDetailScreen extends ConsumerWidget {
     final gstC = TextEditingController(
       text: toDouble(product['gst_rate']).toStringAsFixed(0),
     );
-    final saved = await showDialog<bool>(
+    // true = add; a product map = use that alternative instead.
+    final saved = await showDialog<Object>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(
           '${product['name']}${variant != null ? ' — ${variant['name']}' : ''}',
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: qtyC,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                stock <= 0
+                    ? t('Out of stock')
+                    : t('Stock {v1}', {'v1': qty(stock)}),
+                style: TextStyle(
+                  fontSize: 12.5,
+                  fontWeight: FontWeight.w700,
+                  color: stock <= 0 ? AppColors.red : AppColors.green,
+                ),
               ),
-              decoration: InputDecoration(labelText: t('Quantity')),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: priceC,
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
+              const SizedBox(height: 8),
+              TextField(
+                controller: qtyC,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(labelText: t('Quantity')),
               ),
-              decoration: InputDecoration(
-                labelText: t('Price ₹ (per unit, excl. GST)'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: priceC,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('Price ₹ (per unit, excl. GST)'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: gstC,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(labelText: t('GST %')),
-            ),
-          ],
+              const SizedBox(height: 12),
+              TextField(
+                controller: gstC,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: t('GST %')),
+              ),
+              const SizedBox(height: 12),
+              AlternativesList(
+                productId: product['id'] as String,
+                title: t('Or use instead:'),
+                onPick: (p) => Navigator.pop(ctx, p),
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -193,6 +235,9 @@ class JobCardDetailScreen extends ConsumerWidget {
         ],
       ),
     );
+    if (saved is Map<String, dynamic> && context.mounted) {
+      return _addPart(context, ref, preset: saved);
+    }
     if (saved != true || !context.mounted) return;
     try {
       await ref
@@ -1020,7 +1065,7 @@ class PartPickerState extends ConsumerState<PartPicker> {
   @override
   void initState() {
     super.initState();
-    _load('');
+    _load(widget.searchController.text);
   }
 
   Future<void> _load(String search) async {

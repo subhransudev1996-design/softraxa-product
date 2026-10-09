@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/business_category.dart';
 import '../../core/data_refresh.dart';
 import '../stock/pack_qty_input.dart';
+import 'alternatives.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
@@ -108,6 +109,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     text: _num(widget.existing?['piece_length']),
   );
   final List<VariantDraft> _variants = [];
+
+  /// The shop's alternatives of this product (migration 0074): id + name.
+  List<Map<String, dynamic>> _alternatives = [];
+  bool _alternativesChanged = false;
   final List<String> _serials = [];
   final TextEditingController _singleImeiInput = TextEditingController();
   bool _busy = false;
@@ -153,6 +158,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     _categoryId = widget.existing?['category_id'] as String?;
     _brandId = widget.existing?['brand_id'] as String?;
     _unitId = widget.existing?['unit_id'] as String?;
+    if (isEdit) _loadAlternatives();
     if (!isEdit) {
       _name.addListener(_onNameChanged);
       final code = widget.initialBarcode ?? '';
@@ -279,6 +285,34 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     ref.invalidate(brandsProvider);
     ref.invalidate(unitsProvider);
     setState(() => _manageVisits++);
+  }
+
+  Future<void> _loadAlternatives() async {
+    try {
+      final rows = await loadLinkedAlternatives(
+        ref,
+        widget.existing!['id'] as String,
+      );
+      if (mounted) setState(() => _alternatives = rows);
+    } catch (_) {
+      // Offline, or a database without alternatives: the section stays empty.
+    }
+  }
+
+  Future<void> _addAlternative() async {
+    final picked = await pickAlternativeProduct(
+      context,
+      excludeIds: {
+        if (isEdit) widget.existing!['id'] as String,
+        for (final a in _alternatives) a['id'] as String,
+      },
+    );
+    if (picked == null || !mounted) return;
+    setState(() {
+      _alternatives = [..._alternatives, picked];
+      _alternativesChanged = true;
+      _dirty = true;
+    });
   }
 
   Future<void> _quickAddMaster(
@@ -642,6 +676,12 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             'p_serials': _serials,
           },
         );
+      }
+
+      if (_alternativesChanged) {
+        await saveLinkedAlternatives(ref, productId, [
+          for (final a in _alternatives) a['id'] as String,
+        ]);
       }
 
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
@@ -1114,6 +1154,38 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   ],
                 ),
               ],
+              SectionLabel(t('Alternative products')),
+              Text(
+                t(
+                  'Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.',
+                ),
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  for (final a in _alternatives)
+                    InputChip(
+                      label: Text(a['name'] as String? ?? ''),
+                      onDeleted: () => setState(() {
+                        _alternatives = [
+                          for (final x in _alternatives)
+                            if (x['id'] != a['id']) x,
+                        ];
+                        _alternativesChanged = true;
+                        _dirty = true;
+                      }),
+                    ),
+                  ActionChip(
+                    avatar: const Icon(Icons.add, size: 18),
+                    label: Text(t('Add alternative')),
+                    onPressed: _addAlternative,
+                  ),
+                ],
+              ),
               SectionLabel(t('Stock')),
               if (!isEdit && _openingInPacks) ...[
                 Text(

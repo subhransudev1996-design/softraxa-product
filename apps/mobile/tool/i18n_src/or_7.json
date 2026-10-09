@@ -28,5 +28,15 @@
 "Tell the customer on WhatsApp?": "ଗ୍ରାହକଙ୍କୁ WhatsApp ରେ ଜଣାଇବେ?",
 "WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "କାମର ବିବରଣୀ, ମୋଟ ଓ ବାକି ଲେଖାଯାଇ WhatsApp ଖୋଲିବ। ଯାଞ୍ଚ କରି ପଠାନ୍ତୁ ଦବାନ୍ତୁ।",
 "Send to customer on WhatsApp": "ଗ୍ରାହକଙ୍କୁ WhatsApp ରେ ପଠାନ୍ତୁ",
-"No phone number on this job card — you will pick the chat yourself.": "ଏହି ଜବ୍ କାର୍ଡରେ ଫୋନ୍ ନମ୍ବର ନାହିଁ — ଚାଟ୍ ଆପଣ ନିଜେ ବାଛିବେ।"
+"No phone number on this job card — you will pick the chat yourself.": "ଏହି ଜବ୍ କାର୍ଡରେ ଫୋନ୍ ନମ୍ବର ନାହିଁ — ଚାଟ୍ ଆପଣ ନିଜେ ବାଛିବେ।",
+"Add alternative": "ବିକଳ୍ପ ଯୋଡ଼ନ୍ତୁ",
+"Add an alternative": "ଏକ ବିକଳ୍ପ ଯୋଡ଼ନ୍ତୁ",
+"Alternative products": "ବିକଳ୍ପ ଉତ୍ପାଦ",
+"Alternatives": "ବିକଳ୍ପ",
+"Alternatives to {v1}": "{v1} ର ବିକଳ୍ପ",
+"Hide": "ଲୁଚାନ୍ତୁ",
+"In stock instead:": "ଏହା ବଦଳରେ ଷ୍ଟକରେ:",
+"Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ଏହି ଉତ୍ପାଦ ବଛାଗଲେ କିମ୍ବା ଷ୍ଟକ ସରିଗଲେ ନୂଆ ବିଲ୍ ଓ ଜବ୍ କାର୍ଡରେ ଦେଖାଯାଏ। ଦୁଇ ପଟେ କାମ କରେ।",
+"Or use instead:": "କିମ୍ବା ଏହା ବଦଳରେ ବ୍ୟବହାର କରନ୍ତୁ:",
+"Swap": "ବଦଳାନ୍ତୁ"
 }

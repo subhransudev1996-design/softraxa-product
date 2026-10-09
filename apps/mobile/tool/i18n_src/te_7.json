@@ -28,5 +28,15 @@
 "Tell the customer on WhatsApp?": "కస్టమర్‌కు WhatsApp లో తెలియజేయాలా?",
 "WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "పని వివరాలు, మొత్తం మరియు బాకీ టైప్ చేసి WhatsApp తెరుచుకుంటుంది. చూసి పంపు నొక్కండి.",
 "Send to customer on WhatsApp": "కస్టమర్‌కు WhatsApp లో పంపండి",
-"No phone number on this job card — you will pick the chat yourself.": "ఈ జాబ్ కార్డ్‌పై ఫోన్ నంబర్ లేదు — చాట్‌ను మీరే ఎంచుకుంటారు."
+"No phone number on this job card — you will pick the chat yourself.": "ఈ జాబ్ కార్డ్‌పై ఫోన్ నంబర్ లేదు — చాట్‌ను మీరే ఎంచుకుంటారు.",
+"Add alternative": "ప్రత్యామ్నాయం జోడించండి",
+"Add an alternative": "ఒక ప్రత్యామ్నాయం జోడించండి",
+"Alternative products": "ప్రత్యామ్నాయ ఉత్పత్తులు",
+"Alternatives": "ప్రత్యామ్నాయాలు",
+"Alternatives to {v1}": "{v1} కి ప్రత్యామ్నాయాలు",
+"Hide": "దాచు",
+"In stock instead:": "దీనికి బదులుగా స్టాక్‌లో:",
+"Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ఈ ఉత్పత్తి ఎంచుకున్నప్పుడు లేదా స్టాక్ అయిపోయినప్పుడు కొత్త బిల్లు మరియు జాబ్ కార్డ్‌లలో చూపబడతాయి. రెండు వైపులా పని చేస్తుంది.",
+"Or use instead:": "లేదా దీనికి బదులుగా వాడండి:",
+"Swap": "మార్చు"
 }

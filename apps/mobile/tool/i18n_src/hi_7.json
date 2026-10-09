@@ -28,5 +28,15 @@
 "Tell the customer on WhatsApp?": "ग्राहक को WhatsApp पर बताएँ?",
 "WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "WhatsApp में काम का विवरण, कुल और बाकी रकम लिखी हुई खुलेगी। आप जाँचें और भेजें दबाएँ।",
 "Send to customer on WhatsApp": "ग्राहक को WhatsApp पर भेजें",
-"No phone number on this job card — you will pick the chat yourself.": "इस जॉब कार्ड पर फ़ोन नंबर नहीं है — चैट आप खुद चुनेंगे।"
+"No phone number on this job card — you will pick the chat yourself.": "इस जॉब कार्ड पर फ़ोन नंबर नहीं है — चैट आप खुद चुनेंगे।",
+"Add alternative": "विकल्प जोड़ें",
+"Add an alternative": "एक विकल्प जोड़ें",
+"Alternative products": "विकल्प प्रोडक्ट",
+"Alternatives": "विकल्प",
+"Alternatives to {v1}": "{v1} के विकल्प",
+"Hide": "छिपाएँ",
+"In stock instead:": "इसकी जगह स्टॉक में:",
+"Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "नए बिल और जॉब कार्ड में तब दिखते हैं जब यह प्रोडक्ट चुना जाए या स्टॉक खत्म हो। दोनों तरफ़ काम करता है।",
+"Or use instead:": "या इसकी जगह लें:",
+"Swap": "बदलें"
 }

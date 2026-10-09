@@ -21,6 +21,7 @@ import 'checkout_sheet.dart';
 import 'loose_qty_sheet.dart';
 import 'pos_desktop.dart';
 import 'pos_providers.dart';
+import '../products/alternatives.dart';
 import 'quick_items.dart';
 
 /// Shared "not enough stock" dialog: message + three evenly-sized, full-width,
@@ -28,12 +29,15 @@ import 'quick_items.dart';
 /// live in [content] rather than [actions] so their width and spacing stay
 /// consistent instead of falling back to AlertDialog's default cramped
 /// overflow layout.
-Future<String?> _showStockDialog(
+/// With [productId], in-stock alternatives are offered too; picking one
+/// returns that product (a Map) instead of an action string.
+Future<Object?> _showStockDialog(
   BuildContext context, {
   required String title,
   required String message,
+  String? productId,
 }) {
-  return showDialog<String>(
+  return showDialog<Object>(
     context: context,
     builder: (ctx) => AlertDialog(
       title: Text(title),
@@ -42,6 +46,15 @@ Future<String?> _showStockDialog(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(message),
+          if (productId != null) ...[
+            const SizedBox(height: 12),
+            AlternativesList(
+              productId: productId,
+              inStockOnly: true,
+              title: t('In stock instead:'),
+              onPick: (p) => Navigator.pop(ctx, p),
+            ),
+          ],
           const SizedBox(height: 20),
           TextButton(
             onPressed: () => Navigator.pop(ctx, 'cancel'),
@@ -88,7 +101,11 @@ Future<String?> showImeiPicker(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
-        title: Text(t('Select IMEI / Serial — {productName}', {'productName': productName})),
+        title: Text(
+          t('Select IMEI / Serial — {productName}', {
+            'productName': productName,
+          }),
+        ),
         content: SizedBox(
           width: 400,
           child: Column(
@@ -121,7 +138,10 @@ Future<String?> showImeiPicker(
               if (serials.isEmpty)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(t('No in-stock IMEIs found in database. Type or scan an IMEI above.'),
+                  child: Text(
+                    t(
+                      'No in-stock IMEIs found in database. Type or scan an IMEI above.',
+                    ),
                     style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                 )
@@ -187,6 +207,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   /// Desktop: the search result ↑/↓ point at; Enter adds it.
   int _highlight = 0;
 
+  /// The product just added: its alternatives show under the search.
+  Map<String, dynamic>? _altFor;
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -216,7 +239,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           ? await showDialog<Map<String, dynamic>>(
               context: context,
               builder: (ctx) => SimpleDialog(
-                title: Text(t('Select variant — {v1}', {'v1': product['name']})),
+                title: Text(
+                  t('Select variant — {v1}', {'v1': product['name']}),
+                ),
                 children: [
                   for (final (i, v) in variants.indexed)
                     SizedBox(
@@ -234,7 +259,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           ),
                         ),
                         trailing: StatusChip(
-                          t('Stock {v1}', {'v1': qty(toDouble(v['current_stock']))}),
+                          t('Stock {v1}', {
+                            'v1': qty(toDouble(v['current_stock'])),
+                          }),
                           color: toDouble(v['current_stock']) <= 0
                               ? AppColors.red
                               : AppColors.green,
@@ -257,7 +284,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         children: [
                           Expanded(
                             child: Text(
-                              t('Select variant — {v1}', {'v1': product['name']}),
+                              t('Select variant — {v1}', {
+                                'v1': product['name'],
+                              }),
                               style: Theme.of(ctx).textTheme.titleMedium,
                             ),
                           ),
@@ -284,7 +313,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 ),
                               ),
                               trailing: StatusChip(
-                                t('Stock {v1}', {'v1': qty(toDouble(v['current_stock']))}),
+                                t('Stock {v1}', {
+                                  'v1': qty(toDouble(v['current_stock'])),
+                                }),
                                 color: toDouble(v['current_stock']) <= 0
                                     ? AppColors.red
                                     : AppColors.green,
@@ -382,9 +413,35 @@ class _PosScreenState extends ConsumerState<PosScreen> {
           addQty: addQty,
           asPack: asPack,
         );
+    setState(() => _altFor = product);
     _clearSearch();
     _searchFocus.requestFocus();
   }
+
+  /// "Swap" on an alternative: take the product just added off the bill
+  /// (its last line) and add the alternative instead.
+  Future<void> _swapLastWith(Map<String, dynamic> alternative) async {
+    final last = _altFor;
+    if (last != null) {
+      final lines = ref.read(cartProvider).lines;
+      for (final line in lines.reversed) {
+        if (line.productId == last['id']) {
+          ref.read(cartProvider.notifier).remove(line);
+          break;
+        }
+      }
+    }
+    await _addToCart(alternative);
+  }
+
+  Widget _alternativesStrip() => AlternativesStrip(
+    key: ValueKey('alt_${_altFor!['id']}'),
+    productId: _altFor!['id'] as String,
+    productName: _altFor!['name'] as String? ?? '',
+    onAdd: _addToCart,
+    onSwap: _swapLastWith,
+    onClose: () => setState(() => _altFor = null),
+  );
 
   /// Shows an out-of-stock / exceeds-stock warning with an "Add stock
   /// first" shortcut. Returns true if the caller should still proceed.
@@ -404,7 +461,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       context,
       title: stock <= 0 ? t('Out of stock') : 'Not enough stock',
       message: message,
+      productId: product['id'] as String?,
     );
+    if (action is Map<String, dynamic>) {
+      // An in-stock alternative instead: add that one.
+      Future.microtask(() => _addToCart(action));
+      return false;
+    }
     if (action == 'add_anyway') return true;
     if (action == 'add_stock') {
       if (!mounted) return false;
@@ -690,7 +753,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (!line.allowDecimal && newQty % 1 != 0) {
       showError(
         context,
-        t('{v1} is sold in whole {v2} — quantity must be a whole number', {'v1': line.name, 'v2': line.unitName.isEmpty ? 'units' : line.unitName}),
+        t('{v1} is sold in whole {v2} — quantity must be a whole number', {
+          'v1': line.name,
+          'v2': line.unitName.isEmpty ? 'units' : line.unitName,
+        }),
       );
       newQty = line.qty;
     }
@@ -728,7 +794,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       context,
       title: exchanging ? t('Cancel exchange?') : 'Discard changes?',
       message: exchanging
-          ? t('Nothing has been saved — the return and the replacement are only recorded together at checkout.')
+          ? t(
+              'Nothing has been saved — the return and the replacement are only recorded together at checkout.',
+            )
           : 'Changes to this bill haven\'t been saved yet.',
       confirmText: exchanging ? t('Cancel exchange') : 'Discard',
     );
@@ -983,6 +1051,8 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       if (exchange != null) _ExchangeBanner(exchange: exchange),
                       searchRow,
                       if (search.isEmpty) QuickItemsRow(onPick: _addToCart),
+                      if (search.isEmpty && _altFor != null)
+                        _alternativesStrip(),
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
@@ -994,8 +1064,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                   builder: (rows) => rows.isEmpty
                                       ? EmptyState(
                                           icon: Icons.search_off,
-                                          message:
-                                              t('No product found for "{search}"', {'search': search}),
+                                          message: t(
+                                            'No product found for "{search}"',
+                                            {'search': search},
+                                          ),
                                           action: OutlinedButton.icon(
                                             onPressed: () =>
                                                 context.push('/products/new'),
@@ -1054,6 +1126,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 if (exchange != null) _ExchangeBanner(exchange: exchange),
                 searchRow,
                 if (search.isEmpty) QuickItemsRow(onPick: _addToCart),
+                if (search.isEmpty && _altFor != null) _alternativesStrip(),
                 // customer row
                 Padding(
                   padding: const EdgeInsets.fromLTRB(16, 6, 16, 8),
@@ -1068,7 +1141,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                           builder: (rows) => rows.isEmpty
                               ? EmptyState(
                                   icon: Icons.search_off,
-                                  message: t('No product found for "{search}"', {'search': search}),
+                                  message: t(
+                                    'No product found for "{search}"',
+                                    {'search': search},
+                                  ),
                                   action: OutlinedButton.icon(
                                     onPressed: () =>
                                         context.push('/products/new'),
@@ -1125,7 +1201,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                       : cart.lines.isEmpty
                       ? EmptyState(
                           icon: Icons.shopping_cart_outlined,
-                          message: t('Bill is empty.\nSearch or scan products to add them.'),
+                          message: t(
+                            'Bill is empty.\nSearch or scan products to add them.',
+                          ),
                         )
                       : CoachTarget(
                           page: 'pos',
@@ -1185,7 +1263,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                                       ),
                                                   child: Text(
                                                     line.serialNo.isEmpty
-                                                        ? t('Tap to add IMEI/serial')
+                                                        ? t(
+                                                            'Tap to add IMEI/serial',
+                                                          )
                                                         : 'S/N: ${line.serialNo}',
                                                     style: TextStyle(
                                                       fontSize: 12,
@@ -1265,7 +1345,13 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    t('{v1} {v2} • Qty {v3}', {'v1': cart.itemCount, 'v2': cart.itemCount == 1 ? 'item' : 'items', 'v3': qty(cart.totalQty)}),
+                                    t('{v1} {v2} • Qty {v3}', {
+                                      'v1': cart.itemCount,
+                                      'v2': cart.itemCount == 1
+                                          ? 'item'
+                                          : 'items',
+                                      'v3': qty(cart.totalQty),
+                                    }),
                                     style: TextStyle(
                                       fontSize: 12.5,
                                       color: AppColors.inkSoft,
@@ -1282,7 +1368,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                   ),
                                   if (cart.taxTotal > 0)
                                     Text(
-                                      t('incl. GST {v1}', {'v1': money(cart.billTaxTotal)}),
+                                      t('incl. GST {v1}', {
+                                        'v1': money(cart.billTaxTotal),
+                                      }),
                                       style: TextStyle(
                                         fontSize: 12,
                                         color: AppColors.inkSoft,
@@ -1295,7 +1383,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               onPressed: () => showCheckoutSheet(context),
                               icon: const Icon(Icons.arrow_forward, size: 18),
                               label: Text(
-                                editing == null ? t('Checkout') : 'Review changes',
+                                editing == null
+                                    ? t('Checkout')
+                                    : 'Review changes',
                               ),
                               style: FilledButton.styleFrom(
                                 minimumSize: const Size(150, 52),

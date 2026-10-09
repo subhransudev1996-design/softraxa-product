@@ -28,5 +28,15 @@
 "Tell the customer on WhatsApp?": "ಗ್ರಾಹಕರಿಗೆ WhatsApp ನಲ್ಲಿ ತಿಳಿಸಬೇಕೇ?",
 "WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "ಕೆಲಸದ ವಿವರ, ಒಟ್ಟು ಮತ್ತು ಬಾಕಿ ಟೈಪ್ ಆಗಿ WhatsApp ತೆರೆಯುತ್ತದೆ. ಪರಿಶೀಲಿಸಿ ಕಳುಹಿಸಿ ಒತ್ತಿ.",
 "Send to customer on WhatsApp": "ಗ್ರಾಹಕರಿಗೆ WhatsApp ನಲ್ಲಿ ಕಳುಹಿಸಿ",
-"No phone number on this job card — you will pick the chat yourself.": "ಈ ಜಾಬ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಫೋನ್ ನಂಬರ್ ಇಲ್ಲ — ಚಾಟ್ ಅನ್ನು ನೀವೇ ಆರಿಸುತ್ತೀರಿ."
+"No phone number on this job card — you will pick the chat yourself.": "ಈ ಜಾಬ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ ಫೋನ್ ನಂಬರ್ ಇಲ್ಲ — ಚಾಟ್ ಅನ್ನು ನೀವೇ ಆರಿಸುತ್ತೀರಿ.",
+"Add alternative": "ಪರ್ಯಾಯ ಸೇರಿಸಿ",
+"Add an alternative": "ಒಂದು ಪರ್ಯಾಯ ಸೇರಿಸಿ",
+"Alternative products": "ಪರ್ಯಾಯ ಉತ್ಪನ್ನಗಳು",
+"Alternatives": "ಪರ್ಯಾಯಗಳು",
+"Alternatives to {v1}": "{v1} ಗೆ ಪರ್ಯಾಯಗಳು",
+"Hide": "ಮರೆಮಾಡಿ",
+"In stock instead:": "ಇದರ ಬದಲಿಗೆ ಸ್ಟಾಕ್‌ನಲ್ಲಿ:",
+"Offered on New Bill and in job cards when this product is chosen or out of stock. Works both ways.": "ಈ ಉತ್ಪನ್ನ ಆರಿಸಿದಾಗ ಅಥವಾ ಸ್ಟಾಕ್ ಮುಗಿದಾಗ ಹೊಸ ಬಿಲ್ ಮತ್ತು ಜಾಬ್ ಕಾರ್ಡ್‌ನಲ್ಲಿ ತೋರಿಸಲಾಗುತ್ತದೆ. ಎರಡೂ ಕಡೆ ಕೆಲಸ ಮಾಡುತ್ತದೆ.",
+"Or use instead:": "ಅಥವಾ ಇದರ ಬದಲಿಗೆ ಬಳಸಿ:",
+"Swap": "ಬದಲಿಸಿ"
 }

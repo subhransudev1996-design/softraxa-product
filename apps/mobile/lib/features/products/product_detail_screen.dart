@@ -10,6 +10,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../stock/adjust_stock_sheet.dart';
 import '../stock/pieces_card.dart';
+import 'alternatives.dart';
 import 'product_providers.dart';
 import 'variant_sheet.dart';
 import '../../core/theme.dart';
@@ -493,6 +494,7 @@ class ProductDetailScreen extends ConsumerWidget {
                       const SizedBox(height: 12),
                       _SerialsCard(productId: productId, product: p),
                     ],
+                    _AlternativesCard(productId: productId),
                     if (p['sku'] != null && (p['sku'] as String).isNotEmpty ||
                         (p['barcode'] as String? ?? '').isNotEmpty) ...[
                       SectionLabel(t('Details')),
@@ -813,6 +815,53 @@ class _SerialsCard extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+/// The shop's alternatives of this product (set in Edit); tap to open one.
+class _AlternativesCard extends ConsumerWidget {
+  const _AlternativesCard({required this.productId});
+
+  final String productId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final rows = [
+      for (final r
+          in ref.watch(productAlternativesProvider(productId)).value ??
+              const <Map<String, dynamic>>[])
+        if (r['picked'] == true) r,
+    ];
+    if (rows.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        SectionLabel(t('Alternative products')),
+        Card(
+          child: Column(
+            children: [
+              for (final (i, r) in rows.indexed) ...[
+                if (i > 0) const Divider(height: 1),
+                ListTile(
+                  dense: true,
+                  leading: const Icon(
+                    Icons.swap_horiz,
+                    color: AppColors.primary,
+                  ),
+                  title: Text(r['name'] as String? ?? ''),
+                  subtitle: Text(
+                    '${money(r['selling_price'] as num?)}  •  '
+                    '${t('Stock {v1}', {'v1': qty(altStock(r))})}',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => context.push('/products/${r['id']}'),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
