@@ -14,6 +14,7 @@ import '../../core/theme.dart';
 import '../pos/pos_providers.dart';
 import '../services/service_providers.dart';
 import 'job_card_providers.dart';
+import 'job_whatsapp.dart';
 import 'job_estimates.dart';
 
 /// Job card detail: status timeline, spare parts / labor lines, advance,
@@ -55,9 +56,7 @@ class JobCardDetailScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 TextField(
                   controller: note,
-                  decoration: InputDecoration(
-                    labelText: t('Note (optional)'),
-                  ),
+                  decoration: InputDecoration(labelText: t('Note (optional)')),
                 ),
               ],
             ),
@@ -91,9 +90,37 @@ class JobCardDetailScreen extends ConsumerWidget {
       ref.invalidate(jobCardDetailProvider(jobId));
       ref.invalidate(jobCardsProvider);
       if (context.mounted) showSuccess(context, t('Status updated'));
+      // Job done: offer to tell the customer straight away.
+      if (jobDoneStatuses.contains(selected) && context.mounted) {
+        final job = await ref.read(jobCardDetailProvider(jobId).future);
+        if (!context.mounted) return;
+        final send = await confirmDialog(
+          context,
+          title: t('Tell the customer on WhatsApp?'),
+          message: t(
+            'WhatsApp opens with the job details, total and balance typed in. You check it and press send.',
+          ),
+          confirmText: t('Open WhatsApp'),
+        );
+        if (send && context.mounted) await _sendWhatsApp(context, ref, job);
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
+  }
+
+  Future<void> _sendWhatsApp(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> job,
+  ) {
+    final ctx = ref.read(appContextProvider).value;
+    return sendJobToWhatsApp(
+      context,
+      job,
+      shopName: ctx?.businessName ?? '',
+      shopPhone: ctx?.business?['phone'] as String? ?? '',
+    );
   }
 
   Future<void> _addPart(BuildContext context, WidgetRef ref) async {
@@ -193,7 +220,9 @@ class JobCardDetailScreen extends ConsumerWidget {
           );
       ref.invalidate(jobCardDetailProvider(jobId));
       invalidateStockData(ref);
-      if (context.mounted) showSuccess(context, t('Part added — stock deducted'));
+      if (context.mounted) {
+        showSuccess(context, t('Part added — stock deducted'));
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -386,7 +415,10 @@ class JobCardDetailScreen extends ConsumerWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  t('Total: {v1}  •  Advance already collected: {v2}', {'v1': money(total), 'v2': money(advance)}),
+                  t('Total: {v1}  •  Advance already collected: {v2}', {
+                    'v1': money(total),
+                    'v2': money(advance),
+                  }),
                   style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
                 ),
                 const SizedBox(height: 12),
@@ -470,7 +502,10 @@ class JobCardDetailScreen extends ConsumerWidget {
       ref.invalidate(dashboardStatsProvider);
       ref.invalidate(customersProvider);
       if (context.mounted) {
-        showSuccess(context, t('Invoice {v1} generated', {'v1': res['invoice_no']}));
+        showSuccess(
+          context,
+          t('Invoice {v1} generated', {'v1': res['invoice_no']}),
+        );
         context.push('/invoices/${res['invoice_id']}?new=1');
       }
     } catch (e) {
@@ -484,10 +519,7 @@ class JobCardDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(
-        leading: appBarBack(context),
-        title: Text(t('Job card')),
-      ),
+      appBar: AppBar(leading: appBarBack(context), title: Text(t('Job card'))),
       body: AsyncView(
         value: data,
         onRetry: () => ref.invalidate(jobCardDetailProvider(jobId)),
@@ -668,7 +700,9 @@ class JobCardDetailScreen extends ConsumerWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                t('Expected: {v1}', {'v1': dateStr(j['expected_delivery'])}),
+                                t('Expected: {v1}', {
+                                  'v1': dateStr(j['expected_delivery']),
+                                }),
                                 style: const TextStyle(fontSize: 13),
                               ),
                             ],
@@ -688,7 +722,9 @@ class JobCardDetailScreen extends ConsumerWidget {
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
-                                  t('Invoice {invoiceNo}', {'invoiceNo': invoiceNo}),
+                                  t('Invoice {invoiceNo}', {
+                                    'invoiceNo': invoiceNo,
+                                  }),
                                   style: const TextStyle(
                                     color: AppColors.indigo,
                                     fontWeight: FontWeight.w600,
@@ -702,7 +738,9 @@ class JobCardDetailScreen extends ConsumerWidget {
                         if (j['warranty_end'] != null) ...[
                           const SizedBox(height: 4),
                           Text(
-                            t('Warranty until {v1}', {'v1': dateStr(j['warranty_end'])}),
+                            t('Warranty until {v1}', {
+                              'v1': dateStr(j['warranty_end']),
+                            }),
                             style: const TextStyle(
                               fontSize: 12.5,
                               color: AppColors.green,
@@ -718,8 +756,35 @@ class JobCardDetailScreen extends ConsumerWidget {
                 OutlinedButton.icon(
                   onPressed: () => _changeStatus(context, ref, status),
                   icon: const Icon(Icons.sync_alt),
-                  label: Text(t('Status: {v1}', {'v1': jobStatusLabel(status)})),
+                  label: Text(
+                    t('Status: {v1}', {'v1': jobStatusLabel(status)}),
+                  ),
                 ),
+                if (jobDoneStatuses.contains(status)) ...[
+                  const SizedBox(height: 8),
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF25D366),
+                      foregroundColor: Colors.white,
+                    ),
+                    onPressed: () => _sendWhatsApp(context, ref, j),
+                    icon: const Icon(Icons.chat),
+                    label: Text(t('Send to customer on WhatsApp')),
+                  ),
+                  if ((j['customer_phone'] as String? ?? '').trim().isEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 4),
+                      child: Text(
+                        t(
+                          'No phone number on this job card — you will pick the chat yourself.',
+                        ),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
+                    ),
+                ],
                 if (needsEstimate) ...[
                   SectionLabel(t('Estimate')),
                   EstimateSection(job: j),
@@ -754,7 +819,10 @@ class JobCardDetailScreen extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              t('Qty {v1} × {v2}', {'v1': qty(items[i]['quantity'] as num?), 'v2': money(items[i]['unit_price'] as num?)}),
+                              t('Qty {v1} × {v2}', {
+                                'v1': qty(items[i]['quantity'] as num?),
+                                'v2': money(items[i]['unit_price'] as num?),
+                              }),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -798,7 +866,9 @@ class JobCardDetailScreen extends ConsumerWidget {
                     onPressed: () => _addDiagnosticFee(context, ref),
                     icon: const Icon(Icons.fact_check_outlined),
                     label: Text(
-                      t('Add diagnostic fee {v1}', {'v1': money(j['diagnostic_fee'] as num?)}),
+                      t('Add diagnostic fee {v1}', {
+                        'v1': money(j['diagnostic_fee'] as num?),
+                      }),
                     ),
                   ),
                 ],
@@ -869,7 +939,8 @@ class JobCardDetailScreen extends ConsumerWidget {
                 else
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: 4),
-                    child: Text(t('This job has been closed and billed.'),
+                    child: Text(
+                      t('This job has been closed and billed.'),
                       style: TextStyle(
                         color: AppColors.inkSoft,
                         fontSize: 12.5,
@@ -1036,7 +1107,10 @@ class PartPickerState extends ConsumerState<PartPicker> {
                       return ListTile(
                         title: Text(p['name'] as String),
                         subtitle: Text(
-                          t('Stock: {v1} • {v2}', {'v1': qty(toDouble(p['current_stock'])), 'v2': money(p['selling_price'] as num?)}),
+                          t('Stock: {v1} • {v2}', {
+                            'v1': qty(toDouble(p['current_stock'])),
+                            'v2': money(p['selling_price'] as num?),
+                          }),
                         ),
                         onTap: () => _select(p),
                       );

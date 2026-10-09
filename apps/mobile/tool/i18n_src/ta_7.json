@@ -24,5 +24,9 @@
 "{v1} will be signed out on every phone and computer within about a minute. Their account and permissions stay; they can log in again with their password.": "சுமார் ஒரு நிமிடத்தில் {v1} ஒவ்வொரு போன் மற்றும் கணினியிலிருந்தும் வெளியேற்றப்படுவார். அவரது கணக்கும் அனுமதிகளும் அப்படியே இருக்கும்; கடவுச்சொல்லுடன் மீண்டும் உள்நுழையலாம்.",
 "Sign out": "வெளியேறு",
 "{v1} has been signed out on all devices.": "{v1} எல்லா சாதனங்களிலிருந்தும் வெளியேற்றப்பட்டார்.",
-"The shop owner signed you out. Log in again to continue.": "கடை உரிமையாளர் உங்களை வெளியேற்றியுள்ளார். தொடர மீண்டும் உள்நுழையவும்."
+"The shop owner signed you out. Log in again to continue.": "கடை உரிமையாளர் உங்களை வெளியேற்றியுள்ளார். தொடர மீண்டும் உள்நுழையவும்.",
+"Tell the customer on WhatsApp?": "வாடிக்கையாளருக்கு WhatsApp இல் தெரிவிக்கவா?",
+"WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "வேலை விவரம், மொத்தம், மீதி தட்டச்சு செய்யப்பட்டு WhatsApp திறக்கும். சரிபார்த்து அனுப்பு அழுத்தவும்.",
+"Send to customer on WhatsApp": "வாடிக்கையாளருக்கு WhatsApp இல் அனுப்பு",
+"No phone number on this job card — you will pick the chat yourself.": "இந்த ஜாப் கார்டில் போன் எண் இல்லை — அரட்டையை நீங்களே தேர்ந்தெடுப்பீர்கள்."
 }

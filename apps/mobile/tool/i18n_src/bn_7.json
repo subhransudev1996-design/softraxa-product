@@ -24,5 +24,9 @@
 "{v1} will be signed out on every phone and computer within about a minute. Their account and permissions stay; they can log in again with their password.": "প্রায় এক মিনিটের মধ্যে {v1} প্রতিটি ফোন ও কম্পিউটার থেকে সাইন আউট হবেন। তাঁর অ্যাকাউন্ট ও অনুমতি থাকবে; পাসওয়ার্ড দিয়ে আবার লগ ইন করতে পারবেন।",
 "Sign out": "সাইন আউট",
 "{v1} has been signed out on all devices.": "{v1} কে সব ডিভাইস থেকে সাইন আউট করা হয়েছে।",
-"The shop owner signed you out. Log in again to continue.": "দোকানের মালিক আপনাকে সাইন আউট করেছেন। চালিয়ে যেতে আবার লগ ইন করুন।"
+"The shop owner signed you out. Log in again to continue.": "দোকানের মালিক আপনাকে সাইন আউট করেছেন। চালিয়ে যেতে আবার লগ ইন করুন।",
+"Tell the customer on WhatsApp?": "গ্রাহককে WhatsApp-এ জানাবেন?",
+"WhatsApp opens with the job details, total and balance typed in. You check it and press send.": "কাজের বিবরণ, মোট ও বাকি লেখা অবস্থায় WhatsApp খুলবে। দেখে নিয়ে পাঠান চাপুন।",
+"Send to customer on WhatsApp": "গ্রাহককে WhatsApp-এ পাঠান",
+"No phone number on this job card — you will pick the chat yourself.": "এই জব কার্ডে ফোন নম্বর নেই — চ্যাট আপনি নিজে বেছে নেবেন।"
 }
