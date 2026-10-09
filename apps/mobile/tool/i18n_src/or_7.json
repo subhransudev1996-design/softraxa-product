@@ -44,5 +44,10 @@
 "Modify": "ପରିବର୍ତ୍ତନ",
 "Search this report": "ଏହି ରିପୋର୍ଟରେ ଖୋଜନ୍ତୁ",
 "{v1} of {v2} rows match": "{v2} ମଧ୍ୟରୁ {v1} ଧାଡ଼ି ମିଳିଲା",
-"Nothing matches \"{v1}\"": "\"{v1}\" ସହ କିଛି ମିଳିଲା ନାହିଁ"
+"Nothing matches \"{v1}\"": "\"{v1}\" ସହ କିଛି ମିଳିଲା ନାହିଁ",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "ଉତ୍ପାଦ ତାଲିକାରୁ ପାର୍ଟସ ଓ ମଜୁରି ଯୋଡ଼ନ୍ତୁ, ଯେପରି ଆକଳନରେ ଆପଣଙ୍କ ପ୍ରକୃତ ଦର ରହିବ।",
+"Estimated cost (from the lines above)": "ଆନୁମାନିକ ଖର୍ଚ୍ଚ (ଉପର ଧାଡ଼ିରୁ)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "ଜବ୍ କାର୍ଡ {v1} ସେଭ୍ ହେଲା, କିନ୍ତୁ ଆକଳନ ନୁହେଁ — ଜବ୍ କାର୍ଡରୁ ଯୋଡ଼ନ୍ତୁ। ({v2})",
+"Or add parts and labour above": "କିମ୍ବା ଉପରେ ପାର୍ଟସ ଓ ମଜୁରି ଯୋଡ଼ନ୍ତୁ",
+"Saved as the estimate for the customer to approve": "ଗ୍ରାହକଙ୍କ ଅନୁମୋଦନ ପାଇଁ ଆକଳନ ଭାବେ ସେଭ୍ ହେବ"
 }

@@ -44,5 +44,10 @@
 "Modify": "మార్చు",
 "Search this report": "ఈ నివేదికలో వెతకండి",
 "{v1} of {v2} rows match": "{v2} లో {v1} వరుసలు సరిపోయాయి",
-"Nothing matches \"{v1}\"": "\"{v1}\" కి ఏదీ సరిపోలలేదు"
+"Nothing matches \"{v1}\"": "\"{v1}\" కి ఏదీ సరిపోలలేదు",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "ఉత్పత్తి జాబితా నుండి పార్ట్స్ మరియు లేబర్ జోడించండి, అప్పుడు అంచనాలో మీ నిజమైన ధరలు ఉంటాయి.",
+"Estimated cost (from the lines above)": "అంచనా ఖర్చు (పై లైన్ల నుండి)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "జాబ్ కార్డ్ {v1} సేవ్ అయింది, కానీ అంచనా కాలేదు — జాబ్ కార్డ్ నుండి జోడించండి. ({v2})",
+"Or add parts and labour above": "లేదా పైన పార్ట్స్ మరియు లేబర్ జోడించండి",
+"Saved as the estimate for the customer to approve": "కస్టమర్ ఆమోదం కోసం అంచనాగా సేవ్ అవుతుంది"
 }

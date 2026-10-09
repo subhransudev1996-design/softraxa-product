@@ -44,5 +44,10 @@
 "Modify": "மாற்று",
 "Search this report": "இந்த அறிக்கையில் தேடு",
 "{v1} of {v2} rows match": "{v2} இல் {v1} வரிசைகள் பொருந்தின",
-"Nothing matches \"{v1}\"": "\"{v1}\" க்கு எதுவும் பொருந்தவில்லை"
+"Nothing matches \"{v1}\"": "\"{v1}\" க்கு எதுவும் பொருந்தவில்லை",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "பொருள் பட்டியலிலிருந்து பாகங்களையும் கூலியையும் சேர்க்கவும், அப்போது மதிப்பீட்டில் உங்கள் உண்மையான விலைகள் இருக்கும்.",
+"Estimated cost (from the lines above)": "மதிப்பிடப்பட்ட செலவு (மேலே உள்ள வரிகளிலிருந்து)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "ஜாப் கார்டு {v1} சேமிக்கப்பட்டது, ஆனால் மதிப்பீடு இல்லை — ஜாப் கார்டிலிருந்து சேர்க்கவும். ({v2})",
+"Or add parts and labour above": "அல்லது மேலே பாகங்களையும் கூலியையும் சேர்க்கவும்",
+"Saved as the estimate for the customer to approve": "வாடிக்கையாளர் ஒப்புதலுக்கான மதிப்பீடாகச் சேமிக்கப்படும்"
 }

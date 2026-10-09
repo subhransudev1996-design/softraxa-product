@@ -44,5 +44,10 @@
 "Modify": "बदलें",
 "Search this report": "इस रिपोर्ट में खोजें",
 "{v1} of {v2} rows match": "{v2} में से {v1} पंक्तियाँ मिलीं",
-"Nothing matches \"{v1}\"": "\"{v1}\" से कुछ नहीं मिला"
+"Nothing matches \"{v1}\"": "\"{v1}\" से कुछ नहीं मिला",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "प्रोडक्ट सूची से पार्ट्स और लेबर जोड़ें, ताकि अनुमान में आपकी असली कीमतें आएँ।",
+"Estimated cost (from the lines above)": "अनुमानित लागत (ऊपर की लाइनों से)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "जॉब कार्ड {v1} सेव हो गया, पर अनुमान नहीं — जॉब कार्ड से जोड़ें। ({v2})",
+"Or add parts and labour above": "या ऊपर पार्ट्स और लेबर जोड़ें",
+"Saved as the estimate for the customer to approve": "ग्राहक की मंज़ूरी के लिए अनुमान के रूप में सेव होगा"
 }

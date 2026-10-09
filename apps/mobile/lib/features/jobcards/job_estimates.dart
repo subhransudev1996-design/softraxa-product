@@ -91,7 +91,10 @@ class EstimateSection extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text(t('No estimate yet. Work can start only after the customer approves an estimate.'),
+                  Text(
+                    t(
+                      'No estimate yet. Work can start only after the customer approves an estimate.',
+                    ),
                     style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                   ),
                   if (!closed) ...[
@@ -255,7 +258,8 @@ class _EstimateCard extends ConsumerWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text(t('Total'),
+                  child: Text(
+                    t('Total'),
                     style: TextStyle(fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -287,7 +291,9 @@ class _EstimateCard extends ConsumerWidget {
                       ),
                     ),
                     Text(
-                      t('{v1} · staff-recorded', {'v1': dateTimeStr(answer['customer_decided_at'])}),
+                      t('{v1} · staff-recorded', {
+                        'v1': dateTimeStr(answer['customer_decided_at']),
+                      }),
                       style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                     if ((answer['notes'] as String? ?? '').isNotEmpty)
@@ -344,8 +350,8 @@ Future<void> openEstimateEditor(
   if (saved == true) _refreshJob(ref, jobId);
 }
 
-class _DraftLine {
-  _DraftLine({
+class EstimateDraftLine {
+  EstimateDraftLine({
     required this.itemType,
     required this.name,
     this.fromLineId,
@@ -399,6 +405,242 @@ class _DraftLine {
   }
 }
 
+/// A part for an estimate, picked from the product list at its selling
+/// price and GST. Null when nothing was picked.
+Future<EstimateDraftLine?> pickEstimatePart(BuildContext context) async {
+  final search = TextEditingController();
+  final picked = await showModalBottomSheet<Map<String, dynamic>>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: PartPicker(searchController: search),
+    ),
+  );
+  if (picked == null || !context.mounted) return null;
+  final product = picked['product'] as Map<String, dynamic>;
+  final variant = picked['variant'] as Map<String, dynamic>?;
+  return EstimateDraftLine(
+    itemType: 'part',
+    name: '${product['name']}${variant != null ? ' (${variant['name']})' : ''}',
+    productId: product['id'] as String,
+    variantId: variant?['id'] as String?,
+    hsn: product['hsn_code'] as String? ?? '',
+    price: toDouble(variant?['selling_price'] ?? product['selling_price']),
+    gst: toDouble(product['gst_rate']),
+  );
+}
+
+/// A labour line for an estimate: from the service catalog (its price and
+/// GST) or typed. Null when cancelled.
+Future<EstimateDraftLine?> pickEstimateLabour(
+  BuildContext context,
+  WidgetRef ref,
+) async {
+  List<Map<String, dynamic>> services = const [];
+  try {
+    services = await ref.read(servicesProvider.future);
+  } catch (_) {
+    // The catalogue is optional; a labour line can be typed.
+  }
+  if (!context.mounted) return null;
+  Map<String, dynamic>? service;
+  final name = TextEditingController();
+  final price = TextEditingController();
+  final gst = TextEditingController(text: '18');
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setDialog) => AlertDialog(
+        title: Text(t('Add labour')),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (services.isNotEmpty)
+                DropdownButtonFormField<Map<String, dynamic>>(
+                  isExpanded: true,
+                  initialValue: service,
+                  decoration: InputDecoration(
+                    labelText: t('From service catalog (optional)'),
+                  ),
+                  items: [
+                    DropdownMenuItem(
+                      value: null,
+                      child: Text(t('Type manually')),
+                    ),
+                    for (final s in services)
+                      DropdownMenuItem(
+                        value: s,
+                        child: Text(
+                          s['name'] as String,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                  ],
+                  onChanged: (v) => setDialog(() {
+                    service = v;
+                    if (v != null) {
+                      name.text = v['name'] as String;
+                      price.text = toDouble(v['price']).toStringAsFixed(2);
+                      gst.text = toDouble(v['gst_rate']).toStringAsFixed(0);
+                    }
+                  }),
+                ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: name,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(labelText: t('Work *')),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: price,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('Price ₹ (excl. GST)'),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: gst,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(labelText: t('GST %')),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(t('Cancel')),
+          ),
+          FilledButton(
+            style: dialogActionStyle,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t('Add')),
+          ),
+        ],
+      ),
+    ),
+  );
+  if (ok != true || name.text.trim().isEmpty) return null;
+  return EstimateDraftLine(
+    itemType: 'labor',
+    name: name.text.trim(),
+    serviceId: service?['id'] as String?,
+    hsn: service?['sac_code'] as String? ?? '',
+    price: double.tryParse(price.text) ?? 0,
+    gst: double.tryParse(gst.text) ?? 0,
+  );
+}
+
+/// One part / labour line of an estimate: quantity, price and GST to edit.
+class EstimateLineCard extends StatelessWidget {
+  const EstimateLineCard({
+    super.key,
+    required this.line,
+    required this.onChanged,
+    required this.onRemove,
+  });
+
+  final EstimateDraftLine line;
+  final VoidCallback onChanged;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(12, 8, 4, 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  line.itemType == 'part'
+                      ? Icons.inventory_2_outlined
+                      : Icons.build_outlined,
+                  size: 18,
+                  color: line.itemType == 'part'
+                      ? AppColors.teal
+                      : AppColors.indigo,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    line.name,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.red,
+                    size: 20,
+                  ),
+                  onPressed: onRemove,
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: line.qty,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: t('Qty'),
+                        isDense: true,
+                      ),
+                      onChanged: (_) => onChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: line.price,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: t('Price ₹'),
+                        isDense: true,
+                      ),
+                      onChanged: (_) => onChanged(),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: TextField(
+                      controller: line.gst,
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(
+                        labelText: t('GST %'),
+                        isDense: true,
+                      ),
+                      onChanged: (_) => onChanged(),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class EstimateEditorScreen extends ConsumerStatefulWidget {
   const EstimateEditorScreen({super.key, required this.jobId, this.base});
 
@@ -413,7 +655,7 @@ class EstimateEditorScreen extends ConsumerStatefulWidget {
 }
 
 class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
-  final List<_DraftLine> _lines = [];
+  final List<EstimateDraftLine> _lines = [];
   final _note = TextEditingController();
   bool _busy = false;
 
@@ -424,7 +666,7 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
     if (base != null) {
       for (final l in estimateLines(base)) {
         _lines.add(
-          _DraftLine(
+          EstimateDraftLine(
             itemType: l['item_type'] as String,
             name: l['name'] as String,
             fromLineId: l['id'] as String,
@@ -451,140 +693,13 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
   }
 
   Future<void> _addPart() async {
-    final search = TextEditingController();
-    final picked = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: PartPicker(searchController: search),
-      ),
-    );
-    if (picked == null || !mounted) return;
-    final product = picked['product'] as Map<String, dynamic>;
-    final variant = picked['variant'] as Map<String, dynamic>?;
-    setState(
-      () => _lines.add(
-        _DraftLine(
-          itemType: 'part',
-          name:
-              '${product['name']}${variant != null ? ' (${variant['name']})' : ''}',
-          productId: product['id'] as String,
-          variantId: variant?['id'] as String?,
-          hsn: product['hsn_code'] as String? ?? '',
-          price: toDouble(
-            variant?['selling_price'] ?? product['selling_price'],
-          ),
-          gst: toDouble(product['gst_rate']),
-        ),
-      ),
-    );
+    final line = await pickEstimatePart(context);
+    if (line != null && mounted) setState(() => _lines.add(line));
   }
 
   Future<void> _addLabour() async {
-    List<Map<String, dynamic>> services = const [];
-    try {
-      services = await ref.read(servicesProvider.future);
-    } catch (_) {
-      // The catalogue is optional; a labour line can be typed.
-    }
-    if (!mounted) return;
-    Map<String, dynamic>? service;
-    final name = TextEditingController();
-    final price = TextEditingController();
-    final gst = TextEditingController(text: '18');
-    final ok = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setDialog) => AlertDialog(
-          title: Text(t('Add labour')),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (services.isNotEmpty)
-                  DropdownButtonFormField<Map<String, dynamic>>(
-                    isExpanded: true,
-                    initialValue: service,
-                    decoration: InputDecoration(
-                      labelText: t('From service catalog (optional)'),
-                    ),
-                    items: [
-                      DropdownMenuItem(
-                        value: null,
-                        child: Text(t('Type manually')),
-                      ),
-                      for (final s in services)
-                        DropdownMenuItem(
-                          value: s,
-                          child: Text(
-                            s['name'] as String,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                    ],
-                    onChanged: (v) => setDialog(() {
-                      service = v;
-                      if (v != null) {
-                        name.text = v['name'] as String;
-                        price.text = toDouble(v['price']).toStringAsFixed(2);
-                        gst.text = toDouble(v['gst_rate']).toStringAsFixed(0);
-                      }
-                    }),
-                  ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: name,
-                  textCapitalization: TextCapitalization.words,
-                  decoration: InputDecoration(labelText: t('Work *')),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: price,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: InputDecoration(
-                    labelText: t('Price ₹ (excl. GST)'),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: gst,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(labelText: t('GST %')),
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(ctx, false),
-              child: Text(t('Cancel')),
-            ),
-            FilledButton(
-              style: dialogActionStyle,
-              onPressed: () => Navigator.pop(ctx, true),
-              child: Text(t('Add')),
-            ),
-          ],
-        ),
-      ),
-    );
-    if (ok != true || name.text.trim().isEmpty || !mounted) return;
-    setState(
-      () => _lines.add(
-        _DraftLine(
-          itemType: 'labor',
-          name: name.text.trim(),
-          serviceId: service?['id'] as String?,
-          hsn: service?['sac_code'] as String? ?? '',
-          price: double.tryParse(price.text) ?? 0,
-          gst: double.tryParse(gst.text) ?? 0,
-        ),
-      ),
-    );
+    final line = await pickEstimateLabour(context, ref);
+    if (line != null && mounted) setState(() => _lines.add(line));
   }
 
   Future<void> _save() async {
@@ -594,7 +709,10 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
     }
     for (final l in _lines) {
       if (l.quantity <= 0 || l.unitPrice < 0) {
-        showError(context, t('Check the quantity and price of {v1}', {'v1': l.name}));
+        showError(
+          context,
+          t('Check the quantity and price of {v1}', {'v1': l.name}),
+        );
         return;
       }
     }
@@ -615,7 +733,10 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
       if (mounted) {
         showSuccess(
           context,
-          t('Estimate v{v1} saved — {v2}', {'v1': res['version'], 'v2': money(res['total'] as num?)}),
+          t('Estimate v{v1} saved — {v2}', {
+            'v1': res['version'],
+            'v2': money(res['total'] as num?),
+          }),
         );
         Navigator.pop(context, true);
       }
@@ -634,105 +755,27 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
         : (widget.base!['version'] as int) + 1;
     return Scaffold(
       backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text(t('Estimate v{version}', {'version': version}))),
+      appBar: AppBar(
+        title: Text(t('Estimate v{version}', {'version': version})),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           if (widget.base != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(t('Saving makes a new version for the customer to approve. Earlier answers stay on record. Work already done must stay in the estimate at the same price.'),
+              child: Text(
+                t(
+                  'Saving makes a new version for the customer to approve. Earlier answers stay on record. Work already done must stay in the estimate at the same price.',
+                ),
                 style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
               ),
             ),
           for (var i = 0; i < _lines.length; i++)
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(12, 8, 4, 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _lines[i].itemType == 'part'
-                              ? Icons.inventory_2_outlined
-                              : Icons.build_outlined,
-                          size: 18,
-                          color: _lines[i].itemType == 'part'
-                              ? AppColors.teal
-                              : AppColors.indigo,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            _lines[i].name,
-                            style: const TextStyle(fontWeight: FontWeight.w600),
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: AppColors.red,
-                            size: 20,
-                          ),
-                          onPressed: () =>
-                              setState(() => _lines.removeAt(i).dispose()),
-                        ),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _lines[i].qty,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: t('Qty'),
-                                isDense: true,
-                              ),
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _lines[i].price,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                              decoration: InputDecoration(
-                                labelText: t('Price ₹'),
-                                isDense: true,
-                              ),
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: TextField(
-                              controller: _lines[i].gst,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                labelText: t('GST %'),
-                                isDense: true,
-                              ),
-                              onChanged: (_) => setState(() {}),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            EstimateLineCard(
+              line: _lines[i],
+              onChanged: () => setState(() {}),
+              onRemove: () => setState(() => _lines.removeAt(i).dispose()),
             ),
           const SizedBox(height: 8),
           Row(
@@ -768,7 +811,8 @@ class _EstimateEditorScreenState extends ConsumerState<EstimateEditorScreen> {
               child: Row(
                 children: [
                   Expanded(
-                    child: Text(t('Estimate total'),
+                    child: Text(
+                      t('Estimate total'),
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -934,7 +978,10 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
     if (failed > 0) {
       showError(
         context,
-        t('Answer saved, but {failed} photo(s) failed to upload. Add them again under Photos.', {'failed': failed}),
+        t(
+          'Answer saved, but {failed} photo(s) failed to upload. Add them again under Photos.',
+          {'failed': failed},
+        ),
       );
     } else {
       showSuccess(context, t('Customer\'s answer recorded'));
@@ -944,7 +991,9 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(t('Customer\'s answer — v{v1}', {'v1': widget.estimate['version']})),
+      title: Text(
+        t('Customer\'s answer — v{v1}', {'v1': widget.estimate['version']}),
+      ),
       content: SizedBox(
         width: 460,
         child: SingleChildScrollView(
@@ -1009,9 +1058,7 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
               ),
               TextField(
                 controller: _notes,
-                decoration: InputDecoration(
-                  labelText: t('Notes (optional)'),
-                ),
+                decoration: InputDecoration(labelText: t('Notes (optional)')),
               ),
               const SizedBox(height: 8),
               Wrap(
@@ -1036,7 +1083,10 @@ class _RecordAnswerDialogState extends ConsumerState<_RecordAnswerDialog> {
                 ],
               ),
               const SizedBox(height: 8),
-              Text(t('Saved as a staff-recorded answer with your name — not a digital signature by the customer.'),
+              Text(
+                t(
+                  'Saved as a staff-recorded answer with your name — not a digital signature by the customer.',
+                ),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
             ],
@@ -1083,7 +1133,10 @@ Future<void> markEstimateWorkDone(
   if (!context.mounted) return;
   final current = currentApprovedEstimate(estimates);
   if (current == null) {
-    showError(context, t('Record the customer\'s approval of an estimate first'));
+    showError(
+      context,
+      t('Record the customer\'s approval of an estimate first'),
+    );
     return;
   }
   final used = <String, double>{};
@@ -1102,7 +1155,9 @@ Future<void> markEstimateWorkDone(
   if (open.isEmpty) {
     showError(
       context,
-      t('All approved work is already added. Revise the estimate for more work.'),
+      t(
+        'All approved work is already added. Revise the estimate for more work.',
+      ),
     );
     return;
   }
@@ -1140,7 +1195,7 @@ Future<void> markEstimateWorkDone(
   final left = toDouble(line['quantity']) - (used[line['id']] ?? 0);
   var quantity = left;
   if (left > 1) {
-    final c = TextEditingController(text: _DraftLine._num(left));
+    final c = TextEditingController(text: EstimateDraftLine._num(left));
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -1236,7 +1291,8 @@ class JobPhotosSection extends ConsumerWidget {
               Icons.add_a_photo_outlined,
               color: AppColors.indigo,
             ),
-            title: Text(t('Add photo'),
+            title: Text(
+              t('Add photo'),
               style: TextStyle(color: AppColors.indigo),
             ),
             onTap: () => _add(context, ref, jobId),
@@ -1283,8 +1339,7 @@ Future<XFile?> pickJobPhoto(BuildContext context) async {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
-              title: Text(t('Choose from gallery (e.g. WhatsApp screenshot)'),
-              ),
+              title: Text(t('Choose from gallery (e.g. WhatsApp screenshot)')),
               onTap: () => Navigator.pop(ctx, ImageSource.gallery),
             ),
           ],

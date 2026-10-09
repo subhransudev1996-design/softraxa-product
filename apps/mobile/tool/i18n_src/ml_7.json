@@ -44,5 +44,10 @@
 "Modify": "മാറ്റം വരുത്തുക",
 "Search this report": "ഈ റിപ്പോർട്ടിൽ തിരയുക",
 "{v1} of {v2} rows match": "{v2} ൽ {v1} വരികൾ യോജിക്കുന്നു",
-"Nothing matches \"{v1}\"": "\"{v1}\" ന് ഒന്നും യോജിക്കുന്നില്ല"
+"Nothing matches \"{v1}\"": "\"{v1}\" ന് ഒന്നും യോജിക്കുന്നില്ല",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "ഉൽപ്പന്ന ലിസ്റ്റിൽ നിന്ന് പാർട്‌സും കൂലിയും ചേർക്കുക, അപ്പോൾ എസ്റ്റിമേറ്റിൽ നിങ്ങളുടെ യഥാർത്ഥ വിലകൾ വരും.",
+"Estimated cost (from the lines above)": "കണക്കാക്കിയ ചെലവ് (മുകളിലെ വരികളിൽ നിന്ന്)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "ജോബ് കാർഡ് {v1} സേവ് ചെയ്തു, പക്ഷേ എസ്റ്റിമേറ്റ് ഇല്ല — ജോബ് കാർഡിൽ നിന്ന് ചേർക്കുക. ({v2})",
+"Or add parts and labour above": "അല്ലെങ്കിൽ മുകളിൽ പാർട്‌സും കൂലിയും ചേർക്കുക",
+"Saved as the estimate for the customer to approve": "ഉപഭോക്താവിന്റെ അംഗീകാരത്തിനുള്ള എസ്റ്റിമേറ്റായി സേവ് ചെയ്യും"
 }

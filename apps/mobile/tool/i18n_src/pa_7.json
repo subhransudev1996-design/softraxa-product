@@ -44,5 +44,10 @@
 "Modify": "ਸੋਧੋ",
 "Search this report": "ਇਸ ਰਿਪੋਰਟ ਵਿੱਚ ਲੱਭੋ",
 "{v1} of {v2} rows match": "{v2} ਵਿੱਚੋਂ {v1} ਕਤਾਰਾਂ ਮਿਲੀਆਂ",
-"Nothing matches \"{v1}\"": "\"{v1}\" ਨਾਲ ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ"
+"Nothing matches \"{v1}\"": "\"{v1}\" ਨਾਲ ਕੁਝ ਨਹੀਂ ਮਿਲਿਆ",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "ਪ੍ਰੋਡਕਟ ਸੂਚੀ ਤੋਂ ਪਾਰਟਸ ਅਤੇ ਮਜ਼ਦੂਰੀ ਜੋੜੋ, ਤਾਂ ਜੋ ਅੰਦਾਜ਼ੇ ਵਿੱਚ ਤੁਹਾਡੀਆਂ ਅਸਲ ਕੀਮਤਾਂ ਆਉਣ।",
+"Estimated cost (from the lines above)": "ਅੰਦਾਜ਼ਨ ਖਰਚਾ (ਉੱਪਰਲੀਆਂ ਲਾਈਨਾਂ ਤੋਂ)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "ਜੌਬ ਕਾਰਡ {v1} ਸੇਵ ਹੋ ਗਿਆ, ਪਰ ਅੰਦਾਜ਼ਾ ਨਹੀਂ — ਜੌਬ ਕਾਰਡ ਤੋਂ ਜੋੜੋ। ({v2})",
+"Or add parts and labour above": "ਜਾਂ ਉੱਪਰ ਪਾਰਟਸ ਅਤੇ ਮਜ਼ਦੂਰੀ ਜੋੜੋ",
+"Saved as the estimate for the customer to approve": "ਗਾਹਕ ਦੀ ਮਨਜ਼ੂਰੀ ਲਈ ਅੰਦਾਜ਼ੇ ਵਜੋਂ ਸੇਵ ਹੋਵੇਗਾ"
 }

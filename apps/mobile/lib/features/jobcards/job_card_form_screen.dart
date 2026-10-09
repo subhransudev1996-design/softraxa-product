@@ -11,6 +11,7 @@ import '../../core/theme.dart';
 import '../customers/customer_picker.dart';
 import '../services/service_providers.dart';
 import 'job_card_providers.dart';
+import 'job_estimates.dart';
 
 /// Repair/service intake flow (PRD Phase 2 §7).
 class JobCardFormScreen extends ConsumerStatefulWidget {
@@ -52,6 +53,32 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   DateTime? _expectedDelivery;
   bool _busy = false;
 
+  /// Parts (from the product list) and labour (from the service catalog)
+  /// for the estimate. With lines, the estimated cost is their total and
+  /// the job is saved with this estimate for the customer to approve.
+  final List<EstimateDraftLine> _estimateLines = [];
+
+  double get _estimateTotal =>
+      _estimateLines.fold<double>(0, (s, l) => s + l.total);
+
+  @override
+  void dispose() {
+    for (final l in _estimateLines) {
+      l.dispose();
+    }
+    super.dispose();
+  }
+
+  Future<void> _addEstimatePart() async {
+    final line = await pickEstimatePart(context);
+    if (line != null && mounted) setState(() => _estimateLines.add(line));
+  }
+
+  Future<void> _addEstimateLabour() async {
+    final line = await pickEstimateLabour(context, ref);
+    if (line != null && mounted) setState(() => _estimateLines.add(line));
+  }
+
   Future<void> _scanSerial() async {
     final code = isDesktopPlatform
         ? await promptBarcode(context, title: t('Enter serial number'))
@@ -62,6 +89,15 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
 
   Future<void> _save() async {
     if (!_formKey.currentState!.validate()) return;
+    for (final l in _estimateLines) {
+      if (l.quantity <= 0 || l.unitPrice < 0) {
+        showError(
+          context,
+          t('Check the quantity and price of {v1}', {'v1': l.name}),
+        );
+        return;
+      }
+    }
     setState(() => _busy = true);
     try {
       final payload = {
@@ -77,7 +113,9 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
         'accessories_received': _accessories.text.trim(),
         'technician_name': _technician.text.trim(),
         'service_location': _location.text.trim(),
-        'estimated_cost': double.tryParse(_estimatedCost.text) ?? 0,
+        'estimated_cost': _estimateLines.isNotEmpty
+            ? double.parse(_estimateTotal.toStringAsFixed(2))
+            : double.tryParse(_estimatedCost.text) ?? 0,
         'advance_amount': double.tryParse(_advanceAmount.text) ?? 0,
         'advance_mode': _advanceMode,
         'expected_delivery': _expectedDelivery != null
@@ -102,6 +140,33 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                   .rpc('create_job_card', params: {'payload': payload})
               as Map<String, dynamic>;
       ref.invalidate(jobCardsProvider);
+      // The parts and labour become the job's first estimate.
+      if (_estimateLines.isNotEmpty) {
+        try {
+          await ref
+              .read(supabaseProvider)
+              .rpc(
+                'create_job_estimate',
+                params: {
+                  'p_job_id': res['id'],
+                  'p_lines': [for (final l in _estimateLines) l.toJson()],
+                  'p_note': '',
+                },
+              );
+        } catch (e) {
+          if (mounted) {
+            showError(
+              context,
+              t(
+                'Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})',
+                {'v1': res['job_no'], 'v2': friendlyError(e)},
+              ),
+            );
+            context.pushReplacement('/job-cards/${res['id']}');
+          }
+          return;
+        }
+      }
       if (mounted) {
         showSuccess(context, t('Job card {v1} created', {'v1': res['job_no']}));
         context.pushReplacement('/job-cards/${res['id']}');
@@ -259,12 +324,16 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _fuel,
-                      decoration: InputDecoration(
-                        labelText: t('Fuel level'),
-                      ),
+                      decoration: InputDecoration(labelText: t('Fuel level')),
                       items: [
-                        DropdownMenuItem(value: '', child: Text(t('Not noted'))),
-                        DropdownMenuItem(value: 'empty', child: Text(t('Empty'))),
+                        DropdownMenuItem(
+                          value: '',
+                          child: Text(t('Not noted')),
+                        ),
+                        DropdownMenuItem(
+                          value: 'empty',
+                          child: Text(t('Empty')),
+                        ),
                         DropdownMenuItem(value: 'quarter', child: Text('¼')),
                         DropdownMenuItem(value: 'half', child: Text('½')),
                         DropdownMenuItem(
@@ -336,18 +405,72 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             ),
             ..._diagnosticFee(),
             SectionLabel(t('Estimate & advance')),
+            Text(
+              t(
+                'Add the parts from your product list and the labour, so the estimate uses your real prices.',
+              ),
+              style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+            ),
+            const SizedBox(height: 8),
+            for (var i = 0; i < _estimateLines.length; i++)
+              EstimateLineCard(
+                line: _estimateLines[i],
+                onChanged: () => setState(() {}),
+                onRemove: () =>
+                    setState(() => _estimateLines.removeAt(i).dispose()),
+              ),
             Row(
               children: [
                 Expanded(
-                  child: TextFormField(
-                    controller: _estimatedCost,
-                    keyboardType: const TextInputType.numberWithOptions(
-                      decimal: true,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: t('Estimated cost ₹'),
-                    ),
+                  child: OutlinedButton.icon(
+                    onPressed: _addEstimatePart,
+                    icon: const Icon(Icons.inventory_2_outlined),
+                    label: Text(t('Add part')),
                   ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: _addEstimateLabour,
+                    icon: const Icon(Icons.build_outlined),
+                    label: Text(t('Add labour')),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _estimateLines.isEmpty
+                      ? TextFormField(
+                          controller: _estimatedCost,
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
+                          decoration: InputDecoration(
+                            labelText: t('Estimated cost ₹'),
+                            helperText: t('Or add parts and labour above'),
+                          ),
+                        )
+                      : InputDecorator(
+                          decoration: InputDecoration(
+                            labelText: t(
+                              'Estimated cost (from the lines above)',
+                            ),
+                            helperText: t(
+                              'Saved as the estimate for the customer to approve',
+                            ),
+                            helperMaxLines: 2,
+                          ),
+                          child: Text(
+                            money(_estimateTotal),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -356,9 +479,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
                     keyboardType: const TextInputType.numberWithOptions(
                       decimal: true,
                     ),
-                    decoration: InputDecoration(
-                      labelText: t('Advance paid ₹'),
-                    ),
+                    decoration: InputDecoration(labelText: t('Advance paid ₹')),
                   ),
                 ),
               ],
@@ -366,9 +487,7 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               initialValue: _advanceMode,
-              decoration: InputDecoration(
-                labelText: t('Advance payment mode'),
-              ),
+              decoration: InputDecoration(labelText: t('Advance payment mode')),
               items: [
                 DropdownMenuItem(value: 'cash', child: Text(t('Cash'))),
                 DropdownMenuItem(value: 'upi', child: Text(t('UPI'))),
@@ -382,7 +501,9 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
               textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 labelText: t('Service / installation location (optional)'),
-                hintText: t('e.g. Patia, Bhubaneswar — 2nd floor, near water tank'),
+                hintText: t(
+                  'e.g. Patia, Bhubaneswar — 2nd floor, near water tank',
+                ),
                 prefixIcon: Icon(Icons.place_outlined),
               ),
             ),

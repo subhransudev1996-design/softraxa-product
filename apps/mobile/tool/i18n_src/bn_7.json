@@ -44,5 +44,10 @@
 "Modify": "পরিবর্তন",
 "Search this report": "এই রিপোর্টে খুঁজুন",
 "{v1} of {v2} rows match": "{v2}টির মধ্যে {v1}টি সারি মিলেছে",
-"Nothing matches \"{v1}\"": "\"{v1}\" এর সাথে কিছু মেলেনি"
+"Nothing matches \"{v1}\"": "\"{v1}\" এর সাথে কিছু মেলেনি",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "পণ্য তালিকা থেকে পার্টস ও লেবার যোগ করুন, যাতে এস্টিমেটে আপনার আসল দাম থাকে।",
+"Estimated cost (from the lines above)": "আনুমানিক খরচ (উপরের লাইন থেকে)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "জব কার্ড {v1} সেভ হয়েছে, কিন্তু এস্টিমেট হয়নি — জব কার্ড থেকে যোগ করুন। ({v2})",
+"Or add parts and labour above": "অথবা উপরে পার্টস ও লেবার যোগ করুন",
+"Saved as the estimate for the customer to approve": "গ্রাহকের অনুমোদনের জন্য এস্টিমেট হিসেবে সেভ হবে"
 }

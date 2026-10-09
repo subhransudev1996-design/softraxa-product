@@ -44,5 +44,10 @@
 "Modify": "ಮಾರ್ಪಡಿಸಿ",
 "Search this report": "ಈ ವರದಿಯಲ್ಲಿ ಹುಡುಕಿ",
 "{v1} of {v2} rows match": "{v2} ರಲ್ಲಿ {v1} ಸಾಲುಗಳು ಹೊಂದಿಕೆಯಾಗಿವೆ",
-"Nothing matches \"{v1}\"": "\"{v1}\" ಗೆ ಏನೂ ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ"
+"Nothing matches \"{v1}\"": "\"{v1}\" ಗೆ ಏನೂ ಹೊಂದಿಕೆಯಾಗಿಲ್ಲ",
+"Add the parts from your product list and the labour, so the estimate uses your real prices.": "ಉತ್ಪನ್ನ ಪಟ್ಟಿಯಿಂದ ಪಾರ್ಟ್ಸ್ ಮತ್ತು ಕೂಲಿ ಸೇರಿಸಿ, ಆಗ ಅಂದಾಜಿನಲ್ಲಿ ನಿಮ್ಮ ನಿಜವಾದ ಬೆಲೆಗಳು ಇರುತ್ತವೆ.",
+"Estimated cost (from the lines above)": "ಅಂದಾಜು ವೆಚ್ಚ (ಮೇಲಿನ ಸಾಲುಗಳಿಂದ)",
+"Job card {v1} saved, but the estimate was not — add it from the job card. ({v2})": "ಜಾಬ್ ಕಾರ್ಡ್ {v1} ಉಳಿಸಲಾಗಿದೆ, ಆದರೆ ಅಂದಾಜು ಇಲ್ಲ — ಜಾಬ್ ಕಾರ್ಡ್‌ನಿಂದ ಸೇರಿಸಿ. ({v2})",
+"Or add parts and labour above": "ಅಥವಾ ಮೇಲೆ ಪಾರ್ಟ್ಸ್ ಮತ್ತು ಕೂಲಿ ಸೇರಿಸಿ",
+"Saved as the estimate for the customer to approve": "ಗ್ರಾಹಕರ ಒಪ್ಪಿಗೆಗಾಗಿ ಅಂದಾಜಾಗಿ ಉಳಿಸಲಾಗುತ್ತದೆ"
 }
