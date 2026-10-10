@@ -324,6 +324,14 @@ class _DesktopDashboard extends StatelessWidget {
                           spacing: 10,
                           children: [
                             const GuideButton('home'),
+                            IconButton.outlined(
+                              tooltip: t('Calculator'),
+                              onPressed: () => context.push('/calculator'),
+                              icon: const Icon(
+                                Icons.calculate_outlined,
+                                size: 20,
+                              ),
+                            ),
                             OutlinedButton.icon(
                               onPressed: () => showDaySummary(context),
                               icon: const Icon(
@@ -603,6 +611,12 @@ class _MobileDashboard extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                     ],
+                    _HeaderIconButton(
+                      icon: Icons.calculate_outlined,
+                      tooltip: t('Calculator'),
+                      onTap: () => context.push('/calculator'),
+                    ),
+                    const SizedBox(width: 8),
                     _HeaderIconButton(
                       icon: Icons.help_outline,
                       tooltip: t('App walkthrough'),

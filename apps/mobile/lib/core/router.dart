@@ -19,6 +19,8 @@ import '../features/invoices/invoice_detail_screen.dart';
 import '../features/invoices/invoices_screen.dart';
 import '../features/jobcards/job_card_detail_screen.dart';
 import '../features/jobcards/job_card_form_screen.dart';
+import '../features/jobcards/job_estimates.dart' show EstimateDraftLine;
+import '../features/calculator/calculator_screen.dart';
 import '../features/jobcards/job_cards_screen.dart';
 import '../features/offline/offline_bills_screen.dart';
 import 'splash_screen.dart';
@@ -495,8 +497,20 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/job-cards/new',
+            pageBuilder: (context, state) => _page(
+              context,
+              state,
+              JobCardFormScreen(
+                initialEstimate: state.extra is List<EstimateDraftLine>
+                    ? state.extra as List<EstimateDraftLine>
+                    : const [],
+              ),
+            ),
+          ),
+          GoRoute(
+            path: '/calculator',
             pageBuilder: (context, state) =>
-                _page(context, state, const JobCardFormScreen()),
+                _page(context, state, const CalculatorScreen()),
           ),
           GoRoute(
             path: '/job-cards/:id',

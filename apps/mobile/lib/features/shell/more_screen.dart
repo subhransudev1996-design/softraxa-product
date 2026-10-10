@@ -316,6 +316,16 @@ class MoreScreen extends ConsumerWidget {
                 ),
                 const Divider(),
                 tile(
+                  Icons.calculate_outlined,
+                  t('Calculator'),
+                  '/calculator',
+                  color: AppColors.primary,
+                  subtitle: t(
+                    'Work out prices with your products and services',
+                  ),
+                ),
+                const Divider(),
+                tile(
                   Icons.sync_outlined,
                   'Pending offline bills',
                   '/offline-bills',

@@ -15,7 +15,10 @@ import 'job_estimates.dart';
 
 /// Repair/service intake flow (PRD Phase 2 §7).
 class JobCardFormScreen extends ConsumerStatefulWidget {
-  const JobCardFormScreen({super.key});
+  const JobCardFormScreen({super.key, this.initialEstimate = const []});
+
+  /// Estimate lines to start with — from the calculator.
+  final List<EstimateDraftLine> initialEstimate;
 
   @override
   ConsumerState<JobCardFormScreen> createState() => _JobCardFormScreenState();
@@ -56,7 +59,9 @@ class _JobCardFormScreenState extends ConsumerState<JobCardFormScreen> {
   /// Parts (from the product list) and labour (from the service catalog)
   /// for the estimate. With lines, the estimated cost is their total and
   /// the job is saved with this estimate for the customer to approve.
-  final List<EstimateDraftLine> _estimateLines = [];
+  late final List<EstimateDraftLine> _estimateLines = [
+    ...widget.initialEstimate,
+  ];
 
   double get _estimateTotal =>
       _estimateLines.fold<double>(0, (s, l) => s + l.total);

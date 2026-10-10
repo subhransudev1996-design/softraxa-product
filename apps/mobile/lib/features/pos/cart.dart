@@ -488,6 +488,12 @@ class CartNotifier extends Notifier<CartState> {
     );
   }
 
+  /// A line that isn't a stock item — a service or a typed charge from the
+  /// calculator. It has no product, so no stock moves (like a cutting
+  /// charge).
+  void addChargeLine(CartLine line) =>
+      state = state.copyWith(lines: [...state.lines, line]);
+
   void changeQty(CartLine line, double newQty) {
     if (newQty <= 0) {
       remove(line);
