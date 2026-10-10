@@ -85,6 +85,28 @@ final invoicesProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>(
   return List<Map<String, dynamic>>.from(rows);
 });
 
+/// The exchange this bill was made in (D29): the bill and return it came
+/// from, what came back and where the credit went. Null for an ordinary
+/// bill (or when it can't be read).
+final invoiceExchangeProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>?, String>((ref, id) async {
+      try {
+        final row = await ref
+            .watch(supabaseProvider)
+            .from('exchanges')
+            .select(
+              'result, original:invoices!original_invoice_id(invoice_no), '
+              'sale_returns(return_no, sale_return_items(product_name, '
+              'quantity, line_total))',
+            )
+            .eq('new_invoice_id', id)
+            .maybeSingle();
+        return row == null ? null : Map<String, dynamic>.from(row);
+      } catch (_) {
+        return null;
+      }
+    });
+
 final invoiceDetailProvider = FutureProvider.autoDispose
     .family<Map<String, dynamic>, String>((ref, id) async {
       final client = ref.watch(supabaseProvider);

@@ -1469,40 +1469,174 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   }
 }
 
-/// Exchange mode (D29): what the return is worth toward the replacement.
-class _ExchangeBanner extends StatelessWidget {
+/// Exchange mode (D29): what's coming back and what the customer paid for
+/// it, the old bill, and — as items are added — what the customer pays or
+/// gets back.
+class _ExchangeBanner extends ConsumerStatefulWidget {
   const _ExchangeBanner({required this.exchange});
 
   final ExchangeDraft exchange;
 
   @override
+  ConsumerState<_ExchangeBanner> createState() => _ExchangeBannerState();
+}
+
+class _ExchangeBannerState extends ConsumerState<_ExchangeBanner> {
+  bool _open = true;
+
+  @override
   Widget build(BuildContext context) {
+    final exchange = widget.exchange;
+    final cart = ref.watch(cartProvider);
+    final window =
+        ((ref.watch(appContextProvider).value?.business?['return_window_days'])
+                as num?)
+            ?.toInt() ??
+        30;
+    final bought = exchange.invoiceDate;
+    final days = bought == null
+        ? 0
+        : DateTime(
+            DateTime.now().year,
+            DateTime.now().month,
+            DateTime.now().day,
+          ).difference(DateTime(bought.year, bought.month, bought.day)).inDays;
     final settled = exchange.returnValue - exchange.credit;
+    final diff = exchangeDifference(
+      credit: exchange.credit,
+      newTotal: cart.lines.isEmpty ? 0 : cart.total,
+    );
+    const ink = AppColors.indigo;
+    const small = TextStyle(fontSize: 12.5, color: ink);
+    final diffColor = diff.label == 'Give back' ? AppColors.green : ink;
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 10),
       decoration: BoxDecoration(
-        color: AppColors.indigo.withValues(alpha: 0.08),
+        color: ink.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.swap_horiz, color: AppColors.indigo),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Text(
-              'Return worth about ${money(exchange.returnValue)}'
-              '${settled > 0.005 ? ' — ${money(settled)} first clears what ${exchange.invoiceNo} still owes' : ''}. '
-              'Credit for the replacement ≈ ${money(exchange.credit)}. '
-              'Add the replacement items, then check out.',
-              style: const TextStyle(fontSize: 12.5, color: AppColors.indigo),
+          InkWell(
+            onTap: () => setState(() => _open = !_open),
+            child: Row(
+              children: [
+                const Icon(Icons.swap_horiz, color: ink),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    t('Exchange for {v1} · bill total {v2}', {
+                      'v1': exchange.invoiceNo,
+                      'v2': money(exchange.invoiceTotal),
+                    }),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: ink,
+                    ),
+                  ),
+                ),
+                Icon(_open ? Icons.expand_less : Icons.expand_more, color: ink),
+              ],
             ),
+          ),
+          if (_open) ...[
+            Padding(
+              padding: const EdgeInsets.only(left: 32, top: 2),
+              child: Text(billAgeText(bought, days, window), style: small),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              t('Coming back — the price paid'),
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                color: ink,
+              ),
+            ),
+            for (final l in exchange.returned)
+              Padding(
+                padding: const EdgeInsets.only(top: 3),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        '${l.name} — ${l.qtyLabel} × ${money(l.rate)}'
+                        '${l.discount > 0 ? ' − ${money(l.discount)} off' : ''}',
+                        style: small,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      money(l.paid),
+                      style: small.copyWith(fontWeight: FontWeight.w700),
+                    ),
+                  ],
+                ),
+              ),
+            if (settled > 0.005)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(
+                  t('{v1} of it first clears what {v2} still owes.', {
+                    'v1': money(settled),
+                    'v2': exchange.invoiceNo,
+                  }),
+                  style: small,
+                ),
+              ),
+            const Divider(height: 14),
+            _sumRow(t('Return credit'), money(exchange.credit), small),
+            _sumRow(
+              t('New items'),
+              money(cart.lines.isEmpty ? 0 : cart.total),
+              small,
+            ),
+          ],
+          const SizedBox(height: 4),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  cart.lines.isEmpty
+                      ? t('Add the replacement items')
+                      : exchangeDifferenceLabel(diff.label),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: diffColor,
+                  ),
+                ),
+              ),
+              if (cart.lines.isNotEmpty && diff.amount > 0)
+                Text(
+                  money(diff.amount),
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15,
+                    color: diffColor,
+                  ),
+                ),
+            ],
           ),
         ],
       ),
     );
   }
+
+  Widget _sumRow(String label, String value, TextStyle style) => Padding(
+    padding: const EdgeInsets.only(top: 2),
+    child: Row(
+      children: [
+        Expanded(child: Text(label, style: style)),
+        Text(value, style: style),
+      ],
+    ),
+  );
 }
 
 class _QtyStepper extends StatelessWidget {

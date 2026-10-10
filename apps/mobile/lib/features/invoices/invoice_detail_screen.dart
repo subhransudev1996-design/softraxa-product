@@ -16,7 +16,7 @@ import '../customers/customer_providers.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../pos/cart.dart';
 import 'advance_actions.dart';
-import 'bill_layout.dart' show loadBillLogo;
+import 'bill_layout.dart' show BillExchange, loadBillLogo;
 import 'invoice_pdf.dart';
 import 'invoice_providers.dart';
 import 'thermal_printer.dart';
@@ -126,6 +126,26 @@ class InvoiceDetailScreen extends ConsumerWidget {
   final String invoiceId;
   final bool justCreated;
 
+  /// BillExchange.rows labels, translated (the bill itself stays English).
+  String _exchangeLabel(String label) => switch (label) {
+    'Return value' => t('Return value'),
+    'Cleared old bill dues' => t('Cleared old bill dues'),
+    'Used on this bill' => t('Used on this bill'),
+    'Given back' => t('Given back'),
+    'Kept as advance' => t('Kept as advance'),
+    _ => label,
+  };
+
+  Widget _exchangeRow(String label, String value) => Padding(
+    padding: const EdgeInsets.only(top: 3),
+    child: Row(
+      children: [
+        Expanded(child: Text(label, style: const TextStyle(fontSize: 13))),
+        Text(value, style: const TextStyle(fontSize: 13)),
+      ],
+    ),
+  );
+
   Future<void> _sharePdf(
     BuildContext context,
     WidgetRef ref,
@@ -141,6 +161,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
       invoice: invoice,
       items: items,
       logo: await loadBillLogo(business),
+      exchange: await ref.read(
+        invoiceExchangeProvider(invoice['id'] as String).future,
+      ),
     );
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.sharePdf(
@@ -164,6 +187,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
       invoice: invoice,
       items: items,
       logo: await loadBillLogo(business),
+      exchange: await ref.read(
+        invoiceExchangeProvider(invoice['id'] as String).future,
+      ),
     );
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.layoutPdf(
@@ -837,6 +863,43 @@ class InvoiceDetailScreen extends ConsumerWidget {
                       ),
                     ),
                   ),
+                // Made in an exchange: what came back and where the credit
+                // went (also printed on the bill).
+                Consumer(
+                  builder: (context, ref, _) {
+                    final row = ref
+                        .watch(invoiceExchangeProvider(invoiceId))
+                        .value;
+                    if (row == null) return const SizedBox.shrink();
+                    final ex = BillExchange(row);
+                    return Card(
+                      color: AppColors.indigo.withValues(alpha: 0.06),
+                      child: Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              t('Exchange against {v1}', {'v1': ex.originalNo}),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            for (final (name, q, value) in ex.returned)
+                              _exchangeRow('$name × ${qty(q)}', money(value)),
+                            const Divider(height: 12),
+                            for (final (label, amount) in ex.rows)
+                              _exchangeRow(
+                                _exchangeLabel(label),
+                                money(amount),
+                              ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
                 Row(
                   children: [
                     if (features?.featureOn('pdf_invoice') ?? true)
@@ -879,6 +942,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                                       {},
                                   invoice: inv,
                                   items: items,
+                                  exchange: ref
+                                      .read(invoiceExchangeProvider(invoiceId))
+                                      .value,
                                 ),
                           icon: const Icon(Icons.receipt),
                           label: Text(t('Thermal print')),
@@ -896,6 +962,19 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
+                // Straight from the bill to its return or exchange.
+                if ((features?.canManageReturns ?? false) &&
+                    inv['is_cancelled'] != true &&
+                    inv['invoice_type'] != 'estimate' &&
+                    inv['invoice_type'] != 'opening') ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () =>
+                        context.push('/sale-returns/new', extra: inv),
+                    icon: const Icon(Icons.swap_horiz),
+                    label: Text(t('Return / Exchange')),
+                  ),
+                ],
               ],
               const SizedBox(height: 24),
             ],

@@ -25,7 +25,13 @@ class InvoicePdf {
     required this.invoice,
     required this.items,
     this.logo,
-  }) : bill = BillLayout(business: business, invoice: invoice, items: items);
+    Map<String, dynamic>? exchange,
+  }) : bill = BillLayout(
+         business: business,
+         invoice: invoice,
+         items: items,
+         exchange: exchange,
+       );
 
   final Map<String, dynamic> business;
   final Map<String, dynamic> invoice;
@@ -295,6 +301,7 @@ class InvoicePdf {
                       for (final (mode, amount) in bill.payments)
                         pw.Text('$mode: ${_rs(amount)}', style: small),
                     ],
+                    ..._exchangeBlock(small, smallBold),
                   ],
                 ),
               ),
@@ -534,6 +541,7 @@ class InvoicePdf {
                 _tRow(mode, _n(amount), small),
               if (bill.due > 0) _tRow('DUE', _n(bill.due), smallBold),
             ],
+            ..._exchangeBlock(small, smallBold),
             if (bill.gstSummary.isNotEmpty) ...[
               pw.SizedBox(height: 4),
               pw.Text('GST Summary', style: smallBold),
@@ -564,6 +572,24 @@ class InvoicePdf {
 
   pw.Widget _gstTable({required double fontSize}) =>
       pdfGstSummaryTable(bill.gstSummary, fontSize: fontSize);
+
+  /// An exchange bill: what came back, from which bill, where the credit
+  /// went.
+  List<pw.Widget> _exchangeBlock(pw.TextStyle style, pw.TextStyle boldStyle) {
+    final ex = bill.exchange;
+    if (ex == null) return const [];
+    return [
+      pw.SizedBox(height: 6),
+      pw.Text(
+        'Exchange against ${ex.originalNo}'
+        '${ex.returnNo.isEmpty ? '' : ' (return ${ex.returnNo})'}',
+        style: boldStyle,
+      ),
+      for (final (name, q, value) in ex.returned)
+        _tRow('$name x ${qty(q)}', _n(value), style),
+      for (final (label, amount) in ex.rows) _tRow(label, _n(amount), style),
+    ];
+  }
 
   /// "Terms & Conditions:" and the shop's terms, numbered.
   List<pw.Widget> _termsBlock({required double fontSize}) {

@@ -72,11 +72,16 @@ class BillLayout {
     required this.business,
     required this.invoice,
     required this.items,
-  });
+    Map<String, dynamic>? exchange,
+  }) : exchange = exchange == null ? null : BillExchange(exchange);
 
   final Map<String, dynamic> business;
   final Map<String, dynamic> invoice;
   final List<Map<String, dynamic>> items;
+
+  /// When this bill was made in an exchange: what came back and how its
+  /// credit was used (invoiceExchangeProvider). Null for ordinary bills.
+  final BillExchange? exchange;
 
   bool get isGst => invoice['invoice_type'] == 'gst';
   bool get isEstimate => invoice['invoice_type'] == 'estimate';
@@ -134,24 +139,27 @@ class BillLayout {
   /// "Rupees Three Thousand Five Hundred Eighty-Six Only".
   String get amountInWords => rupeesInWords(netAmount);
 
-  /// How it was paid: each mode and amount (one row for a single payment).
+  /// How it was paid: each payment row (an exchange's credit by name),
+  /// and whatever of the paid amount has no row, by the bill's mode.
   List<(String, double)> get payments {
     if (isEstimate) return const [];
     final rows = List<Map<String, dynamic>>.from(
       invoice['invoice_payments'] as List? ?? const [],
     );
-    final list = rows.length > 1
-        ? [
-            for (final p in rows)
-              (paymentModeLabel(p['payment_mode']), toDouble(p['amount'])),
-          ]
-        : [
-            if (toDouble(invoice['paid_amount']) > 0)
-              (
-                paymentModeLabel(invoice['payment_mode']),
-                toDouble(invoice['paid_amount']),
-              ),
-          ];
+    final paid = toDouble(invoice['paid_amount']);
+    final inRows = rows.fold(0.0, (s, p) => s + toDouble(p['amount']));
+    final list = [
+      for (final p in rows)
+        (
+          p['sale_return_id'] != null ||
+                  '${p['note'] ?? ''}'.startsWith('Exchange credit')
+              ? 'Exchange credit'
+              : paymentModeLabel(p['payment_mode']),
+          toDouble(p['amount']),
+        ),
+      if (paid - inRows > 0.005)
+        (paymentModeLabel(invoice['payment_mode']), _r2(paid - inRows)),
+    ];
     final credit = toDouble(invoice['credit_amount']);
     return [...list, if (credit > 0) ('Credit note', credit)];
   }
@@ -193,6 +201,47 @@ List<GstSummaryRow> gstSummaryRows(List<Map<String, dynamic>> lines) {
           igst: split.igst,
         );
       }(),
+  ];
+}
+
+/// The exchange a bill was made in, for printing on it: the bill and
+/// return it came from, what came back, and where the credit went.
+class BillExchange {
+  BillExchange(Map<String, dynamic> row)
+    : _result = Map<String, dynamic>.from(row['result'] as Map? ?? const {}),
+      originalNo = ((row['original'] as Map?)?['invoice_no'] as String?) ?? '',
+      returnNo = ((row['sale_returns'] as Map?)?['return_no'] as String?) ?? '',
+      returned = [
+        for (final it
+            in (row['sale_returns'] as Map?)?['sale_return_items'] as List? ??
+                const [])
+          (
+            it['product_name'] as String? ?? '',
+            toDouble(it['quantity']),
+            toDouble(it['line_total']),
+          ),
+      ];
+
+  final Map<String, dynamic> _result;
+  final String originalNo;
+  final String returnNo;
+
+  /// (name, quantity, value back) per returned line.
+  final List<(String, double, double)> returned;
+
+  double get returnValue => toDouble(_result['return_value']);
+  double get clearedOldBill => toDouble(_result['applied_to_original']);
+  double get usedHere => toDouble(_result['credit_used']);
+  double get refunded => toDouble(_result['refund']);
+  double get keptAsAdvance => toDouble(_result['advance']);
+
+  /// The money rows under the returned items.
+  List<(String, double)> get rows => [
+    ('Return value', returnValue),
+    if (clearedOldBill > 0.005) ('Cleared old bill dues', clearedOldBill),
+    ('Used on this bill', usedHere),
+    if (refunded > 0.005) ('Given back', refunded),
+    if (keptAsAdvance > 0.005) ('Kept as advance', keptAsAdvance),
   ];
 }
 

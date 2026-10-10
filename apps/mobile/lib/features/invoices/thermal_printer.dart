@@ -16,9 +16,15 @@ class ThermalPrinterService {
     required Map<String, dynamic> business,
     required Map<String, dynamic> invoice,
     required List<Map<String, dynamic>> items,
+    Map<String, dynamic>? exchange,
   }) => _print(
     context,
-    () => _buildTicket(business: business, invoice: invoice, items: items),
+    () => _buildTicket(
+      business: business,
+      invoice: invoice,
+      items: items,
+      exchange: exchange,
+    ),
   );
 
   /// A short test slip, used by the setup wizard's printer check.
@@ -122,10 +128,16 @@ class ThermalPrinterService {
     required Map<String, dynamic> business,
     required Map<String, dynamic> invoice,
     required List<Map<String, dynamic>> items,
+    Map<String, dynamic>? exchange,
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
-    final bill = BillLayout(business: business, invoice: invoice, items: items);
+    final bill = BillLayout(
+      business: business,
+      invoice: invoice,
+      items: items,
+      exchange: exchange,
+    );
     final isGst = bill.isGst;
     final logo = await logoForPrinter(business);
     List<int> bytes = [];
@@ -306,6 +318,23 @@ class ThermalPrinterService {
         totalRow(mode, amount);
       }
       if (bill.due > 0) totalRow('DUE', bill.due, strong: true);
+    }
+
+    // ---- exchange: what came back, where the credit went ----
+    final ex = bill.exchange;
+    if (ex != null) {
+      bytes += generator.hr();
+      bytes += generator.text(
+        'Exchange against ${ex.originalNo}'
+        '${ex.returnNo.isEmpty ? '' : ' (return ${ex.returnNo})'}',
+        styles: bold,
+      );
+      for (final (name, q, value) in ex.returned) {
+        totalRow('$name x ${qty(q)}', value);
+      }
+      for (final (label, amount) in ex.rows) {
+        totalRow(label, amount);
+      }
     }
 
     // ---- GST summary ----

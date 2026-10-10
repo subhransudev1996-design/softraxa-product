@@ -1,6 +1,7 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:printing/printing.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestFilterBuilder;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
@@ -686,22 +687,65 @@ class _InvoicePickerState extends ConsumerState<_InvoicePicker> {
     _load('');
   }
 
+  /// Bills by number, customer name or phone — and bills with an item
+  /// whose name, barcode or SKU matches (a customer brings the item back
+  /// without the bill).
   Future<void> _load(String search) async {
+    // Characters that would break the filter syntax.
+    final s = search.trim().replaceAll(RegExp(r'[,()*%]'), ' ').trim();
     try {
       final client = ref.read(supabaseProvider);
-      var query = client
+      PostgrestFilterBuilder<List<Map<String, dynamic>>> bills() => client
           .from('invoices')
           .select('*, invoice_items(*)')
           .eq('is_cancelled', false)
           .neq('invoice_type', 'estimate');
-      if (search.isNotEmpty) {
+      var query = bills();
+      if (s.isNotEmpty) {
         query = query.or(
-          'invoice_no.ilike.%$search%,customer_name.ilike.%$search%',
+          'invoice_no.ilike.%$s%,customer_name.ilike.%$s%,'
+          'customer_phone.ilike.%$s%',
         );
       }
       final rows = List<Map<String, dynamic>>.from(
         await query.order('invoice_date', ascending: false).limit(50),
       );
+      if (s.length >= 2) {
+        final products = await client
+            .from('products')
+            .select('id')
+            .or('barcode.eq.$s,sku.eq.$s')
+            .limit(20);
+        final ids = [for (final p in products) p['id'] as String];
+        final lines = await client
+            .from('invoice_items')
+            .select('invoice_id')
+            .or(
+              [
+                'product_name.ilike.%$s%',
+                if (ids.isNotEmpty) 'product_id.in.(${ids.join(',')})',
+              ].join(','),
+            )
+            .limit(300);
+        final have = {for (final r in rows) r['id']};
+        final more = {
+          for (final l in lines)
+            if (!have.contains(l['invoice_id'])) l['invoice_id'] as String,
+        }.take(100).toList();
+        if (more.isNotEmpty) {
+          rows.addAll(
+            List<Map<String, dynamic>>.from(
+              await bills()
+                  .inFilter('id', more)
+                  .order('invoice_date', ascending: false)
+                  .limit(50),
+            ),
+          );
+          rows.sort(
+            (a, b) => '${b['invoice_date']}'.compareTo('${a['invoice_date']}'),
+          );
+        }
+      }
       if (mounted) {
         setState(() {
           _invoices = rows;
@@ -727,7 +771,7 @@ class _InvoicePickerState extends ConsumerState<_InvoicePicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: t('Search invoice no or customer'),
+              hint: t('Bill no, customer, phone or item / barcode'),
               autofocus: true,
               onChanged: _load,
             ),
@@ -1072,6 +1116,35 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
             },
   ];
 
+  /// The items coming back, as bought: shown while the replacement is
+  /// billed, so the shop sees what the customer paid.
+  List<ExchangeReturnLine> get _returnedLines {
+    final gst = widget.invoice['invoice_type'] == 'gst';
+    return [
+      for (final it in _items)
+        if ((_returnQty[it['id']] ?? 0) > 0)
+          () {
+            final q = _returnQty[it['id']]!;
+            final perPiece =
+                toDouble(it['unit_price']) *
+                (gst ? 1 + toDouble(it['gst_rate']) / 100 : 1);
+            final size = linePackSize(it);
+            final whole =
+                size != null &&
+                (q / size - (q / size).roundToDouble()).abs() < 1e-6;
+            return ExchangeReturnLine(
+              productId: it['product_id'] as String?,
+              name: it['product_name'] as String? ?? '',
+              qty: q,
+              shownQty: whole ? q / size : q,
+              qtyLabel: returnQtyLabel(q, it),
+              rate: whole ? perPiece * size : perPiece,
+              paid: returnRowValue(q, it, _discountFactor),
+            );
+          }(),
+    ];
+  }
+
   Map<String, dynamic> get _returnPayloadBase => {
     'invoice_id': widget.invoice['id'],
     'customer_id': widget.invoice['customer_id'],
@@ -1133,10 +1206,18 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
         returnValue: _total,
         originalDue: toDouble(widget.invoice['due_amount']),
         hasCustomer: customerId != null,
+        invoiceDate: DateTime.tryParse(
+          '${widget.invoice['invoice_date']}',
+        )?.toLocal(),
+        invoiceTotal: toDouble(widget.invoice['total']),
+        returned: _returnedLines,
       ),
     );
     ref.read(editingInvoiceProvider.notifier).set(null);
-    ref.read(cartProvider.notifier).replaceAll(const CartState());
+    // A same-product replacement starts at the price paid (0077).
+    ref
+        .read(cartProvider.notifier)
+        .replaceAll(CartState(exchangePrices: exchangeOldPrices(_returnedLines)));
     await setCartCustomer(ref, customer); // their agreed prices apply (0043)
     if (!mounted) return;
     context.push('/sale-returns/exchange');
@@ -1263,6 +1344,34 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // When it was bought and the return window, at a glance.
+          Card(
+            color: (_isLate ? AppColors.orange : AppColors.indigo).withValues(
+              alpha: 0.07,
+            ),
+            child: ListTile(
+              dense: true,
+              leading: Icon(
+                Icons.event_outlined,
+                color: _isLate ? AppColors.orange : AppColors.indigo,
+              ),
+              title: Text(
+                billAgeText(
+                  DateTime.tryParse(
+                    '${widget.invoice['invoice_date']}',
+                  )?.toLocal(),
+                  _billAgeDays,
+                  _windowDays,
+                ),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                t('Bill total {v1}', {
+                  'v1': money(toDouble(widget.invoice['total'])),
+                }),
+              ),
+            ),
+          ),
           SectionLabel(t('Select items to return')),
           for (final it in _items)
             Builder(

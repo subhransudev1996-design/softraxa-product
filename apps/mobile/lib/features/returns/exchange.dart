@@ -60,6 +60,92 @@ String exchangeSummary(Map<String, dynamic> r) {
   ].join(' • ');
 }
 
+/// One item coming back in an exchange, as the customer bought it: shown
+/// while the replacement is billed, so the shop sees what was paid.
+class ExchangeReturnLine {
+  const ExchangeReturnLine({
+    required this.productId,
+    required this.name,
+    required this.qty,
+    required this.shownQty,
+    required this.qtyLabel,
+    required this.rate,
+    required this.paid,
+  });
+
+  final String? productId;
+  final String name;
+
+  /// Quantity in the unit stock is kept in (pieces).
+  final double qty;
+
+  /// Quantity in the unit [rate] is for: packs when whole packs came back.
+  final double shownQty;
+
+  /// "1", "2 Box", "1 Box + 3 pcs".
+  final String qtyLabel;
+
+  /// The bill's price per [shownQty] unit, GST included, before discounts.
+  final double rate;
+
+  /// What it is worth back: the price paid after the bill's discounts.
+  final double paid;
+
+  /// Rate × quantity less what was paid: the discounts it had.
+  double get discount {
+    final d = gross - paid;
+    return d > 0.005 ? d : 0;
+  }
+
+  double get gross => _r2(rate * shownQty);
+}
+
+double _r2(double v) => (v * 100).roundToDouble() / 100;
+
+/// What the customer paid per piece for each product coming back (the
+/// lowest, if it's on more than one line): the price a same-product
+/// replacement gets by default (0077).
+Map<String, double> exchangeOldPrices(List<ExchangeReturnLine> lines) {
+  final out = <String, double>{};
+  for (final l in lines) {
+    final id = l.productId;
+    if (id == null || l.qty <= 0) continue;
+    final each = l.paid / l.qty;
+    final had = out[id];
+    if (had == null || each < had) out[id] = each;
+  }
+  return out;
+}
+
+/// "Bought 09 Oct 2026 · 3 days ago · exchange within 7 days".
+String billAgeText(DateTime? bought, int days, int windowDays) => [
+  if (bought != null) t('Bought {v1}', {'v1': dateStr(bought)}),
+  days == 0
+      ? t('today')
+      : (days == 1 ? t('1 day ago') : t('{v1} days ago', {'v1': days})),
+  if (windowDays > 0) t('returns within {v1} days', {'v1': windowDays}),
+].join(' · ');
+
+/// [exchangeDifference]'s label, translated.
+String exchangeDifferenceLabel(String label) => switch (label) {
+  'Customer pays' => t('Customer pays'),
+  'Give back' => t('Give back'),
+  'Even exchange' => t('Even exchange'),
+  _ => label,
+};
+
+/// The exchange in one line: what the customer pays, or gets back, once
+/// the return credit is set against the new items.
+({String label, double amount}) exchangeDifference({
+  required double credit,
+  required double newTotal,
+}) {
+  final d = _r2(newTotal - credit);
+  if (d > 0.005) return (label: 'Customer pays', amount: d);
+  if (d < -0.005) return (label: 'Give back', amount: -d);
+  return (label: 'Even exchange', amount: 0);
+}
+
 /// An exchange in progress: the return part, prepared on the return screen,
 /// waiting for replacement items in the POS (D29).
 class ExchangeDraft {
@@ -71,7 +157,20 @@ class ExchangeDraft {
     required this.returnValue,
     required this.originalDue,
     required this.hasCustomer,
+    this.invoiceDate,
+    this.invoiceTotal = 0,
+    this.returned = const [],
   });
+
+  /// The old bill: when it was made and what it came to.
+  final DateTime? invoiceDate;
+  final double invoiceTotal;
+
+  /// The items coming back, as bought.
+  final List<ExchangeReturnLine> returned;
+
+  /// Per-piece price paid for each product coming back.
+  Map<String, double> get oldPrices => exchangeOldPrices(returned);
 
   /// Sent with the exchange so a retry isn't posted twice.
   final String requestId;
@@ -86,12 +185,16 @@ class ExchangeDraft {
   /// Walk-in exchanges must be paid in full and excess is always refunded.
   final bool hasCustomer;
 
-  double get credit =>
-      estimateExchangeCredit(returnValue: returnValue, originalDue: originalDue);
+  double get credit => estimateExchangeCredit(
+    returnValue: returnValue,
+    originalDue: originalDue,
+  );
 }
 
 final exchangeDraftProvider =
-    NotifierProvider<ExchangeDraftNotifier, ExchangeDraft?>(ExchangeDraftNotifier.new);
+    NotifierProvider<ExchangeDraftNotifier, ExchangeDraft?>(
+      ExchangeDraftNotifier.new,
+    );
 
 class ExchangeDraftNotifier extends Notifier<ExchangeDraft?> {
   @override
@@ -117,10 +220,12 @@ Future<Map<String, double>?> showConditionSplitDialog(
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) {
         final split = {
-          for (final e in ctrls.entries) e.key: double.tryParse(e.value.text.trim()) ?? 0,
+          for (final e in ctrls.entries)
+            e.key: double.tryParse(e.value.text.trim()) ?? 0,
         };
         final sum = split.values.fold(0.0, (s, v) => s + v);
-        final ok = (sum - total).abs() < 0.0005 && split.values.every((v) => v >= 0);
+        final ok =
+            (sum - total).abs() < 0.0005 && split.values.every((v) => v >= 0);
         return AlertDialog(
           title: Text(t('Condition — {name}', {'name': name})),
           content: Column(
@@ -133,20 +238,28 @@ Future<Map<String, double>?> showConditionSplitDialog(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: TextField(
                     controller: ctrls[e.key],
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     decoration: InputDecoration(labelText: e.value),
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
               if (!ok)
                 Text(
-                  t('The quantities must add up to {v1} (now {v2}).', {'v1': qty(total), 'v2': qty(sum)}),
+                  t('The quantities must add up to {v1} (now {v2}).', {
+                    'v1': qty(total),
+                    'v2': qty(sum),
+                  }),
                   style: const TextStyle(color: AppColors.red, fontSize: 13),
                 ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(t('Cancel'))),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(t('Cancel')),
+            ),
             FilledButton(
               style: dialogActionStyle,
               onPressed: ok

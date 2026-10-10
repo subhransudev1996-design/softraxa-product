@@ -41,6 +41,7 @@ class CartLine {
     this.priceIsDefault = true,
     this.packSize,
     this.baseUnitName = '',
+    this.exchangePrice,
   });
 
   final String key; // productId:variantId (":pack" for a pack line)
@@ -95,6 +96,10 @@ class CartLine {
   final double? packSize;
   final String baseUnitName;
 
+  /// In an exchange: what the customer paid for this product before, per
+  /// [unitName] — the price it starts at (0077). Null otherwise.
+  final double? exchangePrice;
+
   bool get isPack => packSize != null;
 
   /// Quantity in the base unit stock is kept in.
@@ -108,6 +113,7 @@ class CartLine {
   /// Default price (D15): customer's agreed price → wholesale (customer or
   /// quantity tier) → retail. Null for items without a catalogue price.
   double? get defaultPrice {
+    if (exchangePrice != null) return exchangePrice;
     if (customerPrice != null) return customerPrice;
     if (_wholesaleApplies) return wholesalePrice;
     return (retailPrice ?? 0) > 0 ? retailPrice : null;
@@ -118,6 +124,7 @@ class CartLine {
     bool at(double? p) => p != null && (price - p).abs() < 0.005;
     final def = defaultPrice;
     if (def == null) return 'manual';
+    if (at(exchangePrice)) return 'exchange';
     if (at(def)) {
       return customerPrice != null
           ? 'customer'
@@ -133,6 +140,7 @@ class CartLine {
 
   /// The prices this line may be charged at, for picking one by hand.
   List<(String source, double price)> get priceOptions => [
+    if (exchangePrice != null) ('exchange', exchangePrice!),
     if (customerPrice != null) ('customer', customerPrice!),
     if ((wholesalePrice ?? 0) > 0) ('wholesale', wholesalePrice!),
     if ((retailPrice ?? 0) > 0) ('retail', retailPrice!),
@@ -184,6 +192,7 @@ class CartLine {
     priceIsDefault: priceIsDefault,
     packSize: packSize,
     baseUnitName: baseUnitName,
+    exchangePrice: exchangePrice,
   );
 }
 
@@ -215,6 +224,7 @@ String priceSourceLabel(String source) => switch (source) {
   'wholesale' => 'Wholesale',
   'retail' => 'Retail',
   'negotiated' => 'Negotiated',
+  'exchange' => 'Paid before',
   _ => 'Manual',
 };
 
@@ -227,9 +237,14 @@ class CartState {
     this.applyGst = true,
     this.customerPrices = const {},
     this.wholesaleCustomer = false,
+    this.exchangePrices = const {},
   });
 
   final List<CartLine> lines;
+
+  /// In an exchange: per-piece price paid for each product coming back,
+  /// by product id (exchangeOldPrices).
+  final Map<String, double> exchangePrices;
   final Map<String, dynamic>? customer;
 
   /// The selected customer's agreed prices, keyed "productId:variantId".
@@ -302,6 +317,7 @@ class CartState {
     bool? applyGst,
     Map<String, double>? customerPrices,
     bool? wholesaleCustomer,
+    Map<String, double>? exchangePrices,
   }) => CartState(
     lines: lines ?? this.lines,
     customer: customer == _sentinel
@@ -312,6 +328,7 @@ class CartState {
     applyGst: applyGst ?? this.applyGst,
     customerPrices: customerPrices ?? this.customerPrices,
     wholesaleCustomer: wholesaleCustomer ?? this.wholesaleCustomer,
+    exchangePrices: exchangePrices ?? this.exchangePrices,
   );
 
   static const _sentinel = Object();
@@ -424,6 +441,7 @@ class CartNotifier extends Notifier<CartState> {
         costPrice: toDouble(product['purchase_price']) * size,
         mrp: toDouble(product['mrp']) * size,
         availableStock: toDouble(product['current_stock']) / size,
+        exchangePrice: _exchangePrice(product, size),
       );
       line.price = line.defaultPrice ?? pack.price;
       state = state.copyWith(lines: [...state.lines, line]);
@@ -462,6 +480,7 @@ class CartNotifier extends Notifier<CartState> {
       ),
       wholesalePrice: (product['wholesale_price'] as num?)?.toDouble(),
       wholesaleMinQty: (product['wholesale_min_qty'] as num?)?.toDouble(),
+      exchangePrice: _exchangePrice(product, 1),
     );
     line.price = line.defaultPrice ?? retail;
     // Optional cutting charge (PD44): its own line, once per cut, billed
@@ -493,6 +512,13 @@ class CartNotifier extends Notifier<CartState> {
   /// charge).
   void addChargeLine(CartLine line) =>
       state = state.copyWith(lines: [...state.lines, line]);
+
+  /// The price paid before for a product coming back in an exchange, per
+  /// [per] pieces (a pack), to the paisa. Null when it isn't coming back.
+  double? _exchangePrice(Map<String, dynamic> product, double per) {
+    final each = state.exchangePrices[product['id']];
+    return each == null ? null : (each * per * 100).roundToDouble() / 100;
+  }
 
   void changeQty(CartLine line, double newQty) {
     if (newQty <= 0) {
