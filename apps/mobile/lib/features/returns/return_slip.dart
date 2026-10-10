@@ -99,8 +99,10 @@ class ReturnSlip {
     final shownQty = wholePacks ? q / factor : q;
     final price = wholePacks ? perPiece * factor : perPiece;
     final gross = (shownQty * price * 100).roundToDouble() / 100;
+    final variant = (billLine['variant_name'] as String? ?? '').trim();
+    final name = it['product_name'] as String? ?? '';
     return ReturnSlipLine(
-      name: it['product_name'] as String? ?? '',
+      name: variant.isEmpty ? name : '$name ($variant)',
       qty: shownQty,
       unit: wholePacks ? billLine['alt_unit_name'] as String? ?? '' : '',
       price: (price * 100).roundToDouble() / 100,

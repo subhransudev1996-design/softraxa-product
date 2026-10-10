@@ -177,9 +177,13 @@ String autoVariantSku(String productCode, Map<String, String> attrs) {
       .toUpperCase()
       .replaceAll(RegExp(r'[^A-Z0-9]+'), '-')
       .replaceAll(RegExp(r'^-+|-+$'), '');
-  var base = clean(productCode);
-  if (base.length > 12) {
-    base = base.substring(0, 12).replaceAll(RegExp(r'-+$'), '');
+  // Whole words, up to about 14 letters: COTTON-KURTA, not COTTON-K.
+  var base = '';
+  for (final w in clean(productCode).split('-')) {
+    if (w.isEmpty) continue;
+    final next = base.isEmpty ? w : '$base-$w';
+    if (base.isNotEmpty && next.length > 14) break;
+    base = next.length > 14 ? next.substring(0, 14) : next;
   }
   return [
     if (base.isNotEmpty) base,

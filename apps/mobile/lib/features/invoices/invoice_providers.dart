@@ -97,7 +97,7 @@ final invoiceExchangeProvider = FutureProvider.autoDispose
             .select(
               'result, original:invoices!original_invoice_id(invoice_no), '
               'sale_returns(return_no, sale_return_items(product_name, '
-              'quantity, line_total))',
+              'quantity, line_total, invoice_items(variant_name)))',
             )
             .eq('new_invoice_id', id)
             .maybeSingle();
@@ -115,7 +115,7 @@ final invoiceDetailProvider = FutureProvider.autoDispose
           .select(
             '*, '
             'invoice_items(*, products(sku, track_serial, current_stock, units(allow_decimal)), '
-            'product_variants(current_stock)), '
+            'product_variants(sku, current_stock)), '
             'invoice_payments(*), customers(advance_amount)',
           )
           .eq('id', id)

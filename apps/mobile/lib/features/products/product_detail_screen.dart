@@ -46,7 +46,9 @@ class ProductDetailScreen extends ConsumerWidget {
     final ok = await confirmDialog(
       context,
       title: t('Delete product?'),
-      message: t('This permanently removes the product. If it has sales history, deactivate it instead.'),
+      message: t(
+        'This permanently removes the product. If it has sales history, deactivate it instead.',
+      ),
       confirmText: t('Delete'),
     );
     if (!ok) return;
@@ -62,7 +64,9 @@ class ProductDetailScreen extends ConsumerWidget {
       if (context.mounted) {
         showError(
           context,
-          t('Cannot delete: product is used in bills or purchases. Deactivate it instead.'),
+          t(
+            'Cannot delete: product is used in bills or purchases. Deactivate it instead.',
+          ),
         );
       }
     }
@@ -174,10 +178,7 @@ class ProductDetailScreen extends ConsumerWidget {
       ref.invalidate(productDetailProvider(productId));
       invalidateStockData(ref);
       if (context.mounted) {
-        showSuccess(
-          context,
-          t('{v1} variants added', {'v1': made.length}),
-        );
+        showSuccess(context, t('{v1} variants added', {'v1': made.length}));
       }
     } catch (e) {
       if (context.mounted) showError(context, e);
@@ -264,7 +265,12 @@ class ProductDetailScreen extends ConsumerWidget {
     );
     if (!context.mounted) return;
     if (action == 'stock') {
-      await showAdjustStockSheet(context, ref, product: product, variant: variant);
+      await showAdjustStockSheet(
+        context,
+        ref,
+        product: product,
+        variant: variant,
+      );
       ref.invalidate(productDetailProvider(productId));
     } else if (action == 'edit') {
       await _editVariant(context, ref, variant);
@@ -406,7 +412,10 @@ class ProductDetailScreen extends ConsumerWidget {
                 ),
                 PopupMenuItem(
                   value: 'delete',
-                  child: Text(t('Delete'), style: TextStyle(color: AppColors.red)),
+                  child: Text(
+                    t('Delete'),
+                    style: TextStyle(color: AppColors.red),
+                  ),
                 ),
               ],
             ),
@@ -493,7 +502,8 @@ class ProductDetailScreen extends ConsumerWidget {
                                           color: AppColors.inkSoft,
                                         ),
                                       if (p['track_serial'] == true)
-                                        StatusChip(t('IMEI/Serial'),
+                                        StatusChip(
+                                          t('IMEI/Serial'),
                                           color: AppColors.purple,
                                         ),
                                     ],
@@ -509,7 +519,10 @@ class ProductDetailScreen extends ConsumerWidget {
                                   ),
                                   const SizedBox(height: 3),
                                   Text(
-                                    t('Purchase: {v1}  •  GST {v2}%', {'v1': money(p['purchase_price'] as num?), 'v2': qty(p['gst_rate'] as num?)}),
+                                    t('Purchase: {v1}  •  GST {v2}%', {
+                                      'v1': money(p['purchase_price'] as num?),
+                                      'v2': qty(p['gst_rate'] as num?),
+                                    }),
                                     style: TextStyle(
                                       fontSize: 13,
                                       color: AppColors.inkSoft,
@@ -549,7 +562,8 @@ class ProductDetailScreen extends ConsumerWidget {
                                         CrossAxisAlignment.start,
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(t('Current stock'),
+                                      Text(
+                                        t('Current stock'),
                                         style: TextStyle(
                                           fontWeight: FontWeight.w700,
                                           fontSize: 14,
@@ -604,14 +618,16 @@ class ProductDetailScreen extends ConsumerWidget {
                               color: AppColors.orange,
                               size: 38,
                             ),
-                            title: Text(t('Adjust stock / mark damaged'),
+                            title: Text(
+                              t('Adjust stock / mark damaged'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13.5,
                               ),
                             ),
                             subtitle: variants.isNotEmpty
-                                ? Text(t('Choose a variant to adjust'),
+                                ? Text(
+                                    t('Choose a variant to adjust'),
                                     style: TextStyle(
                                       fontSize: 12.5,
                                       color: AppColors.inkSoft,
@@ -629,7 +645,8 @@ class ProductDetailScreen extends ConsumerWidget {
                               color: AppColors.teal,
                               size: 38,
                             ),
-                            title: Text(t('Stock movement history'),
+                            title: Text(
+                              t('Stock movement history'),
                               style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13.5,
@@ -685,7 +702,8 @@ class ProductDetailScreen extends ConsumerWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text(t('Variants'),
+                          Text(
+                            t('Variants'),
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(color: AppColors.inkSoft),
                           ),
@@ -745,7 +763,8 @@ class ProductDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     if (variants.isEmpty)
-                      Text(t('No variants'),
+                      Text(
+                        t('No variants'),
                         style: TextStyle(color: AppColors.inkSoft),
                       )
                     else if (variantGridOf(variants) case final grid?)
@@ -768,7 +787,9 @@ class ProductDetailScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 8),
                               Text(
-                                t('Stock in each box: green in stock, orange low, red out. Tap a box to adjust it.'),
+                                t(
+                                  'Stock in each box: green in stock, orange low, red out. Tap a box to adjust it.',
+                                ),
                                 style: TextStyle(
                                   fontSize: 12,
                                   color: AppColors.inkSoft,
@@ -934,7 +955,8 @@ class _SerialsCard extends ConsumerWidget {
                   children: [
                     Icon(Icons.qr_code, size: 20, color: AppColors.purple),
                     SizedBox(width: 8),
-                    Text(t('IMEI / Serial Numbers'),
+                    Text(
+                      t('IMEI / Serial Numbers'),
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -957,7 +979,8 @@ class _SerialsCard extends ConsumerWidget {
                 if (serials.isEmpty) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    child: Text(t('No IMEIs recorded yet. Tap "+ Add IMEI" above.'),
+                    child: Text(
+                      t('No IMEIs recorded yet. Tap "+ Add IMEI" above.'),
                       style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                   );
@@ -974,7 +997,10 @@ class _SerialsCard extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      t('In Stock ({v1})  •  Sold ({v2})', {'v1': inStock.length, 'v2': sold.length}),
+                      t('In Stock ({v1})  •  Sold ({v2})', {
+                        'v1': inStock.length,
+                        'v2': sold.length,
+                      }),
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -983,7 +1009,8 @@ class _SerialsCard extends ConsumerWidget {
                     ),
                     const SizedBox(height: 10),
                     if (inStock.isNotEmpty) ...[
-                      Text(t('Available In Stock'),
+                      Text(
+                        t('Available In Stock'),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
@@ -1013,7 +1040,8 @@ class _SerialsCard extends ConsumerWidget {
                       const SizedBox(height: 12),
                     ],
                     if (sold.isNotEmpty) ...[
-                      Text(t('Sold Units'),
+                      Text(
+                        t('Sold Units'),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,

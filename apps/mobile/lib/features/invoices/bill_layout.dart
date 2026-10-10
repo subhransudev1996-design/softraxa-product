@@ -115,8 +115,13 @@ class BillLayout {
     return BillLine(
       name: name,
       isPack: isPack,
+      // The variant's own code (KURTA-XL-RED), else the product's.
       sku: showSku
-          ? ((it['products'] as Map?)?['sku'] as String? ?? '').trim()
+          ? [
+              ((it['product_variants'] as Map?)?['sku'] as String? ?? '')
+                  .trim(),
+              ((it['products'] as Map?)?['sku'] as String? ?? '').trim(),
+            ].firstWhere((s) => s.isNotEmpty, orElse: () => '')
           : '',
       size: (it['variant_name'] as String? ?? '').trim(),
       qty: billed.qty,
@@ -216,7 +221,14 @@ class BillExchange {
             in (row['sale_returns'] as Map?)?['sale_return_items'] as List? ??
                 const [])
           (
-            it['product_name'] as String? ?? '',
+            [
+              it['product_name'] as String? ?? '',
+              if (((it['invoice_items'] as Map?)?['variant_name'] as String? ??
+                      '')
+                  .trim()
+                  .isNotEmpty)
+                '(${(it['invoice_items'] as Map)['variant_name']})',
+            ].join(' '),
             toDouble(it['quantity']),
             toDouble(it['line_total']),
           ),

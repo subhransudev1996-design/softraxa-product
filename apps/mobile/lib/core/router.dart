@@ -394,7 +394,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/sale-returns/exchange',
             pageBuilder: (context, state) =>
-                _page(context, state, const PosScreen()),
+                _page(context, state, const PosScreen(exchange: true)),
           ),
           GoRoute(
             path: '/sale-returns/held',

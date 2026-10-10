@@ -313,9 +313,7 @@ class _VariantSheetState extends State<_VariantSheet> {
                         controller: _rows[i].name,
                         onChanged: (_) => setState(() {}),
                         textCapitalization: TextCapitalization.words,
-                        decoration: InputDecoration(
-                          labelText: t('Field name'),
-                        ),
+                        decoration: InputDecoration(labelText: t('Field name')),
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -480,7 +478,8 @@ class _FieldsSource extends StatelessWidget {
             ],
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-              child: Text(t('Change'),
+              child: Text(
+                t('Change'),
                 style: TextStyle(
                   fontSize: 13.5,
                   fontWeight: FontWeight.w700,

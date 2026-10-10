@@ -1478,8 +1478,10 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       title: Text(_variants[i].name),
                       subtitle: Text(
                         t('Stock: {v1}  •  ₹{v2}', {
-                          'v1': _variants[i].openingStock,
-                          'v2': _variants[i].sellingPrice ?? _selling.text,
+                          'v1': qty(_variants[i].openingStock),
+                          'v2': _variants[i].sellingPrice == null
+                              ? _selling.text
+                              : qty(_variants[i].sellingPrice),
                         }),
                       ),
                       trailing: IconButton(

@@ -211,7 +211,7 @@ Future<double?> _promptPackReturnQty(
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setState) => AlertDialog(
         title: Text(
-          '${it['product_name']}',
+          lineDisplayName(it),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
@@ -358,7 +358,7 @@ final saleReturnDetailProvider = FutureProvider.autoDispose
             'customers(name), profiles(full_name), '
             // The bill line each item came from, for its price (0075).
             'sale_return_items(*, invoice_items(unit_price, gst_rate, '
-            'sold_as_pack, alt_factor, alt_unit_name))',
+            'sold_as_pack, alt_factor, alt_unit_name, variant_name))',
           )
           .eq('id', id)
           .single();
@@ -943,7 +943,7 @@ class SaleReturnDetailScreen extends ConsumerWidget {
                             size: 40,
                           ),
                           title: Text(
-                            items[i]['product_name'] as String? ?? '',
+                            returnItemName(items[i]),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13.5,
@@ -1134,7 +1134,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                 (q / size - (q / size).roundToDouble()).abs() < 1e-6;
             return ExchangeReturnLine(
               productId: it['product_id'] as String?,
-              name: it['product_name'] as String? ?? '',
+              name: lineDisplayName(it),
               qty: q,
               shownQty: whole ? q / size : q,
               qtyLabel: returnQtyLabel(q, it),
@@ -1405,7 +1405,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${it['product_name']}',
+                                lineDisplayName(it),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -1498,7 +1498,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                                         )
                                       : await _promptReturnQty(
                                           context,
-                                          name: '${it['product_name']}',
+                                          name: lineDisplayName(it),
                                           max: maxReturnable,
                                           current: _returnQty[it['id']] ?? 0,
                                         );
@@ -1585,7 +1585,7 @@ class _SaleReturnFormScreenState extends ConsumerState<SaleReturnFormScreen> {
                               onPressed: () async {
                                 final res = await showConditionSplitDialog(
                                   context,
-                                  name: '${it['product_name']}',
+                                  name: lineDisplayName(it),
                                   total: _returnQty[lineId] ?? 0,
                                   current: split,
                                 );
@@ -2623,7 +2623,7 @@ class _PurchaseReturnFormScreenState
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                '${it['product_name']}',
+                                lineDisplayName(it),
                                 style: const TextStyle(
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -2674,7 +2674,7 @@ class _PurchaseReturnFormScreenState
                               : () async {
                                   final v = await _promptReturnQty(
                                     context,
-                                    name: '${it['product_name']}',
+                                    name: lineDisplayName(it),
                                     max: maxReturnable,
                                     current: _returnQty[it['id']] ?? 0,
                                   );

@@ -106,7 +106,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilterChip, 'M'));
     await tester.tap(find.widgetWithText(FilterChip, 'XL'));
     await tester.pump();
-    expect(find.text('1 new variants'), findsOneWidget);
+    expect(find.text('1 new variant'), findsOneWidget);
     await tester.tap(find.text('Add 1'));
     await tester.pumpAndSettle();
     expect([for (final d in result!) d.name], ['XL']);

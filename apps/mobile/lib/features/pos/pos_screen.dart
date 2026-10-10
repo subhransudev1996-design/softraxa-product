@@ -196,7 +196,11 @@ Future<String?> showImeiPicker(
 /// external keyboard-wedge barcode scanners (they type the code and press
 /// Enter, which triggers [_onSubmitted]).
 class PosScreen extends ConsumerStatefulWidget {
-  const PosScreen({super.key});
+  const PosScreen({super.key, this.exchange = false});
+
+  /// The exchange screen (/sale-returns/exchange): bills the replacement
+  /// for the return prepared on the return screen (exchangeDraftProvider).
+  final bool exchange;
 
   @override
   ConsumerState<PosScreen> createState() => _PosScreenState();
@@ -212,8 +216,33 @@ class _PosScreenState extends ConsumerState<PosScreen> {
   /// The product just added: its alternatives show under the search.
   Map<String, dynamic>? _altFor;
 
+  late final ExchangeDraftNotifier _drafts = ref.read(
+    exchangeDraftProvider.notifier,
+  );
+  late final CartNotifier _cartNotifier = ref.read(cartProvider.notifier);
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.exchange) {
+      // Read now: ref can't be used once the screen is going away.
+      _drafts;
+      _cartNotifier;
+    }
+  }
+
   @override
   void dispose() {
+    // Leaving the exchange screen any way at all ends the exchange:
+    // nothing is saved until checkout, and the next ordinary bill must not
+    // carry its return or its replacement items.
+    if (widget.exchange) {
+      final drafts = _drafts, cart = _cartNotifier;
+      Future.microtask(() {
+        drafts.set(null);
+        cart.clear();
+      });
+    }
     _searchController.dispose();
     _searchFocus.dispose();
     super.dispose();
@@ -823,23 +852,9 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     final pendingCount = ref.watch(pendingBillCountProvider).value ?? 0;
     final heldCount = ref.watch(heldBillsProvider).length;
     final editing = ref.watch(editingInvoiceProvider);
-    // Exchange mode only on its own route. Leaving it some other way (e.g.
-    // switching tabs) must not turn the next ordinary bill into an exchange,
-    // so a leftover draft is dropped once the exchange screen isn't on top.
-    final onExchange =
-        GoRouter.of(context).routerDelegate.currentConfiguration.uri.path ==
-        '/sale-returns/exchange';
-    final exchange = onExchange ? ref.watch(exchangeDraftProvider) : null;
-    if (!onExchange && ref.read(exchangeDraftProvider) != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final top = GoRouter.of(
-          context,
-        ).routerDelegate.currentConfiguration.uri.path;
-        if (mounted && top != '/sale-returns/exchange') {
-          ref.read(exchangeDraftProvider.notifier).set(null);
-        }
-      });
-    }
+    // Exchange mode only on its own route, which says so (the router's
+    // location doesn't change for a pushed screen, so it can't be asked).
+    final exchange = widget.exchange ? ref.watch(exchangeDraftProvider) : null;
     final guarded = editing != null || exchange != null;
 
     final wide = isWideLayout(context);
@@ -1122,7 +1137,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         : 'Review changes',
                     onCheckout: cart.lines.isEmpty
                         ? null
-                        : () => showCheckoutSheet(context),
+                        : () => showCheckoutSheet(context, exchange: exchange),
                   ),
                 ),
               ],
@@ -1386,7 +1401,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                               ),
                             ),
                             FilledButton.icon(
-                              onPressed: () => showCheckoutSheet(context),
+                              onPressed: () => showCheckoutSheet(
+                                context,
+                                exchange: exchange,
+                              ),
                               icon: const Icon(Icons.arrow_forward, size: 18),
                               label: Text(
                                 editing == null
@@ -1466,7 +1484,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
         },
         const SingleActivator(LogicalKeyboardKey.f12): () {
           if (ref.read(cartProvider).lines.isNotEmpty) {
-            showCheckoutSheet(context);
+            showCheckoutSheet(context, exchange: exchange);
           }
         },
       },
@@ -1514,7 +1532,9 @@ class _ExchangeBannerState extends ConsumerState<_ExchangeBanner> {
     );
     const ink = AppColors.indigo;
     const small = TextStyle(fontSize: 12.5, color: ink);
-    final diffColor = diff.label == 'Give back' ? AppColors.green : ink;
+    final diffColor = cart.lines.isNotEmpty && diff.label == 'Give back'
+        ? AppColors.green
+        : ink;
 
     return Container(
       width: double.infinity,

@@ -263,7 +263,16 @@ const variantPresets = <VariantPreset>[
       'shorts',
     ],
     [
-      VariantField('Size', ['S', 'M', 'L', 'XL', 'XXL']),
+      VariantField('Size', [
+        'XS',
+        'S',
+        'M',
+        'L',
+        'XL',
+        'XXL',
+        '3XL',
+        'Free size',
+      ]),
       VariantField('Color', _colors),
       VariantField('Fabric', ['Cotton', 'Polyester', 'Denim', 'Linen']),
     ],

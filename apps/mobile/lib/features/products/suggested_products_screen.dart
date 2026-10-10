@@ -99,16 +99,18 @@ class _SuggestedProductsScreenState
       _error = null;
     });
     try {
-      final res = await ref.read(supabaseProvider).rpc(
-        'browse_master_products',
-        params: {
-          'p_type': _type,
-          'p_category': _category,
-          'p_query': _query,
-          'p_limit': _pageSize,
-          'p_offset': more ? _rows.length : 0,
-        },
-      );
+      final res = await ref
+          .read(supabaseProvider)
+          .rpc(
+            'browse_master_products',
+            params: {
+              'p_type': _type,
+              'p_category': _category,
+              'p_query': _query,
+              'p_limit': _pageSize,
+              'p_offset': more ? _rows.length : 0,
+            },
+          );
       if (!mounted || gen != _generation) return;
       final d = Map<String, dynamic>.from(res as Map);
       List<Map<String, dynamic>> list(String key) => [
@@ -174,7 +176,10 @@ class _SuggestedProductsScreenState
     try {
       final client = ref.read(supabaseProvider);
       for (var i = 0; i < items.length; i += 100) {
-        final chunk = items.sublist(i, i + 100 > items.length ? items.length : i + 100);
+        final chunk = items.sublist(
+          i,
+          i + 100 > items.length ? items.length : i + 100,
+        );
         final res = await client.rpc(
           'add_products_from_master',
           params: {'p_items': chunk},
@@ -238,9 +243,7 @@ class _SuggestedProductsScreenState
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.playlist_add_check),
-                  label: Text(
-                    t('Add {n} products', {'n': _ticked.length}),
-                  ),
+                  label: Text(t('Add {n} products', {'n': _ticked.length})),
                 ),
               ),
             ),
@@ -284,7 +287,11 @@ class _SuggestedProductsScreenState
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 children: [
-                  _chip(t('All categories'), _category.isEmpty, () => _setCategory('')),
+                  _chip(
+                    t('All categories'),
+                    _category.isEmpty,
+                    () => _setCategory(''),
+                  ),
                   for (final c in _categories)
                     _chip(
                       '${c['category']} (${c['count']})',
@@ -299,7 +306,9 @@ class _SuggestedProductsScreenState
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                t('Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.'),
+                t(
+                  'Tick what you sell, enter your selling price, then add them all. Products you already have are not shown.',
+                ),
                 style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
               ),
             ),
@@ -325,7 +334,11 @@ class _SuggestedProductsScreenState
 
   Widget _chip(String label, bool selected, VoidCallback onTap) => Padding(
     padding: const EdgeInsets.only(right: 8, top: 4, bottom: 4),
-    child: ChoiceChip(label: Text(label), selected: selected, onSelected: (_) => onTap()),
+    child: ChoiceChip(
+      label: Text(label),
+      selected: selected,
+      onSelected: (_) => onTap(),
+    ),
   );
 
   Widget _body(String ownKey) {
@@ -348,7 +361,9 @@ class _SuggestedProductsScreenState
     if (_rows.isEmpty) {
       return EmptyState(
         icon: Icons.search_off,
-        message: t('Nothing found. Try another word, a category, or "Everything".'),
+        message: t(
+          'Nothing found. Try another word, a category, or "Everything".',
+        ),
       );
     }
     final canMore = _rows.length < _total;
@@ -411,7 +426,10 @@ class _SuggestedProductsScreenState
                 m['name'] as String? ?? '',
                 style: const TextStyle(fontWeight: FontWeight.w600),
               ),
-              subtitle: Text(detail, style: TextStyle(color: AppColors.inkSoft, fontSize: 12)),
+              subtitle: Text(
+                detail,
+                style: TextStyle(color: AppColors.inkSoft, fontSize: 12),
+              ),
             ),
             if (on)
               Padding(
@@ -421,8 +439,12 @@ class _SuggestedProductsScreenState
                     Expanded(
                       child: TextField(
                         controller: _price[id],
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
                         decoration: InputDecoration(
                           labelText: t('Selling price'),
                           prefixText: '₹ ',
@@ -434,8 +456,12 @@ class _SuggestedProductsScreenState
                     Expanded(
                       child: TextField(
                         controller: _stock[id],
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.]'))],
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.]')),
+                        ],
                         decoration: InputDecoration(
                           labelText: t('Stock (optional)'),
                           isDense: true,

@@ -81,9 +81,12 @@ class ProductsScreen extends ConsumerWidget {
                   builder: (rows) => rows.isEmpty
                       ? EmptyState(
                           icon: Icons.inventory_2_outlined,
-                          message: t('No products yet.\nAdd your first product or import from Excel.'),
+                          message: t(
+                            'No products yet.\nAdd your first product or import from Excel.',
+                          ),
                           action: FilledButton.icon(
-                            onPressed: () => context.push('/products/suggested'),
+                            onPressed: () =>
+                                context.push('/products/suggested'),
                             icon: const Icon(Icons.playlist_add_check),
                             label: Text(t('Pick from suggested products')),
                           ),

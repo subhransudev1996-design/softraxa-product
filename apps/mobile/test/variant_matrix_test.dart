@@ -101,7 +101,7 @@ void main() {
     expect(autoVariantSku('', {'Storage': '128 GB'}), '128-GB');
     expect(
       autoVariantSku('Very Long Product Name Here', {'Size': 'M'}),
-      'VERY-LONG-PR-M',
+      'VERY-LONG-M',
     );
   });
 }

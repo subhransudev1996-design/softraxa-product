@@ -119,7 +119,9 @@ class _VariantBuilderState extends State<_VariantBuilder> {
       d.attributes.keys.forEach(add);
     }
     _preset?.fields.forEach((f) => add(f.name));
-    categoryOf(widget.businessType).variantFields.forEach(add);
+    categoryOf(
+      widget.businessType,
+    ).variantFields.where((f) => f != 'Option').forEach(add);
     for (final s in ['Size', 'Color', 'Weight', 'Pack']) {
       add(s);
     }
@@ -182,6 +184,17 @@ class _VariantBuilderState extends State<_VariantBuilder> {
     }
   }
 
+  static const _clothingSizes = [
+    'XS',
+    'S',
+    'M',
+    'L',
+    'XL',
+    'XXL',
+    '3XL',
+    'Free size',
+  ];
+
   static String _num(double v) =>
       v == v.roundToDouble() ? v.toInt().toString() : v.toString();
 
@@ -195,12 +208,16 @@ class _VariantBuilderState extends State<_VariantBuilder> {
     for (final a in axesOf(widget.existing)) {
       if (a.name.toLowerCase() == key) a.values.forEach(add);
     }
-    for (final f in _preset?.fields ?? const <VariantField>[]) {
-      if (f.name.toLowerCase() == key) f.options.forEach(add);
-    }
-    optionsForField(name).forEach(add);
-    if (looksLikeSize(name) && out.isEmpty) {
-      ['S', 'M', 'L', 'XL', 'XXL'].forEach(add);
+    final own = (_preset?.fields ?? const <VariantField>[]).where(
+      (f) => f.name.toLowerCase() == key,
+    );
+    if (own.isNotEmpty) {
+      // A kurta's sizes are S M L — not a wire's sq mm or a tile's cm.
+      own.expand((f) => f.options).forEach(add);
+    } else if (looksLikeSize(name) && _preset == null) {
+      _clothingSizes.forEach(add);
+    } else {
+      optionsForField(name).take(10).forEach(add);
     }
     return out;
   }
@@ -370,6 +387,16 @@ class _VariantBuilderState extends State<_VariantBuilder> {
             children: [
               for (final name in _types)
                 FilterChip(
+                  showCheckmark: false,
+                  selectedColor: AppColors.primary,
+                  labelStyle: WidgetStateTextStyle.resolveWith(
+                    (st) => TextStyle(
+                      color: st.contains(WidgetState.selected)
+                          ? Colors.white
+                          : null,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                   label: Text(name),
                   selected: _axes.any((a) => a.name == name),
                   onSelected: (_) => _toggleType(name),
@@ -397,6 +424,16 @@ class _VariantBuilderState extends State<_VariantBuilder> {
                   ...a.selected.where((s) => !a.options.contains(s)),
                 ])
                   FilterChip(
+                    showCheckmark: false,
+                    selectedColor: AppColors.primary,
+                    labelStyle: WidgetStateTextStyle.resolveWith(
+                      (st) => TextStyle(
+                        color: st.contains(WidgetState.selected)
+                            ? Colors.white
+                            : null,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
                     label: Text(v),
                     selected: a.selected.contains(v),
                     onSelected: a.locked.contains(v)
@@ -422,8 +459,12 @@ class _VariantBuilderState extends State<_VariantBuilder> {
           const SizedBox(height: 20),
           SectionLabel(
             editingLater
-                ? t('{v1} new variants', {'v1': newCount})
-                : t('{v1} variants', {'v1': combos.length}),
+                ? (newCount == 1
+                      ? t('1 new variant')
+                      : t('{v1} new variants', {'v1': newCount}))
+                : (combos.length == 1
+                      ? t('1 variant')
+                      : t('{v1} variants', {'v1': combos.length})),
           ),
           if (combos.isEmpty)
             Text(

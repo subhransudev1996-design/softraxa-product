@@ -5,6 +5,23 @@ import '../../core/formatters.dart';
 /// box price, a loose piece at the loose price, after the line's discount,
 /// GST included — then the bill discount's share.
 
+/// "Cotton Kurta (XL / Red)": the item and its size/colour, so two lines
+/// of the same product can be told apart.
+String lineDisplayName(Map<String, dynamic> it) {
+  final name = (it['product_name'] as String? ?? '').trim();
+  final variant = (it['variant_name'] as String? ?? '').trim();
+  return variant.isEmpty ? name : '$name ($variant)';
+}
+
+/// A return line's item with the size/colour of the bill line it came
+/// from (`invoice_items(variant_name)` embedded), when known.
+String returnItemName(Map<String, dynamic> it) {
+  final name = (it['product_name'] as String? ?? '').trim();
+  final variant =
+      ((it['invoice_items'] as Map?)?['variant_name'] as String? ?? '').trim();
+  return variant.isEmpty ? name : '$name ($variant)';
+}
+
 /// One unit (base unit, e.g. a piece) of this bill line, as billed.
 double returnUnitValue(Map<String, dynamic> it) {
   final q = toDouble(it['quantity']);

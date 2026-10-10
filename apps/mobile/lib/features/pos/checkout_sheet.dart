@@ -23,7 +23,11 @@ import 'cart.dart';
 import 'pos_providers.dart';
 import '../../core/theme.dart';
 
-Future<void> showCheckoutSheet(BuildContext context) {
+/// [exchange]: checking out the exchange screen's replacement bill.
+Future<void> showCheckoutSheet(
+  BuildContext context, {
+  ExchangeDraft? exchange,
+}) {
   // Desktop: a centred dialog, the way desktop software asks for payment.
   if (isWideLayout(context)) {
     return showDialog(
@@ -36,7 +40,7 @@ Future<void> showCheckoutSheet(BuildContext context) {
             maxWidth: 600,
             maxHeight: MediaQuery.sizeOf(ctx).height * 0.9,
           ),
-          child: const _CheckoutSheet(dialog: true),
+          child: _CheckoutSheet(dialog: true, exchange: exchange),
         ),
       ),
     );
@@ -50,16 +54,19 @@ Future<void> showCheckoutSheet(BuildContext context) {
     useSafeArea: true,
     builder: (ctx) => Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-      child: const _CheckoutSheet(),
+      child: _CheckoutSheet(exchange: exchange),
     ),
   );
 }
 
 class _CheckoutSheet extends ConsumerStatefulWidget {
-  const _CheckoutSheet({this.dialog = false});
+  const _CheckoutSheet({this.dialog = false, this.exchange});
 
   /// Shown in a desktop dialog: fills it instead of being a draggable sheet.
   final bool dialog;
+
+  /// The exchange being checked out, from the exchange screen only.
+  final ExchangeDraft? exchange;
 
   @override
   ConsumerState<_CheckoutSheet> createState() => _CheckoutSheetState();
@@ -95,7 +102,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
   String _excess = 'advance';
   String _refundMode = 'cash';
 
-  ExchangeDraft? get _exchange => ref.read(exchangeDraftProvider);
+  ExchangeDraft? get _exchange => widget.exchange;
 
   /// What the customer pays for this bill: the total, less the exchange
   /// credit in exchange mode.
@@ -202,7 +209,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (_splitMode && _docType != 'estimate') {
       final hasAnyEntry = _splitEntries.any((e) => e.$2 > 0);
       if (!hasAnyEntry) {
-        showError(context, t('Enter an amount for at least one payment method'));
+        showError(
+          context,
+          t('Enter an amount for at least one payment method'),
+        );
         return;
       }
       // Credit rows aren't real payments — they're excluded from what's
@@ -300,7 +310,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       if (result.offline) {
         showSuccess(
           context,
-          t('Saved offline as {v1}. It will sync automatically.', {'v1': result.invoiceNo}),
+          t('Saved offline as {v1}. It will sync automatically.', {
+            'v1': result.invoiceNo,
+          }),
         );
       } else {
         showSuccess(context, t('Bill {v1} created', {'v1': result.invoiceNo}));
@@ -362,7 +374,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       Navigator.pop(context); // close sheet
       showSuccess(
         context,
-        t('Sent to the owner. Complete the sale from Approvals once it is approved.'),
+        t(
+          'Sent to the owner. Complete the sale from Approvals once it is approved.',
+        ),
       );
     } catch (e) {
       if (mounted) showError(context, e);
@@ -553,7 +567,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     final cart = ref.watch(cartProvider);
     final editing = ref.watch(editingInvoiceProvider);
     final appContext = ref.watch(appContextProvider).value;
-    final exchange = ref.watch(exchangeDraftProvider);
+    final exchange = widget.exchange;
     final payable = _payable(cart);
     final excess = exchange == null ? 0.0 : exchange.credit - cart.total;
     final paid = _computePaid(cart);
@@ -620,7 +634,10 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            t('Editing {v1} — {v2}', {'v1': editing.invoiceNo, 'v2': editing.invoiceType.toUpperCase()}),
+                            t('Editing {v1} — {v2}', {
+                              'v1': editing.invoiceNo,
+                              'v2': editing.invoiceType.toUpperCase(),
+                            }),
                             style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               color: AppColors.indigo,
@@ -656,7 +673,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   if (_docType == 'estimate')
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(t('Estimates do not deduct stock or record payment.'),
+                      child: Text(
+                        t('Estimates do not deduct stock or record payment.'),
                         style: TextStyle(fontSize: 13, color: AppColors.orange),
                       ),
                     ),
@@ -732,7 +750,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                         runSpacing: 2,
                                         children: [
                                           Text(
-                                            t('Current due: {v1}', {'v1': money(existingDue)}),
+                                            t('Current due: {v1}', {
+                                              'v1': money(existingDue),
+                                            }),
                                             style: TextStyle(
                                               fontSize: 13,
                                               fontWeight: FontWeight.w600,
@@ -743,7 +763,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                           ),
                                           if (creditLimit != null)
                                             Text(
-                                              t('Credit limit: {v1}', {'v1': money(creditLimit)}),
+                                              t('Credit limit: {v1}', {
+                                                'v1': money(creditLimit),
+                                              }),
                                               style: TextStyle(
                                                 fontSize: 13,
                                                 color: AppColors.inkSoft,
@@ -755,7 +777,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   },
                                 ),
                               ] else
-                                Text(t('No customer selected'),
+                                Text(
+                                  t('No customer selected'),
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.inkSoft,
@@ -781,7 +804,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   }
                                 },
                                 child: Text(
-                                  cart.customer == null ? t('Select') : 'Change',
+                                  cart.customer == null
+                                      ? t('Select')
+                                      : 'Change',
                                 ),
                               ),
                               if (cart.customer != null)
@@ -890,7 +915,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            t('About {v1} of credit is left after this bill.', {'v1': money(excess)}),
+                            t('About {v1} of credit is left after this bill.', {
+                              'v1': money(excess),
+                            }),
                             style: const TextStyle(fontWeight: FontWeight.w600),
                           ),
                           const SizedBox(height: 8),
@@ -911,7 +938,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   setState(() => _excess = s.first),
                             )
                           else
-                            Text(t('Walk-in customer: it will be refunded.'),
+                            Text(
+                              t('Walk-in customer: it will be refunded.'),
                               style: TextStyle(
                                 fontSize: 12.5,
                                 color: AppColors.inkSoft,
@@ -927,7 +955,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   ('upi', 'UPI'),
                                 ])
                                   ChoiceChip(
-                                    label: Text(t('Refund by {v1}', {'v1': m.$2})),
+                                    label: Text(
+                                      t('Refund by {v1}', {'v1': m.$2}),
+                                    ),
                                     selected: _refundMode == m.$1,
                                     onSelected: (_) =>
                                         setState(() => _refundMode = m.$1),
@@ -1147,7 +1177,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(t('Collected'),
+                            Text(
+                              t('Collected'),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -1165,7 +1196,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Text(t('Due'),
+                            Text(
+                              t('Due'),
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.inkSoft,
@@ -1189,7 +1221,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                   if (due > 0 && cart.customer == null)
                     Padding(
                       padding: const EdgeInsets.only(top: 8),
-                      child: Text(t('Select a customer on the bill to track this due.'),
+                      child: Text(
+                        t('Select a customer on the bill to track this due.'),
                         style: TextStyle(fontSize: 13, color: AppColors.red),
                       ),
                     ),
@@ -1268,7 +1301,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                     child: Text(
                       editing.paidAmount - cart.total >= 0.01 &&
                               cart.customer == null
-                          ? t('Hand the difference back to the customer — the bill\'s payment is reduced to match.')
+                          ? t(
+                              'Hand the difference back to the customer — the bill\'s payment is reduced to match.',
+                            )
                           : 'Payments already recorded on this bill are unaffected — only the items and total change.',
                       style: TextStyle(
                         fontSize: 12.5,
@@ -1282,9 +1317,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                 const SizedBox(height: 12),
                 TextField(
                   controller: _notes,
-                  decoration: InputDecoration(
-                    labelText: t('Note (optional)'),
-                  ),
+                  decoration: InputDecoration(labelText: t('Note (optional)')),
                 ),
                 const SizedBox(height: 16),
               ],
@@ -1359,7 +1392,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(t('Customer pays the difference now?'),
+          Text(
+            t('Customer pays the difference now?'),
             style: TextStyle(fontWeight: FontWeight.w700, color: AppColors.ink),
           ),
           const SizedBox(height: 8),
@@ -1384,7 +1418,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
               ),
               decoration: InputDecoration(
                 labelText: t('Amount received ₹'),
-                helperText: t('Up to {v1}; anything left stays as due', {'v1': money(due)}),
+                helperText: t('Up to {v1}; anything left stays as due', {
+                  'v1': money(due),
+                }),
               ),
               onChanged: (_) => setState(() => _collectTouched = true),
             ),
