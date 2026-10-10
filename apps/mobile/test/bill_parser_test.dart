@@ -27,6 +27,7 @@ List<BillWord> layout(
 
 void main() {
   tallyExcelBillTest();
+  tallyPdfBillTest();
   test('numbers as bills print them', () {
     expect(billNumber('1,23,456.50'), 123456.5);
     expect(billNumber('₹ 550.00'), 550);
@@ -535,6 +536,135 @@ void tallyExcelBillTest() {
     expect(bill.date, DateTime(2026, 8, 25));
     expect(bill.gstins.first, '21AAAAA1111A1Z1');
     expect(bill.supplierName, 'Demo Mobiles Pvt. Ltd');
+    expect(bill.total, 71040);
+  });
+}
+
+/// The same kind of Tally bill as a PDF: a centred "Description" header
+/// (the name's first word sits under "Sl No."), labels at the top, the
+/// e-way bill page listing the goods again, and the supplier in the
+/// signature. (Made-up names and numbers.)
+void tallyPdfBillTest() {
+  test('a Tally PDF: centred header, e-way goods list, signature', () {
+    List<BillWord> copy(int page) => [
+      ...layout([
+        [(34, 'IRN'), (88, ':'), (95, '93193dd5c62d70b45bcbef55')],
+        [(34, 'Ack No.'), (88, ':'), (95, '182623550534037')],
+        [
+          (34, 'Demo Mobiles Pvt. Ltd - (2024-26)'),
+          (315, 'Invoice No.'),
+          (429, 'Dated'),
+        ],
+        [(34, 'Plot No- 1'), (315, 'DM/2627/8/77'), (429, '25-Aug-26')],
+        [(34, 'GSTIN/UIN: 21AAAAA1111A1Z1')],
+        [(34, 'GSTIN/UIN'), (109, ':'), (114, '21BBBBB2222B1Z2')],
+        [
+          (35, 'Sl'),
+          (100, 'Description of Goods'),
+          (248, 'HSN/SAC'),
+          (307, 'Quantity'),
+          (369, 'Rate'),
+          (412, 'per'),
+          (433, 'Disc. %'),
+          (491, 'Amount'),
+        ],
+        [
+          (38, '1'),
+          (48, 'Demo Phone 8GB+256GB Black'),
+          (245, '85171300'),
+          (323, '1 Pcs'),
+          (365, '31,728.81'),
+          (414, 'Pcs'),
+          (498, '31,728.81'),
+        ],
+        [(60, '350846500000011')],
+        [
+          (38, '2'),
+          (48, 'Demo Phone 8GB+128GB White'),
+          (245, '85171300'),
+          (323, '1 Pcs'),
+          (365, '28,474.58'),
+          (414, 'Pcs'),
+          (498, '28,474.58'),
+        ],
+        [(60, '350846500000022')],
+        [(498, '60,203.39')],
+        [(207, 'CGST'), (504, '5,418.30')],
+        [(207, 'SGST'), (504, '5,418.30')],
+        [(411, 'continued to page number 2')],
+      ], page: page),
+      ...layout([
+        [
+          (35, 'Sl'),
+          (100, 'Description of Goods'),
+          (248, 'HSN/SAC'),
+          (307, 'Quantity'),
+          (369, 'Rate'),
+          (412, 'per'),
+          (433, 'Disc. %'),
+          (491, 'Amount'),
+        ],
+        [(187, 'Round Off'), (525, '0.01')],
+        [(215, 'Total'), (323, '2 Pcs'), (490, '71,040.00')],
+        [
+          (107, 'HSN/SAC'),
+          (242, 'Taxable'),
+          (325, 'CGST'),
+          (406, 'SGST/UTGST'),
+          (505, 'Total'),
+        ],
+        [
+          (200, 'Total'),
+          (248, '60,203.39'),
+          (350, '5,418.30'),
+          (447, '5,418.30'),
+          (503, '10,836.60'),
+        ],
+        [(381, 'for Demo Mobiles Pvt. Ltd - (2024-26)')],
+        [(468, 'Authorised Signatory')],
+      ], page: page + 1),
+    ];
+    final eway = layout([
+      [
+        (50, 'HSN'),
+        (90, 'Product Name & Desc'),
+        (400, 'Quantity'),
+        (470, 'Taxable Amt'),
+        (540, 'Tax Rate'),
+      ],
+      [
+        (50, '85171300'),
+        (90, 'Demo Phone 8GB+256GB Black & Smart Phone'),
+        (400, '1 PCS'),
+        (470, '31,728.81'),
+        (540, '9+9'),
+      ],
+      [
+        (50, '85171300'),
+        (90, 'Demo Phone 8GB+128GB White & Smart Phone'),
+        (400, '1 PCS'),
+        (470, '28,474.58'),
+        (540, '9+9'),
+      ],
+      [
+        (50, 'Tot.Taxable Amt : 60,203.39'),
+        (400, 'Total Inv Amt :'),
+        (470, '71,040.00'),
+      ],
+    ], page: 2);
+    final bill = parseBill([...copy(0), ...eway, ...copy(3), ...copy(5)]);
+    expect(bill.lines.map((l) => l.name), [
+      'Demo Phone 8GB+256GB Black',
+      'Demo Phone 8GB+128GB White',
+    ]);
+    expect(bill.lines.map((l) => l.serials), [
+      ['350846500000011'],
+      ['350846500000022'],
+    ]);
+    expect(bill.lines.map((l) => l.gstRate), [18, 18]);
+    expect(bill.supplierName, 'Demo Mobiles Pvt. Ltd');
+    expect(bill.billNo, 'DM/2627/8/77');
+    expect(bill.date, DateTime(2026, 8, 25));
     expect(bill.total, 71040);
   });
 }

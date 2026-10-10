@@ -841,11 +841,12 @@ ParsedBill parseBill(
 }) {
   final rows = billRows(words);
   // A bill printed in copies (original, duplicate for transporter,
-  // triplicate) has its table again after its total: each table after a
-  // finished one is a segment, and a segment the same as one before is a
-  // copy.
+  // triplicate) has its table again, and an e-way bill page lists the
+  // goods once more: each table is a segment (a page "continued" from the
+  // last goes on in the same one), and a segment whose lines are all
+  // already there is a copy.
   final segments = <List<BillLine>>[[]];
-  var finished = false;
+  var continued = false;
   double? tableTotal;
   int? firstHeader;
   List<BillColumn> columns = const [];
@@ -872,8 +873,8 @@ ParsedBill parseBill(
           : null;
       columns = _columnsOf(row, sub, overrides);
       firstHeader ??= i;
-      if (finished && segments.last.isNotEmpty) segments.add([]);
-      finished = false;
+      if (!continued && segments.last.isNotEmpty) segments.add([]);
+      continued = false;
       foundHeader = true;
       inTable = true;
       tableEnded = false;
@@ -889,11 +890,10 @@ ParsedBill parseBill(
     if (_stopRow.hasMatch(stopText)) {
       inTable = false;
       tableEnded = true;
-      if (!_continued.hasMatch(stopText)) {
-        finished = true;
-        if (tableTotal == null && _totalRow.hasMatch(stopText)) {
-          tableTotal = _lastNumber(row);
-        }
+      if (_continued.hasMatch(stopText)) {
+        continued = true;
+      } else if (tableTotal == null && _totalRow.hasMatch(stopText)) {
+        tableTotal = _lastNumber(row);
       }
       continue;
     }
@@ -928,26 +928,30 @@ ParsedBill parseBill(
   }
 
   final lines = <BillLine>[];
-  final seen = <String>{};
   for (final seg in segments) {
-    final key = seg
-        .map((l) => '${l.name}|${l.qty}|${l.rate}|${l.amount}|${l.taxable}')
-        .join('\n');
-    if (seg.isEmpty || !seen.add(key)) continue;
+    for (final l in seg) {
+      l.resolve();
+    }
+    // Every line already there (same quantity and value): a copy.
+    if (seg.isEmpty ||
+        (lines.isNotEmpty &&
+            seg.every((l) => lines.any((k) => _sameLine(k, l))))) {
+      continue;
+    }
     lines.addAll(seg);
   }
 
   if (!foundHeader || lines.isEmpty) {
     final guessed = _guessLines(rows);
     if (guessed.isNotEmpty) {
+      for (final l in guessed) {
+        l.resolve();
+      }
       lines
         ..clear()
         ..addAll(guessed);
       foundHeader = false;
     }
-  }
-  for (final l in lines) {
-    l.resolve();
   }
   final total = _totalOf(rows, tableTotal);
   _impliedGst(lines, total);
@@ -966,7 +970,7 @@ ParsedBill parseBill(
     billNo: _billNoOf(head),
     date: _dateOf(head),
     gstins: gstins,
-    supplierName: _supplierNameOf(head),
+    supplierName: _signedFor(rows) ?? _supplierNameOf(head),
     total: total,
     foundHeader: foundHeader,
   );
@@ -990,6 +994,13 @@ void _impliedGst(List<BillLine> lines, double? total) {
   }
 }
 
+/// The same item line (another copy of the bill, or the e-way bill's list
+/// of goods): same quantity and value, and the same HSN where both have one.
+bool _sameLine(BillLine a, BillLine b) =>
+    a.qty == b.qty &&
+    (a.value - b.value).abs() < 0.01 &&
+    (a.hsn.isEmpty || b.hsn.isEmpty || a.hsn == b.hsn);
+
 /// A row's words gathered by column. A header sits inside its column's
 /// cell, so whatever a cell holds — left-aligned, centred or right-aligned
 /// past a short header ("10" under "Qty") — ends to the right of its own
@@ -1002,6 +1013,13 @@ Map<BillCol, String> _cellsOf(BillRow row, List<BillColumn> columns) {
   for (final w in row.words) {
     var j = 0;
     while (j + 1 < columns.length && columns[j + 1].left < w.right - 0.5) {
+      j++;
+    }
+    // A centred "Description" header starts well right of its cell: the
+    // name's first word can sit under "Sl No.", which only holds a number.
+    if (columns[j].role == BillCol.sno &&
+        j + 1 < columns.length &&
+        !RegExp(r'^\d{1,4}[.)]?$').hasMatch(w.text)) {
       j++;
     }
     parts.putIfAbsent(j, () => []).add(w.text);
@@ -1458,6 +1476,31 @@ const _titleWords = {
   'estimate',
 };
 
+/// Tally's tag of the financial year: "R.J.S. Enterprises - (2024-26)".
+String _withoutYearTag(String s) =>
+    s.replaceFirst(RegExp(r'\s*-?\s*\(\d{4}\s*-\s*\d{2,4}\)\s*$'), '').trim();
+
+/// The supplier from the signature: "for R.J.S. Enterprises Pvt. Ltd"
+/// above "Authorised Signatory".
+String? _signedFor(List<BillRow> rows) {
+  final forName = RegExp(r'^for\s+(.*[A-Za-z]{3}.*)$', caseSensitive: false);
+  final sign = RegExp(r'authori[sz]ed\s+signatory', caseSensitive: false);
+  for (var i = 0; i < rows.length; i++) {
+    for (final p in billPhrases(rows[i])) {
+      final lines = p.text.split('\n');
+      final m = forName.firstMatch(lines.first.trim());
+      if (m == null) continue;
+      final signed =
+          sign.hasMatch(p.text) ||
+          rows.skip(i + 1).take(4).any((r) => sign.hasMatch(r.text));
+      if (!signed) continue;
+      final name = _withoutYearTag(m.group(1)!);
+      if (name.length >= 3) return name;
+    }
+  }
+  return null;
+}
+
 /// The supplier's name: the biggest text at the top that isn't a title
 /// ("TAX INVOICE"), a label or a number.
 String _supplierNameOf(List<BillRow> rows) {
@@ -1473,7 +1516,7 @@ String _supplierNameOf(List<BillRow> rows) {
       if (t.length < 3 || _titleWords.contains(n)) continue;
       if (!RegExp(r'[A-Za-z]{3}').hasMatch(t)) continue;
       if (RegExp(
-        r'[:]|\b(gstin|gst|phone|ph|mob|email|state|invoice|dated?|buyer|consignee|ship|bill)\b',
+        r'[:]|\b(gstin|gst|phone|ph|mob|email|state|invoice|dated?|buyer|consignee|ship|bill|irn|ack|pan|cin|e-?way|reference|order|dispatch|delivery|terms)\b',
         caseSensitive: false,
       ).hasMatch(t)) {
         continue;
@@ -1487,9 +1530,5 @@ String _supplierNameOf(List<BillRow> rows) {
   }
   // "R.J.S. Enterprises Pvt. Ltd - (2024-26)\nPlot No- 128" → the name:
   // its first line, without Tally's financial-year tag.
-  return (best?.text ?? '')
-      .split('\n')
-      .first
-      .replaceFirst(RegExp(r'\s*-?\s*\(\d{4}\s*-\s*\d{2,4}\)\s*$'), '')
-      .trim();
+  return _withoutYearTag((best?.text ?? '').split('\n').first);
 }
