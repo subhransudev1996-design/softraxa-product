@@ -1049,8 +1049,11 @@ class JobCardDetailScreen extends ConsumerWidget {
 
 /// Bottom sheet to pick a product (+ variant) to add as a job card part.
 class PartPicker extends ConsumerStatefulWidget {
-  const PartPicker({super.key, required this.searchController});
+  const PartPicker({super.key, required this.searchController, this.hint});
   final TextEditingController searchController;
+
+  /// Search box hint; spare-part wording when null.
+  final String? hint;
 
   @override
   ConsumerState<PartPicker> createState() => PartPickerState();
@@ -1133,7 +1136,7 @@ class PartPickerState extends ConsumerState<PartPicker> {
             padding: const EdgeInsets.all(16),
             child: SearchField(
               controller: widget.searchController,
-              hint: t('Search product to use as spare part'),
+              hint: widget.hint ?? t('Search product to use as spare part'),
               autofocus: true,
               onChanged: _load,
             ),

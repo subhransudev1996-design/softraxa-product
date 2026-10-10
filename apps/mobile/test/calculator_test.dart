@@ -88,6 +88,9 @@ void main() {
     expect(r.lines[1].item, isNull);
     expect(r.lines[1].amount, 20);
     expect(r.lines[2].amount, -10);
+    // Each added or taken-off part shows its sign on the tape.
+    expect(r.lines[1].label, '+ 20');
+    expect(r.lines[2].label, '− 10');
     expect(r.hasItems, isTrue);
     // = keeps the items linked.
     expect(s.equals().tokens.length, s.tokens.length);

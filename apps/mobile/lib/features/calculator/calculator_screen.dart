@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoIcons;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -90,7 +91,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       isScrollControlled: true,
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: PartPicker(searchController: search),
+        child: PartPicker(searchController: search, hint: t('Search products')),
       ),
     );
     search.dispose();
@@ -342,25 +343,28 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(t('Send price quote')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: name,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: t('Customer name (optional)'),
+        content: SizedBox(
+          width: 360,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: name,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: t('Customer name (optional)'),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: phone,
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                labelText: t('WhatsApp number (optional)'),
+              const SizedBox(height: 12),
+              TextField(
+                controller: phone,
+                keyboardType: TextInputType.phone,
+                decoration: InputDecoration(
+                  labelText: t('WhatsApp number (optional)'),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -696,7 +700,7 @@ class _Keypad extends StatelessWidget {
             onTap: onTap,
             child: Center(
               child: icon != null
-                  ? Icon(icon, color: foreground)
+                  ? Icon(icon, size: 28, color: foreground ?? scheme.onSurface)
                   : Text(
                       label,
                       style: TextStyle(
@@ -714,6 +718,12 @@ class _Keypad extends StatelessWidget {
     Widget op(String o) => key(
       o,
       () => onOp(o),
+      icon: switch (o) {
+        calcPlus => Icons.add,
+        calcMinus => Icons.remove,
+        calcTimes => Icons.close,
+        _ => CupertinoIcons.divide,
+      },
       background: scheme.primaryContainer,
       foreground: scheme.onPrimaryContainer,
     );

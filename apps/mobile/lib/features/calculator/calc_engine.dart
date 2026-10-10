@@ -239,7 +239,7 @@ class CalcState {
     double total = 0;
     final lines = <CalcLine>[];
     String? problem;
-    for (final term in terms) {
+    for (final (index, term) in terms.indexed) {
       final t = _term(term.parts, total);
       if (t == null) return const CalcResult(total: null, lines: []);
       final value = term.minus ? -t.value : t.value;
@@ -254,7 +254,7 @@ class CalcState {
       }
       lines.add(
         CalcLine(
-          label: _label(term.minus, term.parts),
+          label: _label(term.minus, index > 0, term.parts),
           amount: _r2(value),
           item: t.items == 1 ? t.item : null,
           qty: t.items == 1 ? qty : 1,
@@ -321,8 +321,14 @@ class CalcState {
     );
   }
 
-  static String _label(bool minus, List<CalcToken> parts) {
-    final b = StringBuffer(minus ? '$calcMinus ' : '');
+  static String _label(bool minus, bool added, List<CalcToken> parts) {
+    final b = StringBuffer(
+      minus
+          ? '$calcMinus '
+          : added
+          ? '$calcPlus '
+          : '',
+    );
     for (final tk in parts) {
       switch (tk.kind) {
         case CalcTokenKind.number:

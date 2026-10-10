@@ -469,6 +469,11 @@ class AppSidebar extends ConsumerWidget {
                   ]),
                 ...section(t('Other'), [
                   link(
+                    icon: Icons.calculate_outlined,
+                    label: t('Calculator'),
+                    route: '/calculator',
+                  ),
+                  link(
                     icon: Icons.sync_outlined,
                     label: t('Pending offline bills'),
                     route: '/offline-bills',
