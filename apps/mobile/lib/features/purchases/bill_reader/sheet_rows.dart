@@ -5,10 +5,11 @@ import 'package:excel/excel.dart';
 
 import 'pdf_words.dart' show PdfReadError;
 
-/// The rows of a supplier's Excel (.xlsx) or CSV bill, as text cells. The
-/// sheet with the most filled rows is taken (a workbook may have a cover
-/// sheet).
-List<List<String>> readSheetRows(Uint8List bytes, String fileName) {
+/// The sheets of a supplier's Excel (.xlsx) or CSV bill, in order, each as
+/// rows of text cells. A PDF bill turned into Excel has a sheet per page
+/// (and, for a bill printed in copies, the copies too): every sheet is
+/// read, as the pages of one bill.
+List<List<List<String>>> readSheets(Uint8List bytes, String fileName) {
   final name = fileName.toLowerCase();
   if (name.endsWith('.xls')) {
     throw const PdfReadError(
@@ -16,7 +17,7 @@ List<List<String>> readSheetRows(Uint8List bytes, String fileName) {
     );
   }
   if (name.endsWith('.csv') || name.endsWith('.txt') || name.endsWith('.tsv')) {
-    return parseCsv(utf8.decode(bytes, allowMalformed: true));
+    return [parseCsv(utf8.decode(bytes, allowMalformed: true))];
   }
   final Excel excel;
   try {
@@ -26,20 +27,15 @@ List<List<String>> readSheetRows(Uint8List bytes, String fileName) {
       'This file could not be opened as an Excel sheet.',
     );
   }
-  List<List<String>> best = const [];
-  var bestFilled = -1;
+  final sheets = <List<List<String>>>[];
   for (final sheet in excel.tables.values) {
     final rows = [
       for (final r in sheet.rows) [for (final c in r) _cellText(c?.value)],
     ];
-    final filled = rows.where((r) => r.any((c) => c.isNotEmpty)).length;
-    if (filled > bestFilled) {
-      bestFilled = filled;
-      best = rows;
-    }
+    if (rows.any((r) => r.any((c) => c.isNotEmpty))) sheets.add(rows);
   }
-  if (bestFilled <= 0) throw const PdfReadError('This sheet is empty.');
-  return best;
+  if (sheets.isEmpty) throw const PdfReadError('This sheet is empty.');
+  return sheets;
 }
 
 String _cellText(CellValue? v) => switch (v) {

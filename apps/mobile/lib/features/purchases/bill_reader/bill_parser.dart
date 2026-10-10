@@ -43,8 +43,10 @@ class BillWord {
   String toString() => '"$text"@${left.round()},${top.round()}';
 }
 
-/// The words of a sheet (rows of cells) laid out on a grid.
-List<BillWord> sheetWords(List<List<String>> rows) => [
+/// The words of a sheet (rows of cells) laid out on a grid. [page]: the
+/// sheet's place in the workbook (a PDF turned into Excel has a sheet per
+/// page).
+List<BillWord> sheetWords(List<List<String>> rows, {int page = 0}) => [
   for (var r = 0; r < rows.length; r++)
     for (var c = 0; c < rows[r].length; c++)
       if (rows[r][c].trim().isNotEmpty)
@@ -54,6 +56,7 @@ List<BillWord> sheetWords(List<List<String>> rows) => [
           r * 20.0,
           c * 100.0 + 90,
           r * 20.0 + 10,
+          page: page,
         ),
 ];
 
@@ -677,6 +680,9 @@ class BillLine {
   /// Read from a known table header (false: guessed from the numbers).
   final bool fromHeader;
 
+  /// IMEI / serial numbers printed under the item.
+  final List<String> serials = [];
+
   /// Set by [resolve]: the value before GST, and whether the line's own
   /// numbers agree with each other.
   double value = 0;
@@ -789,10 +795,35 @@ class ParsedBill {
 
 final _stopRow = RegExp(
   r'^(sub\s*total|total|grand\s*total|net\s*total|taxable\s*value|amount\s*chargeable|'
-  r'amount\s*in\s*words|rupees|round\s*off|bank\s*details|declaration|e\s*&\s*o\s*e|'
+  r'amount\s*in\s*words|rupees|bank\s*details|declaration|e\s*&\s*o\s*e|'
   r'terms|continued)',
   caseSensitive: false,
 );
+
+/// "Continued to page 2": the table goes on, the bill isn't over.
+final _continued = RegExp(r'^continued', caseSensitive: false);
+
+/// The table's own total line ("Total", "Grand Total").
+final _totalRow = RegExp(r'^(grand\s*)?total\b', caseSensitive: false);
+
+/// IMEI / serial numbers on a line of their own under an item:
+/// "350846584550521", "IMEI: 3508…, 3508…", "S/N AB12345678".
+List<String>? _serialsIn(String text) {
+  final t = text.replaceFirst(
+    RegExp(
+      r'^(imei|serial|s\s*/\s*n|sr\.?\s*no|s\.?\s*no)\s*(no|nos|number|numbers)?\.?\s*[:\-]?\s*',
+      caseSensitive: false,
+    ),
+    '',
+  );
+  final parts = t.split(RegExp(r'[,;\s]+')).where((p) => p.isNotEmpty).toList();
+  if (parts.isEmpty) return null;
+  for (final p in parts) {
+    if (!RegExp(r'^[A-Za-z0-9\-/]{6,24}$').hasMatch(p)) return null;
+    if (RegExp(r'\d').allMatches(p).length < 6) return null;
+  }
+  return parts;
+}
 
 final _notName = RegExp(
   r'^(batch|exp|expiry|mfg|imei|serial|s\s*no|sl\s*no|output|input|cgst|sgst|igst|'
@@ -809,7 +840,14 @@ ParsedBill parseBill(
   Map<String, BillCol> overrides = const {},
 }) {
   final rows = billRows(words);
-  final lines = <BillLine>[];
+  // A bill printed in copies (original, duplicate for transporter,
+  // triplicate) has its table again after its total: each table after a
+  // finished one is a segment, and a segment the same as one before is a
+  // copy.
+  final segments = <List<BillLine>>[[]];
+  var finished = false;
+  double? tableTotal;
+  int? firstHeader;
   List<BillColumn> columns = const [];
   var foundHeader = false;
 
@@ -833,6 +871,9 @@ ParsedBill parseBill(
           ? rows[i + 1]
           : null;
       columns = _columnsOf(row, sub, overrides);
+      firstHeader ??= i;
+      if (finished && segments.last.isNotEmpty) segments.add([]);
+      finished = false;
       foundHeader = true;
       inTable = true;
       tableEnded = false;
@@ -844,30 +885,56 @@ ParsedBill parseBill(
     final cells = _cellsOf(row, columns);
     final nameText = (cells[BillCol.name] ?? '').trim();
     final firstText = row.words.first.text;
-    if (_stopRow.hasMatch(nameText) ||
-        (nameText.isEmpty && _stopRow.hasMatch(firstText))) {
+    final stopText = nameText.isEmpty ? firstText : nameText;
+    if (_stopRow.hasMatch(stopText)) {
       inTable = false;
       tableEnded = true;
+      if (!_continued.hasMatch(stopText)) {
+        finished = true;
+        if (tableTotal == null && _totalRow.hasMatch(stopText)) {
+          tableTotal = _lastNumber(row);
+        }
+      }
       continue;
     }
     final line = _lineOf(cells);
     if (line != null) {
-      lines.add(line);
+      segments.last.add(line);
       lastItemRow = row;
       continuations = 0;
       continue;
     }
+    final last = segments.last.isEmpty ? null : segments.last.last;
+    if (last == null ||
+        lastItemRow == null ||
+        nameText.isEmpty ||
+        _numbersIn(cells) ||
+        row.top - lastItemRow.bottom >= lastItemRow.height * 1.2) {
+      continue;
+    }
+    // IMEI / serial numbers under the item: kept as its serials.
+    final serials = _serialsIn(nameText);
+    if (serials != null) {
+      last.serials.addAll(serials);
+      lastItemRow = row;
+      continue;
+    }
     // A name running on to the next line, with no numbers of its own.
-    if (lastItemRow != null &&
-        nameText.isNotEmpty &&
-        continuations < 2 &&
-        !_numbersIn(cells) &&
-        !_notName.hasMatch(nameText) &&
-        row.top - lastItemRow.bottom < lastItemRow.height * 1.2) {
-      lines.last.name = '${lines.last.name} $nameText';
+    if (continuations < 2 && !_notName.hasMatch(nameText)) {
+      last.name = '${last.name} $nameText';
       lastItemRow = row;
       continuations++;
     }
+  }
+
+  final lines = <BillLine>[];
+  final seen = <String>{};
+  for (final seg in segments) {
+    final key = seg
+        .map((l) => '${l.name}|${l.qty}|${l.rate}|${l.amount}|${l.taxable}')
+        .join('\n');
+    if (seg.isEmpty || !seen.add(key)) continue;
+    lines.addAll(seg);
   }
 
   if (!foundHeader || lines.isEmpty) {
@@ -882,21 +949,45 @@ ParsedBill parseBill(
   for (final l in lines) {
     l.resolve();
   }
+  final total = _totalOf(rows, tableTotal);
+  _impliedGst(lines, total);
 
-  final firstPage = rows
-      .where((r) => r.page == (rows.isEmpty ? 0 : rows.first.page))
-      .toList();
+  // The bill's details are above its item table (on a sheet of their
+  // own, sometimes), else on its first page.
+  final head = firstHeader != null && firstHeader > 0
+      ? rows.sublist(0, firstHeader)
+      : rows
+            .where((r) => r.page == (rows.isEmpty ? 0 : rows.first.page))
+            .toList();
   final gstins = _gstinsOf(rows, ownGstin);
   return ParsedBill(
     lines: lines,
     columns: columns,
-    billNo: _billNoOf(firstPage),
-    date: _dateOf(firstPage),
+    billNo: _billNoOf(head),
+    date: _dateOf(head),
     gstins: gstins,
-    supplierName: _supplierNameOf(firstPage),
-    total: _totalOf(rows),
+    supplierName: _supplierNameOf(head),
+    total: total,
     foundHeader: foundHeader,
   );
+}
+
+/// GST shown only in the tax rows (Tally's "CGST" / "SGST" lines), not on
+/// each line: when one GST slab takes the lines' value to the bill's total
+/// (a rupee of round-off aside), every line has that rate.
+void _impliedGst(List<BillLine> lines, double? total) {
+  if (total == null || lines.isEmpty) return;
+  if (lines.any((l) => l.gstRate != null)) return;
+  final value = lines.fold<double>(0, (s, l) => s + l.value);
+  if (value <= 0 || total < value) return;
+  final rate = nearestSlab((total - value) / value * 100);
+  if (rate == null) return;
+  if ((value * (1 + rate / 100) - total).abs() > math.max(1.0, total * 0.001)) {
+    return;
+  }
+  for (final l in lines) {
+    l.gstRate = rate;
+  }
 }
 
 /// A row's words gathered by column. A header sits inside its column's
@@ -1303,19 +1394,29 @@ DateTime? _dateOf(List<BillRow> rows) {
   return null;
 }
 
-/// The bill's total: the last number on its "Grand Total" / "Net Amount" /
-/// "Total" line, the most specific label winning.
-double? _totalOf(List<BillRow> rows) {
+/// The last number on a row (a total, an amount).
+double? _lastNumber(BillRow row) {
+  for (final w in row.words.reversed) {
+    final v = billNumber(w.text);
+    if (v != null && v > 0) return v;
+  }
+  return null;
+}
+
+/// The bill's total: on a "Grand Total" / "Invoice Total" / "Net Amount"
+/// line, else the item table's own "Total" line ([tableTotal]: a tax
+/// summary below it has a "Total" of its own), else the last "Total" line.
+double? _totalOf(List<BillRow> rows, double? tableTotal) {
   const labels = [
     r'grand\s*total',
     r'invoice\s*(total|amount|value)',
+    r'total\s*inv(oice)?\.?\s*(amt|amount|value)',
     r'net\s*(amount|payable|total)',
     r'(total\s*)?amount\s*payable',
     r'bill\s*amount',
     r'total\s*amount',
-    r'total',
   ];
-  for (final l in labels) {
+  double? find(String l) {
     final re = RegExp('\\b$l\\b', caseSensitive: false);
     double? found;
     for (final r in rows) {
@@ -1327,19 +1428,17 @@ double? _totalOf(List<BillRow> rows) {
       ).hasMatch(r.text.substring(m.start))) {
         continue;
       }
-      double? last;
-      for (final w in r.words.reversed) {
-        final v = billNumber(w.text);
-        if (v != null && v > 0) {
-          last = v;
-          break;
-        }
-      }
+      final last = _lastNumber(r);
       if (last != null) found = last; // the last such line wins
     }
-    if (found != null) return found;
+    return found;
   }
-  return null;
+
+  for (final l in labels) {
+    final v = find(l);
+    if (v != null) return v;
+  }
+  return tableTotal ?? find(r'total');
 }
 
 const _titleWords = {
@@ -1386,5 +1485,11 @@ String _supplierNameOf(List<BillRow> rows) {
       }
     }
   }
-  return best?.text.trim() ?? '';
+  // "R.J.S. Enterprises Pvt. Ltd - (2024-26)\nPlot No- 128" → the name:
+  // its first line, without Tally's financial-year tag.
+  return (best?.text ?? '')
+      .split('\n')
+      .first
+      .replaceFirst(RegExp(r'\s*-?\s*\(\d{4}\s*-\s*\d{2,4}\)\s*$'), '')
+      .trim();
 }

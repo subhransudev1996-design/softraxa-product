@@ -27,6 +27,7 @@ class BillReadLine {
     required this.qty,
     required this.price,
     required this.gstRate,
+    this.serials = const [],
   });
 
   final Map<String, dynamic> product;
@@ -38,6 +39,9 @@ class BillReadLine {
   /// Per unit of the product, before GST, discounts taken off.
   final double price;
   final double gstRate;
+
+  /// IMEI / serial numbers printed under the item on the bill.
+  final List<String> serials;
 }
 
 class BillReadResult {
@@ -193,7 +197,13 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
       final name = widget.fileName.toLowerCase();
       _words = name.endsWith('.pdf')
           ? await readPdfWords(widget.bytes)
-          : sheetWords(readSheetRows(widget.bytes, widget.fileName));
+          : [
+              for (final (i, sheet) in readSheets(
+                widget.bytes,
+                widget.fileName,
+              ).indexed)
+                ...sheetWords(sheet, page: i),
+            ];
       _ownGstin =
           ref.read(appContextProvider).value?.business?['gst_number']
               as String? ??
@@ -918,6 +928,7 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
               qty: l.baseQty,
               price: l.basePrice,
               gstRate: l.gstRate,
+              serials: l.bill.serials,
             ),
         ],
         discount: carry && d < 0 ? -d : 0,
@@ -1222,6 +1233,14 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
                       '${l.product != null && l.factor != 1 ? '  ·  ${_plain(l.baseQty)} ${l.unitName}' : ''}',
                       style: const TextStyle(fontSize: 13),
                     ),
+                    if (l.bill.serials.isNotEmpty)
+                      Text(
+                        'IMEI / S.No: ${l.bill.serials.join(', ')}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: AppColors.inkSoft,
+                        ),
+                      ),
                     const SizedBox(height: 2),
                     Text(status, style: TextStyle(fontSize: 12, color: color)),
                   ],

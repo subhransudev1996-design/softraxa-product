@@ -26,6 +26,7 @@ List<BillWord> layout(
 }
 
 void main() {
+  tallyExcelBillTest();
   test('numbers as bills print them', () {
     expect(billNumber('1,23,456.50'), 123456.5);
     expect(billNumber('₹ 550.00'), 550);
@@ -113,7 +114,8 @@ void main() {
     expect(salt.discPct, 5);
     expect(salt.value, closeTo(1140, 0.01));
     expect(salt.agrees, isTrue);
-    expect(salt.gstRate, isNull); // no GST column: the product's rate is used
+    // No GST column, but 18% takes the lines to the bill's total.
+    expect(salt.gstRate, 18);
   });
 
   test(
@@ -326,5 +328,213 @@ void main() {
     );
     final l = fixed.lines.single;
     expect((l.rate, l.amount, l.agrees), (30.0, 300.0, true));
+  });
+}
+
+/// A Tally bill turned from PDF into Excel: a sheet per page, the bill
+/// printed in copies, IMEIs under each phone, GST only in the tax rows, and
+/// a tax summary with a "Total" of its own. (Made-up names and numbers.)
+void tallyExcelBillTest() {
+  test('a Tally bill saved as Excel: pages, copies, IMEIs, implied GST', () {
+    List<List<String>> top(String copy) => [
+      ['TAX INVOICE ($copy)\nIRN : abc\nAck Date : 25-Aug-26', 'e-Invoice'],
+    ];
+    final page1 = [
+      [
+        'Demo Mobiles Pvt. Ltd - (2024-26)\nPlot No- 1',
+        '',
+        '',
+        '',
+        '',
+        '',
+        'Invoice No.\nDM/2627/8/77',
+        '',
+        'e-Way Bill No.\n861700000000',
+        '',
+        'Dated\n25-Aug-26',
+      ],
+      ['GSTIN/UIN: 21AAAAA1111A1Z1'],
+      ['Buyer (Bill to)'],
+      ['GSTIN/UIN', '', ': 21BBBBB2222B1Z2'],
+      [
+        'Sl\nNo.',
+        'Description of Goods',
+        '',
+        'HSN/SAC',
+        'Quantity',
+        '',
+        '',
+        'Rate',
+        '',
+        'per',
+        'Disc. %',
+        'Amount',
+      ],
+      [
+        '1',
+        'Demo Phone 8GB+256GB Black',
+        '',
+        '85171300',
+        '1 Pcs',
+        '',
+        '',
+        '31728.81',
+        '',
+        'Pcs',
+        '',
+        '31728.81',
+      ],
+      ['', '350846500000011'],
+      [
+        '2',
+        'Demo Phone 8GB+128GB White',
+        '',
+        '85171300',
+        '1 Pcs',
+        '',
+        '',
+        '28474.58',
+        '',
+        'Pcs',
+        '',
+        '28474.58',
+      ],
+      ['', '350846500000022'],
+      ['', '', '', '', '', '', '', '', '', '', '', '60203.39'],
+      ['', 'CGST', '', '', '', '', '', '', '', '', '', '5418.3'],
+      ['', 'SGST', '', '', '', '', '', '', '', '', '', '5418.3'],
+      ['continued to page number  2'],
+    ];
+    final page2 = [
+      [
+        'Sl\nNo.',
+        'Description of Goods',
+        '',
+        '',
+        '',
+        'HSN/SAC',
+        '',
+        'Quantity',
+        '',
+        '',
+        '',
+        '',
+        'Rate',
+        '',
+        'per',
+        'Disc. %',
+        '',
+        'Amount',
+      ],
+      [
+        '',
+        'Round Off',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '0.01',
+      ],
+      [
+        '',
+        'Total',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '2 Pcs',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '71040',
+      ],
+      [
+        'HSN/SAC',
+        '',
+        '',
+        'Taxable\nValue',
+        '',
+        '',
+        'CGST',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        'SGST/UTGST',
+        '',
+        '',
+        '',
+        '',
+        'Total\nTax Amount',
+      ],
+      [
+        'Total',
+        '',
+        '',
+        '60203.39',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        '5418.3',
+        '',
+        '',
+        '',
+        '',
+        '5418.3',
+        '',
+        '',
+        '10836.6',
+      ],
+    ];
+    final sheets = [
+      for (final copy in [
+        'ORIGINAL FOR RECIPIENT',
+        'DUPLICATE FOR TRANSPORTER',
+        'TRIPLICATE FOR SUPPLIER',
+      ]) ...[top(copy), page1, page2],
+    ];
+    final words = [
+      for (final (i, s) in sheets.indexed) ...sheetWords(s, page: i),
+    ];
+    final bill = parseBill(words, ownGstin: '21BBBBB2222B1Z2');
+    expect(bill.lines.map((l) => l.name), [
+      'Demo Phone 8GB+256GB Black',
+      'Demo Phone 8GB+128GB White',
+    ]);
+    expect(bill.lines.map((l) => l.serials), [
+      ['350846500000011'],
+      ['350846500000022'],
+    ]);
+    expect(bill.lines.map((l) => l.value), [31728.81, 28474.58]);
+    expect(bill.lines.every((l) => l.agrees), isTrue);
+    expect(bill.lines.map((l) => l.gstRate), [18, 18]);
+    expect(bill.billNo, 'DM/2627/8/77');
+    expect(bill.date, DateTime(2026, 8, 25));
+    expect(bill.gstins.first, '21AAAAA1111A1Z1');
+    expect(bill.supplierName, 'Demo Mobiles Pvt. Ltd');
+    expect(bill.total, 71040);
   });
 }

@@ -368,7 +368,10 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
         _lines.add(
           _lineFor(l.product, l.variant, qty: l.qty)
             ..price = l.price
-            ..gstRate = l.gstRate,
+            ..gstRate = l.gstRate
+            ..serialNos = l.product['track_serial'] == true
+                ? List<String>.from(l.serials)
+                : [],
         );
       }
       if (result.discount > 0 && _discount.text.trim().isEmpty) {
