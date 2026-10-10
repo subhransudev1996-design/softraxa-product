@@ -130,16 +130,18 @@ Future<Map<String, dynamic>?> showSupplierForm(
   BuildContext context,
   WidgetRef ref, {
   Map<String, dynamic>? existing,
+
+  /// A new supplier's details to start with (read from their bill).
+  Map<String, dynamic>? initial,
 }) async {
-  final name = TextEditingController(text: existing?['name'] as String? ?? '');
-  final phone = TextEditingController(
-    text: existing?['phone'] as String? ?? '',
-  );
+  final seed = existing ?? initial;
+  final name = TextEditingController(text: seed?['name'] as String? ?? '');
+  final phone = TextEditingController(text: seed?['phone'] as String? ?? '');
   final address = TextEditingController(
-    text: existing?['address'] as String? ?? '',
+    text: seed?['address'] as String? ?? '',
   );
   final gst = TextEditingController(
-    text: existing?['gst_number'] as String? ?? '',
+    text: seed?['gst_number'] as String? ?? '',
   );
   final creditLimit = TextEditingController(
     text: existing?['credit_limit'] == null
@@ -147,7 +149,10 @@ Future<Map<String, dynamic>?> showSupplierForm(
         : toDouble(existing!['credit_limit']).toStringAsFixed(0),
   );
 
-  var state = existing?['state_code'] as String? ?? '';
+  var state =
+      seed?['state_code'] as String? ??
+      stateFromGstin(seed?['gst_number'] as String? ?? '') ??
+      '';
 
   final saved = await showDialog<bool>(
     context: context,

@@ -15,17 +15,33 @@ import '../products/product_providers.dart';
 /// and GST, without leaving the purchase. Typing a name offers products from
 /// the shared list; picking one fills its unit, GST, HSN, category and brand.
 /// Returns the new product's id. No opening stock: the purchase brings it in.
-Future<String?> showQuickAddProduct(BuildContext context, {String name = ''}) {
+/// [purchasePrice] / [gstRate]: filled in from a supplier's bill line.
+Future<String?> showQuickAddProduct(
+  BuildContext context, {
+  String name = '',
+  double? purchasePrice,
+  double? gstRate,
+}) {
   return showDialog<String>(
     context: context,
-    builder: (_) => _QuickAddProduct(initialName: name),
+    builder: (_) => _QuickAddProduct(
+      initialName: name,
+      purchasePrice: purchasePrice,
+      gstRate: gstRate,
+    ),
   );
 }
 
 class _QuickAddProduct extends ConsumerStatefulWidget {
-  const _QuickAddProduct({required this.initialName});
+  const _QuickAddProduct({
+    required this.initialName,
+    this.purchasePrice,
+    this.gstRate,
+  });
 
   final String initialName;
+  final double? purchasePrice;
+  final double? gstRate;
 
   @override
   ConsumerState<_QuickAddProduct> createState() => _QuickAddProductState();
@@ -50,6 +66,10 @@ class _QuickAddProductState extends ConsumerState<_QuickAddProduct> {
   @override
   void initState() {
     super.initState();
+    final price = widget.purchasePrice;
+    if (price != null && price > 0) _purchase.text = price.toStringAsFixed(2);
+    final gst = widget.gstRate;
+    if (gst != null && _gstRates.contains(gst)) _gst = gst;
     _name.addListener(_nameChanged);
     if (widget.initialName.trim().length >= 3) _search(widget.initialName);
   }

@@ -12,6 +12,7 @@ import '../../core/widgets.dart';
 import '../pos/cart.dart' show toBaseQty, roundOffFor;
 import '../pos/pos_providers.dart' show posProductColumns;
 import '../suppliers/suppliers.dart';
+import 'bill_reader/bill_review_screen.dart';
 import 'purchase_providers.dart';
 import 'quick_add_product.dart';
 import '../../core/theme.dart';
@@ -323,15 +324,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   }
 
   Future<void> _addProduct() async {
-    final search = TextEditingController();
-    final selected = await showModalBottomSheet<Map<String, dynamic>>(
-      context: context,
-      isScrollControlled: true,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: _ProductPicker(searchController: search),
-      ),
-    );
+    final selected = await showPurchaseProductPicker(context);
     if (selected == null || !mounted) return;
     if (selected['new'] != null) {
       await _createProduct(selected['new'] as String);
@@ -357,6 +350,43 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
   /// "Add new product" in the picker: a quick dialog (name filled in from
   /// the search), then the new product joins this purchase.
+  /// "Read supplier bill": the bill's lines (checked on the review
+  /// screen) join this purchase, with its supplier, number and date when
+  /// they're still empty here.
+  Future<void> _readBill() async {
+    final result = await readSupplierBill(context, supplier: _supplier);
+    if (result == null || !mounted) return;
+    setState(() {
+      if (result.supplier != null &&
+          (_supplier == null || !(_editing && _paidLater > 0.005))) {
+        _supplier = result.supplier;
+      }
+      if (_billNo.text.trim().isEmpty) _billNo.text = result.billNo;
+      final d = result.date;
+      if (d != null && !d.isAfter(DateTime.now())) _date = d;
+      for (final l in result.lines) {
+        _lines.add(
+          _lineFor(l.product, l.variant, qty: l.qty)
+            ..price = l.price
+            ..gstRate = l.gstRate,
+        );
+      }
+      if (result.discount > 0 && _discount.text.trim().isEmpty) {
+        _discountIsPercent = false;
+        _discount.text = result.discount.toStringAsFixed(2);
+      }
+      if (result.extraCharges > 0 && _extraCharges.text.trim().isEmpty) {
+        _extraCharges.text = result.extraCharges.toStringAsFixed(2);
+      }
+    });
+    showSuccess(
+      context,
+      t('{v1} lines added from the bill — check them and save', {
+        'v1': result.lines.length,
+      }),
+    );
+  }
+
   Future<void> _createProduct(String name) async {
     final id = await showQuickAddProduct(context, name: name);
     if (id == null || !mounted) return;
@@ -741,10 +771,24 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                 ),
               ),
             ),
-          OutlinedButton.icon(
-            onPressed: _addProduct,
-            icon: const Icon(Icons.add),
-            label: Text(t('Add product')),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _addProduct,
+                  icon: const Icon(Icons.add),
+                  label: Text(t('Add product')),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _readBill,
+                  icon: const Icon(Icons.document_scanner_outlined),
+                  label: Text(t('Read supplier bill')),
+                ),
+              ),
+            ],
           ),
           SectionLabel(t('Charges')),
           AmountOrPercentField(
@@ -903,17 +947,46 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
   }
 }
 
-/// Product picker bottom sheet used by purchase & return forms.
-class _ProductPicker extends ConsumerStatefulWidget {
-  const _ProductPicker({required this.searchController});
-
-  final TextEditingController searchController;
-
-  @override
-  ConsumerState<_ProductPicker> createState() => _ProductPickerState();
+/// The product picker as a bottom sheet. Returns `{'product', 'variant'}`,
+/// `{'product', 'lines'}` (several sizes/colours from the grid) or
+/// `{'new': name}`. [singleVariant]: one size/colour from a list, never the
+/// grid (choosing what one bill line is).
+Future<Map<String, dynamic>?> showPurchaseProductPicker(
+  BuildContext context, {
+  String search = '',
+  bool singleVariant = false,
+}) {
+  final controller = TextEditingController(text: search);
+  return showModalBottomSheet<Map<String, dynamic>>(
+    context: context,
+    isScrollControlled: true,
+    builder: (ctx) => Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: PurchaseProductPicker(
+        searchController: controller,
+        singleVariant: singleVariant,
+      ),
+    ),
+  );
 }
 
-class _ProductPickerState extends ConsumerState<_ProductPicker> {
+/// Product picker bottom sheet used by purchase & return forms.
+class PurchaseProductPicker extends ConsumerStatefulWidget {
+  const PurchaseProductPicker({
+    super.key,
+    required this.searchController,
+    this.singleVariant = false,
+  });
+
+  final TextEditingController searchController;
+  final bool singleVariant;
+
+  @override
+  ConsumerState<PurchaseProductPicker> createState() =>
+      PurchaseProductPickerState();
+}
+
+class PurchaseProductPickerState extends ConsumerState<PurchaseProductPicker> {
   List<Map<String, dynamic>> _products = [];
   bool _loading = true;
 
@@ -956,7 +1029,7 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
     final variants = List<Map<String, dynamic>>.from(
       product['product_variants'] as List? ?? [],
     )..removeWhere((v) => v['is_active'] == false);
-    final grid = product['has_variants'] == true
+    final grid = product['has_variants'] == true && !widget.singleVariant
         ? variantGridOf(variants)
         : null;
     if (grid != null) {
