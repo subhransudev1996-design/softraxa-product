@@ -405,6 +405,20 @@ class EstimateDraftLine {
   }
 }
 
+/// A part's price per unit before GST. Job cards price parts before GST
+/// and add it on top; a product's selling price already includes GST (as
+/// on a bill), so it is taken out here — else the part costs GST twice.
+double partPriceExGst(
+  Map<String, dynamic> product,
+  Map<String, dynamic>? variant,
+) {
+  final withGst = toDouble(
+    variant?['selling_price'] ?? product['selling_price'],
+  );
+  final gst = toDouble(product['gst_rate']);
+  return (withGst / (1 + gst / 100) * 100).roundToDouble() / 100;
+}
+
 /// A part for an estimate, picked from the product list at its selling
 /// price and GST. Null when nothing was picked.
 Future<EstimateDraftLine?> pickEstimatePart(BuildContext context) async {
@@ -426,7 +440,7 @@ Future<EstimateDraftLine?> pickEstimatePart(BuildContext context) async {
     productId: product['id'] as String,
     variantId: variant?['id'] as String?,
     hsn: product['hsn_code'] as String? ?? '',
-    price: toDouble(variant?['selling_price'] ?? product['selling_price']),
+    price: partPriceExGst(product, variant),
     gst: toDouble(product['gst_rate']),
   );
 }

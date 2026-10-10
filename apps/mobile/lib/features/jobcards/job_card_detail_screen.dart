@@ -160,9 +160,7 @@ class JobCardDetailScreen extends ConsumerWidget {
 
     final qtyC = TextEditingController(text: '1');
     final priceC = TextEditingController(
-      text: toDouble(
-        variant?['selling_price'] ?? product['selling_price'],
-      ).toStringAsFixed(2),
+      text: partPriceExGst(product, variant).toStringAsFixed(2),
     );
     final gstC = TextEditingController(
       text: toDouble(product['gst_rate']).toStringAsFixed(0),
