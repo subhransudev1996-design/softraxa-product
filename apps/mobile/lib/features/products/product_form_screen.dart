@@ -15,6 +15,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import 'pack_pricing.dart';
 import 'product_providers.dart';
+import 'variant_builder.dart';
 import 'variant_sheet.dart';
 import '../../core/theme.dart';
 
@@ -634,20 +635,25 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
             .single();
         productId = inserted['id'] as String;
 
-        if (_hasVariants) {
-          for (final draft in _variants) {
-            final vRow = await client
+        if (_hasVariants && _variants.isNotEmpty) {
+          // All in one insert; rows come back in the order sent.
+          final rows = List<Map<String, dynamic>>.from(
+            await client
                 .from('product_variants')
-                .insert({...draft.toRow(productId), 'business_id': businessId})
-                .select('id')
-                .single();
-            if (draft.openingStock > 0) {
+                .insert([
+                  for (final d in _variants)
+                    {...d.toRow(productId), 'business_id': businessId},
+                ])
+                .select('id'),
+          );
+          for (var i = 0; i < rows.length && i < _variants.length; i++) {
+            if (_variants[i].openingStock > 0) {
               await client.rpc(
                 'add_opening_stock',
                 params: {
                   'p_product_id': productId,
-                  'p_variant_id': vRow['id'],
-                  'p_quantity': draft.openingStock,
+                  'p_variant_id': rows[i]['id'],
+                  'p_quantity': _variants[i].openingStock,
                 },
               );
             }
@@ -1431,7 +1437,40 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                   onChanged: (v) => setState(() => _hasVariants = v),
                 ),
               if (!isEdit && _hasVariants) ...[
-                SectionLabel(t('Variants')),
+                SectionLabel(
+                  _variants.isEmpty
+                      ? t('Variants')
+                      : t('{v1} variants', {'v1': _variants.length}),
+                ),
+                FilledButton.tonalIcon(
+                  onPressed: () async {
+                    final made = await showVariantBuilder(
+                      context,
+                      businessType: businessType,
+                      productName: _name.text,
+                      categoryName: categoryName,
+                      productCode: _sku.text.trim().isNotEmpty
+                          ? _sku.text.trim()
+                          : _name.text.trim(),
+                      productPrice: double.tryParse(_selling.text.trim()),
+                      drafts: _variants,
+                    );
+                    if (made != null) {
+                      setState(
+                        () => _variants
+                          ..clear()
+                          ..addAll(made),
+                      );
+                    }
+                  },
+                  icon: const Icon(Icons.grid_view_rounded),
+                  label: Text(
+                    _variants.isEmpty
+                        ? t('Choose sizes & colours')
+                        : t('Change sizes & colours'),
+                  ),
+                ),
+                const SizedBox(height: 8),
                 for (var i = 0; i < _variants.length; i++)
                   Card(
                     margin: const EdgeInsets.only(bottom: 8),
@@ -1465,19 +1504,22 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       },
                     ),
                   ),
-                OutlinedButton.icon(
-                  onPressed: () async {
-                    final draft = await showVariantSheet(
-                      context,
-                      businessType: businessType,
-                      productName: _name.text,
-                      categoryName: categoryName,
-                      siblings: [for (final v in _variants) v.attributes],
-                    );
-                    if (draft != null) setState(() => _variants.add(draft));
-                  },
-                  icon: const Icon(Icons.add),
-                  label: Text(t('Add variant')),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: () async {
+                      final draft = await showVariantSheet(
+                        context,
+                        businessType: businessType,
+                        productName: _name.text,
+                        categoryName: categoryName,
+                        siblings: [for (final v in _variants) v.attributes],
+                      );
+                      if (draft != null) setState(() => _variants.add(draft));
+                    },
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(t('Add one variant')),
+                  ),
                 ),
               ],
               const SizedBox(height: 12),

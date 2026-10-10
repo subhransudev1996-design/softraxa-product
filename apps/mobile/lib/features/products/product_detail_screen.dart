@@ -12,6 +12,10 @@ import '../stock/adjust_stock_sheet.dart';
 import '../stock/pieces_card.dart';
 import 'alternatives.dart';
 import 'product_providers.dart';
+import 'variant_builder.dart';
+import 'variant_grid.dart';
+import 'variant_matrix.dart';
+import 'variant_prices.dart';
 import 'variant_sheet.dart';
 import '../../core/theme.dart';
 
@@ -112,6 +116,158 @@ class ProductDetailScreen extends ConsumerWidget {
       invalidateStockData(ref); // variant stock/price/barcode feed POS + stock
     } catch (e) {
       if (context.mounted) showError(context, e);
+    }
+  }
+
+  /// Sizes & colours added later: only the new combinations are made.
+  Future<void> _addSizes(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> product,
+    List<Map<String, dynamic>> variants,
+  ) async {
+    final businessType =
+        ref.read(appContextProvider).value?.business?['business_type']
+            as String? ??
+        'other';
+    final sku = (product['sku'] as String? ?? '').trim();
+    final made = await showVariantBuilder(
+      context,
+      businessType: businessType,
+      productName: product['name'] as String? ?? '',
+      categoryName: (product['categories'] as Map?)?['name'] as String? ?? '',
+      productCode: sku.isNotEmpty ? sku : product['name'] as String? ?? '',
+      productPrice: toDouble(product['selling_price']),
+      existing: variants,
+    );
+    if (made == null || made.isEmpty) return;
+    final client = ref.read(supabaseProvider);
+    try {
+      final businessId = ref.read(appContextProvider).value?.businessId;
+      final rows = List<Map<String, dynamic>>.from(
+        await client
+            .from('product_variants')
+            .insert([
+              for (final d in made)
+                {...d.toRow(productId), 'business_id': businessId},
+            ])
+            .select('id'),
+      );
+      for (var i = 0; i < rows.length && i < made.length; i++) {
+        if (made[i].openingStock > 0) {
+          await client.rpc(
+            'add_opening_stock',
+            params: {
+              'p_product_id': productId,
+              'p_variant_id': rows[i]['id'],
+              'p_quantity': made[i].openingStock,
+            },
+          );
+        }
+      }
+      if (!(product['has_variants'] as bool? ?? false)) {
+        await client
+            .from('products')
+            .update({'has_variants': true})
+            .eq('id', productId);
+      }
+      ref.invalidate(productDetailProvider(productId));
+      invalidateStockData(ref);
+      if (context.mounted) {
+        showSuccess(
+          context,
+          t('{v1} variants added', {'v1': made.length}),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
+  /// Prices for all variants in one table; old sizes switched off.
+  Future<void> _editPrices(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> product,
+    List<Map<String, dynamic>> variants,
+  ) async {
+    final changes = await showVariantPrices(
+      context,
+      product: product,
+      variants: variants,
+    );
+    if (changes == null || changes.isEmpty) return;
+    final client = ref.read(supabaseProvider);
+    try {
+      for (final c in changes) {
+        await client
+            .from('product_variants')
+            .update(c.toUpdate())
+            .eq('id', c.id);
+      }
+      ref.invalidate(productDetailProvider(productId));
+      invalidateStockData(ref);
+      if (context.mounted) {
+        showSuccess(
+          context,
+          t('{v1} variants updated', {'v1': changes.length}),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) showError(context, e);
+    }
+  }
+
+  /// A box in the stock grid: adjust its stock, or its details.
+  Future<void> _variantActions(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> product,
+    Map<String, dynamic> variant,
+  ) async {
+    final action = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              title: Text(
+                variant['name'] as String? ?? '',
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              subtitle: Text(
+                t('Stock {v1} · {v2}', {
+                  'v1': qty(toDouble(variant['current_stock'])),
+                  'v2': money(
+                    toDouble(
+                      variant['selling_price'] ?? product['selling_price'],
+                    ),
+                  ),
+                }),
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.tune),
+              title: Text(t('Adjust stock')),
+              onTap: () => Navigator.pop(ctx, 'stock'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.edit_outlined),
+              title: Text(t('Edit details (price, barcode, code)')),
+              onTap: () => Navigator.pop(ctx, 'edit'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!context.mounted) return;
+    if (action == 'stock') {
+      await showAdjustStockSheet(context, ref, product: product, variant: variant);
+      ref.invalidate(productDetailProvider(productId));
+    } else if (action == 'edit') {
+      await _editVariant(context, ref, variant);
     }
   }
 
@@ -533,10 +689,57 @@ class ProductDetailScreen extends ConsumerWidget {
                             style: Theme.of(context).textTheme.titleSmall
                                 ?.copyWith(color: AppColors.inkSoft),
                           ),
-                          TextButton.icon(
-                            onPressed: () => _addVariant(context, ref, p),
-                            icon: const Icon(Icons.add, size: 18),
-                            label: Text(t('Add')),
+                          PopupMenuButton<String>(
+                            tooltip: t('Change variants'),
+                            onSelected: (v) => switch (v) {
+                              'sizes' => _addSizes(context, ref, p, variants),
+                              'prices' => _editPrices(
+                                context,
+                                ref,
+                                p,
+                                variants,
+                              ),
+                              _ => _addVariant(context, ref, p),
+                            },
+                            itemBuilder: (_) => [
+                              PopupMenuItem(
+                                value: 'sizes',
+                                child: Text(t('Add sizes & colours')),
+                              ),
+                              if (variants.isNotEmpty)
+                                PopupMenuItem(
+                                  value: 'prices',
+                                  child: Text(t('Prices & hide old ones')),
+                                ),
+                              PopupMenuItem(
+                                value: 'one',
+                                child: Text(t('Add one variant')),
+                              ),
+                            ],
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 6,
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.edit_outlined,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    t('Change'),
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.w700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -544,6 +747,36 @@ class ProductDetailScreen extends ConsumerWidget {
                     if (variants.isEmpty)
                       Text(t('No variants'),
                         style: TextStyle(color: AppColors.inkSoft),
+                      )
+                    else if (variantGridOf(variants) case final grid?)
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              VariantGridView(
+                                grid: grid,
+                                cellBuilder: (ctx, v) => VariantStockCell(
+                                  variant: v,
+                                  subtitle: v['is_active'] == false
+                                      ? t('Hidden')
+                                      : null,
+                                  onTap: () =>
+                                      _variantActions(context, ref, p, v),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                t('Stock in each box: green in stock, orange low, red out. Tap a box to adjust it.'),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.inkSoft,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       )
                     else
                       Card(

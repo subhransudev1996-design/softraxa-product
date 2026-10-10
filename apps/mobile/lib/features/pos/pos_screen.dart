@@ -14,6 +14,8 @@ import '../customers/customer_picker.dart';
 import '../offline/offline_service.dart';
 import '../products/product_providers.dart' show parseWeightedBarcode;
 import '../returns/exchange.dart';
+import '../products/variant_grid.dart';
+import '../products/variant_matrix.dart';
 import 'held_bills.dart';
 import '../stock/adjust_stock_sheet.dart';
 import 'cart.dart';
@@ -234,8 +236,12 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     if (variant == null &&
         product['has_variants'] == true &&
         variants.isNotEmpty) {
-      // Desktop: a dialog; ↑/↓ and Enter pick (the first is focused).
-      variant = isWideLayout(context)
+      // Sizes × colours: a grid with the stock in each box. Otherwise
+      // a list — desktop: a dialog; ↑/↓ and Enter pick.
+      final grid = variantGridOf(variants);
+      variant = grid != null
+          ? await showVariantGridPicker(context, product: product, grid: grid)
+          : isWideLayout(context)
           ? await showDialog<Map<String, dynamic>>(
               context: context,
               builder: (ctx) => SimpleDialog(

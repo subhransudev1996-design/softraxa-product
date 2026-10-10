@@ -1,4 +1,6 @@
 import '../../core/i18n.dart';
+import '../products/variant_grid.dart';
+import '../products/variant_matrix.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -337,6 +339,16 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     }
 
     final product = selected['product'] as Map<String, dynamic>;
+    // Several sizes/colours at once, from the grid: a line each, done.
+    final many = selected['lines'] as List<(Map<String, dynamic>, double)>?;
+    if (many != null) {
+      setState(() {
+        for (final (v, q) in many) {
+          _lines.add(_lineFor(product, v, qty: q));
+        }
+      });
+      return;
+    }
     final variant = selected['variant'] as Map<String, dynamic>?;
     setState(() => _lines.add(_lineFor(product, variant)));
     // Jump straight into qty/price entry for the new line.
@@ -944,6 +956,19 @@ class _ProductPickerState extends ConsumerState<_ProductPicker> {
     final variants = List<Map<String, dynamic>>.from(
       product['product_variants'] as List? ?? [],
     )..removeWhere((v) => v['is_active'] == false);
+    final grid = product['has_variants'] == true
+        ? variantGridOf(variants)
+        : null;
+    if (grid != null) {
+      final lines = await showVariantQtyGrid(
+        context,
+        product: product,
+        grid: grid,
+      );
+      if (lines == null || lines.isEmpty || !mounted) return;
+      Navigator.pop(context, {'product': product, 'lines': lines});
+      return;
+    }
     if (product['has_variants'] == true && variants.isNotEmpty) {
       final variant = await showModalBottomSheet<Map<String, dynamic>>(
         context: context,
