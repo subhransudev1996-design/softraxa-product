@@ -16,6 +16,7 @@ import '../customers/customer_providers.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../pos/cart.dart';
 import 'advance_actions.dart';
+import 'bill_layout.dart' show loadBillLogo;
 import 'invoice_pdf.dart';
 import 'invoice_providers.dart';
 import 'thermal_printer.dart';
@@ -27,17 +28,19 @@ import '../../core/theme.dart';
 /// separate editor, so adding/removing/changing items works identically to
 /// building a new bill.
 Future<void> startModifyInvoice(
-BuildContext context,
-WidgetRef ref,
-Map<String, dynamic> inv,
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> inv,
 ) async {
-final invoiceId = inv['id'] as String;
+  final invoiceId = inv['id'] as String;
   final liveCart = ref.read(cartProvider);
   if (liveCart.lines.isNotEmpty && ref.read(editingInvoiceProvider) == null) {
     final proceed = await confirmDialog(
       context,
       title: t('Replace current bill?'),
-      message: t('You have an unsaved bill in progress. Editing this invoice will replace it.'),
+      message: t(
+        'You have an unsaved bill in progress. Editing this invoice will replace it.',
+      ),
       confirmText: t('Continue'),
     );
     if (!proceed) return;
@@ -93,7 +96,6 @@ final invoiceId = inv['id'] as String;
   ref.invalidate(invoiceDetailProvider(invoiceId));
 }
 
-
 /// Whether this bill can be modified by the signed-in user.
 bool canModifyInvoice(Map<String, dynamic> inv, AppContext? ctx) =>
     inv['is_cancelled'] != true &&
@@ -134,7 +136,12 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final items = List<Map<String, dynamic>>.from(
       invoice['invoice_items'] as List? ?? [],
     );
-    final pdf = InvoicePdf(business: business, invoice: invoice, items: items);
+    final pdf = InvoicePdf(
+      business: business,
+      invoice: invoice,
+      items: items,
+      logo: await loadBillLogo(business),
+    );
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.sharePdf(
       bytes: await doc.save(),
@@ -152,7 +159,12 @@ class InvoiceDetailScreen extends ConsumerWidget {
     final items = List<Map<String, dynamic>>.from(
       invoice['invoice_items'] as List? ?? [],
     );
-    final pdf = InvoicePdf(business: business, invoice: invoice, items: items);
+    final pdf = InvoicePdf(
+      business: business,
+      invoice: invoice,
+      items: items,
+      logo: await loadBillLogo(business),
+    );
     final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
     await Printing.layoutPdf(
       name: safeFileName('${invoice['invoice_no']}'),
@@ -414,7 +426,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
       ref.invalidate(invoiceDetailProvider(invoiceId));
       ref.invalidate(invoicesProvider);
       ref.invalidate(recentInvoicesProvider);
-      if (context.mounted) showSuccess(context, t('Bill moved to {to}', {'to': to}));
+      if (context.mounted) {
+        showSuccess(context, t('Bill moved to {to}', {'to': to}));
+      }
     } catch (e) {
       if (context.mounted) showError(context, e);
     }
@@ -483,7 +497,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
               (features?.canEditInvoices ?? false))
             PopupMenuButton<String>(
               onSelected: (v) {
-                if (v == 'edit') startModifyInvoice(context, ref, detail.value!);
+                if (v == 'edit') {
+                  startModifyInvoice(context, ref, detail.value!);
+                }
                 if (v == 'cancel') _cancel(context, ref, detail.value!);
                 if (v == 'due') _changeDueDate(context, ref, detail.value!);
                 if (v == 'customer') {
@@ -507,7 +523,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   ),
                 PopupMenuItem(
                   value: 'cancel',
-                  child: Text(t('Cancel invoice'),
+                  child: Text(
+                    t('Cancel invoice'),
                     style: TextStyle(color: AppColors.red),
                   ),
                 ),
@@ -552,7 +569,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     children: [
                       Icon(Icons.cancel, color: AppColors.red),
                       SizedBox(width: 8),
-                      Text(t('This invoice is cancelled'),
+                      Text(
+                        t('This invoice is cancelled'),
                         style: TextStyle(color: AppColors.red),
                       ),
                     ],
@@ -645,7 +663,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               : () => _changePlaceOfSupply(context, ref, inv),
                           child: Padding(
                             padding: const EdgeInsets.only(top: 2),
-                            child: Text('Place of supply: '
+                            child: Text(
+                              'Place of supply: '
                               '${gstStateLabel(inv['place_of_supply'] as String?).isEmpty ? t('not set') : gstStateLabel(inv['place_of_supply'] as String?)}'
                               '${cancelled ? '' : '  ✎'}',
                               style: TextStyle(
@@ -757,7 +776,8 @@ class InvoiceDetailScreen extends ConsumerWidget {
                         padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
                         child: Align(
                           alignment: Alignment.centerLeft,
-                          child: Text(t('Payment history'),
+                          child: Text(
+                            t('Payment history'),
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -790,7 +810,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: () => _recordPayment(context, ref, inv),
                       icon: const Icon(Icons.payments),
-                      label: Text(t('Record payment (due {v1})', {'v1': money(due)})),
+                      label: Text(
+                        t('Record payment (due {v1})', {'v1': money(due)}),
+                      ),
                     ),
                   ),
                 // PD22: an advance is used only when the shop chooses to.

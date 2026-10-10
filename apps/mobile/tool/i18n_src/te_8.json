@@ -22,5 +22,15 @@
 "Two items are multiplied. Use + between items.": "రెండు ఐటమ్‌లు గుణించబడ్డాయి. ఐటమ్‌ల మధ్య + పెట్టండి.",
 "An item is divided. Divide only numbers.": "ఒక ఐటమ్‌తో భాగించబడింది. నంబర్లతో మాత్రమే భాగించండి.",
 "An item has a minus or zero quantity.": "ఒక ఐటమ్ పరిమాణం మైనస్ లేదా సున్నా.",
-"App version {v1}": "యాప్ వెర్షన్ {v1}"
+"App version {v1}": "యాప్ వెర్షన్ {v1}",
+"Bill settings": "బిల్లు సెట్టింగ్",
+"Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.": "పైన ఉన్న మీ లోగో, పేరు, చిరునామా, ఫోన్, ఈమెయిల్, GSTIN ప్రతి బిల్లు పైభాగంలో ముద్రించబడతాయి. ఇవి కింద ముద్రించబడతాయి.",
+"Terms & conditions": "నియమాలు మరియు షరతులు",
+"Goods once sold will not be taken back\nExchange within 7 days with bill and packing": "అమ్మిన సరుకు తిరిగి తీసుకోబడదు\nబిల్లు మరియు ప్యాకింగ్‌తో 7 రోజుల్లో మార్చుకోండి",
+"One per line. Printed numbered on every bill.": "ఒక్కో లైన్‌లో ఒకటి. ప్రతి బిల్లుపై నంబర్‌తో ముద్రించబడుతుంది.",
+"Closing line": "చివరి లైన్",
+"Thank you! Visit again.": "ధన్యవాదాలు! మళ్ళీ రండి.",
+"Printed last, in the middle. Leave empty for none.": "అన్నిటికంటే కింద, మధ్యలో ముద్రించబడుతుంది. వద్దనుకుంటే ఖాళీగా వదలండి.",
+"Print stock no. (SKU) on bills": "బిల్లుపై స్టాక్ నంబర్ (SKU) ముద్రించు",
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ప్రతి ఐటమ్ పేరు ముందు దాని స్టాక్ నంబర్ కనిపిస్తుంది, బట్టలు మరియు హార్డ్‌వేర్ దుకాణాల్లో లాగా."
 }

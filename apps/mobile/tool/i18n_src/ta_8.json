@@ -22,5 +22,15 @@
 "Two items are multiplied. Use + between items.": "இரண்டு பொருட்கள் பெருக்கப்பட்டுள்ளன. பொருட்களுக்கு இடையே + போடவும்.",
 "An item is divided. Divide only numbers.": "ஒரு பொருளால் வகுக்கப்பட்டுள்ளது. எண்களால் மட்டும் வகுக்கவும்.",
 "An item has a minus or zero quantity.": "ஒரு பொருளின் அளவு மைனஸ் அல்லது பூஜ்யம்.",
-"App version {v1}": "ஆப் வெர்ஷன் {v1}"
+"App version {v1}": "ஆப் வெர்ஷன் {v1}",
+"Bill settings": "பில் அமைப்பு",
+"Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.": "மேலே உள்ள உங்கள் லோகோ, பெயர், முகவரி, போன், மின்னஞ்சல், GSTIN ஆகியவை ஒவ்வொரு பில்லின் மேலும் அச்சாகும். இவை கீழே அச்சாகும்.",
+"Terms & conditions": "விதிமுறைகள் மற்றும் நிபந்தனைகள்",
+"Goods once sold will not be taken back\nExchange within 7 days with bill and packing": "விற்ற பொருள் திரும்பப் பெறப்படாது\nபில் மற்றும் பேக்கிங்குடன் 7 நாட்களில் மாற்றலாம்",
+"One per line. Printed numbered on every bill.": "ஒரு வரிக்கு ஒன்று. ஒவ்வொரு பில்லிலும் எண்ணுடன் அச்சாகும்.",
+"Closing line": "கடைசி வரி",
+"Thank you! Visit again.": "நன்றி! மீண்டும் வருக.",
+"Printed last, in the middle. Leave empty for none.": "கடைசியில், நடுவில் அச்சாகும். வேண்டாமெனில் காலியாக விடவும்.",
+"Print stock no. (SKU) on bills": "பில்லில் ஸ்டாக் எண் (SKU) அச்சிடு",
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ஒவ்வொரு பொருளின் பெயருக்கு முன் அதன் ஸ்டாக் எண் தெரியும், துணி மற்றும் ஹார்ட்வேர் கடைகளில் உள்ளது போல."
 }

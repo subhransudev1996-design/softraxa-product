@@ -1,35 +1,42 @@
+import 'dart:typed_data';
+
 import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../../core/formatters.dart';
 import '../../core/gst.dart';
+import 'bill_layout.dart';
 
 /// Default PDF fonts have no ₹ glyph, so amounts use "Rs." instead.
 String _rs(num? v) =>
     'Rs. ${NumberFormat('#,##,##0.00', 'en_IN').format(v ?? 0)}';
 
-/// Builds invoice PDFs (PRD 7.8): A4 and thermal (80mm) layouts.
-/// GST invoices show HSN and a tax summary; non-GST/cash memos don't.
+/// 3,490.00 — table cells, where "Rs." would only crowd the columns.
+String _n(num v) => billMoney(v);
+
+/// Builds invoice PDFs (PRD 7.8): A4 and thermal (80mm) layouts, laid out
+/// like a shop's sales invoice (bill_layout.dart): stock no., rate, amount,
+/// discount and total per line; amount in words; payment details; GST
+/// summary by rate; the shop's terms & conditions (migration 0076).
 class InvoicePdf {
   InvoicePdf({
     required this.business,
     required this.invoice,
     required this.items,
-  });
+    this.logo,
+  }) : bill = BillLayout(business: business, invoice: invoice, items: items);
 
   final Map<String, dynamic> business;
   final Map<String, dynamic> invoice;
   final List<Map<String, dynamic>> items;
 
-  bool get isGst => invoice['invoice_type'] == 'gst';
-  bool get isEstimate => invoice['invoice_type'] == 'estimate';
+  /// The shop's logo (loadBillLogo), printed at the top when there is one.
+  final Uint8List? logo;
+  final BillLayout bill;
 
-  /// Individual payment rows (split bills have more than one) — falls back
-  /// to a single blended "Paid (mode)" line when there's 0 or 1 row.
-  List<Map<String, dynamic>> get _payments => List<Map<String, dynamic>>.from(
-    invoice['invoice_payments'] as List? ?? [],
-  );
+  bool get isGst => bill.isGst;
+  bool get isEstimate => bill.isEstimate;
 
   /// UPI "scan to pay" link for the balance due (setup wizard, 0047).
   /// Null when the shop has no UPI ID or nothing is left to pay.
@@ -100,14 +107,38 @@ class InvoicePdf {
           'cash_memo' => 'CASH MEMO',
           'estimate' => 'ESTIMATE / QUOTATION',
           'opening' => 'OPENING BALANCE',
-          _ => 'INVOICE',
+          _ => 'SALES INVOICE',
         };
+
+  String _s(Object? v) => (v as String? ?? '').trim();
+  bool get _anySize => bill.lines.any((l) => l.size.isNotEmpty);
+  bool get _anyDiscount => bill.lines.any((l) => l.discount > 0);
+  bool get _anySku => bill.lines.any((l) => l.sku.isNotEmpty);
 
   // ---------------- A4 ----------------
 
   Future<pw.Document> buildA4() async {
     final doc = pw.Document();
     final bold = pw.TextStyle(fontWeight: pw.FontWeight.bold);
+    const small = pw.TextStyle(fontSize: 9);
+    final smallBold = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+    final email = _s(business['email']);
+
+    // Item table columns, each only when some line needs it.
+    final headers = <String>[
+      '#',
+      if (_anySku) 'Stock No',
+      'Item',
+      if (_anySize) 'Size',
+      if (isGst) 'HSN',
+      'Qty',
+      'Rate',
+      'Amount',
+      if (_anyDiscount) 'Disc',
+      if (isGst) 'GST%',
+      'Total',
+    ];
+    final firstNumber = headers.indexOf('Qty');
 
     doc.addPage(
       pw.MultiPage(
@@ -117,37 +148,40 @@ class InvoicePdf {
           // header
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Column(
-                crossAxisAlignment: pw.CrossAxisAlignment.start,
-                children: [
-                  pw.Text(
-                    business['name'] as String? ?? '',
-                    style: pw.TextStyle(
-                      fontSize: 18,
-                      fontWeight: pw.FontWeight.bold,
-                    ),
-                  ),
-                  if ((business['address'] as String? ?? '').isNotEmpty)
+              if (logo != null) ...[
+                pw.Image(pw.MemoryImage(logo!), width: 64, height: 64),
+                pw.SizedBox(width: 12),
+              ],
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
                     pw.Text(
-                      business['address'] as String,
-                      style: const pw.TextStyle(fontSize: 9),
-                    ),
-                  if ((business['phone'] as String? ?? '').isNotEmpty)
-                    pw.Text(
-                      'Phone: ${business['phone']}',
-                      style: const pw.TextStyle(fontSize: 9),
-                    ),
-                  if (showsShopGstin)
-                    pw.Text(
-                      'GSTIN: ${business['gst_number']}',
+                      _s(business['name']),
                       style: pw.TextStyle(
-                        fontSize: 9,
+                        fontSize: 18,
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
-                ],
+                    if (_s(business['address']).isNotEmpty)
+                      pw.Text(_s(business['address']), style: small),
+                    if (_s(business['phone']).isNotEmpty || email.isNotEmpty)
+                      pw.Text(
+                        [
+                          if (_s(business['phone']).isNotEmpty)
+                            'Ph: ${_s(business['phone'])}',
+                          if (email.isNotEmpty) email,
+                        ].join('   '),
+                        style: small,
+                      ),
+                    if (showsShopGstin)
+                      pw.Text(
+                        'GSTIN: ${business['gst_number']}',
+                        style: smallBold,
+                      ),
+                  ],
+                ),
               ),
               pw.Column(
                 crossAxisAlignment: pw.CrossAxisAlignment.end,
@@ -169,16 +203,10 @@ class InvoicePdf {
                       ),
                     ),
                   pw.SizedBox(height: 4),
-                  pw.Text('No: ${invoice['invoice_no']}', style: bold),
-                  pw.Text(
-                    'Date: ${dateTimeStr(invoice['invoice_date'])}',
-                    style: const pw.TextStyle(fontSize: 9),
-                  ),
+                  pw.Text('Bill No: ${invoice['invoice_no']}', style: bold),
+                  pw.Text(dateTimeStr(invoice['invoice_date']), style: small),
                   if (isGst && _placeOfSupply.isNotEmpty)
-                    pw.Text(
-                      _placeOfSupply,
-                      style: const pw.TextStyle(fontSize: 9),
-                    ),
+                    pw.Text(_placeOfSupply, style: small),
                 ],
               ),
             ],
@@ -186,28 +214,18 @@ class InvoicePdf {
           pw.SizedBox(height: 10),
           pw.Divider(),
           // customer
-          if ((invoice['customer_name'] as String? ?? '').isNotEmpty) ...[
-            pw.Text(
-              'Bill To:',
-              style: pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold),
-            ),
-            pw.Text(invoice['customer_name'] as String),
+          if (_s(invoice['customer_name']).isNotEmpty ||
+              _s(invoice['customer_phone']).isNotEmpty) ...[
+            pw.Text('Bill To:', style: smallBold),
+            if (_s(invoice['customer_name']).isNotEmpty)
+              pw.Text(_s(invoice['customer_name'])),
             if (isGst && _customerGstin.isNotEmpty)
-              pw.Text(
-                'GSTIN: $_customerGstin',
-                style: pw.TextStyle(
-                  fontSize: 9,
-                  fontWeight: pw.FontWeight.bold,
-                ),
-              ),
-            if ((invoice['customer_phone'] as String? ?? '').isNotEmpty)
-              pw.Text(
-                'Phone: ${invoice['customer_phone']}',
-                style: const pw.TextStyle(fontSize: 9),
-              ),
+              pw.Text('GSTIN: $_customerGstin', style: smallBold),
+            if (_s(invoice['customer_phone']).isNotEmpty)
+              pw.Text('Mob: ${invoice['customer_phone']}', style: small),
             pw.SizedBox(height: 8),
           ],
-          // items table
+          // items
           pw.TableHelper.fromTextArray(
             headerStyle: pw.TextStyle(
               fontSize: 9,
@@ -219,115 +237,116 @@ class InvoicePdf {
             ),
             cellStyle: const pw.TextStyle(fontSize: 9),
             cellAlignments: {
-              0: pw.Alignment.centerLeft,
-              1: pw.Alignment.centerLeft,
-              for (var i = 2; i < 8; i++) i: pw.Alignment.centerRight,
+              for (var i = 0; i < headers.length; i++)
+                i: i >= firstNumber
+                    ? pw.Alignment.centerRight
+                    : pw.Alignment.centerLeft,
             },
-            headers: [
-              '#',
-              'Item',
-              if (isGst) 'HSN',
-              'Qty',
-              'Rate',
-              if (isGst) 'GST%',
-              'Disc',
-              'Amount',
-            ],
+            headers: headers,
             data: [
-              for (var i = 0; i < items.length; i++)
-                [
-                  '${i + 1}',
-                  _itemName(items[i]),
-                  if (isGst) items[i]['hsn_code'] as String? ?? '',
-                  qtyUnit(billedQty(items[i]).qty, billedQty(items[i]).unit),
-                  (toDouble(items[i]['unit_price']) *
-                          _inclFactor(items[i]) *
-                          billedQty(items[i]).per)
-                      .toStringAsFixed(2),
-                  if (isGst) '${qty(items[i]['gst_rate'] as num?)}%',
-                  toDouble(items[i]['discount_amount']) > 0
-                      ? (toDouble(items[i]['discount_amount']) *
-                                _inclFactor(items[i]))
-                            .toStringAsFixed(2)
-                      : '-',
-                  toDouble(items[i]['line_total']).toStringAsFixed(2),
-                ],
+              for (var i = 0; i < bill.lines.length; i++)
+                () {
+                  final l = bill.lines[i];
+                  final it = items[i];
+                  return [
+                    '${i + 1}',
+                    if (_anySku) l.sku,
+                    l.name,
+                    if (_anySize) l.size,
+                    if (isGst) it['hsn_code'] as String? ?? '',
+                    qtyUnit(l.qty, l.unit),
+                    _n(l.rate),
+                    _n(l.amount),
+                    if (_anyDiscount) l.discount > 0 ? _n(l.discount) : '-',
+                    if (isGst) '${qty(it['gst_rate'] as num?)}%',
+                    _n(l.total),
+                  ];
+                }(),
+              // Totals row, like the shop's own bill.
+              [
+                '',
+                if (_anySku) '',
+                'Total',
+                if (_anySize) '',
+                if (isGst) '',
+                qty(bill.totalQty),
+                '',
+                _n(bill.totalAmount),
+                if (_anyDiscount) _n(bill.totalLineDiscount),
+                if (isGst) '',
+                _n(bill.linesTotal),
+              ],
             ],
           ),
           pw.SizedBox(height: 10),
-          // totals
           pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.end,
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
+              // amount in words + payments
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Text('Amount in words:', style: smallBold),
+                    pw.Text(bill.amountInWords, style: small),
+                    if (bill.payments.isNotEmpty) ...[
+                      pw.SizedBox(height: 8),
+                      pw.Text('Payment details:', style: smallBold),
+                      for (final (mode, amount) in bill.payments)
+                        pw.Text('$mode: ${_rs(amount)}', style: small),
+                    ],
+                  ],
+                ),
+              ),
+              pw.SizedBox(width: 16),
+              // totals
               pw.SizedBox(
                 width: 220,
                 child: pw.Column(
                   children: [
-                    _totRow(
-                      'Subtotal',
-                      _rs(
-                        toDouble(invoice['subtotal']) +
-                            toDouble(invoice['tax_amount']),
-                      ),
-                    ),
-                    if (toDouble(invoice['discount_amount']) > 0)
-                      _totRow(
-                        'Discount',
-                        '- ${_rs(invoice['discount_amount'] as num?)}',
-                      ),
-                    if (isGst) ...[
-                      _totRow('Taxable value', _rs(gstTaxableTotal(items))),
-                      ..._gstBreakup(),
-                    ],
-                    if (toDouble(invoice['round_off']) != 0)
-                      _totRow('Round off', _rs(invoice['round_off'] as num?)),
+                    if (bill.billDiscount > 0)
+                      _totRow('Bill discount', '- ${_rs(bill.billDiscount)}'),
+                    if (bill.roundOff != 0)
+                      _totRow('Round off', _rs(bill.roundOff)),
                     pw.Divider(),
                     _totRow(
-                      'TOTAL',
-                      _rs(invoice['total'] as num?),
+                      'NET AMOUNT',
+                      _rs(bill.netAmount),
                       bold: true,
                       size: 12,
                     ),
-                    if (!isEstimate) ...[
-                      if (_payments.length > 1)
-                        for (final p in _payments)
-                          _totRow(
-                            'Paid (${p['payment_mode']})',
-                            _rs(p['amount'] as num?),
-                          )
-                      else
-                        _totRow(
-                          'Paid (${invoice['payment_mode']})',
-                          _rs(invoice['paid_amount'] as num?),
-                        ),
-                      if (toDouble(invoice['credit_amount']) > 0)
-                        _totRow(
-                          'Returns credit',
-                          _rs(invoice['credit_amount'] as num?),
-                        ),
-                      if (toDouble(invoice['due_amount']) > 0)
-                        _totRow(
-                          'Balance Due',
-                          _rs(invoice['due_amount'] as num?),
-                          bold: true,
-                        ),
-                    ],
+                    if (bill.due > 0)
+                      _totRow('Balance Due', _rs(bill.due), bold: true),
                   ],
                 ),
               ),
             ],
           ),
-          pw.SizedBox(height: 24),
+          if (bill.gstSummary.isNotEmpty) ...[
+            pw.SizedBox(height: 12),
+            pw.Text('GST Summary', style: smallBold),
+            pw.SizedBox(height: 4),
+            _gstTable(fontSize: 9),
+          ],
+          pw.SizedBox(height: 16),
           pw.Row(
+            crossAxisAlignment: pw.CrossAxisAlignment.end,
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              if (_upiLink != null)
-                _upiQr(84)
-              else
-                pw.Text(
-                  'Thank you for your business!',
-                  style: const pw.TextStyle(fontSize: 9),
+              pw.Expanded(
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    if (_upiLink != null) _upiQr(84),
+                    ..._termsBlock(fontSize: 8.5),
+                    if (bill.footer.isNotEmpty) ...[
+                      pw.SizedBox(height: 6),
+                      pw.Text(bill.footer, style: small),
+                    ],
+                  ],
                 ),
+              ),
+              pw.SizedBox(width: 16),
               pw.Column(
                 children: [
                   pw.SizedBox(height: 24),
@@ -351,7 +370,7 @@ class InvoicePdf {
     return doc;
   }
 
-  // ---------------- Thermal (80mm / 58mm) ----------------
+  // ---------------- Thermal (80mm) ----------------
 
   Future<pw.Document> buildThermal({double widthMm = 80}) async {
     final doc = pw.Document();
@@ -360,8 +379,39 @@ class InvoicePdf {
       double.infinity,
       marginAll: 4 * PdfPageFormat.mm,
     );
-    const small = pw.TextStyle(fontSize: 8);
-    final smallBold = pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold);
+    const small = pw.TextStyle(fontSize: 7.5);
+    final smallBold = pw.TextStyle(
+      fontSize: 7.5,
+      fontWeight: pw.FontWeight.bold,
+    );
+    final email = _s(business['email']);
+    final dash = pw.Divider(height: 6, borderStyle: pw.BorderStyle.dashed);
+
+    // Size | Qty | Rate | Amount | Disc | Total, each where it's needed.
+    // Qty is short; the money columns need the room.
+    final flex = [if (_anySize) 3, 2, 3, 3, if (_anyDiscount) 3, 3];
+    pw.Widget cols(List<String> cells, pw.TextStyle style) => pw.Row(
+      children: [
+        for (var i = 0; i < cells.length; i++)
+          pw.Expanded(
+            flex: flex[i],
+            child: pw.Padding(
+              padding: const pw.EdgeInsets.only(left: 3),
+              child: pw.Text(
+                cells[i],
+                style: style,
+                textAlign: i == 0 && _anySize
+                    ? pw.TextAlign.left
+                    : pw.TextAlign.right,
+              ),
+            ),
+          ),
+      ],
+    );
+
+    pw.Widget centered(String text, pw.TextStyle style) => pw.Center(
+      child: pw.Text(text, style: style, textAlign: pw.TextAlign.center),
+    );
 
     doc.addPage(
       pw.Page(
@@ -369,134 +419,140 @@ class InvoicePdf {
         build: (ctx) => pw.Column(
           crossAxisAlignment: pw.CrossAxisAlignment.stretch,
           children: [
-            pw.Center(
-              child: pw.Text(
-                business['name'] as String? ?? '',
-                style: pw.TextStyle(
-                  fontSize: 11,
-                  fontWeight: pw.FontWeight.bold,
+            if (logo != null)
+              pw.Center(
+                child: pw.Image(
+                  pw.MemoryImage(logo!),
+                  height: 44,
+                  fit: pw.BoxFit.contain,
                 ),
               ),
+            centered(
+              _s(business['name']),
+              pw.TextStyle(fontSize: 12, fontWeight: pw.FontWeight.bold),
             ),
-            if ((business['address'] as String? ?? '').isNotEmpty)
-              pw.Center(
-                child: pw.Text(
-                  business['address'] as String,
-                  style: small,
-                  textAlign: pw.TextAlign.center,
-                ),
-              ),
-            if ((business['phone'] as String? ?? '').isNotEmpty)
-              pw.Center(
-                child: pw.Text('Ph: ${business['phone']}', style: small),
-              ),
+            if (_s(business['address']).isNotEmpty)
+              centered(_s(business['address']), small),
+            if (_s(business['phone']).isNotEmpty)
+              centered('Ph: ${business['phone']}', small),
+            if (email.isNotEmpty) centered(email, small),
+            pw.SizedBox(height: 3),
+            centered(title, smallBold),
             if (showsShopGstin)
-              pw.Center(
-                child: pw.Text(
-                  'GSTIN: ${business['gst_number']}',
-                  style: smallBold,
-                ),
-              ),
-            pw.Center(child: pw.Text('--- $title ---', style: smallBold)),
-            if (isComposition)
-              pw.Center(
-                child: pw.Text(
-                  compositionDeclaration,
-                  style: small,
-                  textAlign: pw.TextAlign.center,
-                ),
-              ),
+              centered('GSTIN: ${business['gst_number']}', smallBold),
+            if (isComposition) centered(compositionDeclaration, small),
+            pw.SizedBox(height: 4),
             pw.Row(
               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
               children: [
-                pw.Text('${invoice['invoice_no']}', style: smallBold),
+                pw.Text('Bill No: ${invoice['invoice_no']}', style: smallBold),
                 pw.Text(dateTimeStr(invoice['invoice_date']), style: small),
               ],
             ),
-            if ((invoice['customer_name'] as String? ?? '').isNotEmpty)
-              pw.Text('Customer: ${invoice['customer_name']}', style: small),
-            if (isGst && _customerGstin.isNotEmpty)
-              pw.Text('GSTIN: $_customerGstin', style: small),
-            if (isGst && _placeOfSupply.isNotEmpty)
-              pw.Text(_placeOfSupply, style: small),
-            pw.Divider(height: 6, borderStyle: pw.BorderStyle.dashed),
-            for (final it in items) ...[
-              pw.Text(_itemName(it), style: smallBold),
+            if (_s(invoice['customer_name']).isNotEmpty ||
+                _s(invoice['customer_phone']).isNotEmpty)
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text(
-                    '${qtyUnit(billedQty(it).qty, billedQty(it).unit)}'
-                    ' x ${(toDouble(it['unit_price']) * _inclFactor(it) * billedQty(it).per).toStringAsFixed(2)}',
+                    'Cust: ${_s(invoice['customer_name'])}',
                     style: small,
                   ),
-                  pw.Text(
-                    toDouble(it['line_total']).toStringAsFixed(2),
-                    style: small,
-                  ),
+                  if (_s(invoice['customer_phone']).isNotEmpty)
+                    pw.Text('Mob: ${invoice['customer_phone']}', style: small),
                 ],
               ),
-            ],
-            pw.Divider(height: 6, borderStyle: pw.BorderStyle.dashed),
-            _tRow(
-              'Subtotal',
-              (toDouble(invoice['subtotal']) + toDouble(invoice['tax_amount']))
-                  .toStringAsFixed(2),
-              small,
+            if (isGst && _customerGstin.isNotEmpty)
+              pw.Text('GSTIN: $_customerGstin', style: small),
+            if (isGst && _placeOfSupply.isNotEmpty)
+              pw.Text(_placeOfSupply, style: small),
+            pw.Divider(height: 6),
+            // table header
+            pw.Text(
+              _anySku ? 'Stock No   Item Description' : 'Item',
+              style: smallBold,
             ),
-            if (toDouble(invoice['discount_amount']) > 0)
-              _tRow(
-                'Discount',
-                '-${toDouble(invoice['discount_amount']).toStringAsFixed(2)}',
-                small,
+            cols([
+              if (_anySize) 'Size',
+              'Qty',
+              'Rate',
+              'Amount',
+              if (_anyDiscount) 'Disc',
+              'Total',
+            ], smallBold),
+            pw.Divider(height: 6),
+            for (final l in bill.lines) ...[
+              pw.Text(
+                l.sku.isEmpty ? l.name : '${l.sku}   ${l.name}',
+                style: small,
               ),
-            if (isGst && toDouble(invoice['tax_amount']) > 0) ...[
-              _tRow(
-                'Taxable value',
-                gstTaxableTotal(items).toStringAsFixed(2),
-                small,
-              ),
-              for (final (label, amount) in gstBreakupRows(items))
-                _tRow('Incl. $label', amount.toStringAsFixed(2), small),
+              cols([
+                if (_anySize) l.size,
+                l.isPack ? qtyUnit(l.qty, l.unit) : qty(l.qty),
+                _n(l.rate),
+                _n(l.amount),
+                if (_anyDiscount) l.discount > 0 ? _n(l.discount) : '0.00',
+                _n(l.total),
+              ], small),
+              pw.SizedBox(height: 2),
             ],
-            if (toDouble(invoice['round_off']) != 0)
-              _tRow(
-                'Round off',
-                toDouble(invoice['round_off']).toStringAsFixed(2),
-                small,
-              ),
+            pw.Divider(height: 6),
+            cols([
+              if (_anySize) 'Total',
+              qty(bill.totalQty),
+              '',
+              _n(bill.totalAmount),
+              if (_anyDiscount) _n(bill.totalLineDiscount),
+              _n(bill.linesTotal),
+            ], smallBold),
+            pw.Divider(height: 6),
+            if (bill.billDiscount > 0)
+              _tRow('Bill discount', '-${_n(bill.billDiscount)}', small),
+            if (bill.roundOff != 0)
+              _tRow('Round off', _n(bill.roundOff), small),
             _tRow(
-              'TOTAL',
-              toDouble(invoice['total']).toStringAsFixed(2),
+              'Net Bill Amount',
+              _n(bill.netAmount),
               pw.TextStyle(fontSize: 11, fontWeight: pw.FontWeight.bold),
             ),
-            if (!isEstimate) ...[
-              if (_payments.length > 1)
-                for (final p in _payments)
-                  _tRow(
-                    'Paid (${p['payment_mode']})',
-                    toDouble(p['amount']).toStringAsFixed(2),
-                    small,
-                  )
-              else
-                _tRow(
-                  'Paid (${invoice['payment_mode']})',
-                  toDouble(invoice['paid_amount']).toStringAsFixed(2),
-                  small,
-                ),
-              if (toDouble(invoice['due_amount']) > 0)
-                _tRow(
-                  'DUE',
-                  toDouble(invoice['due_amount']).toStringAsFixed(2),
-                  smallBold,
-                ),
+            pw.SizedBox(height: 4),
+            pw.Container(
+              padding: const pw.EdgeInsets.all(3),
+              decoration: pw.BoxDecoration(border: pw.Border.all(width: 0.5)),
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                children: [
+                  pw.Text('Amount In Words:', style: smallBold),
+                  pw.Text(bill.amountInWords, style: small),
+                ],
+              ),
+            ),
+            if (bill.payments.isNotEmpty || bill.due > 0) ...[
+              pw.SizedBox(height: 4),
+              pw.Text('Payment Details', style: smallBold),
+              for (final (mode, amount) in bill.payments)
+                _tRow(mode, _n(amount), small),
+              if (bill.due > 0) _tRow('DUE', _n(bill.due), smallBold),
+            ],
+            if (bill.gstSummary.isNotEmpty) ...[
+              pw.SizedBox(height: 4),
+              pw.Text('GST Summary', style: smallBold),
+              pw.SizedBox(height: 2),
+              _gstTable(fontSize: 6.5),
             ],
             if (_upiLink != null) ...[
               pw.SizedBox(height: 6),
               pw.Center(child: _upiQr(widthMm >= 70 ? 90 : 70)),
             ],
-            pw.SizedBox(height: 6),
-            pw.Center(child: pw.Text('Thank you! Visit again.', style: small)),
+            if (bill.terms.isNotEmpty) ...[
+              pw.SizedBox(height: 4),
+              dash,
+              ..._termsBlock(fontSize: 7),
+            ],
+            if (bill.footer.isNotEmpty) ...[
+              pw.SizedBox(height: 6),
+              centered(bill.footer, small),
+            ],
           ],
         ),
       ),
@@ -506,38 +562,92 @@ class InvoicePdf {
 
   // ---------------- helpers ----------------
 
-  String _itemName(Map<String, dynamic> it) {
-    final variant = it['variant_name'] as String? ?? '';
-    final serial = it['serial_no'] as String? ?? '';
-    var name = it['product_name'] as String? ?? '';
-    if (variant.isNotEmpty) name = '$name ($variant)';
-    if (serial.isNotEmpty) name = '$name\nS/N: $serial';
-    // Bulk unit as it was when billed (migration 0052): 100 kg = 2 Bag.
-    final factor = toDouble(it['alt_factor']);
-    final altUnit = it['alt_unit_name'] as String? ?? '';
-    final q = toDouble(it['quantity']);
-    if (it['sold_as_pack'] == true && factor > 0) {
-      // Sold by the pack (0061): the pack is the quantity; show its size.
-      return '$name\n(1 $altUnit = ${qtyUnit(factor, it['unit_name'] as String?)})';
-    }
-    if (altUnit.isNotEmpty && factor > 0 && q >= factor) {
-      final bulk = q / factor;
-      final shown = bulk == bulk.roundToDouble()
-          ? bulk.toInt().toString()
-          : bulk.toStringAsFixed(2);
-      name = '$name\n(= $shown $altUnit)';
-    }
-    return name;
+  /// Rate | Taxable value | CGST | SGST | Total GST (or IGST), with totals.
+  pw.Widget _gstTable({required double fontSize}) {
+    final rows = bill.gstSummary;
+    final igst = bill.gstIsInterState;
+    final style = pw.TextStyle(fontSize: fontSize);
+    final boldStyle = pw.TextStyle(
+      fontSize: fontSize,
+      fontWeight: pw.FontWeight.bold,
+    );
+    final headers = [
+      'GST %',
+      'Taxable',
+      if (igst) 'IGST' else ...['CGST', 'SGST'],
+      'Total GST',
+    ];
+    final sum = (
+      taxable: rows.fold(0.0, (s, r) => s + r.taxable),
+      cgst: rows.fold(0.0, (s, r) => s + r.cgst),
+      sgst: rows.fold(0.0, (s, r) => s + r.sgst),
+      igst: rows.fold(0.0, (s, r) => s + r.igst),
+      tax: rows.fold(0.0, (s, r) => s + r.totalTax),
+    );
+    pw.Widget cell(String s, pw.TextStyle st, {bool left = false}) =>
+        pw.Padding(
+          padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+          child: pw.Text(
+            s,
+            style: st,
+            textAlign: left ? pw.TextAlign.left : pw.TextAlign.right,
+          ),
+        );
+    return pw.Table(
+      border: pw.TableBorder.all(width: 0.5),
+      children: [
+        pw.TableRow(
+          children: [
+            for (var i = 0; i < headers.length; i++)
+              cell(headers[i], boldStyle, left: i == 0),
+          ],
+        ),
+        for (final r in rows)
+          pw.TableRow(
+            children: [
+              cell('${qty(r.rate)}%', style, left: true),
+              cell(_n(r.taxable), style),
+              if (igst)
+                cell(_n(r.igst), style)
+              else ...[
+                cell(_n(r.cgst), style),
+                cell(_n(r.sgst), style),
+              ],
+              cell(_n(r.totalTax), style),
+            ],
+          ),
+        if (rows.length > 1)
+          pw.TableRow(
+            children: [
+              cell('Total', boldStyle, left: true),
+              cell(_n(sum.taxable), boldStyle),
+              if (igst)
+                cell(_n(sum.igst), boldStyle)
+              else ...[
+                cell(_n(sum.cgst), boldStyle),
+                cell(_n(sum.sgst), boldStyle),
+              ],
+              cell(_n(sum.tax), boldStyle),
+            ],
+          ),
+      ],
+    );
   }
 
-  /// unit_price is stored tax-exclusive; display inclusive rate on the bill.
-  double _inclFactor(Map<String, dynamic> it) =>
-      isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1;
-
-  List<pw.Widget> _gstBreakup() => [
-    for (final (label, amount) in gstBreakupRows(items))
-      _totRow('$label (incl.)', _rs(amount)),
-  ];
+  /// "Terms & Conditions:" and the shop's terms, numbered.
+  List<pw.Widget> _termsBlock({required double fontSize}) {
+    if (bill.terms.isEmpty) return const [];
+    final style = pw.TextStyle(fontSize: fontSize);
+    return [
+      pw.SizedBox(height: 4),
+      pw.Text(
+        'Terms & Conditions:',
+        style: pw.TextStyle(fontSize: fontSize, fontWeight: pw.FontWeight.bold),
+      ),
+      for (var i = 0; i < bill.terms.length; i++)
+        pw.Text('${i + 1}. ${bill.terms[i]}', style: style),
+    ];
+  }
 
   /// The customer's GSTIN as it was when billed (migration 0040).
   String get _customerGstin => invoice['customer_gstin'] as String? ?? '';

@@ -276,16 +276,16 @@ class _InvoiceRow extends ConsumerWidget {
                         ? 'cancelled'
                         : inv['payment_status'] as String? ?? '',
                   ),
-                  if (canEdit) IconButton(
-                    tooltip: t('Modify'),
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    onPressed: () => modifyInvoiceById(
-                      context,
-                      ref,
-                      inv['id'] as String,
-                    ),
-                  ) else const SizedBox(width: 40),
+                  if (canEdit)
+                    IconButton(
+                      tooltip: t('Modify'),
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      onPressed: () =>
+                          modifyInvoiceById(context, ref, inv['id'] as String),
+                    )
+                  else
+                    const SizedBox(width: 40),
                 ],
               ),
             ),
@@ -388,16 +388,14 @@ class _InvoiceTile extends ConsumerWidget {
                   ),
                 ],
               ),
-              if (canEdit) IconButton(
-                    tooltip: t('Modify'),
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.edit_outlined, size: 18),
-                    onPressed: () => modifyInvoiceById(
-                      context,
-                      ref,
-                      inv['id'] as String,
-                    ),
-                  ),
+              if (canEdit)
+                IconButton(
+                  tooltip: t('Modify'),
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(Icons.edit_outlined, size: 18),
+                  onPressed: () =>
+                      modifyInvoiceById(context, ref, inv['id'] as String),
+                ),
             ],
           ),
         ),

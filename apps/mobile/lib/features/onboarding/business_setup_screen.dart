@@ -76,6 +76,18 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     text: widget.existing?['upi_id'] as String? ?? '',
   );
   late String? _band = widget.existing?['turnover_band'] as String?;
+
+  /// Bill settings (migration 0076). Shown and saved only once the
+  /// database has them, so an older database still saves the rest.
+  bool get _hasBillSettings =>
+      widget.existing?.containsKey('bill_terms') ?? false;
+  late final _billTerms = TextEditingController(
+    text: widget.existing?['bill_terms'] as String? ?? '',
+  );
+  late final _billFooter = TextEditingController(
+    text: widget.existing?['bill_footer'] as String? ?? '',
+  );
+  late bool _billShowSku = widget.existing?['bill_show_sku'] as bool? ?? false;
   XFile? _logo;
   bool _busy = false;
 
@@ -127,6 +139,11 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'require_repair_estimate': _requireEstimate,
         'upi_id': _upi.text.trim(),
         if (_taxPref != 'non_gst') 'turnover_band': _band,
+        if (_hasBillSettings) ...{
+          'bill_terms': _billTerms.text.trim(),
+          'bill_footer': _billFooter.text.trim(),
+          'bill_show_sku': _billShowSku,
+        },
       };
       if (isEdit) {
         final id = widget.existing!['id'] as String;
@@ -148,7 +165,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       }
       await ref.read(appContextProvider.notifier).refresh();
       if (mounted) {
-        showSuccess(context, isEdit ? t('Business updated') : 'Business created!');
+        showSuccess(
+          context,
+          isEdit ? t('Business updated') : 'Business created!',
+        );
         if (isEdit) Navigator.of(context).pop();
         // For setup, the router redirects to the dashboard automatically.
       }
@@ -170,7 +190,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(t('SOFTRAXA will delete your shop, its logins and its data, and confirm on WhatsApp or by email. Bills may be kept for as long as GST law requires. Export your data first if you want a copy.'),
+            Text(
+              t(
+                'SOFTRAXA will delete your shop, its logins and its data, and confirm on WhatsApp or by email. Bills may be kept for as long as GST law requires. Export your data first if you want a copy.',
+              ),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -203,7 +226,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
       if (mounted) {
         showSuccess(
           context,
-          t('Request sent — SOFTRAXA will confirm when your account is deleted'),
+          t(
+            'Request sent — SOFTRAXA will confirm when your account is deleted',
+          ),
         );
       }
     } catch (e) {
@@ -299,9 +324,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
               TextFormField(
                 controller: _address,
                 maxLines: 2,
-                decoration: InputDecoration(
-                  labelText: t('Business address'),
-                ),
+                decoration: InputDecoration(labelText: t('Business address')),
               ),
               SectionLabel(t('Tax & billing')),
               DropdownButtonFormField<String>(
@@ -345,8 +368,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     label: t('State *'),
                     helperText: t('Decides CGST + SGST vs IGST on invoices'),
                     onChanged: (v) => setState(() => _state = v),
-                    validator: (v) =>
-                        (v ?? '').isEmpty ? t('Required for GST billing') : null,
+                    validator: (v) => (v ?? '').isEmpty
+                        ? t('Required for GST billing')
+                        : null,
                   ),
                 ),
               if (_taxPref != 'non_gst')
@@ -356,7 +380,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     initialValue: _band,
                     decoration: InputDecoration(
                       labelText: t('Annual turnover'),
-                      helperText: t('Above ₹5 crore needs e-invoicing — contact SOFTRAXA'),
+                      helperText: t(
+                        'Above ₹5 crore needs e-invoicing — contact SOFTRAXA',
+                      ),
                     ),
                     items: [
                       DropdownMenuItem(
@@ -397,7 +423,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 ),
                 decoration: InputDecoration(
                   labelText: t('Default credit limit for new customers ₹'),
-                  helperText: t('0 = new customers get no credit until you set a limit'),
+                  helperText: t(
+                    '0 = new customers get no credit until you set a limit',
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -406,7 +434,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
                   labelText: t('Return window (days)'),
-                  helperText: t('Returns after this need the owner and a reason. 0 = no limit'),
+                  helperText: t(
+                    'Returns after this need the owner and a reason. 0 = no limit',
+                  ),
                 ),
                 validator: (v) {
                   final n = int.tryParse((v ?? '').trim());
@@ -454,7 +484,10 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 value: _requireEstimate,
                 onChanged: (v) => setState(() => _requireEstimate = v),
                 title: Text(t('Repairs need an approved estimate')),
-                subtitle: Text(t('Job card work starts only after the customer approves the estimate. Turn off if you don\'t do repairs.'),
+                subtitle: Text(
+                  t(
+                    'Job card work starts only after the customer approves the estimate. Turn off if you don\'t do repairs.',
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -463,7 +496,9 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 textCapitalization: TextCapitalization.characters,
                 decoration: InputDecoration(
                   labelText: t('Invoice prefix'),
-                  helperText: t('Up to 4 characters — bills become INV/26-27/0001'),
+                  helperText: t(
+                    'Up to 4 characters — bills become INV/26-27/0001',
+                  ),
                 ),
                 // Bill numbers must fit in 16 characters (migration 0048).
                 validator: (v) =>
@@ -471,6 +506,56 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     ? null
                     : '1–4 letters or digits',
               ),
+              if (_hasBillSettings) ...[
+                const SizedBox(height: 24),
+                SectionLabel(t('Bill settings')),
+                Text(
+                  t(
+                    'Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.',
+                  ),
+                  style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _billTerms,
+                  minLines: 3,
+                  maxLines: 8,
+                  maxLength: 1500,
+                  decoration: InputDecoration(
+                    labelText: t('Terms & conditions'),
+                    alignLabelWithHint: true,
+                    hintText: t(
+                      'Goods once sold will not be taken back\nExchange within 7 days with bill and packing',
+                    ),
+                    helperText: t(
+                      'One per line. Printed numbered on every bill.',
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                TextFormField(
+                  controller: _billFooter,
+                  maxLength: 200,
+                  decoration: InputDecoration(
+                    labelText: t('Closing line'),
+                    hintText: t('Thank you! Visit again.'),
+                    helperText: t(
+                      'Printed last, in the middle. Leave empty for none.',
+                    ),
+                  ),
+                ),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: _billShowSku,
+                  onChanged: (v) => setState(() => _billShowSku = v),
+                  title: Text(t('Print stock no. (SKU) on bills')),
+                  subtitle: Text(
+                    t(
+                      'Each item shows its stock no. before the name, as clothing and hardware shops do.',
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 24),
               FilledButton(
                 onPressed: _busy ? null : _save,

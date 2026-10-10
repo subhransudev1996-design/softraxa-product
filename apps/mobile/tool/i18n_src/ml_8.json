@@ -22,5 +22,15 @@
 "Two items are multiplied. Use + between items.": "രണ്ട് ഐറ്റങ്ങൾ തമ്മിൽ ഗുണിച്ചിരിക്കുന്നു. ഐറ്റങ്ങൾക്കിടയിൽ + ഇടുക.",
 "An item is divided. Divide only numbers.": "ഒരു ഐറ്റം കൊണ്ട് ഹരിച്ചിരിക്കുന്നു. നമ്പറുകൾ കൊണ്ട് മാത്രം ഹരിക്കുക.",
 "An item has a minus or zero quantity.": "ഒരു ഐറ്റത്തിന്റെ അളവ് മൈനസ് അല്ലെങ്കിൽ പൂജ്യം ആണ്.",
-"App version {v1}": "ആപ്പ് വേർഷൻ {v1}"
+"App version {v1}": "ആപ്പ് വേർഷൻ {v1}",
+"Bill settings": "ബിൽ സെറ്റിംഗ്",
+"Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.": "മുകളിലുള്ള നിങ്ങളുടെ ലോഗോ, പേര്, വിലാസം, ഫോൺ, ഇമെയിൽ, GSTIN എന്നിവ എല്ലാ ബില്ലിന്റെയും മുകളിൽ അച്ചടിക്കും. ഇവ താഴെ അച്ചടിക്കും.",
+"Terms & conditions": "നിബന്ധനകളും വ്യവസ്ഥകളും",
+"Goods once sold will not be taken back\nExchange within 7 days with bill and packing": "വിറ്റ സാധനം തിരിച്ചെടുക്കില്ല\nബില്ലും പാക്കിംഗും സഹിതം 7 ദിവസത്തിനുള്ളിൽ മാറ്റാം",
+"One per line. Printed numbered on every bill.": "ഓരോ വരിയിലും ഒന്ന്. എല്ലാ ബില്ലിലും നമ്പറിട്ട് അച്ചടിക്കും.",
+"Closing line": "അവസാന വരി",
+"Thank you! Visit again.": "നന്ദി! വീണ്ടും വരിക.",
+"Printed last, in the middle. Leave empty for none.": "ഏറ്റവും താഴെ, നടുവിൽ അച്ചടിക്കും. വേണ്ടെങ്കിൽ ഒഴിച്ചിടുക.",
+"Print stock no. (SKU) on bills": "ബില്ലിൽ സ്റ്റോക്ക് നമ്പർ (SKU) അച്ചടിക്കുക",
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ഓരോ ഐറ്റത്തിന്റെയും പേരിന് മുമ്പ് അതിന്റെ സ്റ്റോക്ക് നമ്പർ കാണിക്കും, തുണി, ഹാർഡ്‌വെയർ കടകളിലെ പോലെ."
 }

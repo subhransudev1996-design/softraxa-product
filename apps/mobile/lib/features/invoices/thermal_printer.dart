@@ -1,10 +1,12 @@
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../core/formatters.dart';
 import '../../core/gst.dart';
 import '../../core/widgets.dart';
+import 'bill_layout.dart';
 
 /// Bluetooth ESC/POS thermal printing (PRD 7.8).
 class ThermalPrinterService {
@@ -116,65 +118,87 @@ class ThermalPrinterService {
   }) async {
     final profile = await CapabilityProfile.load();
     final generator = Generator(PaperSize.mm80, profile);
-    final isGst = invoice['invoice_type'] == 'gst';
+    final bill = BillLayout(business: business, invoice: invoice, items: items);
+    final isGst = bill.isGst;
+    final logo = await _logoImage(business);
     List<int> bytes = [];
+    const center = PosStyles(align: PosAlign.center);
+    const right = PosStyles(align: PosAlign.right);
+    const bold = PosStyles(bold: true);
+    const boldRight = PosStyles(align: PosAlign.right, bold: true);
+    String s(Object? v) => (v as String? ?? '').trim();
+    String n(num v) => billMoney(v);
 
+    // ---- shop ----
+    if (logo != null) bytes += generator.imageRaster(logo);
     bytes += generator.text(
-      business['name'] as String? ?? '',
+      s(business['name']),
       styles: const PosStyles(
         align: PosAlign.center,
         bold: true,
         height: PosTextSize.size2,
       ),
     );
-    if ((business['address'] as String? ?? '').isNotEmpty) {
-      bytes += generator.text(
-        business['address'] as String,
-        styles: const PosStyles(align: PosAlign.center),
-      );
+    if (s(business['address']).isNotEmpty) {
+      bytes += generator.text(s(business['address']), styles: center);
     }
-    if ((business['phone'] as String? ?? '').isNotEmpty) {
-      bytes += generator.text(
-        'Ph: ${business['phone']}',
-        styles: const PosStyles(align: PosAlign.center),
-      );
+    if (s(business['phone']).isNotEmpty) {
+      bytes += generator.text('Ph: ${s(business['phone'])}', styles: center);
+    }
+    if (s(business['email']).isNotEmpty) {
+      bytes += generator.text(s(business['email']), styles: center);
     }
     final composition = business['tax_preference'] == 'composition';
-    if ((isGst || composition) &&
-        (business['gst_number'] as String? ?? '').isNotEmpty) {
+    // Composition shops issue bills of supply (migration 0048).
+    final title = composition && !bill.isEstimate
+        ? 'BILL OF SUPPLY'
+        : switch (invoice['invoice_type']) {
+            'gst' => 'TAX INVOICE',
+            'cash_memo' => 'CASH MEMO',
+            'estimate' => 'ESTIMATE / QUOTATION',
+            _ => 'SALES INVOICE',
+          };
+    bytes += generator.text(title, styles: center.copyWith(bold: true));
+    if ((isGst || composition) && s(business['gst_number']).isNotEmpty) {
       bytes += generator.text(
-        'GSTIN: ${business['gst_number']}',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
+        'GSTIN: ${s(business['gst_number'])}',
+        styles: center.copyWith(bold: true),
       );
     }
-    // Composition shops issue bills of supply (migration 0048).
-    if (composition && invoice['invoice_type'] != 'estimate') {
-      bytes += generator.text(
-        'BILL OF SUPPLY',
-        styles: const PosStyles(align: PosAlign.center, bold: true),
-      );
+    if (composition && !bill.isEstimate) {
       bytes += generator.text(
         'Composition taxable person, not eligible to collect tax on supplies',
-        styles: const PosStyles(align: PosAlign.center),
+        styles: center,
       );
     }
+
+    // ---- bill and customer ----
     bytes += generator.hr();
     bytes += generator.row([
       PosColumn(
-        text: '${invoice['invoice_no']}',
-        width: 6,
-        styles: const PosStyles(bold: true),
+        text: 'Bill No: ${invoice['invoice_no']}',
+        width: 7,
+        styles: bold,
       ),
       PosColumn(
-        text: dateStr(invoice['invoice_date']),
-        width: 6,
-        styles: const PosStyles(align: PosAlign.right),
+        text: dateTimeStr(invoice['invoice_date']),
+        width: 5,
+        styles: right,
       ),
     ]);
-    if ((invoice['customer_name'] as String? ?? '').isNotEmpty) {
-      bytes += generator.text('Customer: ${invoice['customer_name']}');
+    final cust = s(invoice['customer_name']);
+    final mob = s(invoice['customer_phone']);
+    if (cust.isNotEmpty || mob.isNotEmpty) {
+      bytes += generator.row([
+        PosColumn(text: 'Cust: $cust', width: 6),
+        PosColumn(
+          text: mob.isEmpty ? '' : 'Mob: $mob',
+          width: 6,
+          styles: right,
+        ),
+      ]);
     }
-    final customerGstin = invoice['customer_gstin'] as String? ?? '';
+    final customerGstin = s(invoice['customer_gstin']);
     if (isGst && customerGstin.isNotEmpty) {
       bytes += generator.text('GSTIN: $customerGstin');
     }
@@ -182,90 +206,189 @@ class ThermalPrinterService {
     if (isGst && pos.isNotEmpty) {
       bytes += generator.text('Place of supply: $pos');
     }
-    bytes += generator.hr();
 
-    for (final it in items) {
-      var name = it['product_name'] as String? ?? '';
-      if ((it['variant_name'] as String? ?? '').isNotEmpty) {
-        name = '$name (${it['variant_name']})';
-      }
-      bytes += generator.text(name, styles: const PosStyles(bold: true));
-      final billed = billedQty(it);
-      final rate =
-          toDouble(it['unit_price']) *
-          (isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1) *
-          billed.per;
-      bytes += generator.row([
+    // ---- items: name line, then Qty | Rate | Amount | Disc | Total ----
+    final anyDisc = bill.lines.any((l) => l.discount > 0);
+    final anySku = bill.lines.any((l) => l.sku.isNotEmpty);
+    // 12 columns: 2 qty, then the money columns.
+    final widths = anyDisc ? [2, 2, 3, 2, 3] : [2, 3, 3, 4];
+    List<PosColumn> cols(List<String> c, {bool b = false}) => [
+      for (var i = 0; i < c.length; i++)
         PosColumn(
-          text:
-              '${qtyUnit(billed.qty, it['sold_as_pack'] == true ? billed.unit : null)} x ${rate.toStringAsFixed(2)}',
-          width: 7,
+          text: c[i],
+          width: widths[i],
+          styles: PosStyles(
+            align: i == 0 ? PosAlign.left : PosAlign.right,
+            bold: b,
+          ),
         ),
-        PosColumn(
-          text: toDouble(it['line_total']).toStringAsFixed(2),
-          width: 5,
-          styles: const PosStyles(align: PosAlign.right),
-        ),
-      ]);
-      if ((it['serial_no'] as String? ?? '').isNotEmpty) {
-        bytes += generator.text('S/N: ${it['serial_no']}');
-      }
+    ];
+    bytes += generator.hr();
+    bytes += generator.text(
+      anySku ? 'Stock No  Item Description' : 'Item',
+      styles: bold,
+    );
+    bytes += generator.row(
+      cols(['Qty', 'Rate', 'Amount', if (anyDisc) 'Disc', 'Total'], b: true),
+    );
+    bytes += generator.hr();
+    for (final l in bill.lines) {
+      final size = l.size.isEmpty ? '' : ' - ${l.size}';
+      bytes += generator.text(
+        l.sku.isEmpty ? '${l.name}$size' : '${l.sku}  ${l.name}$size',
+      );
+      bytes += generator.row(
+        cols([
+          l.isPack ? qtyUnit(l.qty, l.unit) : qty(l.qty),
+          n(l.rate),
+          n(l.amount),
+          if (anyDisc) n(l.discount),
+          n(l.total),
+        ]),
+      );
     }
     bytes += generator.hr();
+    bytes += generator.row(
+      cols([
+        qty(bill.totalQty),
+        '',
+        n(bill.totalAmount),
+        if (anyDisc) n(bill.totalLineDiscount),
+        n(bill.linesTotal),
+      ], b: true),
+    );
+    bytes += generator.hr();
 
-    void totalRow(String label, num? value, {bool bold = false}) {
+    void totalRow(String label, num value, {bool strong = false}) {
       bytes += generator.row([
         PosColumn(
           text: label,
           width: 7,
-          styles: PosStyles(bold: bold),
+          styles: PosStyles(bold: strong),
         ),
-        PosColumn(
-          text: toDouble(value).toStringAsFixed(2),
-          width: 5,
-          styles: PosStyles(align: PosAlign.right, bold: bold),
-        ),
+        PosColumn(text: n(value), width: 5, styles: strong ? boldRight : right),
       ]);
     }
 
-    if (toDouble(invoice['discount_amount']) > 0) {
-      totalRow('Discount', -toDouble(invoice['discount_amount']));
-    }
-    if (isGst && toDouble(invoice['tax_amount']) > 0) {
-      totalRow('Taxable value', gstTaxableTotal(items));
-      for (final (label, amount) in gstBreakupRows(items)) {
-        totalRow('Incl. $label', amount);
+    if (bill.billDiscount > 0) totalRow('Bill discount', -bill.billDiscount);
+    if (bill.roundOff != 0) totalRow('Round off', bill.roundOff);
+    bytes += generator.row([
+      PosColumn(
+        text: 'Net Bill Amount',
+        width: 7,
+        styles: const PosStyles(bold: true, height: PosTextSize.size2),
+      ),
+      PosColumn(
+        text: n(bill.netAmount),
+        width: 5,
+        styles: const PosStyles(
+          align: PosAlign.right,
+          bold: true,
+          height: PosTextSize.size2,
+        ),
+      ),
+    ]);
+    bytes += generator.text('Amount In Words:', styles: bold);
+    bytes += generator.text(bill.amountInWords);
+
+    // ---- payment ----
+    if (bill.payments.isNotEmpty || bill.due > 0) {
+      bytes += generator.hr();
+      bytes += generator.text('Payment Details', styles: bold);
+      for (final (mode, amount) in bill.payments) {
+        totalRow(mode, amount);
       }
+      if (bill.due > 0) totalRow('DUE', bill.due, strong: true);
     }
-    if (toDouble(invoice['round_off']) != 0) {
-      totalRow('Round off', invoice['round_off'] as num?);
-    }
-    totalRow('TOTAL', invoice['total'] as num?, bold: true);
-    if (invoice['invoice_type'] != 'estimate') {
-      final payments = List<Map<String, dynamic>>.from(
-        invoice['invoice_payments'] as List? ?? [],
+
+    // ---- GST summary: GST% | Taxable | CGST | SGST | Total (or IGST) ----
+    final gst = bill.gstSummary;
+    if (gst.isNotEmpty) {
+      final igst = bill.gstIsInterState;
+      final gw = igst ? [2, 4, 3, 3] : [2, 3, 2, 2, 3];
+      List<PosColumn> g(List<String> c, {bool b = false}) => [
+        for (var i = 0; i < c.length; i++)
+          PosColumn(
+            text: c[i],
+            width: gw[i],
+            styles: PosStyles(
+              align: i == 0 ? PosAlign.left : PosAlign.right,
+              bold: b,
+            ),
+          ),
+      ];
+      double sum(double Function(GstSummaryRow) f) =>
+          gst.fold(0.0, (t, r) => t + f(r));
+      bytes += generator.hr();
+      bytes += generator.text('GST Summary', styles: bold);
+      bytes += generator.row(
+        g([
+          'GST%',
+          'Taxable',
+          if (igst) 'IGST' else ...['CGST', 'SGST'],
+          'Total',
+        ], b: true),
       );
-      if (payments.length > 1) {
-        for (final p in payments) {
-          totalRow('Paid (${p['payment_mode']})', p['amount'] as num?);
-        }
-      } else {
-        totalRow(
-          'Paid (${invoice['payment_mode']})',
-          invoice['paid_amount'] as num?,
+      for (final r in gst) {
+        bytes += generator.row(
+          g([
+            '${qty(r.rate)}%',
+            n(r.taxable),
+            if (igst) n(r.igst) else ...[n(r.cgst), n(r.sgst)],
+            n(r.totalTax),
+          ]),
         );
       }
-      if (toDouble(invoice['due_amount']) > 0) {
-        totalRow('DUE', invoice['due_amount'] as num?, bold: true);
+      if (gst.length > 1) {
+        bytes += generator.row(
+          g([
+            'Total',
+            n(sum((r) => r.taxable)),
+            if (igst)
+              n(sum((r) => r.igst))
+            else ...[
+              n(sum((r) => r.cgst)),
+              n(sum((r) => r.sgst)),
+            ],
+            n(sum((r) => r.totalTax)),
+          ], b: true),
+        );
       }
     }
-    bytes += generator.feed(1);
-    bytes += generator.text(
-      'Thank you! Visit again.',
-      styles: const PosStyles(align: PosAlign.center),
-    );
+
+    // ---- terms and footer ----
+    if (bill.terms.isNotEmpty) {
+      bytes += generator.hr();
+      bytes += generator.text('Terms & Conditions:', styles: bold);
+      for (var i = 0; i < bill.terms.length; i++) {
+        bytes += generator.text('${i + 1}. ${bill.terms[i]}');
+      }
+    }
+    if (bill.footer.isNotEmpty) {
+      bytes += generator.feed(1);
+      bytes += generator.text(bill.footer, styles: center);
+    }
     bytes += generator.feed(2);
     bytes += generator.cut();
     return bytes;
+  }
+
+  /// The shop's logo for the printer: on white, in grey, at most 280 dots
+  /// wide. Null without a logo, or when it can't be loaded or read; the
+  /// bill then prints without it.
+  static Future<img.Image?> _logoImage(Map<String, dynamic> business) async {
+    final data = await loadBillLogo(business);
+    if (data == null) return null;
+    try {
+      final src = img.decodeImage(data);
+      if (src == null) return null;
+      final sized = src.width > 280 ? img.copyResize(src, width: 280) : src;
+      final white = img.Image(width: sized.width, height: sized.height)
+        ..clear(img.ColorRgb8(255, 255, 255));
+      img.compositeImage(white, sized);
+      return img.grayscale(white);
+    } catch (_) {
+      return null;
+    }
   }
 }

@@ -46,7 +46,9 @@ Future<bool> applyAdvanceToInvoice(
     if (context.mounted) {
       showSuccess(
         context,
-        t('Advance of {v1} used on this bill', {'v1': money(toDouble((res as Map)['applied']))}),
+        t('Advance of {v1} used on this bill', {
+          'v1': money(toDouble((res as Map)['applied'])),
+        }),
       );
     }
     return true;

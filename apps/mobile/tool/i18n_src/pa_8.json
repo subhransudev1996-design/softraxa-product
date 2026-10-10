@@ -22,5 +22,15 @@
 "Two items are multiplied. Use + between items.": "ਦੋ ਆਈਟਮਾਂ ਨੂੰ ਗੁਣਾ ਕੀਤਾ ਗਿਆ ਹੈ। ਆਈਟਮਾਂ ਵਿਚਕਾਰ + ਲਗਾਓ।",
 "An item is divided. Divide only numbers.": "ਕਿਸੇ ਆਈਟਮ ਨਾਲ ਭਾਗ ਕੀਤਾ ਗਿਆ ਹੈ। ਸਿਰਫ਼ ਨੰਬਰਾਂ ਨਾਲ ਭਾਗ ਕਰੋ।",
 "An item has a minus or zero quantity.": "ਕਿਸੇ ਆਈਟਮ ਦੀ ਮਾਤਰਾ ਮਾਈਨਸ ਜਾਂ ਸਿਫ਼ਰ ਹੈ।",
-"App version {v1}": "ਐਪ ਵਰਜ਼ਨ {v1}"
+"App version {v1}": "ਐਪ ਵਰਜ਼ਨ {v1}",
+"Bill settings": "ਬਿੱਲ ਸੈਟਿੰਗ",
+"Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.": "ਉੱਪਰ ਦਿੱਤਾ ਤੁਹਾਡਾ ਲੋਗੋ, ਨਾਮ, ਪਤਾ, ਫ਼ੋਨ, ਈਮੇਲ ਅਤੇ GSTIN ਹਰ ਬਿੱਲ ਦੇ ਉੱਪਰ ਛਪਦੇ ਹਨ। ਇਹ ਹੇਠਾਂ ਛਪਦੇ ਹਨ।",
+"Terms & conditions": "ਨਿਯਮ ਅਤੇ ਸ਼ਰਤਾਂ",
+"Goods once sold will not be taken back\nExchange within 7 days with bill and packing": "ਵਿਕਿਆ ਮਾਲ ਵਾਪਸ ਨਹੀਂ ਹੋਵੇਗਾ\nਬਿੱਲ ਅਤੇ ਪੈਕਿੰਗ ਨਾਲ 7 ਦਿਨਾਂ ਵਿੱਚ ਬਦਲੋ",
+"One per line. Printed numbered on every bill.": "ਹਰ ਲਾਈਨ ਵਿੱਚ ਇੱਕ। ਹਰ ਬਿੱਲ 'ਤੇ ਨੰਬਰ ਨਾਲ ਛਪਦਾ ਹੈ।",
+"Closing line": "ਆਖ਼ਰੀ ਲਾਈਨ",
+"Thank you! Visit again.": "ਧੰਨਵਾਦ! ਫਿਰ ਆਉਣਾ।",
+"Printed last, in the middle. Leave empty for none.": "ਸਭ ਤੋਂ ਹੇਠਾਂ, ਵਿਚਕਾਰ ਛਪਦੀ ਹੈ। ਨਾ ਚਾਹੋ ਤਾਂ ਖਾਲੀ ਛੱਡੋ।",
+"Print stock no. (SKU) on bills": "ਬਿੱਲ 'ਤੇ ਸਟਾਕ ਨੰਬਰ (SKU) ਛਾਪੋ",
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ਹਰ ਆਈਟਮ ਦੇ ਨਾਮ ਤੋਂ ਪਹਿਲਾਂ ਉਸਦਾ ਸਟਾਕ ਨੰਬਰ ਦਿਸਦਾ ਹੈ, ਕੱਪੜੇ ਅਤੇ ਹਾਰਡਵੇਅਰ ਦੀਆਂ ਦੁਕਾਨਾਂ ਵਾਂਗ।"
 }

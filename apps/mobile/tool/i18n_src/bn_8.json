@@ -22,5 +22,15 @@
 "Two items are multiplied. Use + between items.": "দুটি আইটেম গুণ করা হয়েছে। আইটেমের মাঝে + দিন।",
 "An item is divided. Divide only numbers.": "একটি আইটেম দিয়ে ভাগ করা হয়েছে। শুধু সংখ্যা দিয়ে ভাগ করুন।",
 "An item has a minus or zero quantity.": "একটি আইটেমের পরিমাণ মাইনাস বা শূন্য।",
-"App version {v1}": "অ্যাপ ভার্সন {v1}"
+"App version {v1}": "অ্যাপ ভার্সন {v1}",
+"Bill settings": "বিল সেটিং",
+"Your logo, name, address, phone, email and GSTIN above print at the top of every bill. These print at the bottom.": "ওপরে দেওয়া আপনার লোগো, নাম, ঠিকানা, ফোন, ইমেল ও GSTIN প্রতিটি বিলের ওপরে ছাপা হয়। এগুলো নিচে ছাপা হয়।",
+"Terms & conditions": "শর্তাবলী",
+"Goods once sold will not be taken back\nExchange within 7 days with bill and packing": "বিক্রি হওয়া মাল ফেরত নেওয়া হবে না\nবিল ও প্যাকিং সহ ৭ দিনের মধ্যে বদল",
+"One per line. Printed numbered on every bill.": "প্রতি লাইনে একটি। প্রতিটি বিলে নম্বর দিয়ে ছাপা হয়।",
+"Closing line": "শেষ লাইন",
+"Thank you! Visit again.": "ধন্যবাদ! আবার আসবেন।",
+"Printed last, in the middle. Leave empty for none.": "সবার শেষে, মাঝখানে ছাপা হয়। না চাইলে ফাঁকা রাখুন।",
+"Print stock no. (SKU) on bills": "বিলে স্টক নম্বর (SKU) ছাপুন",
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "প্রতিটি আইটেমের নামের আগে তার স্টক নম্বর দেখায়, যেমন কাপড় ও হার্ডওয়্যারের দোকানে।"
 }
