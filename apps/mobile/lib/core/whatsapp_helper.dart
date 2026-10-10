@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'app_version.dart';
 import 'supabase_providers.dart';
 import 'widgets.dart';
 
@@ -84,6 +85,8 @@ Future<void> launchWhatsAppContact(
   if (phone.isNotEmpty) buffer.writeln('• *Phone Number:* $phone');
   if (email.isNotEmpty) buffer.writeln('• *Email:* $email');
   buffer.writeln('• *Current Status:* $subState');
+  final version = await readAppVersion();
+  if (version.isNotEmpty) buffer.writeln('• *App Version:* $version');
 
   final message = buffer.toString();
   final fromSettings = (number ?? '').isNotEmpty

@@ -21,5 +21,6 @@
 "{v1} + {v2}% GST": "{v1} + {v2}% GST",
 "Two items are multiplied. Use + between items.": "രണ്ട് ഐറ്റങ്ങൾ തമ്മിൽ ഗുണിച്ചിരിക്കുന്നു. ഐറ്റങ്ങൾക്കിടയിൽ + ഇടുക.",
 "An item is divided. Divide only numbers.": "ഒരു ഐറ്റം കൊണ്ട് ഹരിച്ചിരിക്കുന്നു. നമ്പറുകൾ കൊണ്ട് മാത്രം ഹരിക്കുക.",
-"An item has a minus or zero quantity.": "ഒരു ഐറ്റത്തിന്റെ അളവ് മൈനസ് അല്ലെങ്കിൽ പൂജ്യം ആണ്."
+"An item has a minus or zero quantity.": "ഒരു ഐറ്റത്തിന്റെ അളവ് മൈനസ് അല്ലെങ്കിൽ പൂജ്യം ആണ്.",
+"App version {v1}": "ആപ്പ് വേർഷൻ {v1}"
 }

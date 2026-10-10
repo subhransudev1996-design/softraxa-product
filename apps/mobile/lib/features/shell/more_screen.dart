@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/app_version.dart';
 import '../../core/crash_reporting.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
@@ -423,6 +424,19 @@ class MoreScreen extends ConsumerWidget {
                   },
                 ),
               ],
+            ),
+          ),
+          // Which version is installed — asked for by support and when an
+          // update won't install.
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: Center(
+              child: Text(
+                t('App version {v1}', {
+                  'v1': ref.watch(appVersionProvider).value ?? '…',
+                }),
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
             ),
           ),
           const SizedBox(height: 24),

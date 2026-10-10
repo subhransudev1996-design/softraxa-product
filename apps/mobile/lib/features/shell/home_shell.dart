@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 
+import '../../core/app_version.dart';
 import '../../core/crash_reporting.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
@@ -620,6 +621,21 @@ class _SidebarFooter extends StatelessWidget {
                         fontSize: 11.5,
                         fontWeight: FontWeight.w600,
                       ),
+                    ),
+                    Consumer(
+                      builder: (context, ref, _) {
+                        final v = ref.watch(appVersionProvider).value ?? '';
+                        return v.isEmpty
+                            ? const SizedBox.shrink()
+                            : Text(
+                                t('App version {v1}', {'v1': v}),
+                                maxLines: 1,
+                                style: const TextStyle(
+                                  color: _sidebarMuted,
+                                  fontSize: 11,
+                                ),
+                              );
+                      },
                     ),
                   ],
                 ),

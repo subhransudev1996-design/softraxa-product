@@ -21,5 +21,6 @@
 "{v1} + {v2}% GST": "{v1} + {v2}% GST",
 "Two items are multiplied. Use + between items.": "ಎರಡು ಐಟಂಗಳನ್ನು ಗುಣಿಸಲಾಗಿದೆ. ಐಟಂಗಳ ನಡುವೆ + ಹಾಕಿ.",
 "An item is divided. Divide only numbers.": "ಒಂದು ಐಟಂನಿಂದ ಭಾಗಿಸಲಾಗಿದೆ. ಸಂಖ್ಯೆಗಳಿಂದ ಮಾತ್ರ ಭಾಗಿಸಿ.",
-"An item has a minus or zero quantity.": "ಒಂದು ಐಟಂನ ಪ್ರಮಾಣ ಮೈನಸ್ ಅಥವಾ ಸೊನ್ನೆ ಇದೆ."
+"An item has a minus or zero quantity.": "ಒಂದು ಐಟಂನ ಪ್ರಮಾಣ ಮೈನಸ್ ಅಥವಾ ಸೊನ್ನೆ ಇದೆ.",
+"App version {v1}": "ಆ್ಯಪ್ ವರ್ಷನ್ {v1}"
 }

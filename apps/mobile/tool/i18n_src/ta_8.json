@@ -21,5 +21,6 @@
 "{v1} + {v2}% GST": "{v1} + {v2}% GST",
 "Two items are multiplied. Use + between items.": "இரண்டு பொருட்கள் பெருக்கப்பட்டுள்ளன. பொருட்களுக்கு இடையே + போடவும்.",
 "An item is divided. Divide only numbers.": "ஒரு பொருளால் வகுக்கப்பட்டுள்ளது. எண்களால் மட்டும் வகுக்கவும்.",
-"An item has a minus or zero quantity.": "ஒரு பொருளின் அளவு மைனஸ் அல்லது பூஜ்யம்."
+"An item has a minus or zero quantity.": "ஒரு பொருளின் அளவு மைனஸ் அல்லது பூஜ்யம்.",
+"App version {v1}": "ஆப் வெர்ஷன் {v1}"
 }

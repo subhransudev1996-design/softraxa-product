@@ -21,5 +21,6 @@
 "{v1} + {v2}% GST": "{v1} + {v2}% GST",
 "Two items are multiplied. Use + between items.": "দুটি আইটেম গুণ করা হয়েছে। আইটেমের মাঝে + দিন।",
 "An item is divided. Divide only numbers.": "একটি আইটেম দিয়ে ভাগ করা হয়েছে। শুধু সংখ্যা দিয়ে ভাগ করুন।",
-"An item has a minus or zero quantity.": "একটি আইটেমের পরিমাণ মাইনাস বা শূন্য।"
+"An item has a minus or zero quantity.": "একটি আইটেমের পরিমাণ মাইনাস বা শূন্য।",
+"App version {v1}": "অ্যাপ ভার্সন {v1}"
 }
