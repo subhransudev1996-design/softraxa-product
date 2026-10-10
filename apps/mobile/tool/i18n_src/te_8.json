@@ -32,5 +32,7 @@
 "Thank you! Visit again.": "ధన్యవాదాలు! మళ్ళీ రండి.",
 "Printed last, in the middle. Leave empty for none.": "అన్నిటికంటే కింద, మధ్యలో ముద్రించబడుతుంది. వద్దనుకుంటే ఖాళీగా వదలండి.",
 "Print stock no. (SKU) on bills": "బిల్లుపై స్టాక్ నంబర్ (SKU) ముద్రించు",
-"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ప్రతి ఐటమ్ పేరు ముందు దాని స్టాక్ నంబర్ కనిపిస్తుంది, బట్టలు మరియు హార్డ్‌వేర్ దుకాణాల్లో లాగా."
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ప్రతి ఐటమ్ పేరు ముందు దాని స్టాక్ నంబర్ కనిపిస్తుంది, బట్టలు మరియు హార్డ్‌వేర్ దుకాణాల్లో లాగా.",
+"Print return slip": "రిటర్న్ స్లిప్ ముద్రించు",
+"Share return slip": "రిటర్న్ స్లిప్ పంపు"
 }

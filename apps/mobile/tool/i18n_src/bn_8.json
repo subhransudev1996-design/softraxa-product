@@ -32,5 +32,7 @@
 "Thank you! Visit again.": "ধন্যবাদ! আবার আসবেন।",
 "Printed last, in the middle. Leave empty for none.": "সবার শেষে, মাঝখানে ছাপা হয়। না চাইলে ফাঁকা রাখুন।",
 "Print stock no. (SKU) on bills": "বিলে স্টক নম্বর (SKU) ছাপুন",
-"Each item shows its stock no. before the name, as clothing and hardware shops do.": "প্রতিটি আইটেমের নামের আগে তার স্টক নম্বর দেখায়, যেমন কাপড় ও হার্ডওয়্যারের দোকানে।"
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "প্রতিটি আইটেমের নামের আগে তার স্টক নম্বর দেখায়, যেমন কাপড় ও হার্ডওয়্যারের দোকানে।",
+"Print return slip": "রিটার্ন স্লিপ প্রিন্ট করুন",
+"Share return slip": "রিটার্ন স্লিপ পাঠান"
 }

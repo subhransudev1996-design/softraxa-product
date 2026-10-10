@@ -32,5 +32,7 @@
 "Thank you! Visit again.": "നന്ദി! വീണ്ടും വരിക.",
 "Printed last, in the middle. Leave empty for none.": "ഏറ്റവും താഴെ, നടുവിൽ അച്ചടിക്കും. വേണ്ടെങ്കിൽ ഒഴിച്ചിടുക.",
 "Print stock no. (SKU) on bills": "ബില്ലിൽ സ്റ്റോക്ക് നമ്പർ (SKU) അച്ചടിക്കുക",
-"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ഓരോ ഐറ്റത്തിന്റെയും പേരിന് മുമ്പ് അതിന്റെ സ്റ്റോക്ക് നമ്പർ കാണിക്കും, തുണി, ഹാർഡ്‌വെയർ കടകളിലെ പോലെ."
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ഓരോ ഐറ്റത്തിന്റെയും പേരിന് മുമ്പ് അതിന്റെ സ്റ്റോക്ക് നമ്പർ കാണിക്കും, തുണി, ഹാർഡ്‌വെയർ കടകളിലെ പോലെ.",
+"Print return slip": "റിട്ടേൺ സ്ലിപ്പ് പ്രിന്റ് ചെയ്യുക",
+"Share return slip": "റിട്ടേൺ സ്ലിപ്പ് അയയ്ക്കുക"
 }

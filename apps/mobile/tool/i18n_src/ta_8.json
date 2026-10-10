@@ -32,5 +32,7 @@
 "Thank you! Visit again.": "நன்றி! மீண்டும் வருக.",
 "Printed last, in the middle. Leave empty for none.": "கடைசியில், நடுவில் அச்சாகும். வேண்டாமெனில் காலியாக விடவும்.",
 "Print stock no. (SKU) on bills": "பில்லில் ஸ்டாக் எண் (SKU) அச்சிடு",
-"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ஒவ்வொரு பொருளின் பெயருக்கு முன் அதன் ஸ்டாக் எண் தெரியும், துணி மற்றும் ஹார்ட்வேர் கடைகளில் உள்ளது போல."
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "ஒவ்வொரு பொருளின் பெயருக்கு முன் அதன் ஸ்டாக் எண் தெரியும், துணி மற்றும் ஹார்ட்வேர் கடைகளில் உள்ளது போல.",
+"Print return slip": "ரிட்டர்ன் சீட்டு அச்சிடு",
+"Share return slip": "ரிட்டர்ன் சீட்டு அனுப்பு"
 }

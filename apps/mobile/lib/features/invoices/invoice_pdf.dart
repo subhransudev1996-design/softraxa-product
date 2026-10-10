@@ -562,77 +562,8 @@ class InvoicePdf {
 
   // ---------------- helpers ----------------
 
-  /// Rate | Taxable value | CGST | SGST | Total GST (or IGST), with totals.
-  pw.Widget _gstTable({required double fontSize}) {
-    final rows = bill.gstSummary;
-    final igst = bill.gstIsInterState;
-    final style = pw.TextStyle(fontSize: fontSize);
-    final boldStyle = pw.TextStyle(
-      fontSize: fontSize,
-      fontWeight: pw.FontWeight.bold,
-    );
-    final headers = [
-      'GST %',
-      'Taxable',
-      if (igst) 'IGST' else ...['CGST', 'SGST'],
-      'Total GST',
-    ];
-    final sum = (
-      taxable: rows.fold(0.0, (s, r) => s + r.taxable),
-      cgst: rows.fold(0.0, (s, r) => s + r.cgst),
-      sgst: rows.fold(0.0, (s, r) => s + r.sgst),
-      igst: rows.fold(0.0, (s, r) => s + r.igst),
-      tax: rows.fold(0.0, (s, r) => s + r.totalTax),
-    );
-    pw.Widget cell(String s, pw.TextStyle st, {bool left = false}) =>
-        pw.Padding(
-          padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1),
-          child: pw.Text(
-            s,
-            style: st,
-            textAlign: left ? pw.TextAlign.left : pw.TextAlign.right,
-          ),
-        );
-    return pw.Table(
-      border: pw.TableBorder.all(width: 0.5),
-      children: [
-        pw.TableRow(
-          children: [
-            for (var i = 0; i < headers.length; i++)
-              cell(headers[i], boldStyle, left: i == 0),
-          ],
-        ),
-        for (final r in rows)
-          pw.TableRow(
-            children: [
-              cell('${qty(r.rate)}%', style, left: true),
-              cell(_n(r.taxable), style),
-              if (igst)
-                cell(_n(r.igst), style)
-              else ...[
-                cell(_n(r.cgst), style),
-                cell(_n(r.sgst), style),
-              ],
-              cell(_n(r.totalTax), style),
-            ],
-          ),
-        if (rows.length > 1)
-          pw.TableRow(
-            children: [
-              cell('Total', boldStyle, left: true),
-              cell(_n(sum.taxable), boldStyle),
-              if (igst)
-                cell(_n(sum.igst), boldStyle)
-              else ...[
-                cell(_n(sum.cgst), boldStyle),
-                cell(_n(sum.sgst), boldStyle),
-              ],
-              cell(_n(sum.tax), boldStyle),
-            ],
-          ),
-      ],
-    );
-  }
+  pw.Widget _gstTable({required double fontSize}) =>
+      pdfGstSummaryTable(bill.gstSummary, fontSize: fontSize);
 
   /// "Terms & Conditions:" and the shop's terms, numbered.
   List<pw.Widget> _termsBlock({required double fontSize}) {
@@ -685,6 +616,79 @@ class InvoicePdf {
     children: [
       pw.Text(label, style: style),
       pw.Text(value, style: style),
+    ],
+  );
+}
+
+/// Rate | Taxable value | CGST | SGST | Total GST (or IGST), with totals.
+pw.Widget pdfGstSummaryTable(
+  List<GstSummaryRow> rows, {
+  required double fontSize,
+}) {
+  final igst = rows.any((r) => r.igst != 0);
+  final style = pw.TextStyle(fontSize: fontSize);
+  final boldStyle = pw.TextStyle(
+    fontSize: fontSize,
+    fontWeight: pw.FontWeight.bold,
+  );
+  final headers = [
+    'GST %',
+    'Taxable',
+    if (igst) 'IGST' else ...['CGST', 'SGST'],
+    'Total GST',
+  ];
+  final sum = (
+    taxable: rows.fold(0.0, (s, r) => s + r.taxable),
+    cgst: rows.fold(0.0, (s, r) => s + r.cgst),
+    sgst: rows.fold(0.0, (s, r) => s + r.sgst),
+    igst: rows.fold(0.0, (s, r) => s + r.igst),
+    tax: rows.fold(0.0, (s, r) => s + r.totalTax),
+  );
+  pw.Widget cell(String s, pw.TextStyle st, {bool left = false}) => pw.Padding(
+    padding: const pw.EdgeInsets.symmetric(horizontal: 2, vertical: 1),
+    child: pw.Text(
+      s,
+      style: st,
+      textAlign: left ? pw.TextAlign.left : pw.TextAlign.right,
+    ),
+  );
+  return pw.Table(
+    border: pw.TableBorder.all(width: 0.5),
+    children: [
+      pw.TableRow(
+        children: [
+          for (var i = 0; i < headers.length; i++)
+            cell(headers[i], boldStyle, left: i == 0),
+        ],
+      ),
+      for (final r in rows)
+        pw.TableRow(
+          children: [
+            cell('${qty(r.rate)}%', style, left: true),
+            cell(_n(r.taxable), style),
+            if (igst)
+              cell(_n(r.igst), style)
+            else ...[
+              cell(_n(r.cgst), style),
+              cell(_n(r.sgst), style),
+            ],
+            cell(_n(r.totalTax), style),
+          ],
+        ),
+      if (rows.length > 1)
+        pw.TableRow(
+          children: [
+            cell('Total', boldStyle, left: true),
+            cell(_n(sum.taxable), boldStyle),
+            if (igst)
+              cell(_n(sum.igst), boldStyle)
+            else ...[
+              cell(_n(sum.cgst), boldStyle),
+              cell(_n(sum.sgst), boldStyle),
+            ],
+            cell(_n(sum.tax), boldStyle),
+          ],
+        ),
     ],
   );
 }

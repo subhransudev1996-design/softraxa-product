@@ -46,6 +46,13 @@ class ThermalPrinterService {
         ];
       });
 
+  /// Prints a receipt built elsewhere (the return slip) through the same
+  /// printer picker.
+  static Future<void> printTicket(
+    BuildContext context,
+    Future<List<int>> Function() build,
+  ) => _print(context, build);
+
   static Future<void> _print(
     BuildContext context,
     Future<List<int>> Function() build,
@@ -120,7 +127,7 @@ class ThermalPrinterService {
     final generator = Generator(PaperSize.mm80, profile);
     final bill = BillLayout(business: business, invoice: invoice, items: items);
     final isGst = bill.isGst;
-    final logo = await _logoImage(business);
+    final logo = await logoForPrinter(business);
     List<int> bytes = [];
     const center = PosStyles(align: PosAlign.center);
     const right = PosStyles(align: PosAlign.right);
@@ -301,60 +308,8 @@ class ThermalPrinterService {
       if (bill.due > 0) totalRow('DUE', bill.due, strong: true);
     }
 
-    // ---- GST summary: GST% | Taxable | CGST | SGST | Total (or IGST) ----
-    final gst = bill.gstSummary;
-    if (gst.isNotEmpty) {
-      final igst = bill.gstIsInterState;
-      final gw = igst ? [2, 4, 3, 3] : [2, 3, 2, 2, 3];
-      List<PosColumn> g(List<String> c, {bool b = false}) => [
-        for (var i = 0; i < c.length; i++)
-          PosColumn(
-            text: c[i],
-            width: gw[i],
-            styles: PosStyles(
-              align: i == 0 ? PosAlign.left : PosAlign.right,
-              bold: b,
-            ),
-          ),
-      ];
-      double sum(double Function(GstSummaryRow) f) =>
-          gst.fold(0.0, (t, r) => t + f(r));
-      bytes += generator.hr();
-      bytes += generator.text('GST Summary', styles: bold);
-      bytes += generator.row(
-        g([
-          'GST%',
-          'Taxable',
-          if (igst) 'IGST' else ...['CGST', 'SGST'],
-          'Total',
-        ], b: true),
-      );
-      for (final r in gst) {
-        bytes += generator.row(
-          g([
-            '${qty(r.rate)}%',
-            n(r.taxable),
-            if (igst) n(r.igst) else ...[n(r.cgst), n(r.sgst)],
-            n(r.totalTax),
-          ]),
-        );
-      }
-      if (gst.length > 1) {
-        bytes += generator.row(
-          g([
-            'Total',
-            n(sum((r) => r.taxable)),
-            if (igst)
-              n(sum((r) => r.igst))
-            else ...[
-              n(sum((r) => r.cgst)),
-              n(sum((r) => r.sgst)),
-            ],
-            n(sum((r) => r.totalTax)),
-          ], b: true),
-        );
-      }
-    }
+    // ---- GST summary ----
+    bytes += posGstSummary(generator, bill.gstSummary);
 
     // ---- terms and footer ----
     if (bill.terms.isNotEmpty) {
@@ -376,7 +331,9 @@ class ThermalPrinterService {
   /// The shop's logo for the printer: on white, in grey, at most 280 dots
   /// wide. Null without a logo, or when it can't be loaded or read; the
   /// bill then prints without it.
-  static Future<img.Image?> _logoImage(Map<String, dynamic> business) async {
+  static Future<img.Image?> logoForPrinter(
+    Map<String, dynamic> business,
+  ) async {
     final data = await loadBillLogo(business);
     if (data == null) return null;
     try {
@@ -391,4 +348,63 @@ class ThermalPrinterService {
       return null;
     }
   }
+}
+
+/// GST% | Taxable | CGST | SGST | Total (or IGST), with a totals row when
+/// there is more than one rate. Nothing without GST.
+List<int> posGstSummary(Generator generator, List<GstSummaryRow> gst) {
+  if (gst.isEmpty) return const [];
+  String n(num v) => billMoney(v);
+  final igst = gst.any((r) => r.igst != 0);
+  final gw = igst ? [2, 4, 3, 3] : [2, 3, 2, 2, 3];
+  List<PosColumn> g(List<String> c, {bool b = false}) => [
+    for (var i = 0; i < c.length; i++)
+      PosColumn(
+        text: c[i],
+        width: gw[i],
+        styles: PosStyles(
+          align: i == 0 ? PosAlign.left : PosAlign.right,
+          bold: b,
+        ),
+      ),
+  ];
+  double sum(double Function(GstSummaryRow) f) =>
+      gst.fold(0.0, (t, r) => t + f(r));
+  var bytes = <int>[];
+  bytes += generator.hr();
+  bytes += generator.text('GST Summary', styles: const PosStyles(bold: true));
+  bytes += generator.row(
+    g([
+      'GST%',
+      'Taxable',
+      if (igst) 'IGST' else ...['CGST', 'SGST'],
+      'Total',
+    ], b: true),
+  );
+  for (final r in gst) {
+    bytes += generator.row(
+      g([
+        '${qty(r.rate)}%',
+        n(r.taxable),
+        if (igst) n(r.igst) else ...[n(r.cgst), n(r.sgst)],
+        n(r.totalTax),
+      ]),
+    );
+  }
+  if (gst.length > 1) {
+    bytes += generator.row(
+      g([
+        'Total',
+        n(sum((r) => r.taxable)),
+        if (igst)
+          n(sum((r) => r.igst))
+        else ...[
+          n(sum((r) => r.cgst)),
+          n(sum((r) => r.sgst)),
+        ],
+        n(sum((r) => r.totalTax)),
+      ], b: true),
+    );
+  }
+  return bytes;
 }

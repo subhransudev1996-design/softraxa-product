@@ -1,5 +1,6 @@
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
+import 'package:printing/printing.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
@@ -20,6 +21,9 @@ import 'exchange.dart';
 import '../suppliers/suppliers.dart';
 import '../../core/theme.dart';
 import 'credit_note_pdf.dart';
+import '../invoices/bill_layout.dart' show loadBillLogo;
+import '../invoices/thermal_printer.dart';
+import 'return_slip.dart';
 import 'return_lines.dart';
 import '../stock/pack_qty_input.dart';
 
@@ -53,6 +57,64 @@ Future<void> _shareNotePdf(
         SnackBar(content: Text(friendlyError(e))),
       );
     }
+  }
+}
+
+/// Prints the return slip: the Bluetooth printer on a phone, the print
+/// dialog on a PC.
+Future<void> _printReturnSlip(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> row,
+) async {
+  final business = ref.read(appContextProvider).value?.business ?? {};
+  final slip = ReturnSlip(business: business, saleReturn: row);
+  try {
+    if (isDesktopPlatform) {
+      final doc = await buildReturnSlipPdf(
+        slip,
+        logo: await loadBillLogo(business),
+      );
+      await Printing.layoutPdf(
+        name: safeFileName(slip.returnNo),
+        onLayout: (_) => doc.save(),
+      );
+    } else {
+      await ThermalPrinterService.printTicket(
+        context,
+        () async => buildReturnSlipTicket(
+          slip,
+          logo: await ThermalPrinterService.logoForPrinter(business),
+        ),
+      );
+    }
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
+}
+
+/// Saves or shares the return slip as an 80 mm PDF.
+Future<void> _shareReturnSlip(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> row,
+) async {
+  final business = ref.read(appContextProvider).value?.business ?? {};
+  final slip = ReturnSlip(business: business, saleReturn: row);
+  try {
+    final doc = await buildReturnSlipPdf(
+      slip,
+      logo: await loadBillLogo(business),
+    );
+    final message = await saveOrShareFile(
+      await doc.save(),
+      safeFileName('${slip.returnNo}.pdf'),
+    );
+    if (message != null && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    }
+  } catch (e) {
+    if (context.mounted) showError(context, e);
   }
 }
 
@@ -291,8 +353,11 @@ final saleReturnDetailProvider = FutureProvider.autoDispose
       final row = await client
           .from('sale_returns')
           .select(
-            '*, invoices(invoice_no, invoice_date, customer_name), customers(name), '
-            'sale_return_items(*)',
+            '*, invoices(invoice_no, invoice_date, customer_name, invoice_type), '
+            'customers(name), profiles(full_name), '
+            // The bill line each item came from, for its price (0075).
+            'sale_return_items(*, invoice_items(unit_price, gst_rate, '
+            'sold_as_pack, alt_factor, alt_unit_name))',
           )
           .eq('id', id)
           .single();
@@ -711,6 +776,18 @@ class SaleReturnDetailScreen extends ConsumerWidget {
         leading: appBarBack(context),
         title: Text(t('Sale return')),
         actions: [
+          if (data.value != null) ...[
+            IconButton(
+              icon: const Icon(Icons.print_outlined),
+              tooltip: t('Print return slip'),
+              onPressed: () => _printReturnSlip(context, ref, data.value!),
+            ),
+            IconButton(
+              icon: const Icon(Icons.share_outlined),
+              tooltip: t('Share return slip'),
+              onPressed: () => _shareReturnSlip(context, ref, data.value!),
+            ),
+          ],
           if (data.value?['credit_note_no'] != null)
             IconButton(
               icon: const Icon(Icons.picture_as_pdf_outlined),

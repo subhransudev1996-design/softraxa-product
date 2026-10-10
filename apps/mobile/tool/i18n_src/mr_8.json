@@ -32,5 +32,7 @@
 "Thank you! Visit again.": "धन्यवाद! पुन्हा भेट द्या.",
 "Printed last, in the middle. Leave empty for none.": "सर्वात खाली, मध्यभागी छापली जाते. नको असल्यास रिकामी ठेवा.",
 "Print stock no. (SKU) on bills": "बिलावर स्टॉक नंबर (SKU) छापा",
-"Each item shows its stock no. before the name, as clothing and hardware shops do.": "प्रत्येक आयटमच्या नावाआधी त्याचा स्टॉक नंबर दिसतो, कपडे आणि हार्डवेअरच्या दुकानांप्रमाणे."
+"Each item shows its stock no. before the name, as clothing and hardware shops do.": "प्रत्येक आयटमच्या नावाआधी त्याचा स्टॉक नंबर दिसतो, कपडे आणि हार्डवेअरच्या दुकानांप्रमाणे.",
+"Print return slip": "रिटर्न स्लिप प्रिंट करा",
+"Share return slip": "रिटर्न स्लिप पाठवा"
 }

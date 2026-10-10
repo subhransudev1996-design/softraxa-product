@@ -160,28 +160,8 @@ class BillLayout {
 
   /// GST by rate, from each line's stored split (after any bill discount,
   /// migration 0040). Only for GST bills that charged GST.
-  List<GstSummaryRow> get gstSummary {
-    if (!isGst) return const [];
-    final byRate = <double, List<Map<String, dynamic>>>{};
-    for (final it in items) {
-      final rate = toDouble(it['gst_rate']);
-      if (rate > 0) (byRate[rate] ??= []).add(it);
-    }
-    final rates = byRate.keys.toList()..sort();
-    return [
-      for (final r in rates)
-        () {
-          final split = gstSplit(byRate[r]!);
-          return GstSummaryRow(
-            rate: r,
-            taxable: gstTaxableTotal(byRate[r]!),
-            cgst: split.cgst,
-            sgst: split.sgst,
-            igst: split.igst,
-          );
-        }(),
-    ];
-  }
+  List<GstSummaryRow> get gstSummary =>
+      isGst ? gstSummaryRows(items) : const [];
 
   bool get gstIsInterState => gstSummary.any((r) => r.igst != 0);
 
@@ -189,6 +169,31 @@ class BillLayout {
   List<String> get terms => billTerms(business['bill_terms'] as String?);
 
   String get footer => (business['bill_footer'] as String? ?? '').trim();
+}
+
+/// GST by rate, from each line's stored split (after any bill discount,
+/// migration 0040): bill lines or return lines alike. Lines at 0% are left
+/// out, so a bill without GST gives no rows.
+List<GstSummaryRow> gstSummaryRows(List<Map<String, dynamic>> lines) {
+  final byRate = <double, List<Map<String, dynamic>>>{};
+  for (final it in lines) {
+    final rate = toDouble(it['gst_rate']);
+    if (rate > 0) (byRate[rate] ??= []).add(it);
+  }
+  final rates = byRate.keys.toList()..sort();
+  return [
+    for (final r in rates)
+      () {
+        final split = gstSplit(byRate[r]!);
+        return GstSummaryRow(
+          rate: r,
+          taxable: gstTaxableTotal(byRate[r]!),
+          cgst: split.cgst,
+          sgst: split.sgst,
+          igst: split.igst,
+        );
+      }(),
+  ];
 }
 
 List<String> billTerms(String? text) => [
