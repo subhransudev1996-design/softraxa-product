@@ -383,6 +383,36 @@ SetOffResult gstSetOff(TaxHeads liability, TaxHeads credit) {
   );
 }
 
+/// GSTR-3B with reverse charge (migration 0080): tax the shop pays itself
+/// on rent or freight can't be paid from credit, so it is added to the cash
+/// in full — and, once paid, it is credit (table 4(A)(3)) that pays the
+/// tax on sales along with the purchase credit.
+SetOffResult gstr3bSetOff({
+  required TaxHeads sales,
+  required TaxHeads credit,
+  required TaxHeads reverseCharge,
+}) {
+  final r = gstSetOff(
+    sales,
+    TaxHeads(
+      credit.igst + reverseCharge.igst,
+      credit.cgst + reverseCharge.cgst,
+      credit.sgst + reverseCharge.sgst,
+    ),
+  );
+  double p(double v) => v < 0 ? 0 : v;
+  double round(double v) => (v * 100).roundToDouble() / 100;
+  return SetOffResult(
+    cash: TaxHeads(
+      round(r.cash.igst + p(reverseCharge.igst)),
+      round(r.cash.cgst + p(reverseCharge.cgst)),
+      round(r.cash.sgst + p(reverseCharge.sgst)),
+    ),
+    carryForward: r.carryForward,
+    used: r.used,
+  );
+}
+
 // ---------------------------------------------------------------------------
 // GSTR-2B
 // ---------------------------------------------------------------------------

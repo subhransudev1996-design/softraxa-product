@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1}ଟି ଜିନିଷ ଏବେ ବି 12% ବା 28% GSTରେ ଅଛି। 22 ସେପ୍ଟେମ୍ବର 2025ରୁ ଅଧିକାଂଶ ଜିନିଷ 5% ବା 18%କୁ ଯାଇଛି।",
 "{v1} products now at {v2}% GST": "{v1}ଟି ଜିନିଷ ଏବେ {v2}% GSTରେ",
 "{v1} rows": "{v1}ଟି ଧାଡ଼ି",
-"{v1} selected — set to": "{v1}ଟି ବଛା — ଏହାକୁ କରନ୍ତୁ"
+"{v1} selected — set to": "{v1}ଟି ବଛା — ଏହାକୁ କରନ୍ତୁ",
+"3.1(d) Expenses under reverse charge": "3.1(d) ରିଭର୍ସ ଚାର୍ଜ ଖର୍ଚ୍ଚ",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) ରିଭର୍ସ ଚାର୍ଜ ଟିକସ — ନଗଦରେ ଦିଅନ୍ତୁ",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) ରିଭର୍ସ ଚାର୍ଜ ଟିକସର କ୍ରେଡିଟ",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "ରିଭର୍ସ ଚାର୍ଜ ଟିକସ କ୍ରେଡିଟରୁ ନୁହେଁ, ନଗଦରେ ଦିଆଯାଏ — ଏହା ଦେବାକୁ ଥିବା ନଗଦରେ ଅଛି। ଦେବା ପରେ ଏହା ସେହି ରିଟର୍ନରେ କ୍ରେଡିଟ ହୁଏ।",
+"Reverse charge tax on expenses": "ଖର୍ଚ୍ଚ ଉପରେ ରିଭର୍ସ ଚାର୍ଜ ଟିକସ",
+"Total to pay": "ମୋଟ ଦେବାକୁ",
+"Reverse charge — I pay the GST": "ରିଭର୍ସ ଚାର୍ଜ — GST ମୁଁ ଦେବି",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "ଗୁଡ୍ସ ଟ୍ରାନ୍ସପୋର୍ଟ ଏଜେନ୍ସିକୁ ଦିଆଯାଇଥିବା ମାଲ ଭଡ଼ା (5%)। କମ୍ପୋଜିସନ ଦୋକାନକୁ ଦୋକାନ ଭଡ଼ା ଉପରେ ଏହା ଦେବାକୁ ପଡ଼େ ନାହିଁ।",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST ପଞ୍ଜୀକରଣ ନଥିବା ମାଲିକଙ୍କୁ ଦୋକାନ ଭଡ଼ା (18%), କିମ୍ବା ଗୁଡ୍ସ ଟ୍ରାନ୍ସପୋର୍ଟ ଏଜେନ୍ସିକୁ ମାଲ ଭଡ଼ା (5%)।",
+"GST rate": "GST ହାର",
+"18% — rent, legal, security": "18% — ଭଡ଼ା, ଆଇନ, ସୁରକ୍ଷା",
+"5% — goods transport (GTA)": "5% — ମାଲ ପରିବହନ (GTA)",
+"Supplier is in another state": "ଯୋଗାଣକାରୀ ଅନ୍ୟ ରାଜ୍ୟରେ ଅଛନ୍ତି",
+"GST you pay: {v1} ({v2})": "ଆପଣ ଦେବାକୁ ଥିବା GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "ରିଭର୍ସ ଚାର୍ଜ {v1}% — ଆପଣ ଦେବାକୁ ଥିବା GST {v2}"
 }

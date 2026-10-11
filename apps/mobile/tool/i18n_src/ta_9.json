@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} பொருட்கள் இன்னும் 12% அல்லது 28% GST-இல் உள்ளன. 22 செப்டம்பர் 2025 முதல் பெரும்பாலான பொருட்கள் 5% அல்லது 18%-க்கு மாறின.",
 "{v1} products now at {v2}% GST": "{v1} பொருட்கள் இப்போது {v2}% GST-இல்",
 "{v1} rows": "{v1} வரிசைகள்",
-"{v1} selected — set to": "{v1} தேர்வு — இதற்கு மாற்று"
+"{v1} selected — set to": "{v1} தேர்வு — இதற்கு மாற்று",
+"3.1(d) Expenses under reverse charge": "3.1(d) ரிவர்ஸ் சார்ஜ் செலவுகள்",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) ரிவர்ஸ் சார்ஜ் வரி — பணமாகச் செலுத்தவும்",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) ரிவர்ஸ் சார்ஜ் வரியின் கிரெடிட்",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "ரிவர்ஸ் சார்ஜ் வரி கிரெடிட்டிலிருந்து அல்ல, பணமாகச் செலுத்தப்படும் — அது செலுத்த வேண்டிய பணத்தில் சேர்ந்துள்ளது. செலுத்திய பின் அதே ரிட்டர்னில் கிரெடிட்டாகும்.",
+"Reverse charge tax on expenses": "செலவுகளுக்கான ரிவர்ஸ் சார்ஜ் வரி",
+"Total to pay": "மொத்தம் செலுத்த வேண்டியது",
+"Reverse charge — I pay the GST": "ரிவர்ஸ் சார்ஜ் — GST நானே செலுத்துவேன்",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "சரக்குப் போக்குவரத்து நிறுவனத்துக்குக் கொடுத்த சரக்குக் கட்டணம் (5%). காம்போசிஷன் கடைகள் வாடகைக்கு இதைச் செலுத்த வேண்டியதில்லை.",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST பதிவு இல்லாத உரிமையாளருக்கு வாடகை (18%), அல்லது சரக்குப் போக்குவரத்து நிறுவனத்துக்குச் சரக்குக் கட்டணம் (5%).",
+"GST rate": "GST விகிதம்",
+"18% — rent, legal, security": "18% — வாடகை, சட்டம், பாதுகாப்பு",
+"5% — goods transport (GTA)": "5% — சரக்குப் போக்குவரத்து (GTA)",
+"Supplier is in another state": "சப்ளையர் வேறு மாநிலத்தில் உள்ளார்",
+"GST you pay: {v1} ({v2})": "நீங்கள் செலுத்தும் GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "ரிவர்ஸ் சார்ஜ் {v1}% — நீங்கள் செலுத்தும் GST {v2}"
 }

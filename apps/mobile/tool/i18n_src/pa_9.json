@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} ਸਮਾਨ ਅਜੇ ਵੀ 12% ਜਾਂ 28% GST ਉੱਤੇ ਹੈ। 22 ਸਤੰਬਰ 2025 ਤੋਂ ਜ਼ਿਆਦਾਤਰ ਸਮਾਨ 5% ਜਾਂ 18% ਉੱਤੇ ਆ ਗਿਆ।",
 "{v1} products now at {v2}% GST": "{v1} ਸਮਾਨ ਹੁਣ {v2}% GST ਉੱਤੇ",
 "{v1} rows": "{v1} ਕਤਾਰਾਂ",
-"{v1} selected — set to": "{v1} ਚੁਣੇ — ਇਸ ਉੱਤੇ ਕਰੋ"
+"{v1} selected — set to": "{v1} ਚੁਣੇ — ਇਸ ਉੱਤੇ ਕਰੋ",
+"3.1(d) Expenses under reverse charge": "3.1(d) ਰਿਵਰਸ ਚਾਰਜ ਵਾਲੇ ਖਰਚੇ",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) ਰਿਵਰਸ ਚਾਰਜ ਟੈਕਸ — ਨਕਦ ਵਿੱਚ ਭਰੋ",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) ਰਿਵਰਸ ਚਾਰਜ ਟੈਕਸ ਦਾ ਕ੍ਰੈਡਿਟ",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "ਰਿਵਰਸ ਚਾਰਜ ਟੈਕਸ ਕ੍ਰੈਡਿਟ ਤੋਂ ਨਹੀਂ, ਨਕਦ ਵਿੱਚ ਭਰਿਆ ਜਾਂਦਾ ਹੈ — ਇਹ ਨਕਦ ਭੁਗਤਾਨ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ। ਭਰਨ ਤੋਂ ਬਾਅਦ ਇਹ ਉਸੇ ਰਿਟਰਨ ਵਿੱਚ ਕ੍ਰੈਡਿਟ ਬਣ ਜਾਂਦਾ ਹੈ।",
+"Reverse charge tax on expenses": "ਖਰਚਿਆਂ ਉੱਤੇ ਰਿਵਰਸ ਚਾਰਜ ਟੈਕਸ",
+"Total to pay": "ਕੁੱਲ ਭੁਗਤਾਨ",
+"Reverse charge — I pay the GST": "ਰਿਵਰਸ ਚਾਰਜ — GST ਮੈਨੂੰ ਭਰਨਾ ਹੈ",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "ਗੁਡਜ਼ ਟਰਾਂਸਪੋਰਟ ਏਜੰਸੀ ਨੂੰ ਦਿੱਤਾ ਭਾੜਾ (5%)। ਕੰਪੋਜ਼ੀਸ਼ਨ ਦੁਕਾਨਾਂ ਨੂੰ ਕਿਰਾਏ ਉੱਤੇ ਇਹ ਨਹੀਂ ਭਰਨਾ ਪੈਂਦਾ।",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "ਬਿਨਾਂ GST ਵਾਲੇ ਮਕਾਨ-ਮਾਲਕ ਨੂੰ ਕਿਰਾਇਆ (18%), ਜਾਂ ਗੁਡਜ਼ ਟਰਾਂਸਪੋਰਟ ਏਜੰਸੀ ਨੂੰ ਭਾੜਾ (5%)।",
+"GST rate": "GST ਦਰ",
+"18% — rent, legal, security": "18% — ਕਿਰਾਇਆ, ਕਾਨੂੰਨੀ, ਸੁਰੱਖਿਆ",
+"5% — goods transport (GTA)": "5% — ਮਾਲ ਢੁਆਈ (GTA)",
+"Supplier is in another state": "ਸਪਲਾਇਰ ਦੂਜੇ ਰਾਜ ਵਿੱਚ ਹੈ",
+"GST you pay: {v1} ({v2})": "ਤੁਹਾਡੇ ਵੱਲੋਂ ਭਰਨ ਵਾਲਾ GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "ਰਿਵਰਸ ਚਾਰਜ {v1}% — ਤੁਹਾਡੇ ਵੱਲੋਂ ਭਰਨ ਵਾਲਾ GST {v2}"
 }

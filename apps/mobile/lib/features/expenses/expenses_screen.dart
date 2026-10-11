@@ -212,6 +212,15 @@ class ExpensesScreen extends ConsumerWidget {
         ? DateTime.now()
         : DateTime.parse(existing['expense_date'] as String);
     String mode = existing?['payment_mode'] as String? ?? 'cash';
+    // Reverse charge (migration 0080): only a GST or composition shop pays
+    // GST itself on rent / freight.
+    final taxPref =
+        ref.read(appContextProvider).value?.business?['tax_preference'];
+    final composition = taxPref == 'composition';
+    final taxShop = taxPref == 'gst' || composition;
+    final oldRcmRate = toDouble(existing?['rcm_rate']);
+    double rcmRate = oldRcmRate;
+    bool rcmInter = existing?['rcm_inter'] as bool? ?? false;
 
     final saved = await showDialog<bool>(
       context: context,
@@ -311,6 +320,68 @@ class ExpensesScreen extends ConsumerWidget {
                     labelText: t('Note (optional)'),
                   ),
                 ),
+                if (taxShop || oldRcmRate > 0) ...[
+                  const SizedBox(height: 8),
+                  _switchRow(
+                    title: t('Reverse charge — I pay the GST'),
+                    subtitle: composition
+                        ? t(
+                            'Freight paid to a goods transport agency (5%). Composition shops don\'t pay it on rent.',
+                          )
+                        : t(
+                            'Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).',
+                          ),
+                    value: rcmRate > 0,
+                    onChanged: (on) => setState(
+                      () => rcmRate = on ? (composition ? 5 : 18) : 0,
+                    ),
+                  ),
+                  if (rcmRate > 0) ...[
+                    const SizedBox(height: 8),
+                    DropdownButtonFormField<double>(
+                      initialValue: rcmRate,
+                      isExpanded: true,
+                      decoration: InputDecoration(labelText: t('GST rate')),
+                      items: [
+                        DropdownMenuItem(
+                          value: 18,
+                          child: Text(t('18% — rent, legal, security')),
+                        ),
+                        DropdownMenuItem(
+                          value: 5,
+                          child: Text(t('5% — goods transport (GTA)')),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => rcmRate = v ?? 18),
+                    ),
+                    const SizedBox(height: 4),
+                    _switchRow(
+                      title: t('Supplier is in another state'),
+                      value: rcmInter,
+                      onChanged: (on) => setState(() => rcmInter = on),
+                    ),
+                    ValueListenableBuilder(
+                      valueListenable: amount,
+                      builder: (_, v, _) {
+                        final tax =
+                            (double.tryParse(v.text) ?? 0) * rcmRate / 100;
+                        return Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            t('GST you pay: {v1} ({v2})', {
+                              'v1': money(tax),
+                              'v2': rcmInter ? 'IGST' : 'CGST + SGST',
+                            }),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.purple,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ],
               ],
             ),
           ),
@@ -342,6 +413,11 @@ class ExpensesScreen extends ConsumerWidget {
         'payment_mode': mode,
         'expense_date': ymd(date),
         'note': note.text.trim(),
+        // Sent only when used, so a plain expense saves without 0080.
+        if (rcmRate > 0 || oldRcmRate > 0) ...{
+          'rcm_rate': rcmRate,
+          'rcm_inter': rcmRate > 0 && rcmInter,
+        },
       };
       if (existing == null) {
         final businessId = ref.read(appContextProvider).value?.businessId;
@@ -597,6 +673,32 @@ class ExpensesScreen extends ConsumerWidget {
 /// Desktop card for an expense entry — mirrors [PartyCard]'s look for visual
 /// consistency, with explicit edit/delete actions instead of relying on
 /// touch-only gestures (tap/long-press) that don't suit mouse users.
+/// A switch with a title (and a hint) that fits in an AlertDialog, which
+/// can't size a ListTile.
+Widget _switchRow({
+  required String title,
+  String? subtitle,
+  required bool value,
+  required ValueChanged<bool> onChanged,
+}) => Row(
+  children: [
+    Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
+          if (subtitle != null)
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: AppColors.inkSoft),
+            ),
+        ],
+      ),
+    ),
+    Switch(value: value, onChanged: onChanged),
+  ],
+);
+
 class _ExpenseCard extends StatelessWidget {
   const _ExpenseCard({
     required this.expense,
@@ -612,6 +714,7 @@ class _ExpenseCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final e = expense;
     final note = e['note'] as String? ?? '';
+    final rcmRate = toDouble(e['rcm_rate']);
     return Material(
       color: AppColors.card,
       borderRadius: BorderRadius.circular(18),
@@ -698,6 +801,20 @@ class _ExpenseCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (rcmRate > 0) ...[
+                const SizedBox(height: 8),
+                Text(
+                  t('Reverse charge {v1}% — GST you pay {v2}', {
+                    'v1': qty(rcmRate),
+                    'v2': money(toDouble(e['amount']) * rcmRate / 100),
+                  }),
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.purple,
+                  ),
+                ),
+              ],
               if (note.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Text(

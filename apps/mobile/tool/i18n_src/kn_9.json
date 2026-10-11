@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} ಉತ್ಪನ್ನಗಳು ಇನ್ನೂ 12% ಅಥವಾ 28% GST ಯಲ್ಲಿವೆ. 22 ಸೆಪ್ಟೆಂಬರ್ 2025 ರಿಂದ ಹೆಚ್ಚಿನ ಉತ್ಪನ್ನಗಳು 5% ಅಥವಾ 18% ಗೆ ಬದಲಾಗಿವೆ.",
 "{v1} products now at {v2}% GST": "{v1} ಉತ್ಪನ್ನಗಳು ಈಗ {v2}% GST ಯಲ್ಲಿ",
 "{v1} rows": "{v1} ಸಾಲುಗಳು",
-"{v1} selected — set to": "{v1} ಆಯ್ಕೆ — ಇದಕ್ಕೆ ಬದಲಿಸಿ"
+"{v1} selected — set to": "{v1} ಆಯ್ಕೆ — ಇದಕ್ಕೆ ಬದಲಿಸಿ",
+"3.1(d) Expenses under reverse charge": "3.1(d) ರಿವರ್ಸ್ ಚಾರ್ಜ್ ವೆಚ್ಚಗಳು",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) ರಿವರ್ಸ್ ಚಾರ್ಜ್ ತೆರಿಗೆ — ನಗದಾಗಿ ಪಾವತಿಸಿ",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) ರಿವರ್ಸ್ ಚಾರ್ಜ್ ತೆರಿಗೆಯ ಕ್ರೆಡಿಟ್",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "ರಿವರ್ಸ್ ಚಾರ್ಜ್ ತೆರಿಗೆಯನ್ನು ಕ್ರೆಡಿಟ್‌ನಿಂದಲ್ಲ, ನಗದಾಗಿ ಪಾವತಿಸಬೇಕು — ಇದು ಪಾವತಿಸಬೇಕಾದ ನಗದಿನಲ್ಲಿ ಸೇರಿದೆ. ಪಾವತಿಸಿದ ನಂತರ ಅದೇ ರಿಟರ್ನ್‌ನಲ್ಲಿ ಕ್ರೆಡಿಟ್ ಆಗುತ್ತದೆ.",
+"Reverse charge tax on expenses": "ವೆಚ್ಚಗಳ ಮೇಲಿನ ರಿವರ್ಸ್ ಚಾರ್ಜ್ ತೆರಿಗೆ",
+"Total to pay": "ಒಟ್ಟು ಪಾವತಿಸಬೇಕಾದದ್ದು",
+"Reverse charge — I pay the GST": "ರಿವರ್ಸ್ ಚಾರ್ಜ್ — GST ನಾನೇ ಪಾವತಿಸುತ್ತೇನೆ",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "ಗೂಡ್ಸ್ ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್ ಏಜೆನ್ಸಿಗೆ ನೀಡಿದ ಸಾಗಣೆ ಶುಲ್ಕ (5%). ಕಾಂಪೊಸಿಷನ್ ಅಂಗಡಿಗಳು ಬಾಡಿಗೆಯ ಮೇಲೆ ಇದನ್ನು ಪಾವತಿಸಬೇಕಿಲ್ಲ.",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST ನೋಂದಣಿ ಇಲ್ಲದ ಮಾಲೀಕರಿಗೆ ಬಾಡಿಗೆ (18%), ಅಥವಾ ಗೂಡ್ಸ್ ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್ ಏಜೆನ್ಸಿಗೆ ಸಾಗಣೆ ಶುಲ್ಕ (5%).",
+"GST rate": "GST ದರ",
+"18% — rent, legal, security": "18% — ಬಾಡಿಗೆ, ಕಾನೂನು, ಭದ್ರತೆ",
+"5% — goods transport (GTA)": "5% — ಸರಕು ಸಾಗಣೆ (GTA)",
+"Supplier is in another state": "ಪೂರೈಕೆದಾರರು ಬೇರೆ ರಾಜ್ಯದಲ್ಲಿದ್ದಾರೆ",
+"GST you pay: {v1} ({v2})": "ನೀವು ಪಾವತಿಸಬೇಕಾದ GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "ರಿವರ್ಸ್ ಚಾರ್ಜ್ {v1}% — ನೀವು ಪಾವತಿಸಬೇಕಾದ GST {v2}"
 }

@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} માલ હજી 12% કે 28% GST પર છે. 22 સપ્ટેમ્બર 2025થી મોટા ભાગનો માલ 5% કે 18% પર ગયો.",
 "{v1} products now at {v2}% GST": "{v1} માલ હવે {v2}% GST પર",
 "{v1} rows": "{v1} હરોળ",
-"{v1} selected — set to": "{v1} પસંદ — આ કરો"
+"{v1} selected — set to": "{v1} પસંદ — આ કરો",
+"3.1(d) Expenses under reverse charge": "3.1(d) રિવર્સ ચાર્જવાળા ખર્ચ",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) રિવર્સ ચાર્જ ટેક્સ — રોકડમાં ભરો",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) રિવર્સ ચાર્જ ટેક્સની ક્રેડિટ",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "રિવર્સ ચાર્જ ટેક્સ ક્રેડિટમાંથી નહીં, રોકડમાં ભરાય છે — તે રોકડ ચુકવણીમાં સામેલ છે. ભર્યા પછી તે એ જ રિટર્નમાં ક્રેડિટ બને છે.",
+"Reverse charge tax on expenses": "ખર્ચ પર રિવર્સ ચાર્જ ટેક્સ",
+"Total to pay": "કુલ ચૂકવવાના",
+"Reverse charge — I pay the GST": "રિવર્સ ચાર્જ — GST હું ભરીશ",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "ગુડ્સ ટ્રાન્સપોર્ટ એજન્સીને ચૂકવેલું માલ ભાડું (5%). કમ્પોઝિશન દુકાનોએ દુકાનના ભાડા પર આ ભરવાનો નથી.",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST નોંધણી વગરના માલિકને દુકાનનું ભાડું (18%), અથવા ગુડ્સ ટ્રાન્સપોર્ટ એજન્સીને માલ ભાડું (5%).",
+"GST rate": "GST દર",
+"18% — rent, legal, security": "18% — ભાડું, કાનૂની, સિક્યોરિટી",
+"5% — goods transport (GTA)": "5% — માલ પરિવહન (GTA)",
+"Supplier is in another state": "સપ્લાયર બીજા રાજ્યમાં છે",
+"GST you pay: {v1} ({v2})": "તમારે ભરવાનો GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "રિવર્સ ચાર્જ {v1}% — તમારે ભરવાનો GST {v2}"
 }

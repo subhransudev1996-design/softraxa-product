@@ -39,6 +39,9 @@ class GstReturnData {
   Map<String, dynamic> get outward => _map('outward_taxable');
   Map<String, dynamic> get itc => _map('itc_available');
 
+  /// Tax the shop pays itself on rent / freight (migration 0080).
+  Map<String, dynamic> get reverseCharge => _map('reverse_charge');
+
   /// Output tax minus input tax credit, per head, before the portal's
   /// set-off order is applied (negative = credit carried forward).
   ({double igst, double cgst, double sgst}) get netPayable => (
@@ -115,6 +118,12 @@ Uint8List buildGstWorkbook({
     [t('Input tax credit IGST'), n(itc['igst_amount'])],
     [t('Input tax credit CGST'), n(itc['cgst_amount'])],
     [t('Input tax credit SGST'), n(itc['sgst_amount'])],
+    [
+      t('Reverse charge tax (paid in cash, then claimed as credit)'),
+      n(toDouble(data.reverseCharge['igst_amount']) +
+          toDouble(data.reverseCharge['cgst_amount']) +
+          toDouble(data.reverseCharge['sgst_amount'])),
+    ],
     [t('Net IGST (before set-off)'), n(net.igst)],
     [t('Net CGST (before set-off)'), n(net.cgst)],
     [t('Net SGST (before set-off)'), n(net.sgst)],
@@ -292,6 +301,13 @@ Uint8List buildGstWorkbook({
         n(0), n(0), n(0),
       ],
       [
+        t('3.1(d)'), t('Inward supplies liable to reverse charge'),
+        n(data.reverseCharge['taxable_value']),
+        n(data.reverseCharge['igst_amount']),
+        n(data.reverseCharge['cgst_amount']),
+        n(data.reverseCharge['sgst_amount']),
+      ],
+      [
         t('3.1(e)'), t('Non-GST outward supplies'),
         n((data.gstr3b['outward_non_gst'] as Map?)?['taxable_value']),
         n(0), n(0), n(0),
@@ -312,6 +328,12 @@ Uint8List buildGstWorkbook({
           t('Inter-state to unregistered — ${gstPos(r['place_of_supply'])}'),
           n(r['taxable_value']), n(r['igst_amount']), n(0), n(0),
         ],
+      [
+        t('4(A)(3)'), t('ITC on inward supplies liable to reverse charge'),
+        n(0), n(data.reverseCharge['igst_amount']),
+        n(data.reverseCharge['cgst_amount']),
+        n(data.reverseCharge['sgst_amount']),
+      ],
       [
         t('4(A)(5)'), t('All other ITC (registered suppliers, net of debit notes)'),
         n(0), n(itc['igst_amount']), n(itc['cgst_amount']), n(itc['sgst_amount']),

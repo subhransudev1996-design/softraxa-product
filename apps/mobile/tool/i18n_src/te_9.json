@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} వస్తువులు ఇంకా 12% లేదా 28% GST లో ఉన్నాయి. 22 సెప్టెంబర్ 2025 నుండి చాలా వస్తువులు 5% లేదా 18% కి మారాయి.",
 "{v1} products now at {v2}% GST": "{v1} వస్తువులు ఇప్పుడు {v2}% GST లో",
 "{v1} rows": "{v1} వరుసలు",
-"{v1} selected — set to": "{v1} ఎంచుకున్నవి — ఇలా మార్చండి"
+"{v1} selected — set to": "{v1} ఎంచుకున్నవి — ఇలా మార్చండి",
+"3.1(d) Expenses under reverse charge": "3.1(d) రివర్స్ ఛార్జ్ ఖర్చులు",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) రివర్స్ ఛార్జ్ పన్ను — నగదుగా చెల్లించండి",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) రివర్స్ ఛార్జ్ పన్ను క్రెడిట్",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "రివర్స్ ఛార్జ్ పన్ను క్రెడిట్ నుండి కాదు, నగదుగా చెల్లించాలి — ఇది చెల్లించాల్సిన నగదులో ఉంది. చెల్లించిన తర్వాత అదే రిటర్న్‌లో క్రెడిట్ అవుతుంది.",
+"Reverse charge tax on expenses": "ఖర్చులపై రివర్స్ ఛార్జ్ పన్ను",
+"Total to pay": "మొత్తం చెల్లించాల్సింది",
+"Reverse charge — I pay the GST": "రివర్స్ ఛార్జ్ — GST నేనే చెల్లిస్తాను",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "గూడ్స్ ట్రాన్స్‌పోర్ట్ ఏజెన్సీకి చెల్లించిన రవాణా ఛార్జీ (5%). కంపోజిషన్ షాపులు అద్దెపై దీనిని చెల్లించనవసరం లేదు.",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST నమోదు లేని యజమానికి అద్దె (18%), లేదా గూడ్స్ ట్రాన్స్‌పోర్ట్ ఏజెన్సీకి రవాణా ఛార్జీ (5%).",
+"GST rate": "GST రేటు",
+"18% — rent, legal, security": "18% — అద్దె, న్యాయ, భద్రత",
+"5% — goods transport (GTA)": "5% — సరుకు రవాణా (GTA)",
+"Supplier is in another state": "సరఫరాదారు వేరే రాష్ట్రంలో ఉన్నారు",
+"GST you pay: {v1} ({v2})": "మీరు చెల్లించాల్సిన GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "రివర్స్ ఛార్జ్ {v1}% — మీరు చెల్లించాల్సిన GST {v2}"
 }

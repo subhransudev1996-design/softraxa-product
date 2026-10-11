@@ -293,6 +293,29 @@ void main() {
       expect(r.cash.total, 0);
       expect(r.carryForward.total, 15);
     });
+
+    test('reverse charge is paid in cash and comes back as credit', () {
+      // Sales tax CGST/SGST 1,000 each; purchase credit 200 each; rent under
+      // reverse charge 900 + 900. Cash: 900 + 900 for the rent, and the
+      // sales tax after 200 + 900 credit each = 0. 100 each carried.
+      final r = gstr3bSetOff(
+        sales: const TaxHeads(0, 1000, 1000),
+        credit: const TaxHeads(0, 200, 200),
+        reverseCharge: const TaxHeads(0, 900, 900),
+      );
+      expect((r.cash.igst, r.cash.cgst, r.cash.sgst), (0.0, 900.0, 900.0));
+      expect(r.carryForward.total, 200);
+    });
+
+    test('reverse charge with nothing sold is still paid', () {
+      final r = gstr3bSetOff(
+        sales: const TaxHeads(0, 0, 0),
+        credit: const TaxHeads(0, 0, 0),
+        reverseCharge: const TaxHeads(100, 0, 0),
+      );
+      expect(r.cash.igst, 100);
+      expect(r.carryForward.igst, 100);
+    });
   });
 
   group('GSTR-2B', () {

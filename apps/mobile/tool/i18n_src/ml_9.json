@@ -184,5 +184,20 @@
 "{v1} products are still at 12% or 28% GST. From 22 Sep 2025 most goods moved to 5% or 18%.": "{v1} ഉൽപ്പന്നങ്ങൾ ഇപ്പോഴും 12% അല്ലെങ്കിൽ 28% GST-ലാണ്. 2025 സെപ്റ്റംബർ 22 മുതൽ മിക്ക ഉൽപ്പന്നങ്ങളും 5% അല്ലെങ്കിൽ 18%-ലേക്ക് മാറി.",
 "{v1} products now at {v2}% GST": "{v1} ഉൽപ്പന്നങ്ങൾ ഇപ്പോൾ {v2}% GST-ൽ",
 "{v1} rows": "{v1} വരികൾ",
-"{v1} selected — set to": "{v1} തിരഞ്ഞെടുത്തു — ഇതാക്കുക"
+"{v1} selected — set to": "{v1} തിരഞ്ഞെടുത്തു — ഇതാക്കുക",
+"3.1(d) Expenses under reverse charge": "3.1(d) റിവേഴ്സ് ചാർജ് ചെലവുകൾ",
+"3.1(d) Reverse charge tax — paid in cash": "3.1(d) റിവേഴ്സ് ചാർജ് നികുതി — പണമായി അടയ്ക്കുക",
+"4(A)(3) Credit of the reverse charge tax": "4(A)(3) റിവേഴ്സ് ചാർജ് നികുതിയുടെ ക്രെഡിറ്റ്",
+"Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.": "റിവേഴ്സ് ചാർജ് നികുതി ക്രെഡിറ്റിൽ നിന്നല്ല, പണമായാണ് അടയ്ക്കേണ്ടത് — ഇത് അടയ്ക്കേണ്ട പണത്തിൽ ഉൾപ്പെടുന്നു. അടച്ച ശേഷം അതേ റിട്ടേണിൽ ക്രെഡിറ്റാകും.",
+"Reverse charge tax on expenses": "ചെലവുകളിലെ റിവേഴ്സ് ചാർജ് നികുതി",
+"Total to pay": "ആകെ അടയ്ക്കേണ്ടത്",
+"Reverse charge — I pay the GST": "റിവേഴ്സ് ചാർജ് — GST ഞാൻ അടയ്ക്കും",
+"Freight paid to a goods transport agency (5%). Composition shops don't pay it on rent.": "ഗുഡ്സ് ട്രാൻസ്പോർട്ട് ഏജൻസിക്ക് നൽകിയ ചരക്കുകൂലി (5%). കോമ്പോസിഷൻ കടകൾ വാടകയ്ക്ക് ഇത് അടയ്ക്കേണ്ടതില്ല.",
+"Rent to an unregistered landlord (18%), or freight paid to a goods transport agency (5%).": "GST രജിസ്ട്രേഷൻ ഇല്ലാത്ത ഉടമയ്ക്ക് വാടക (18%), അല്ലെങ്കിൽ ഗുഡ്സ് ട്രാൻസ്പോർട്ട് ഏജൻസിക്ക് ചരക്കുകൂലി (5%).",
+"GST rate": "GST നിരക്ക്",
+"18% — rent, legal, security": "18% — വാടക, നിയമം, സുരക്ഷ",
+"5% — goods transport (GTA)": "5% — ചരക്ക് ഗതാഗതം (GTA)",
+"Supplier is in another state": "വിതരണക്കാരൻ മറ്റൊരു സംസ്ഥാനത്താണ്",
+"GST you pay: {v1} ({v2})": "നിങ്ങൾ അടയ്ക്കേണ്ട GST: {v1} ({v2})",
+"Reverse charge {v1}% — GST you pay {v2}": "റിവേഴ്സ് ചാർജ് {v1}% — നിങ്ങൾ അടയ്ക്കേണ്ട GST {v2}"
 }

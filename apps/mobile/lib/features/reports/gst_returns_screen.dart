@@ -798,7 +798,18 @@ class _Gstr3bCard extends StatelessWidget {
       toDouble(itc['cgst_amount']),
       toDouble(itc['sgst_amount']),
     );
-    final r = gstSetOff(liability, credit);
+    final rc = data.reverseCharge;
+    final reverse = TaxHeads(
+      toDouble(rc['igst_amount']),
+      toDouble(rc['cgst_amount']),
+      toDouble(rc['sgst_amount']),
+    );
+    final hasReverse = reverse.total > 0.005;
+    final r = gstr3bSetOff(
+      sales: liability,
+      credit: credit,
+      reverseCharge: reverse,
+    );
     final inward = Map<String, dynamic>.from(
       g3['inward_nil_exempt'] as Map? ?? const {},
     );
@@ -819,6 +830,11 @@ class _Gstr3bCard extends StatelessWidget {
               t('3.1(c) Nil-rated & exempt sales'),
               money(v('outward_nil_exempt')),
             ),
+            if (hasReverse)
+              _row(
+                t('3.1(d) Expenses under reverse charge'),
+                money(toDouble(rc['taxable_value'])),
+              ),
             _row(t('3.1(e) Non-GST sales'), money(v('outward_non_gst'))),
             if (interUnreg.isNotEmpty)
               _row(
@@ -837,7 +853,15 @@ class _Gstr3bCard extends StatelessWidget {
             const Divider(height: 20),
             _heads(t('Tax on sales'), liability),
             const SizedBox(height: 8),
+            if (hasReverse) ...[
+              _heads(t('3.1(d) Reverse charge tax — paid in cash'), reverse),
+              const SizedBox(height: 8),
+            ],
             _heads(t('4(A)(5) Input tax credit from purchases'), credit),
+            if (hasReverse) ...[
+              const SizedBox(height: 8),
+              _heads(t('4(A)(3) Credit of the reverse charge tax'), reverse),
+            ],
             const Divider(height: 20),
             _heads(t('Credit used'), r.used),
             const SizedBox(height: 8),
@@ -864,6 +888,15 @@ class _Gstr3bCard extends StatelessWidget {
               ),
               style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
             ),
+            if (hasReverse) ...[
+              const SizedBox(height: 6),
+              Text(
+                t(
+                  'Reverse charge tax is paid in cash, not from credit — it is in the cash to pay. Once paid, it counts as credit in the same return.',
+                ),
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+            ],
           ],
         ),
       ),
@@ -1052,6 +1085,11 @@ class _CompositionCard extends StatelessWidget {
     final inUnreg = Map<String, dynamic>.from(
       data['inward_unregistered'] as Map? ?? const {},
     );
+    final rc = data['reverse_charge'] as Map? ?? const {};
+    final rcTax =
+        toDouble(rc['igst_amount']) +
+        toDouble(rc['cgst_amount']) +
+        toDouble(rc['sgst_amount']);
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -1074,9 +1112,21 @@ class _CompositionCard extends StatelessWidget {
             _row(
               t('Total tax'),
               money(toDouble(data['tax'])),
-              bold: true,
-              color: AppColors.purple,
+              bold: rcTax <= 0.005,
+              color: rcTax <= 0.005 ? AppColors.purple : null,
             ),
+            if (rcTax > 0.005) ...[
+              _row(
+                t('Reverse charge tax on expenses'),
+                money(rcTax),
+              ),
+              _row(
+                t('Total to pay'),
+                money(toDouble(data['tax']) + rcTax),
+                bold: true,
+                color: AppColors.purple,
+              ),
+            ],
             if (annual) ...[
               const Divider(height: 20),
               _row(
