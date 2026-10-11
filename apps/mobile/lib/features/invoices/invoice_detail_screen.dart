@@ -21,6 +21,7 @@ import 'invoice_pdf.dart';
 import 'invoice_providers.dart';
 import 'thermal_printer.dart';
 import '../../core/theme.dart';
+import 'eway_bill.dart';
 
 /// Loads this invoice's items into the cart and opens it for editing —
 /// reuses the whole POS/checkout flow (see `pos_screen.dart` and
@@ -962,6 +963,18 @@ class InvoiceDetailScreen extends ConsumerWidget {
                     ],
                   ],
                 ),
+                // E-way bill file for the portal's bulk upload.
+                if ((features?.gstEnabled ?? false) &&
+                    inv['is_cancelled'] != true &&
+                    const {'gst', 'non_gst', 'cash_memo'}
+                        .contains(inv['invoice_type'])) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton.icon(
+                    onPressed: () => showEwayBillSheet(context, ref, inv),
+                    icon: const Icon(Icons.local_shipping_outlined),
+                    label: Text(t('E-way bill file')),
+                  ),
+                ],
                 // Straight from the bill to its return or exchange.
                 if ((features?.canManageReturns ?? false) &&
                     inv['is_cancelled'] != true &&
