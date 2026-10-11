@@ -17,6 +17,7 @@ class ProductsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final products = ref.watch(productsProvider);
+    final search = ref.watch(productSearchProvider).trim();
     final isDesktop = MediaQuery.sizeOf(context).width >= kDesktopBreakpoint;
 
     final mainAction = ScreenAction(
@@ -78,7 +79,20 @@ class ProductsScreen extends ConsumerWidget {
                 child: AsyncView(
                   value: products,
                   onRetry: () => ref.invalidate(productsProvider),
-                  builder: (rows) => rows.isEmpty
+                  builder: (rows) => rows.isEmpty && search.isNotEmpty
+                      ? EmptyState(
+                          icon: Icons.search_off,
+                          message: t(
+                            'No products match "{v1}".\nCheck the spelling, or add it as a new product.',
+                            {'v1': search},
+                          ),
+                          action: FilledButton.icon(
+                            onPressed: () => context.push('/products/new'),
+                            icon: const Icon(Icons.add),
+                            label: Text(t('Add product')),
+                          ),
+                        )
+                      : rows.isEmpty
                       ? EmptyState(
                           icon: Icons.inventory_2_outlined,
                           message: t(

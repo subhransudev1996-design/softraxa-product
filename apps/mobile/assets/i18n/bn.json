@@ -710,6 +710,7 @@
  "No phone number on this job card — you will pick the chat yourself.": "এই জব কার্ডে ফোন নম্বর নেই — চ্যাট আপনি নিজে বেছে নেবেন।",
  "No product found for \"{search}\"": "\"{search}\"-এর কোনো মাল পাওয়া যায়নি",
  "No product with barcode {code}.\nAdd it as a new product?": "বারকোড {code}-এর কোনো মাল নেই.\nনতুন মাল হিসেবে যোগ করবেন?",
+ "No products match \"{v1}\".\nCheck the spelling, or add it as a new product.": "\"{v1}\"-এর সাথে কোনো পণ্য মেলেনি।\nবানান দেখুন, বা এটি নতুন পণ্য হিসেবে যোগ করুন।",
  "No products yet.\nAdd your first product or import from Excel.": "এখনও কোনো মাল নেই.\nপ্রথম মাল যোগ করুন বা Excel থেকে ইমপোর্ট করুন.",
  "No purchase returns found": "কোনো কেনা ফেরত পাওয়া যায়নি",
  "No purchases found": "কোনো কেনা পাওয়া যায়নি",

@@ -710,6 +710,7 @@
  "No phone number on this job card — you will pick the chat yourself.": "इस जॉब कार्ड पर फ़ोन नंबर नहीं है — चैट आप खुद चुनेंगे।",
  "No product found for \"{search}\"": "\"{search}\" का कोई सामान नहीं मिला",
  "No product with barcode {code}.\nAdd it as a new product?": "बारकोड {code} का कोई सामान नहीं.\nनया सामान जोड़ें?",
+ "No products match \"{v1}\".\nCheck the spelling, or add it as a new product.": "\"{v1}\" से कोई सामान नहीं मिला।\nस्पेलिंग जाँचें, या इसे नए सामान के रूप में जोड़ें।",
  "No products yet.\nAdd your first product or import from Excel.": "अभी कोई सामान नहीं.\nपहला सामान जोड़ें या Excel से इम्पोर्ट करें.",
  "No purchase returns found": "कोई खरीद वापसी नहीं मिली",
  "No purchases found": "कोई खरीद नहीं मिली",
