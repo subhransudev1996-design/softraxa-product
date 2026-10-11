@@ -9,6 +9,7 @@ import '../../core/formatters.dart';
 import '../../core/platform.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../reports/gst_rates_screen.dart';
 import 'product_providers.dart';
 
 class ProductsScreen extends ConsumerWidget {
@@ -58,6 +59,11 @@ class ProductsScreen extends ConsumerWidget {
       floatingActionButton: mainAction.fab(context),
       body: Column(
         children: [
+          // GST 2.0: products still at 12% / 28% (nothing when none).
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12),
+            child: GstRatesBanner(),
+          ),
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: CoachTarget(

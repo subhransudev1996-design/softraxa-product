@@ -678,6 +678,20 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         style: TextStyle(fontSize: 13, color: AppColors.orange),
                       ),
                     ),
+                  // A GST shop's bill of supply / cash memo is only for
+                  // nil-rated or exempt goods (GSTR-1 flags the rest).
+                  if ((appContext?.gstEnabled ?? false) &&
+                      (_docType == 'non_gst' || _docType == 'cash_memo') &&
+                      cart.lines.any((l) => l.gstRate > 0))
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Text(
+                        t(
+                          'These items carry GST. A GST-registered shop must give a tax invoice for them — a non-GST bill or cash memo is only for nil-rated or exempt goods.',
+                        ),
+                        style: TextStyle(fontSize: 13, color: AppColors.orange),
+                      ),
+                    ),
                 ],
                 SectionLabel(t('Customer')),
                 Card(

@@ -77,6 +77,13 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
   );
   late String? _band = widget.existing?['turnover_band'] as String?;
 
+  /// Composition scheme rate (0079): 1% traders and manufacturers, 5%
+  /// restaurants, 6% services. Shown once the database has the column.
+  late double _compositionRate =
+      (widget.existing?['composition_rate'] as num?)?.toDouble() ?? 1;
+  bool get _hasCompositionRate =>
+      widget.existing?.containsKey('composition_rate') ?? false;
+
   /// Bill settings (migration 0076). Shown and saved only once the
   /// database has them, so an older database still saves the rest.
   bool get _hasBillSettings =>
@@ -139,6 +146,8 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         'require_repair_estimate': _requireEstimate,
         'upi_id': _upi.text.trim(),
         if (_taxPref != 'non_gst') 'turnover_band': _band,
+        if (_taxPref == 'composition' && _hasCompositionRate)
+          'composition_rate': _compositionRate,
         if (_hasBillSettings) ...{
           'bill_terms': _billTerms.text.trim(),
           'bill_footer': _billFooter.text.trim(),
@@ -395,6 +404,26 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                       ),
                     ],
                     onChanged: (v) => setState(() => _band = v),
+                  ),
+                ),
+              if (_taxPref == 'composition' && _hasCompositionRate)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: DropdownButtonFormField<double>(
+                    initialValue: _compositionRate,
+                    decoration: InputDecoration(
+                      labelText: t('Composition rate'),
+                      helperText: t('The tax on your turnover, shown in GST returns (CMP-08)'),
+                    ),
+                    items: [
+                      DropdownMenuItem(
+                        value: 1.0,
+                        child: Text(t('1% — traders and manufacturers')),
+                      ),
+                      DropdownMenuItem(value: 5.0, child: Text(t('5% — restaurants'))),
+                      DropdownMenuItem(value: 6.0, child: Text(t('6% — services'))),
+                    ],
+                    onChanged: (v) => setState(() => _compositionRate = v ?? 1),
                   ),
                 ),
               TextFormField(

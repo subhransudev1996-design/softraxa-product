@@ -100,6 +100,13 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       : DateTime.tryParse(widget.existing!['expiry_date'] as String);
   late double _gstRate =
       (widget.existing?['gst_rate'] as num?)?.toDouble() ?? 18;
+
+  /// What a 0% product is: nil-rated, exempt or non-GST (GSTR-1 Table 8).
+  late String _gstCategory = switch (widget.existing?['gst_category']) {
+    'exempt' => 'exempt',
+    'non_gst' => 'non_gst',
+    _ => 'nil',
+  };
   late bool _hasVariants = widget.existing?['has_variants'] == true;
   late bool _trackSerial = widget.existing?['track_serial'] == true;
   late bool _trackPieces = widget.existing?['track_pieces'] == true;
@@ -597,6 +604,7 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'wholesale_price': double.tryParse(_wholesale.text),
         'wholesale_min_qty': double.tryParse(_wholesaleMinQty.text),
         'gst_rate': _gstRate,
+        'gst_category': _gstRate > 0 ? 'taxable' : _gstCategory,
         'low_stock_qty': double.tryParse(_lowStock.text) ?? 0,
         'warranty_months': int.tryParse(_warranty.text),
         'description': _description.text.trim(),
@@ -1121,15 +1129,36 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 initialValue: _gstRate,
                 decoration: InputDecoration(labelText: t('GST %')),
                 items: [
-                  DropdownMenuItem(value: 0.0, child: Text(t('0% (Exempt)'))),
+                  DropdownMenuItem(value: 0.0, child: Text(t('0% (nil-rated / exempt)'))),
                   DropdownMenuItem(value: 3.0, child: Text('3%')),
                   DropdownMenuItem(value: 5.0, child: Text('5%')),
-                  DropdownMenuItem(value: 12.0, child: Text('12%')),
                   DropdownMenuItem(value: 18.0, child: Text('18%')),
-                  DropdownMenuItem(value: 28.0, child: Text('28%')),
+                  DropdownMenuItem(value: 40.0, child: Text('40%')),
+                  // Most goods left these on 22 Sep 2025 (GST 2.0).
+                  DropdownMenuItem(value: 12.0, child: Text(t('12% (before GST 2.0)'))),
+                  DropdownMenuItem(value: 28.0, child: Text(t('28% (before GST 2.0)'))),
                 ],
                 onChanged: (v) => setState(() => _gstRate = v ?? 0),
               ),
+              if (_gstRate == 0) ...[
+                const SizedBox(height: 12),
+                DropdownButtonFormField<String>(
+                  initialValue: _gstCategory,
+                  decoration: InputDecoration(
+                    labelText: t('Type of 0% supply'),
+                    helperText: t('Reported in GSTR-1 Table 8'),
+                  ),
+                  items: [
+                    DropdownMenuItem(value: 'nil', child: Text(t('Nil-rated (0% GST)'))),
+                    DropdownMenuItem(value: 'exempt', child: Text(t('Exempt from GST'))),
+                    DropdownMenuItem(
+                      value: 'non_gst',
+                      child: Text(t('Non-GST (petrol, liquor…)')),
+                    ),
+                  ],
+                  onChanged: (v) => setState(() => _gstCategory = v ?? 'nil'),
+                ),
+              ],
               if (categoryOf(businessType).bulkPricing) ...[
                 SectionLabel(t('Bulk pricing (optional)')),
                 Row(

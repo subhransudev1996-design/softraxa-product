@@ -86,7 +86,7 @@ class ReportsScreen extends ConsumerWidget {
     (
       'gst-returns',
       'GST returns',
-      'GSTR-1, GSTR-3B & purchase register in Excel for your accountant',
+      'GSTR-1 file for the GST portal, GSTR-3B tax to pay, GSTR-2B check',
       Icons.assignment_outlined,
       AppColors.green,
     ),

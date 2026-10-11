@@ -119,8 +119,11 @@ Uint8List buildGstWorkbook({
     [t('Net CGST (before set-off)'), n(net.cgst)],
     [t('Net SGST (before set-off)'), n(net.sgst)],
     [t(''), t('')],
-    [t('Taxed lines without HSN'), n(w['lines_without_hsn'])],
+    [t('Lines without HSN (would be rejected)'), n(w['lines_without_hsn'])],
+    [t('HSN codes too short'), n(w['short_hsn_codes'])],
     [t('Invalid customer GSTINs (treated as B2C)'), n(w['invalid_customer_gstins'])],
+    [t('Bills selling GST items without GST'), n(w['untaxed_bills'])],
+    [t('Value of GST items sold without GST'), n(w['untaxed_value'])],
     [t(''), t('')],
     [
       t('Note'),
@@ -227,6 +230,22 @@ Uint8List buildGstWorkbook({
         ],
     ],
   );
+  sheet(
+    'exemp',
+    ['Description', 'Nil Rated Supplies', 'Exempted(other than nil rated/non GST supply)', 'Non-GST Supplies'],
+    [
+      for (final r in data.section('nil'))
+        [
+          t(switch (r['supply_type']) {
+            'INTRB2B' => 'Inter-State supplies to registered persons',
+            'INTRAB2B' => 'Intra-State supplies to registered persons',
+            'INTRB2C' => 'Inter-State supplies to unregistered persons',
+            _ => 'Intra-State supplies to unregistered persons',
+          }),
+          n(r['nil_amount']), n(r['exempt_amount']), n(r['non_gst_amount']),
+        ],
+    ],
+  );
   const hsnHeaders = [
     'HSN', 'Description', 'UQC', 'Total Quantity', 'Total Value', 'Rate',
     'Taxable Value', 'Integrated Tax Amount', 'Central Tax Amount',
@@ -271,6 +290,19 @@ Uint8List buildGstWorkbook({
       [
         t('3.1(c)'), t('Nil rated / exempted'), n(nil['taxable_value']),
         n(0), n(0), n(0),
+      ],
+      [
+        t('3.1(e)'), t('Non-GST outward supplies'),
+        n((data.gstr3b['outward_non_gst'] as Map?)?['taxable_value']),
+        n(0), n(0), n(0),
+      ],
+      [
+        t('5'), t('Inward nil rated / exempt — inter-state'),
+        n((data.gstr3b['inward_nil_exempt'] as Map?)?['inter']), n(0), n(0), n(0),
+      ],
+      [
+        t('5'), t('Inward nil rated / exempt — intra-state'),
+        n((data.gstr3b['inward_nil_exempt'] as Map?)?['intra']), n(0), n(0), n(0),
       ],
       for (final r in List<Map<String, dynamic>>.from(
         data.gstr3b['inter_state_unregistered'] as List? ?? const [],
