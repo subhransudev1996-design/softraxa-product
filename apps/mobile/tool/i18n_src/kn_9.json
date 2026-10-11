@@ -226,5 +226,6 @@
 "Leave empty to add it on the portal later (Part B).": "ಖಾಲಿ ಬಿಡಿ, ನಂತರ ಪೋರ್ಟಲ್‌ನಲ್ಲಿ ಸೇರಿಸಿ (Part B).",
 "Transporter ID (optional)": "ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟರ್ ID (ಐಚ್ಛಿಕ)",
 "Transporter name (optional)": "ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟರ್ ಹೆಸರು (ಐಚ್ಛಿಕ)",
-"Make e-way bill file": "ಇ-ವೇ ಬಿಲ್ ಫೈಲ್ ಮಾಡಿ"
+"Make e-way bill file": "ಇ-ವೇ ಬಿಲ್ ಫೈಲ್ ಮಾಡಿ",
+"Fix the problem marked red first — the portal would reject it.": "ಮೊದಲು ಕೆಂಪು ಗುರುತಿನ ಸಮಸ್ಯೆಯನ್ನು ಸರಿಪಡಿಸಿ — ಪೋರ್ಟಲ್ ಅದನ್ನು ತಿರಸ್ಕರಿಸುತ್ತದೆ."
 }

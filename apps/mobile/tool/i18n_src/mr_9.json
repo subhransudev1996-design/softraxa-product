@@ -226,5 +226,6 @@
 "Leave empty to add it on the portal later (Part B).": "रिकामे ठेवा आणि नंतर पोर्टलवर जोडा (Part B).",
 "Transporter ID (optional)": "ट्रान्सपोर्टर ID (ऐच्छिक)",
 "Transporter name (optional)": "ट्रान्सपोर्टरचे नाव (ऐच्छिक)",
-"Make e-way bill file": "ई-वे बिल फाइल बनवा"
+"Make e-way bill file": "ई-वे बिल फाइल बनवा",
+"Fix the problem marked red first — the portal would reject it.": "आधी लाल खूण असलेली समस्या दुरुस्त करा — पोर्टल ती नाकारेल."
 }

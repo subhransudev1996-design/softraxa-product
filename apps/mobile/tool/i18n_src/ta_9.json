@@ -226,5 +226,6 @@
 "Leave empty to add it on the portal later (Part B).": "காலியாக விட்டு, பின்னர் போர்டலில் சேர்க்கவும் (Part B).",
 "Transporter ID (optional)": "டிரான்ஸ்போர்ட்டர் ID (விருப்பம்)",
 "Transporter name (optional)": "டிரான்ஸ்போர்ட்டர் பெயர் (விருப்பம்)",
-"Make e-way bill file": "இ-வே பில் கோப்பை உருவாக்கவும்"
+"Make e-way bill file": "இ-வே பில் கோப்பை உருவாக்கவும்",
+"Fix the problem marked red first — the portal would reject it.": "முதலில் சிவப்பாகக் குறிக்கப்பட்ட சிக்கலைச் சரிசெய்யவும் — போர்டல் அதை நிராகரிக்கும்."
 }

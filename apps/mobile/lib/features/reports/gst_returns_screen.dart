@@ -359,7 +359,11 @@ class _GstReturnsScreenState extends ConsumerState<GstReturnsScreen> {
             ),
             const SizedBox(height: 6),
             Text(
-              blocking > 0
+              blocking == 1
+                  ? t(
+                      'Fix the problem marked red first — the portal would reject it.',
+                    )
+                  : blocking > 1
                   ? t(
                       'Fix the {v1} problems marked red first — the portal would reject those lines.',
                       {'v1': blocking},

@@ -375,7 +375,12 @@ class _EwayBillFormState extends State<_EwayBillForm> {
     address: _buyerAddress.text.trim(),
     place: _buyerPlace.text.trim(),
     pincode: _buyerPin.text.trim(),
-    stateCode: widget.invoice['place_of_supply'] as String? ?? '',
+    // A bill without a place of supply (made before the shop had a state)
+    // was a sale within the shop's own state.
+    stateCode:
+        (widget.invoice['place_of_supply'] as String? ?? '').trim().isNotEmpty
+        ? widget.invoice['place_of_supply'] as String
+        : widget.business['state_code'] as String? ?? '',
   );
 
   EwbTransport get _transport => EwbTransport(

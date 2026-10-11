@@ -226,5 +226,6 @@
 "Leave empty to add it on the portal later (Part B).": "ഒഴിച്ചിടുക, പിന്നീട് പോർട്ടലിൽ ചേർക്കാം (Part B).",
 "Transporter ID (optional)": "ട്രാൻസ്പോർട്ടർ ID (ഐച്ഛികം)",
 "Transporter name (optional)": "ട്രാൻസ്പോർട്ടറുടെ പേര് (ഐച്ഛികം)",
-"Make e-way bill file": "ഇ-വേ ബിൽ ഫയൽ ഉണ്ടാക്കുക"
+"Make e-way bill file": "ഇ-വേ ബിൽ ഫയൽ ഉണ്ടാക്കുക",
+"Fix the problem marked red first — the portal would reject it.": "ആദ്യം ചുവപ്പിൽ അടയാളപ്പെടുത്തിയ പ്രശ്നം പരിഹരിക്കുക — പോർട്ടൽ അത് നിരസിക്കും."
 }
