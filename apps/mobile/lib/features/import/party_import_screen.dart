@@ -11,6 +11,7 @@ import '../../core/file_export.dart';
 import '../../core/formatters.dart';
 import '../../core/gst.dart';
 import '../../core/supabase_providers.dart';
+import '../../core/excel_read.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_providers.dart';
@@ -101,7 +102,7 @@ class _PartyImportScreenState extends ConsumerState<PartyImportScreen> {
     });
     try {
       final bytes = await File(picked.files.single.path!).readAsBytes();
-      final excel = Excel.decodeBytes(bytes);
+      final excel = decodeExcel(bytes);
       final sheet = excel.tables[excel.tables.keys.first]!;
       String cell(List<Data?> row, int i) =>
           i < row.length ? (row[i]?.value?.toString() ?? '').trim() : '';

@@ -12,6 +12,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
+import '../../core/excel_read.dart';
 import '../../core/theme.dart';
 
 const _headers = [
@@ -138,7 +139,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
 
     try {
       final bytes = await File(result.files.single.path!).readAsBytes();
-      final excel = Excel.decodeBytes(bytes);
+      final excel = decodeExcel(bytes);
       final sheet = excel.tables[excel.tables.keys.first]!;
 
       String cellStr(List<Data?> row, int i) =>

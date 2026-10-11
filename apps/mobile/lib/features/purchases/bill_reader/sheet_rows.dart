@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:excel/excel.dart';
 
+import '../../../core/excel_read.dart';
 import 'pdf_words.dart' show PdfReadError;
 
 /// The sheets of a supplier's Excel (.xlsx) or CSV bill, in order, each as
@@ -21,7 +22,7 @@ List<List<List<String>>> readSheets(Uint8List bytes, String fileName) {
   }
   final Excel excel;
   try {
-    excel = Excel.decodeBytes(bytes);
+    excel = decodeExcel(bytes);
   } catch (_) {
     throw const PdfReadError(
       'This file could not be opened as an Excel sheet.',
