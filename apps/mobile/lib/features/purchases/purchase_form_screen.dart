@@ -384,9 +384,11 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
     });
     showSuccess(
       context,
-      t('{v1} lines added from the bill — check them and save', {
-        'v1': result.lines.length,
-      }),
+      result.lines.length == 1
+          ? t('1 line added from the bill — check it and save')
+          : t('{v1} lines added from the bill — check them and save', {
+              'v1': result.lines.length,
+            }),
     );
   }
 

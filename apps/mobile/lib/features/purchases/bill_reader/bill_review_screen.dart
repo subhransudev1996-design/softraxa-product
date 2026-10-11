@@ -504,7 +504,8 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
     // That supplier's names and columns.
     final keep = {
       for (final l in _lines)
-        if (l.product != null && l.found != _Found.suggested) l.key: l,
+        if ((l.product != null && l.found != _Found.suggested) || l.skip)
+          l.key: l,
     };
     await _loadMemory(_bill!);
     if (_overrides.isNotEmpty) {
@@ -611,7 +612,7 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
     if (saved != true || !mounted) return;
     final keep = {
       for (final l in _lines)
-        if (l.product != null) l.key: l,
+        if (l.product != null || l.skip) l.key: l,
     };
     setState(() => _loading = true);
     _overrides = {for (final c in cols) c.key: c.role};
@@ -1271,10 +1272,12 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
               Padding(
                 padding: const EdgeInsets.only(bottom: 6),
                 child: Text(
-                  t(
-                    'Choose the product for {v1} more lines, or leave them out',
-                    {'v1': missing},
-                  ),
+                  missing == 1
+                      ? t('Choose the product for 1 more line, or leave it out')
+                      : t(
+                          'Choose the product for {v1} more lines, or leave them out',
+                          {'v1': missing},
+                        ),
                   style: const TextStyle(fontSize: 13, color: AppColors.red),
                 ),
               ),
@@ -1291,9 +1294,11 @@ class _BillReviewScreenState extends ConsumerState<BillReviewScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : Text(
-                        t('Add {v1} lines to the purchase', {
-                          'v1': used.length,
-                        }),
+                        used.length == 1
+                            ? t('Add 1 line to the purchase')
+                            : t('Add {v1} lines to the purchase', {
+                                'v1': used.length,
+                              }),
                       ),
               ),
             ),

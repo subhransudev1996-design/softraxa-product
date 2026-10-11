@@ -86,6 +86,70 @@ String billItemKey(String name) {
 
 final _size = RegExp(r'^\d+(\.\d+)?(kg|g|ml|l)$');
 
+/// A number with or without a unit: a size (1l, 500g), storage (256gb),
+/// a model number (4b, 13c) or a plain number (Dolo 650).
+final _measure = RegExp(r'^(\d+(?:\.\d+)?)([a-z]{0,4})$');
+
+const _colours = {
+  'black',
+  'white',
+  'red',
+  'blue',
+  'green',
+  'yellow',
+  'pink',
+  'purple',
+  'grey',
+  'gray',
+  'silver',
+  'gold',
+  'golden',
+  'orange',
+  'brown',
+  'maroon',
+  'navy',
+  'beige',
+  'cream',
+  'violet',
+  'peach',
+  'mint',
+  'lavender',
+};
+
+/// Two names that can't be the same product: a size, storage, model
+/// number or plain number of one kind (unit) that differs between them
+/// ("8GB+128GB" vs "8GB+256GB", "1 L" vs "500 ml", "Dolo 650" vs "Dolo
+/// 500"), or different colours (White vs Black).
+bool _conflict(List<String> a, List<String> b) {
+  Map<String, Set<String>> measures(List<String> t) {
+    final out = <String, Set<String>>{};
+    for (final w in t) {
+      final m = _measure.firstMatch(w);
+      if (m == null) continue;
+      // Litres and kilos are written in ml / g too (1l = 1000ml).
+      final unit = switch (m.group(2)!) {
+        'ml' => 'l',
+        'g' => 'kg',
+        final u => u,
+      };
+      out.putIfAbsent(unit, () => {}).add(w);
+    }
+    return out;
+  }
+
+  final ma = measures(a), mb = measures(b);
+  for (final unit in ma.keys) {
+    final other = mb[unit];
+    if (other != null &&
+        !(ma[unit]!.length == other.length && ma[unit]!.containsAll(other))) {
+      return true;
+    }
+  }
+  final ca = a.where(_colours.contains).toSet();
+  final cb = b.where(_colours.contains).toSet();
+  return ca.isNotEmpty && cb.isNotEmpty && ca.intersection(cb).isEmpty;
+}
+
 bool _closeWord(String a, String b) {
   if (a == b) return true;
   if (a.length < 5 || b.length < 5 || (a.length - b.length).abs() > 1) {
@@ -113,13 +177,11 @@ bool _closeWord(String a, String b) {
 }
 
 /// How alike two names are, 0–1: shared words over all words (a shortened
-/// word — "choc" for "chocolate" — counts most of one). Different sizes
-/// are never alike.
+/// word — "choc" for "chocolate" — counts most of one). Different sizes,
+/// storage, model numbers or colours are never alike.
 double nameScore(List<String> a, List<String> b) {
   if (a.isEmpty || b.isEmpty) return 0;
-  final sa = a.where(_size.hasMatch).toSet();
-  final sb = b.where(_size.hasMatch).toSet();
-  if (sa.isNotEmpty && sb.isNotEmpty && sa.intersection(sb).isEmpty) return 0;
+  if (_conflict(a, b)) return 0;
   final used = <int>{};
   var matched = 0.0;
   for (final w in a) {

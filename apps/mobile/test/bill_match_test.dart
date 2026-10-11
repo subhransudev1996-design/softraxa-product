@@ -75,4 +75,23 @@ void main() {
     expect(defaultPackFactor('Doz', baseUnit: 'Pcs'), 12);
     expect(defaultPackFactor('Doz', baseUnit: 'kg'), 1);
   });
+
+  test('different storage, model, number or colour never match', () {
+    final phones = [
+      MatchProduct(id: 'black256', name: 'Nothing Phone (4B) 8GB+256GB Black'),
+      MatchProduct(id: 'redmi13', name: 'Redmi 13C 4GB+128GB Blue'),
+      MatchProduct(id: 'dolo650', name: 'Dolo 650 Tablet'),
+    ];
+    expect(bestMatch('Nothing Phone (4B)8GB+128Gb White', phones), isNull);
+    expect(bestMatch('Nothing Phone (4B)8GB+256Gb White', phones), isNull);
+    expect(
+      bestMatch('Nothing Phone (4B)8GB+256Gb Black', phones)?.productId,
+      'black256',
+    );
+    expect(bestMatch('Redmi 12C 4GB+128GB Blue', phones), isNull);
+    expect(bestMatch('DOLO 500 TAB', phones), isNull);
+    expect(bestMatch('DOLO 650 TAB', phones)?.productId, 'dolo650');
+    // A pack count the product's name doesn't have is no conflict.
+    expect(bestMatch('AMUL GHEE 1LTR TIN 12', products)?.productId, 'ghee1');
+  });
 }

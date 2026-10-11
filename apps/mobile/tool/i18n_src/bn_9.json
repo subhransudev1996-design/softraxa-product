@@ -59,5 +59,8 @@
 "{v1} lines added from the bill — check them and save": "বিল থেকে {v1}টি লাইন যোগ হয়েছে — দেখে সেভ করুন",
 "{v1} not matched": "{v1}টি মেলেনি",
 "{v1} ready": "{v1}টি প্রস্তুত",
-"{v1} to check": "{v1}টি দেখতে হবে"
+"{v1} to check": "{v1}টি দেখতে হবে",
+"Add 1 line to the purchase": "১টি লাইন কেনায় যোগ করুন",
+"Choose the product for 1 more line, or leave it out": "আরও ১টি লাইনের পণ্য বাছুন, বা সেটি বাদ দিন",
+"1 line added from the bill — check it and save": "বিল থেকে ১টি লাইন যোগ হয়েছে — দেখে সেভ করুন"
 }
