@@ -235,5 +235,8 @@
 "The customer scans with any UPI app and the amount is already filled in. Check the money reached your account before you save the bill.": "ग्राहक कोणत्याही UPI ॲपने स्कॅन करेल, रक्कम आधीच भरलेली असेल. बिल सेव्ह करण्यापूर्वी पैसे तुमच्या खात्यात आले का ते तपासा.",
 "Show big QR": "मोठा QR दाखवा",
 "Enter the UPI amount first.": "आधी UPI ची रक्कम टाका.",
-"Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills": "चेकआउटला UPI निवडल्यावर स्कॅन-करून-पैसे QR दिसतो, आणि बिलावर छापला जातो"
+"Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills": "चेकआउटला UPI निवडल्यावर स्कॅन-करून-पैसे QR दिसतो, आणि बिलावर छापला जातो",
+"Close Dukania?": "Dukania बंद करायचे?",
+"Your bills and data are saved.": "तुमची बिले आणि डेटा सेव्ह आहेत.",
+"Close app": "ॲप बंद करा"
 }

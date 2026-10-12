@@ -2,6 +2,7 @@ import '../app_lock/app_lock_settings.dart';
 import '../../core/i18n.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
@@ -11,6 +12,7 @@ import '../../core/crash_reporting.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
+import '../../core/widgets.dart';
 import '../approvals/approvals_screen.dart';
 import '../support/ticket_thread_screen.dart';
 
@@ -76,102 +78,122 @@ class _MobileShell extends StatelessWidget {
     // must too, or it floats over the screen (and the bill's totals).
     final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
-    return Scaffold(
-      body: navigationShell,
-      extendBody: false,
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: keyboardOpen
-          ? null
-          : SizedBox(
-              width: 64,
-              height: 64,
-              child: CoachTarget(
-                page: 'home',
-                id: 'new_bill',
-                child: FloatingActionButton(
-                  heroTag: 'new_bill_fab',
-                  onPressed: () => _go(1),
-                  tooltip: t('New Bill'),
-                  elevation: current == 1 ? 1 : 4,
-                  shape: const CircleBorder(),
-                  child: Container(
-                    width: 64,
-                    height: 64,
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppColors.primary, AppColors.primaryDark],
+    // Phone back button with nothing left to go back to: from another tab
+    // it goes to Home; on Home it asks before closing the app, so a stray
+    // press doesn't throw the shop out mid-work.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        if (current != 0) {
+          _go(0);
+          return;
+        }
+        final close = await confirmDialog(
+          context,
+          title: t('Close Dukania?'),
+          message: t('Your bills and data are saved.'),
+          confirmText: t('Close app'),
+        );
+        if (close) await SystemNavigator.pop();
+      },
+      child: Scaffold(
+        body: navigationShell,
+        extendBody: false,
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        floatingActionButton: keyboardOpen
+            ? null
+            : SizedBox(
+                width: 64,
+                height: 64,
+                child: CoachTarget(
+                  page: 'home',
+                  id: 'new_bill',
+                  child: FloatingActionButton(
+                    heroTag: 'new_bill_fab',
+                    onPressed: () => _go(1),
+                    tooltip: t('New Bill'),
+                    elevation: current == 1 ? 1 : 4,
+                    shape: const CircleBorder(),
+                    child: Container(
+                      width: 64,
+                      height: 64,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [AppColors.primary, AppColors.primaryDark],
+                        ),
+                      ),
+                      child: const Icon(
+                        Icons.receipt_long,
+                        size: 28,
+                        color: Colors.white,
                       ),
                     ),
-                    child: const Icon(
-                      Icons.receipt_long,
-                      size: 28,
-                      color: Colors.white,
-                    ),
                   ),
                 ),
               ),
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            boxShadow: softShadow(20),
+          ),
+          child: BottomAppBar(
+            color: AppColors.card,
+            surfaceTintColor: Colors.transparent,
+            elevation: 0,
+            height: 66,
+            padding: EdgeInsets.zero,
+            shape: const CircularNotchedRectangle(),
+            notchMargin: 8,
+            child: Row(
+              children: [
+                _NavItem(
+                  icon: Icons.home_outlined,
+                  activeIcon: Icons.home,
+                  label: t('Home'),
+                  selected: current == 0,
+                  onTap: () => _go(0),
+                ),
+                _NavItem(
+                  icon: Icons.inventory_2_outlined,
+                  activeIcon: Icons.inventory_2,
+                  label: t('Products'),
+                  selected: current == 2,
+                  onTap: () => _go(2),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 38),
+                    child: Text(
+                      t('New Bill'),
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ),
+                _NavItem(
+                  icon: Icons.bar_chart_outlined,
+                  activeIcon: Icons.bar_chart,
+                  label: t('Reports'),
+                  selected: current == 3,
+                  onTap: () => _go(3),
+                ),
+                _NavItem(
+                  icon: Icons.widgets_outlined,
+                  activeIcon: Icons.widgets,
+                  label: t('More'),
+                  selected: current == 4,
+                  onTap: () => _go(4),
+                ),
+              ],
             ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          boxShadow: softShadow(20),
-        ),
-        child: BottomAppBar(
-          color: AppColors.card,
-          surfaceTintColor: Colors.transparent,
-          elevation: 0,
-          height: 66,
-          padding: EdgeInsets.zero,
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 8,
-          child: Row(
-            children: [
-              _NavItem(
-                icon: Icons.home_outlined,
-                activeIcon: Icons.home,
-                label: t('Home'),
-                selected: current == 0,
-                onTap: () => _go(0),
-              ),
-              _NavItem(
-                icon: Icons.inventory_2_outlined,
-                activeIcon: Icons.inventory_2,
-                label: t('Products'),
-                selected: current == 2,
-                onTap: () => _go(2),
-              ),
-              Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(top: 38),
-                  child: Text(
-                    t('New Bill'),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ),
-              _NavItem(
-                icon: Icons.bar_chart_outlined,
-                activeIcon: Icons.bar_chart,
-                label: t('Reports'),
-                selected: current == 3,
-                onTap: () => _go(3),
-              ),
-              _NavItem(
-                icon: Icons.widgets_outlined,
-                activeIcon: Icons.widgets,
-                label: t('More'),
-                selected: current == 4,
-                onTap: () => _go(4),
-              ),
-            ],
           ),
         ),
       ),
