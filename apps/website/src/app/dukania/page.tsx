@@ -26,17 +26,21 @@ const FEATURES: { icon: keyof typeof LucideIcons; title: string; body: string }[
   { icon: "ScanLine", title: "Barcode scanning", body: "Scan with the phone camera or a USB scanner. Weighing-scale labels for loose goods too." },
   { icon: "Boxes", title: "Stock & low-stock alerts", body: "Live stock for every product and variant, low and out-of-stock lists, stock adjustments." },
   { icon: "CalendarClock", title: "Expiry tracking", body: "Know which products expire soon before they turn into a loss." },
-  { icon: "Landmark", title: "GST returns", body: "GSTR-1 and GSTR-3B summaries, HSN codes, CGST/SGST/IGST — ready for your accountant." },
+  { icon: "Landmark", title: "GST filing made easy", body: "GSTR-1 file to upload on the GST portal, GSTR-3B with the cash to pay, purchase check against GSTR-2B, CMP-08 for composition shops." },
+  { icon: "Route", title: "E-way bills & reverse charge", body: "Make the e-way bill upload file from any bill. Rent and freight under reverse charge go into GSTR-3B by themselves." },
   { icon: "Users", title: "Customers & khata", body: "Credit sales, part payments and dues for each customer — your udhaar book, digital." },
   { icon: "Truck", title: "Purchases & suppliers", body: "Record purchases, track what you owe each supplier, and handle purchase returns." },
+  { icon: "FileScan", title: "Read supplier bills", body: "Pick the supplier's PDF or Excel bill and the purchase fills itself in — no typing it line by line." },
   { icon: "Undo2", title: "Returns & exchanges", body: "Sale returns, credit notes and exchanges that keep stock and money right." },
   { icon: "ShieldCheck", title: "Staff logins & approvals", body: "Each staff member sees only what you allow. Below-cost sales and big discounts wait for your OK." },
-  { icon: "Printer", title: "Print & share bills", body: "Bluetooth thermal printers from the phone, any printer from Windows, PDF bills on WhatsApp." },
+  { icon: "Printer", title: "Print & share bills", body: "Bluetooth thermal printers from the phone, any printer from Windows, PDF bills on WhatsApp — with your logo, terms and closing line." },
+  { icon: "QrCode", title: "UPI QR at the counter", body: "Choose UPI and a scan-to-pay QR appears with the bill amount already filled in. The customer just scans and pays." },
   { icon: "Wrench", title: "Job cards for repairs", body: "Take in devices or vehicles, give estimates, track repairs and bill parts and labour." },
   { icon: "Wallet", title: "Cashbook & expenses", body: "Cash in the drawer, day closing, and every shop expense in one place." },
   { icon: "BarChart3", title: "Reports", body: "Sales, profit, stock value, dues, purchases and expenses — on screen or exported." },
   { icon: "PackageSearch", title: "Ready product list", body: "Pick common products from our shared list instead of typing every name and detail." },
   { icon: "FileSpreadsheet", title: "Excel import & export", body: "Bring your products, customers and suppliers in from Excel — and take all your data out any time." },
+  { icon: "Languages", title: "In your language", body: "Use the app in English, Hindi, Marathi, Gujarati, Bengali, Punjabi, Tamil, Telugu, Kannada, Malayalam or Odia." },
 ];
 
 const SHOP_TYPES: { icon: keyof typeof LucideIcons; title: string; points: string[] }[] = [
@@ -72,7 +76,9 @@ export default async function DukaniaPage() {
   const faqItems = content.faqs?.items || [
     { q: "Is there a free trial?", a: "Yes. Sign up in the app and your shop starts on a free trial straight away — no card, no payment." },
     { q: "Does it really work with no internet?", a: "Yes. Billing works fully offline and syncs automatically once the connection is back." },
-    { q: "Does it handle GST?", a: "Yes — GST bills with HSN codes, CGST/SGST/IGST, plus GSTR-1 and GSTR-3B reports." },
+    { q: "Does it handle GST?", a: "Yes — GST bills with HSN codes and CGST/SGST/IGST. Dukania makes the GSTR-1 file you upload on the GST portal, shows GSTR-3B with the cash to pay, matches purchases with GSTR-2B, and makes e-way bill files." },
+    { q: "Can my customers pay by UPI?", a: "Yes. Add your UPI ID once in business settings. When you choose UPI at checkout, a QR with the bill amount appears for the customer to scan." },
+    { q: "Can I use it in Hindi or my own language?", a: "Yes — Dukania works in English and 10 Indian languages: Hindi, Marathi, Gujarati, Bengali, Punjabi, Tamil, Telugu, Kannada, Malayalam and Odia." },
   ];
 
   return (
@@ -109,6 +115,9 @@ export default async function DukaniaPage() {
               <MagneticButton href="/download">Start free trial <LucideIcons.ArrowRight className="h-4 w-4" /></MagneticButton>
               <MagneticButton href="/contact" variant="ghost">Book a free demo</MagneticButton>
             </div>
+            <a href="#film" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sky hover:text-paper">
+              <LucideIcons.PlayCircle className="h-5 w-5" aria-hidden="true" /> Watch the 2-minute film
+            </a>
             <p className="mt-4 font-mono text-xs text-dim">
               {trial} · No card, no payment{info.fromYearly ? ` · Plans from ${rupees(info.fromYearly)}/year` : ""}
             </p>
@@ -150,6 +159,26 @@ export default async function DukaniaPage() {
             </div>
           </Reveal>
         </div>
+      </section>
+
+      {/* 1b — the film: a day at a real counter, start to close */}
+      <section id="film" className="mx-auto max-w-5xl scroll-mt-24 px-6 pt-20">
+        <SectionHeading eyebrow="Watch" title="Ek din, ek dukaan." align="center"
+          lead="A shop's day with Dukania, from opening to closing — billing, udhaar, stock and GST in two and a half minutes." />
+        <Reveal>
+          <div className="mt-10 overflow-hidden rounded-3xl border border-hairline bg-black shadow-2xl">
+            <video
+              className="aspect-video w-full"
+              controls
+              playsInline
+              preload="none"
+              poster="/videos/dukania-film-poster.jpg"
+            >
+              <source src="/videos/dukania-film.mp4" type="video/mp4" />
+              Your browser can&apos;t play this video.
+            </video>
+          </div>
+        </Reveal>
       </section>
 
       {/* 2 — real screens */}

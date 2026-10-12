@@ -1,4 +1,4 @@
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, PlayCircle } from "lucide-react";
 import Hero from "@/components/hero";
 import Marquee from "@/components/marquee";
 import SectionHeading from "@/components/section-heading";
@@ -62,10 +62,11 @@ export default async function HomePage() {
               <ul className="mt-6 space-y-2.5 text-sm text-paper">
                 {[
                   "Bill customers online or completely offline",
-                  "GST bills, GSTR-1 and GSTR-3B reports",
+                  "GST bills, plus the GSTR-1 file for the GST portal",
+                  "UPI QR at the counter with the amount filled in",
                   "Stock, expiry and low-stock alerts",
                   "Staff logins with permissions and approvals",
-                  "Runs on Android phones and Windows PCs",
+                  "Android phones and Windows PCs, in 11 languages",
                 ].map((p) => (
                   <li key={p} className="flex items-start gap-2.5">
                     <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-violet to-sky" />
@@ -77,6 +78,9 @@ export default async function HomePage() {
                 <MagneticButton href="/dukania">Explore Dukania <ArrowRight className="h-4 w-4" /></MagneticButton>
                 <MagneticButton href="/download" variant="ghost">Try it free</MagneticButton>
               </div>
+              <a href="/dukania#film" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky hover:text-paper">
+                <PlayCircle className="h-5 w-5" aria-hidden="true" /> Watch the 2-minute film
+              </a>
             </Reveal>
             <Reveal delay={0.15}>
               <Parallax amount={36}>
