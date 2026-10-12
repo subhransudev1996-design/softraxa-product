@@ -6,6 +6,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/formatters.dart';
 import '../offline/offline_service.dart';
 import 'cart.dart';
+import '../../core/network.dart';
 
 final posSearchProvider = NotifierProvider<PosSearchNotifier, String>(
   PosSearchNotifier.new,
@@ -46,7 +47,7 @@ final posProductsProvider =
           );
         }
         final rows = List<Map<String, dynamic>>.from(
-          await query.order('name', ascending: true).limit(100),
+          await quickCall(query.order('name', ascending: true).limit(100)),
         );
         // Keep the whole catalogue cached for offline billing (throttled,
         // paged, removes stale rows) — not just this first page of results.
@@ -73,11 +74,13 @@ Future<void> setCartCustomer(
   final wholesale = customer['is_wholesale'] == true;
   var prices = <String, double>{};
   try {
-    final rows = await ref
-        .read(supabaseProvider)
-        .from('customer_prices')
-        .select('product_id, variant_id, price')
-        .eq('customer_id', customer['id'] as String);
+    final rows = await quickCall(
+      ref
+          .read(supabaseProvider)
+          .from('customer_prices')
+          .select('product_id, variant_id, price')
+          .eq('customer_id', customer['id'] as String),
+    );
     prices = {
       for (final r in List<Map<String, dynamic>>.from(rows))
         '${r['product_id']}:${r['variant_id'] ?? ''}': toDouble(r['price']),
@@ -99,7 +102,8 @@ final pricingRightsProvider = FutureProvider<PricingRights>((ref) async {
   final ctx = ref.watch(appContextProvider).value;
   try {
     final r = Map<String, dynamic>.from(
-      await ref.read(supabaseProvider).rpc('get_my_pricing_rights') as Map,
+      await quickCall(ref.read(supabaseProvider).rpc('get_my_pricing_rights'))
+          as Map,
     );
     return (
       unlimited: r['unlimited'] == true,

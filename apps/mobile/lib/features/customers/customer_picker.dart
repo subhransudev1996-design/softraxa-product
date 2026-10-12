@@ -8,6 +8,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../offline/offline_service.dart';
 import '../../core/theme.dart';
+import '../../core/network.dart';
 
 /// Bottom sheet to pick (or quickly add) a customer. Works offline
 /// from the cached customer list.
@@ -54,7 +55,7 @@ class _CustomerPickerState extends ConsumerState<_CustomerPicker> {
         query = query.or('name.ilike.%$_search%,phone.ilike.%$_search%');
       }
       final rows = List<Map<String, dynamic>>.from(
-        await query.order('name', ascending: true).limit(50),
+        await quickCall(query.order('name', ascending: true).limit(50)),
       );
       if (_search.isEmpty) offline.cacheCustomers(rows);
       if (mounted) {

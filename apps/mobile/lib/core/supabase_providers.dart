@@ -200,6 +200,7 @@ class AppContextNotifier extends AsyncNotifier<AppContext> {
       if (!isNetworkError(e)) rethrow;
       final saved = await _load(uid);
       if (saved == null) rethrow;
+      Reachability.instance.markDown();
       _refreshWhenOnline();
       return AppContext.fromJson(saved.data, offlineSince: saved.savedAt);
     }

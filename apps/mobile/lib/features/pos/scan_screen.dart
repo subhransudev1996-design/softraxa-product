@@ -11,6 +11,7 @@ import '../../core/widgets.dart';
 import '../offline/offline_service.dart';
 import '../products/product_providers.dart';
 import 'cart.dart';
+import '../../core/network.dart';
 
 /// Camera barcode scanner (PRD 7.9).
 ///
@@ -60,7 +61,7 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       final client = ref.read(supabaseProvider);
       Map<String, dynamic>? found;
       try {
-        found = await findByBarcode(client, code);
+        found = await quickCall(findByBarcode(client, code));
       } catch (_) {
         // offline: try local cache
         final cached = await ref

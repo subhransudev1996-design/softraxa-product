@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -12,6 +13,7 @@ import 'core/branding.dart';
 import 'core/crash_reporting.dart';
 import 'core/desktop_titlebar.dart';
 import 'core/i18n.dart';
+import 'core/network.dart';
 import 'core/push_service.dart';
 import 'core/router.dart';
 import 'core/supabase_providers.dart';
@@ -21,6 +23,7 @@ import 'features/app_lock/app_lock.dart';
 import 'features/app_lock/lock_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
 import 'features/offline/offline_service.dart';
+import 'features/pos/pos_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -31,8 +34,20 @@ Future<void> main() async {
 }
 
 Future<void> _start() async {
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ?? '';
+  // Time limits and fail-fast while the server is out of reach, so offline
+  // billing doesn't wait on hanging requests (core/network.dart).
+  final httpClient = AppHttpClient();
+  Reachability.instance.setProbe(
+    () => httpClient.probe(Uri.parse('$supabaseUrl/auth/v1/health')),
+  );
+  try {
+    final net = await Connectivity().checkConnectivity();
+    if (net.contains(ConnectivityResult.none)) Reachability.instance.markDown();
+  } catch (_) {}
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
+    url: supabaseUrl,
+    httpClient: httpClient,
     // The legacy anon key is accepted here too; SUPABASE_ANON_KEY is kept
     // as a fallback so existing .env files keep working.
     publishableKey:
@@ -78,6 +93,7 @@ class App extends ConsumerStatefulWidget {
 
 class _AppState extends ConsumerState<App> {
   StreamSubscription<AuthState>? _authSub;
+  StreamSubscription<List<ConnectivityResult>>? _netSub;
   late final AppLifecycleListener _lifecycle;
   Timer? _contextTimer;
   Timer? _sessionTimer;
@@ -88,6 +104,23 @@ class _AppState extends ConsumerState<App> {
     // Start the offline service (connectivity listener + pending bill sync).
     final offline = ref.read(offlineServiceProvider);
     Future.microtask(offline.syncPendingBills);
+
+    // Server reachable again (even on the same mobile data, with no
+    // network change): send the offline bills and refresh what was loaded
+    // from the device while offline.
+    Reachability.instance.onBackOnline(() {
+      offline.syncPendingBills();
+      ref.read(appContextProvider.notifier).refreshSilently();
+      ref.invalidate(pricingRightsProvider);
+      ref.invalidate(posProductsProvider);
+    });
+    _netSub = Connectivity().onConnectivityChanged.listen((results) {
+      if (results.contains(ConnectivityResult.none)) {
+        Reachability.instance.markDown();
+      } else if (Reachability.instance.isDown) {
+        Reachability.instance.checkNow();
+      }
+    });
 
     // Changes made in the admin panel (renewal, suspension, plan, features)
     // reach an app that stays open: on return to the app and every 30 min.
@@ -129,6 +162,7 @@ class _AppState extends ConsumerState<App> {
   @override
   void dispose() {
     _authSub?.cancel();
+    _netSub?.cancel();
     _lifecycle.dispose();
     _contextTimer?.cancel();
     _sessionTimer?.cancel();

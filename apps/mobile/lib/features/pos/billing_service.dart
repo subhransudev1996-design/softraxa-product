@@ -66,6 +66,8 @@ class BillingService {
           _ref.read(appContextProvider).value?.featureOn('offline_billing') ??
           true;
       if (!isNetwork || !offlineAllowed || invoiceType == 'estimate') rethrow;
+      // Covers this call's own time limit too: later calls fail fast.
+      Reachability.instance.markDown();
 
       // Offline fallback: provisional number, marked as offline-created.
       final displayNo = 'OFF-${DateTime.now().millisecondsSinceEpoch % 100000}';
