@@ -432,7 +432,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 decoration: InputDecoration(
                   labelText: t('UPI ID (optional)'),
                   hintText: t('shopname@okaxis'),
-                  helperText: t('Printed on bills as a "scan to pay" QR code'),
+                  helperText: t('Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills'),
                 ),
                 validator: (v) {
                   final t = (v ?? '').trim();

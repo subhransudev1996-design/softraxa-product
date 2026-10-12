@@ -227,5 +227,13 @@
 "Transporter ID (optional)": "ట్రాన్స్‌పోర్టర్ ID (ఐచ్ఛికం)",
 "Transporter name (optional)": "ట్రాన్స్‌పోర్టర్ పేరు (ఐచ్ఛికం)",
 "Make e-way bill file": "ఈ-వే బిల్లు ఫైల్ తయారు చేయండి",
-"Fix the problem marked red first — the portal would reject it.": "ముందుగా ఎరుపుగా గుర్తించిన సమస్యను సరిచేయండి — పోర్టల్ దాన్ని తిరస్కరిస్తుంది."
+"Fix the problem marked red first — the portal would reject it.": "ముందుగా ఎరుపుగా గుర్తించిన సమస్యను సరిచేయండి — పోర్టల్ దాన్ని తిరస్కరిస్తుంది.",
+"Scan with any UPI app to pay": "ఏ UPI యాప్‌తోనైనా స్కాన్ చేసి చెల్లించండి",
+"Show UPI QR": "UPI QR చూపించు",
+"Add your UPI ID in business settings to show a scan-to-pay QR here.": "ఇక్కడ స్కాన్ చేసి చెల్లించే QR చూపించడానికి బిజినెస్ సెట్టింగ్స్‌లో మీ UPI ID జోడించండి.",
+"Add UPI ID": "UPI ID జోడించు",
+"The customer scans with any UPI app and the amount is already filled in. Check the money reached your account before you save the bill.": "కస్టమర్ ఏ UPI యాప్‌తోనైనా స్కాన్ చేస్తారు, మొత్తం ముందే నింపి ఉంటుంది. బిల్లు సేవ్ చేసే ముందు డబ్బు మీ ఖాతాకు వచ్చిందో చూసుకోండి.",
+"Show big QR": "పెద్ద QR చూపించు",
+"Enter the UPI amount first.": "ముందుగా UPI మొత్తం నమోదు చేయండి.",
+"Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills": "చెక్‌అవుట్‌లో UPI ఎంచుకుంటే స్కాన్ చేసి చెల్లించే QR కనిపిస్తుంది, బిల్లుపై కూడా ముద్రించబడుతుంది"
 }

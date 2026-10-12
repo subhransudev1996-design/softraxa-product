@@ -227,5 +227,13 @@
 "Transporter ID (optional)": "ટ્રાન્સપોર્ટર ID (વૈકલ્પિક)",
 "Transporter name (optional)": "ટ્રાન્સપોર્ટરનું નામ (વૈકલ્પિક)",
 "Make e-way bill file": "ઈ-વે બિલ ફાઇલ બનાવો",
-"Fix the problem marked red first — the portal would reject it.": "પહેલા લાલ નિશાનવાળી સમસ્યા સુધારો — પોર્ટલ તેને નકારી દેશે."
+"Fix the problem marked red first — the portal would reject it.": "પહેલા લાલ નિશાનવાળી સમસ્યા સુધારો — પોર્ટલ તેને નકારી દેશે.",
+"Scan with any UPI app to pay": "કોઈપણ UPI ઍપથી સ્કેન કરીને ચૂકવો",
+"Show UPI QR": "UPI QR બતાવો",
+"Add your UPI ID in business settings to show a scan-to-pay QR here.": "અહીં સ્કેન-કરીને-ચૂકવો QR બતાવવા બિઝનેસ સેટિંગમાં તમારો UPI ID ઉમેરો.",
+"Add UPI ID": "UPI ID ઉમેરો",
+"The customer scans with any UPI app and the amount is already filled in. Check the money reached your account before you save the bill.": "ગ્રાહક કોઈપણ UPI ઍપથી સ્કેન કરશે, રકમ પહેલેથી ભરેલી હશે. બિલ સેવ કરતા પહેલા તપાસો કે પૈસા તમારા ખાતામાં આવી ગયા છે.",
+"Show big QR": "મોટો QR બતાવો",
+"Enter the UPI amount first.": "પહેલા UPI ની રકમ લખો.",
+"Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills": "ચેકઆઉટ પર UPI પસંદ કરતાં સ્કેન-કરીને-ચૂકવો QR દેખાય છે, અને બિલ પર છપાય છે"
 }

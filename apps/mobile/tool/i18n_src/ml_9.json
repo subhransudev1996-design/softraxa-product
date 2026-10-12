@@ -227,5 +227,13 @@
 "Transporter ID (optional)": "ട്രാൻസ്പോർട്ടർ ID (ഐച്ഛികം)",
 "Transporter name (optional)": "ട്രാൻസ്പോർട്ടറുടെ പേര് (ഐച്ഛികം)",
 "Make e-way bill file": "ഇ-വേ ബിൽ ഫയൽ ഉണ്ടാക്കുക",
-"Fix the problem marked red first — the portal would reject it.": "ആദ്യം ചുവപ്പിൽ അടയാളപ്പെടുത്തിയ പ്രശ്നം പരിഹരിക്കുക — പോർട്ടൽ അത് നിരസിക്കും."
+"Fix the problem marked red first — the portal would reject it.": "ആദ്യം ചുവപ്പിൽ അടയാളപ്പെടുത്തിയ പ്രശ്നം പരിഹരിക്കുക — പോർട്ടൽ അത് നിരസിക്കും.",
+"Scan with any UPI app to pay": "ഏത് UPI ആപ്പിലും സ്കാൻ ചെയ്ത് പണമടയ്ക്കുക",
+"Show UPI QR": "UPI QR കാണിക്കുക",
+"Add your UPI ID in business settings to show a scan-to-pay QR here.": "ഇവിടെ സ്കാൻ ചെയ്ത് പണമടയ്ക്കാനുള്ള QR കാണിക്കാൻ ബിസിനസ് സെറ്റിംഗ്സിൽ നിങ്ങളുടെ UPI ID ചേർക്കുക.",
+"Add UPI ID": "UPI ID ചേർക്കുക",
+"The customer scans with any UPI app and the amount is already filled in. Check the money reached your account before you save the bill.": "ഉപഭോക്താവ് ഏത് UPI ആപ്പിലും സ്കാൻ ചെയ്യും, തുക മുൻകൂട്ടി നിറഞ്ഞിരിക്കും. ബിൽ സേവ് ചെയ്യുന്നതിന് മുമ്പ് പണം നിങ്ങളുടെ അക്കൗണ്ടിൽ എത്തിയോ എന്ന് നോക്കുക.",
+"Show big QR": "വലിയ QR കാണിക്കുക",
+"Enter the UPI amount first.": "ആദ്യം UPI തുക നൽകുക.",
+"Shown as a scan-to-pay QR when you choose UPI at checkout, and printed on bills": "ചെക്ക്ഔട്ടിൽ UPI തിരഞ്ഞെടുക്കുമ്പോൾ സ്കാൻ ചെയ്ത് പണമടയ്ക്കാനുള്ള QR കാണിക്കും, ബില്ലിലും അച്ചടിക്കും"
 }

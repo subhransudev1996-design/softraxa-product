@@ -22,6 +22,7 @@ import 'billing_service.dart';
 import 'cart.dart';
 import 'pos_providers.dart';
 import '../../core/theme.dart';
+import '../../core/upi.dart';
 
 /// [exchange]: checking out the exchange screen's replacement bill.
 Future<void> showCheckoutSheet(
@@ -560,6 +561,100 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
+  }
+
+  /// Scan-to-pay QR for a UPI payment: the shop's UPI ID with [amount]
+  /// filled in, so the customer doesn't type it. Without a UPI ID in
+  /// business settings, a pointer to add one.
+  Widget _upiPanel(double amount) {
+    final app = ref.watch(appContextProvider).value;
+    final upi = (app?.business?['upi_id'] as String? ?? '').trim();
+    final payee = app?.businessName ?? '';
+    if (upi.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.only(top: 12),
+        child: Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                const Icon(Icons.qr_code_2, color: AppColors.indigo),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    t(
+                      'Add your UPI ID in business settings to show a scan-to-pay QR here.',
+                    ),
+                    style: const TextStyle(fontSize: 13),
+                  ),
+                ),
+                if (app?.isOwner ?? false)
+                  TextButton(
+                    onPressed: () => context.push('/settings/business'),
+                    child: Text(t('Add UPI ID')),
+                  ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    if (amount <= 0) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            children: [
+              UpiQr(upiId: upi, payee: payee, amount: amount, size: 170),
+              const SizedBox(height: 8),
+              Text(
+                t(
+                  'The customer scans with any UPI app and the amount is already filled in. Check the money reached your account before you save the bill.',
+                ),
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 12.5, color: AppColors.inkSoft),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                icon: const Icon(Icons.fullscreen),
+                label: Text(t('Show big QR')),
+                onPressed: () => showUpiQrFullScreen(
+                  context,
+                  upiId: upi,
+                  payee: payee,
+                  amount: amount,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Split payment: the big QR for one UPI row's amount.
+  void _showUpiQr(double amount) {
+    final app = ref.read(appContextProvider).value;
+    final upi = (app?.business?['upi_id'] as String? ?? '').trim();
+    if (upi.isEmpty) {
+      showError(
+        context,
+        t('Add your UPI ID in business settings to show a scan-to-pay QR here.'),
+      );
+      return;
+    }
+    if (amount <= 0) {
+      showError(context, t('Enter the UPI amount first.'));
+      return;
+    }
+    showUpiQrFullScreen(
+      context,
+      upiId: upi,
+      payee: app?.businessName ?? '',
+      amount: amount,
+    );
   }
 
   @override
@@ -1107,6 +1202,12 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         ),
                       ],
                     ),
+                    if (_paymentMode == 'upi')
+                      _upiPanel(
+                        _paidTouched
+                            ? double.tryParse(_paid.text) ?? 0
+                            : payable,
+                      ),
                   ] else ...[
                     for (var i = 0; i < _splits.length; i++)
                       Padding(
@@ -1164,6 +1265,14 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                 onChanged: (_) => setState(() {}),
                               ),
                             ),
+                            if (_splits[i].mode == 'upi')
+                              IconButton(
+                                tooltip: t('Show UPI QR'),
+                                icon: const Icon(Icons.qr_code_2),
+                                onPressed: () => _showUpiQr(
+                                  double.tryParse(_splits[i].amount.text) ?? 0,
+                                ),
+                              ),
                             IconButton(
                               icon: const Icon(
                                 Icons.remove_circle_outline,
