@@ -52,6 +52,11 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
     _lastTime = now;
 
     if (widget.mode == 'return') {
+      // Once only: the camera keeps reading while this screen closes, and a
+      // second (different) code popped the screen below too — the product
+      // form closed and the shop landed on Products.
+      _handling = true;
+      _controller.stop();
       context.pop(code);
       return;
     }
@@ -109,7 +114,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
           builder: (ctx) => AlertDialog(
             title: Text(t('Product not found')),
             content: Text(
-              t('No product with barcode {code}.\nAdd it as a new product?', {'code': code}),
+              t('No product with barcode {code}.\nAdd it as a new product?', {
+                'code': code,
+              }),
             ),
             actions: [
               TextButton(
@@ -143,7 +150,9 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(widget.mode == 'return' ? t('Scan barcode') : 'Scan to bill'),
+        title: Text(
+          widget.mode == 'return' ? t('Scan barcode') : 'Scan to bill',
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.flash_on),
@@ -178,7 +187,8 @@ class _ScanScreenState extends ConsumerState<ScanScreen> {
             left: 0,
             right: 0,
             top: 100,
-            child: Text(t('Align barcode within the frame'),
+            child: Text(
+              t('Align barcode within the frame'),
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: Colors.white70,
