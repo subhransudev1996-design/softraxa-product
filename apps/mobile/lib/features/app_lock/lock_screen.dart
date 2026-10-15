@@ -369,19 +369,26 @@ class _LockScreenState extends ConsumerState<LockScreen> {
         style: TextStyle(color: AppColors.ink, fontSize: 14),
       ),
       const SizedBox(height: 16),
+      // Expanded: on phones the theme makes filled buttons full width, which
+      // can't be laid out in a Row (the Logout button was not drawn at all).
       Row(
-        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          OutlinedButton(
-            onPressed: _busy ? null : () => setState(() => _askLogout = false),
-            child: Text(t('Back')),
+          Expanded(
+            child: OutlinedButton(
+              onPressed: _busy
+                  ? null
+                  : () => setState(() => _askLogout = false),
+              child: Text(t('Back')),
+            ),
           ),
           const SizedBox(width: 12),
-          FilledButton(
-            key: const Key('lock-logout'),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
-            onPressed: _busy ? null : _logout,
-            child: Text(t('Logout')),
+          Expanded(
+            child: FilledButton(
+              key: const Key('lock-logout'),
+              style: FilledButton.styleFrom(backgroundColor: AppColors.red),
+              onPressed: _busy ? null : _logout,
+              child: Text(t('Logout')),
+            ),
           ),
         ],
       ),

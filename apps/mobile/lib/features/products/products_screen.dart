@@ -221,6 +221,7 @@ class _ProductRow extends StatelessWidget {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: CachedNetworkImage(
+                        key: ValueKey(product['image_url']),
                         imageUrl: imageThumb(
                           product['image_url'] as String,
                           120,
@@ -378,6 +379,7 @@ class _ProductTile extends ConsumerWidget {
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: CachedNetworkImage(
+                        key: ValueKey(product['image_url']),
                         imageUrl: imageThumb(
                           product['image_url'] as String,
                           120,

@@ -116,6 +116,7 @@ class ProductPhotoField extends StatelessWidget {
         ? Image.memory(picked!, fit: BoxFit.cover)
         : has
         ? CachedNetworkImage(
+            key: ValueKey(url),
             imageUrl: imageThumb(url!, 240),
             fit: BoxFit.cover,
             errorWidget: (_, _, _) =>
@@ -211,6 +212,7 @@ class ProductThumb extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(size / 4),
       child: CachedNetworkImage(
+        key: ValueKey(url),
         imageUrl: imageThumb(url!, (size * 3).round()),
         width: size,
         height: size,

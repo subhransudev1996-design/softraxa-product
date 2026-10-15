@@ -760,6 +760,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       }
 
       invalidateStockData(ref); // new/edited product: POS, stock, dashboard
+      // The detail screen reloads when this screen closes, but picking a
+      // photo leaves the app, and coming back can end that wait early (it
+      // then reloaded the old row and the next edit saved the old photo
+      // back). Reload it here, after the save.
+      ref.invalidate(productDetailProvider(productId));
       _dirty = false;
       if (mounted) {
         showSuccess(

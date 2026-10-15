@@ -457,6 +457,9 @@ class ProductDetailScreen extends ConsumerWidget {
                                     child: ClipRRect(
                                       borderRadius: BorderRadius.circular(16),
                                       child: CachedNetworkImage(
+                                        // A new photo is a new address:
+                                        // without the key the old one stays.
+                                        key: ValueKey(p['image_url']),
                                         imageUrl: imageThumb(
                                           p['image_url'] as String,
                                           240,
