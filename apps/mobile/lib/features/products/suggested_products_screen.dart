@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'product_photo.dart';
 import '../../core/business_category.dart';
 import '../../core/data_refresh.dart';
 import '../../core/i18n.dart';
@@ -422,6 +423,13 @@ class _SuggestedProductsScreenState
               onChanged: (v) => _toggle(m, v ?? false),
               controlAffinity: ListTileControlAffinity.leading,
               dense: true,
+              secondary: (m['image_url'] as String? ?? '').isEmpty
+                  ? null
+                  : ProductThumb(
+                      url: m['image_url'] as String?,
+                      size: 40,
+                      fallback: const SizedBox.shrink(),
+                    ),
               title: Text(
                 m['name'] as String? ?? '',
                 style: const TextStyle(fontWeight: FontWeight.w600),

@@ -239,5 +239,13 @@
 "Close Dukania?": "Dukania बंद करें?",
 "Your bills and data are saved.": "आपके बिल और डेटा सेव हैं।",
 "Close app": "ऐप बंद करें",
-"Book store": "किताबों की दुकान"
+"Book store": "किताबों की दुकान",
+"Choose from gallery": "गैलरी से चुनें",
+"Product photo": "प्रोडक्ट की फ़ोटो",
+"Change photo": "फ़ोटो बदलें",
+"From the product list. Take your own to replace it.": "प्रोडक्ट लिस्ट से। बदलने के लिए अपनी फ़ोटो लें।",
+"Shown in your product list and while billing.": "आपकी प्रोडक्ट लिस्ट में और बिल बनाते समय दिखती है।",
+"Optional. Shown in your product list and while billing.": "ज़रूरी नहीं। आपकी प्रोडक्ट लिस्ट में और बिल बनाते समय दिखती है।",
+"The photo could not be uploaded. Check the internet, or remove the photo and save.": "फ़ोटो अपलोड नहीं हो सकी। इंटरनेट देखें, या फ़ोटो हटाकर सेव करें।",
+"That file is not a photo": "यह फ़ाइल फ़ोटो नहीं है"
 }

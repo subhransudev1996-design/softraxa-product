@@ -12,6 +12,7 @@ import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../offline/offline_service.dart';
+import '../products/product_photo.dart';
 import '../products/product_providers.dart' show parseWeightedBarcode;
 import '../returns/exchange.dart';
 import '../products/variant_grid.dart';
@@ -1188,10 +1189,14 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                                     final stock = toDouble(p['current_stock']);
                                     return Card(
                                       child: ListTile(
-                                        leading: const IconChip(
-                                          Icons.inventory_2_outlined,
-                                          color: AppColors.indigo,
+                                        leading: ProductThumb(
+                                          url: p['image_url'] as String?,
                                           size: 38,
+                                          fallback: const IconChip(
+                                            Icons.inventory_2_outlined,
+                                            color: AppColors.indigo,
+                                            size: 38,
+                                          ),
                                         ),
                                         title: Text(
                                           p['name'] as String,

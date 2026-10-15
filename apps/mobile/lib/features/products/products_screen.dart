@@ -1,3 +1,4 @@
+import '../../core/imagekit.dart';
 import '../../core/i18n.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -216,11 +217,14 @@ class _ProductRow extends StatelessWidget {
           children: [
             SizedBox(
               width: _colLeadingWidth,
-              child: product['image_url'] != null
+              child: (product['image_url'] as String? ?? '').isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(10),
                       child: CachedNetworkImage(
-                        imageUrl: product['image_url'] as String,
+                        imageUrl: imageThumb(
+                          product['image_url'] as String,
+                          120,
+                        ),
                         width: 36,
                         height: 36,
                         fit: BoxFit.cover,
@@ -370,11 +374,14 @@ class _ProductTile extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           child: Row(
             children: [
-              product['image_url'] != null
+              (product['image_url'] as String? ?? '').isNotEmpty
                   ? ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: CachedNetworkImage(
-                        imageUrl: product['image_url'] as String,
+                        imageUrl: imageThumb(
+                          product['image_url'] as String,
+                          120,
+                        ),
                         width: 44,
                         height: 44,
                         fit: BoxFit.cover,

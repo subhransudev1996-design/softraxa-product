@@ -1,6 +1,9 @@
 import '../../core/i18n.dart';
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,10 +13,12 @@ import '../stock/pack_qty_input.dart';
 import 'alternatives.dart';
 
 import '../../core/formatters.dart';
+import '../../core/imagekit.dart';
 import '../../core/platform.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import 'pack_pricing.dart';
+import 'product_photo.dart';
 import 'product_providers.dart';
 import 'variant_builder.dart';
 import 'variant_sheet.dart';
@@ -124,6 +129,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   final List<String> _serials = [];
   final TextEditingController _singleImeiInput = TextEditingController();
   bool _busy = false;
+
+  /// The saved photo, or the shared list's photo of a picked product.
+  /// '' = removed on purpose (so the list's photo is not added back).
+  late String? _imageUrl = widget.existing?['image_url'] as String?;
+
+  /// A new photo, shrunk, uploaded when the product is saved.
+  Uint8List? _newPhoto;
+  bool _photoFromList = false;
 
   // The shared product list (migration 0057): while a NEW product's name is
   // typed, matching products are offered; picking one fills in everything
@@ -253,6 +266,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         if (_description.text.trim().isEmpty) {
           _description.text = d['description'] as String? ?? '';
         }
+        final listPhoto = m['image_url'] as String? ?? '';
+        if (_newPhoto == null && _imageUrl == null && listPhoto.isNotEmpty) {
+          _imageUrl = listPhoto;
+          _photoFromList = true;
+        }
       });
       _filling = false;
       showSuccess(context, t('Details filled in — add your prices and stock'));
@@ -261,6 +279,27 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
       if (mounted) showError(context, e);
     }
   }
+
+  Future<void> _pickPhoto() async {
+    try {
+      final photo = await pickProductPhoto(context);
+      if (photo == null || !mounted) return;
+      setState(() {
+        _newPhoto = photo;
+        _photoFromList = false;
+        _dirty = true;
+      });
+    } catch (e) {
+      if (mounted) showError(context, e);
+    }
+  }
+
+  void _removePhoto() => setState(() {
+    _newPhoto = null;
+    _imageUrl = '';
+    _photoFromList = false;
+    _dirty = true;
+  });
 
   static const _manage = '__manage__';
 
@@ -587,6 +626,23 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     final client = ref.read(supabaseProvider);
     try {
       final businessId = ref.read(appContextProvider).value?.businessId;
+      var imageUrl = _imageUrl;
+      if (_newPhoto != null && businessId != null) {
+        try {
+          imageUrl = await uploadProductPhoto(
+            client,
+            _newPhoto!,
+            businessId: businessId,
+          );
+        } catch (_) {
+          throw t(
+            'The photo could not be uploaded. Check the internet, or remove the photo and save.',
+          );
+        }
+        // Saved: a second press of Save doesn't upload it again.
+        _imageUrl = imageUrl;
+        _newPhoto = null;
+      }
       final row = {
         'business_id': businessId,
         if (!isEdit && _masterProductId != null)
@@ -608,6 +664,11 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'low_stock_qty': double.tryParse(_lowStock.text) ?? 0,
         'warranty_months': int.tryParse(_warranty.text),
         'description': _description.text.trim(),
+        // Null on a new product lets the shared list's photo be added;
+        // '' keeps it off (removed on purpose). An edit clears to null.
+        'image_url': (imageUrl ?? '').isNotEmpty
+            ? imageUrl
+            : (!isEdit && imageUrl == '' ? '' : null),
         'has_variants': _hasVariants,
         'track_serial': _trackSerial,
         'track_pieces': _trackPieces,
@@ -805,10 +866,27 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                       for (final m in _suggestions)
                         ListTile(
                           dense: true,
-                          leading: const Icon(
-                            Icons.inventory_2_outlined,
-                            color: AppColors.primary,
-                          ),
+                          leading: (m['image_url'] as String? ?? '').isEmpty
+                              ? const Icon(
+                                  Icons.inventory_2_outlined,
+                                  color: AppColors.primary,
+                                )
+                              : ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: CachedNetworkImage(
+                                    imageUrl: imageThumb(
+                                      m['image_url'] as String,
+                                      96,
+                                    ),
+                                    width: 40,
+                                    height: 40,
+                                    fit: BoxFit.cover,
+                                    errorWidget: (_, _, _) => const Icon(
+                                      Icons.inventory_2_outlined,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                ),
                           title: Text(m['name'] as String? ?? ''),
                           subtitle: Text(
                             [
@@ -826,6 +904,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ],
                   ),
                 ),
+              const SizedBox(height: 14),
+              ProductPhotoField(
+                url: _imageUrl,
+                picked: _newPhoto,
+                fromList: _photoFromList,
+                onPick: _busy ? () {} : _pickPhoto,
+                onRemove: _removePhoto,
+              ),
               SectionLabel(t('Classification')),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
@@ -1129,14 +1215,23 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                 initialValue: _gstRate,
                 decoration: InputDecoration(labelText: t('GST %')),
                 items: [
-                  DropdownMenuItem(value: 0.0, child: Text(t('0% (nil-rated / exempt)'))),
+                  DropdownMenuItem(
+                    value: 0.0,
+                    child: Text(t('0% (nil-rated / exempt)')),
+                  ),
                   DropdownMenuItem(value: 3.0, child: Text('3%')),
                   DropdownMenuItem(value: 5.0, child: Text('5%')),
                   DropdownMenuItem(value: 18.0, child: Text('18%')),
                   DropdownMenuItem(value: 40.0, child: Text('40%')),
                   // Most goods left these on 22 Sep 2025 (GST 2.0).
-                  DropdownMenuItem(value: 12.0, child: Text(t('12% (before GST 2.0)'))),
-                  DropdownMenuItem(value: 28.0, child: Text(t('28% (before GST 2.0)'))),
+                  DropdownMenuItem(
+                    value: 12.0,
+                    child: Text(t('12% (before GST 2.0)')),
+                  ),
+                  DropdownMenuItem(
+                    value: 28.0,
+                    child: Text(t('28% (before GST 2.0)')),
+                  ),
                 ],
                 onChanged: (v) => setState(() => _gstRate = v ?? 0),
               ),
@@ -1149,8 +1244,14 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     helperText: t('Reported in GSTR-1 Table 8'),
                   ),
                   items: [
-                    DropdownMenuItem(value: 'nil', child: Text(t('Nil-rated (0% GST)'))),
-                    DropdownMenuItem(value: 'exempt', child: Text(t('Exempt from GST'))),
+                    DropdownMenuItem(
+                      value: 'nil',
+                      child: Text(t('Nil-rated (0% GST)')),
+                    ),
+                    DropdownMenuItem(
+                      value: 'exempt',
+                      child: Text(t('Exempt from GST')),
+                    ),
                     DropdownMenuItem(
                       value: 'non_gst',
                       child: Text(t('Non-GST (petrol, liquor…)')),

@@ -239,5 +239,13 @@
 "Close Dukania?": "Dukania-வை மூடவா?",
 "Your bills and data are saved.": "உங்கள் பில்களும் தரவும் சேமிக்கப்பட்டுள்ளன.",
 "Close app": "செயலியை மூடு",
-"Book store": "புத்தகக் கடை"
+"Book store": "புத்தகக் கடை",
+"Choose from gallery": "கேலரியிலிருந்து தேர்வு செய்",
+"Product photo": "பொருளின் புகைப்படம்",
+"Change photo": "புகைப்படத்தை மாற்று",
+"From the product list. Take your own to replace it.": "பொருள் பட்டியலிலிருந்து. மாற்ற உங்கள் சொந்த புகைப்படம் எடுக்கவும்.",
+"Shown in your product list and while billing.": "உங்கள் பொருள் பட்டியலிலும் பில் போடும்போதும் தெரியும்.",
+"Optional. Shown in your product list and while billing.": "விருப்பம். உங்கள் பொருள் பட்டியலிலும் பில் போடும்போதும் தெரியும்.",
+"The photo could not be uploaded. Check the internet, or remove the photo and save.": "புகைப்படம் பதிவேற்றப்படவில்லை. இணையத்தைச் சரிபார்க்கவும், அல்லது புகைப்படத்தை நீக்கிச் சேமிக்கவும்.",
+"That file is not a photo": "இந்தக் கோப்பு புகைப்படம் அல்ல"
 }

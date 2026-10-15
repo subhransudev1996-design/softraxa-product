@@ -1,3 +1,4 @@
+import '../../core/imagekit.dart';
 import '../../core/i18n.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -446,14 +447,24 @@ class ProductDetailScreen extends ConsumerWidget {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            p['image_url'] != null
-                                ? ClipRRect(
+                            (p['image_url'] as String? ?? '').isNotEmpty
+                                ? InkWell(
+                                    onTap: () => _showPhoto(
+                                      context,
+                                      p['image_url'] as String,
+                                    ),
                                     borderRadius: BorderRadius.circular(16),
-                                    child: CachedNetworkImage(
-                                      imageUrl: p['image_url'] as String,
-                                      width: 80,
-                                      height: 80,
-                                      fit: BoxFit.cover,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(16),
+                                      child: CachedNetworkImage(
+                                        imageUrl: imageThumb(
+                                          p['image_url'] as String,
+                                          240,
+                                        ),
+                                        width: 80,
+                                        height: 80,
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   )
                                 : IconChip(
@@ -1126,3 +1137,28 @@ class _AlternativesCard extends ConsumerWidget {
     );
   }
 }
+
+/// The product photo full size; pinch to zoom.
+void _showPhoto(BuildContext context, String url) => showDialog<void>(
+  context: context,
+  builder: (ctx) => Dialog(
+    insetPadding: const EdgeInsets.all(16),
+    clipBehavior: Clip.antiAlias,
+    child: Stack(
+      children: [
+        InteractiveViewer(
+          child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
+        ),
+        Positioned(
+          top: 4,
+          right: 4,
+          child: IconButton.filledTonal(
+            tooltip: t('Close'),
+            icon: const Icon(Icons.close),
+            onPressed: () => Navigator.pop(ctx),
+          ),
+        ),
+      ],
+    ),
+  ),
+);

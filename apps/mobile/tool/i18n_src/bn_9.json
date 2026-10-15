@@ -239,5 +239,13 @@
 "Close Dukania?": "Dukania বন্ধ করবেন?",
 "Your bills and data are saved.": "আপনার বিল ও ডেটা সেভ করা আছে।",
 "Close app": "অ্যাপ বন্ধ করুন",
-"Book store": "বইয়ের দোকান"
+"Book store": "বইয়ের দোকান",
+"Choose from gallery": "গ্যালারি থেকে বাছুন",
+"Product photo": "পণ্যের ছবি",
+"Change photo": "ছবি বদলান",
+"From the product list. Take your own to replace it.": "পণ্য তালিকা থেকে। বদলাতে নিজের ছবি তুলুন।",
+"Shown in your product list and while billing.": "আপনার পণ্য তালিকায় আর বিল করার সময় দেখা যায়।",
+"Optional. Shown in your product list and while billing.": "ঐচ্ছিক। আপনার পণ্য তালিকায় আর বিল করার সময় দেখা যায়।",
+"The photo could not be uploaded. Check the internet, or remove the photo and save.": "ছবি আপলোড হয়নি। ইন্টারনেট দেখুন, অথবা ছবি সরিয়ে সেভ করুন।",
+"That file is not a photo": "এই ফাইলটি ছবি নয়"
 }

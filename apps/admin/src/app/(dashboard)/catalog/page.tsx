@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, Input, Label, Select, Spinner } from "@/components/ui";
 import { Modal, Notice } from "@/components/ops";
 import { BUSINESS_TYPES, businessTypeLabel } from "@/lib/business-types";
+import { imageThumb, shrinkPhoto, uploadToImageKit } from "@/lib/imagekit";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -383,6 +384,14 @@ export default function CatalogPage() {
                     return next;
                   })}
                 />
+                <PhotoCell
+                  product={m}
+                  onSaved={(url) => {
+                    setData((d: any) => ({ ...d, rows: d.rows.map((r: any) => (r.id === m.id ? { ...r, image_url: url } : r)) }));
+                    setNotice({ ok: true, text: url ? `Photo saved for ${m.name}.` : `Photo removed from ${m.name}.` });
+                  }}
+                  onError={(text) => setNotice({ ok: false, text })}
+                />
                 <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="font-semibold text-ink">{m.name}</span>
@@ -572,6 +581,71 @@ export default function CatalogPage() {
 }
 
 /** Two entries for the same product: move every shop's product to the one kept. */
+/** A product's photo: click or drop a picture to add or change it. Shops
+ *  that add the product from the list get this photo (migration 0082). */
+function PhotoCell({ product, onSaved, onError }: {
+  product: any;
+  onSaved: (url: string | null) => void;
+  onError: (text: string) => void;
+}) {
+  const supabase = createClient();
+  const input = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [over, setOver] = useState(false);
+  const url: string | null = product.image_url ?? null;
+
+  async function setImage(next: string | null) {
+    const { error } = await supabase.rpc("admin_set_master_product_image", { p_id: product.id, p_url: next ?? "" });
+    if (error) throw new Error(error.message);
+    onSaved(next);
+  }
+
+  async function upload(file: File | undefined) {
+    if (!file) return;
+    setBusy(true);
+    try {
+      const jpeg = await shrinkPhoto(file);
+      const slug = String(product.name).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "product";
+      await setImage(await uploadToImageKit(supabase, jpeg, `${slug}.jpg`, "/master-products"));
+    } catch (e: any) {
+      onError(e?.message ?? String(e));
+    } finally {
+      setBusy(false);
+      if (input.current) input.current.value = "";
+    }
+  }
+
+  async function remove() {
+    if (!confirm(`Remove the photo from "${product.name}"? Shops that already added it keep theirs.`)) return;
+    setBusy(true);
+    try { await setImage(null); } catch (e: any) { onError(e?.message ?? String(e)); } finally { setBusy(false); }
+  }
+
+  return (
+    <div className="flex shrink-0 flex-col items-center gap-0.5">
+      <button
+        type="button"
+        title={url ? "Change photo (or drop a picture here)" : "Add a photo (or drop a picture here)"}
+        onClick={() => input.current?.click()}
+        onDragOver={(e) => { e.preventDefault(); setOver(true); }}
+        onDragLeave={() => setOver(false)}
+        onDrop={(e) => { e.preventDefault(); setOver(false); upload(e.dataTransfer.files?.[0]); }}
+        disabled={busy}
+        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border ${over ? "border-brand bg-brand/10" : url ? "border-zinc-200" : "border-dashed border-zinc-300 bg-zinc-50"} text-[10px] font-medium text-zinc-400 hover:border-brand`}
+      >
+        {busy ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" /> : url
+          // eslint-disable-next-line @next/next/no-img-element
+          ? <img src={imageThumb(url, 112)} alt={product.name} className="h-full w-full object-cover" />
+          : "+ Photo"}
+      </button>
+      {url && !busy && (
+        <button type="button" onClick={remove} className="text-[10px] text-zinc-400 hover:text-red-600 hover:underline">Remove</button>
+      )}
+      <input ref={input} type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0])} />
+    </div>
+  );
+}
+
 function MergeDialog({ from, onClose, onDone }: { from: any; onClose: () => void; onDone: (text: string) => void }) {
   const supabase = createClient();
   const [typed, setTyped] = useState("");
