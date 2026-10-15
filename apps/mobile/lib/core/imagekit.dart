@@ -8,7 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 ///
 /// The public key is safe to embed; the signature comes from the
 /// `get_imagekit_auth` RPC so the private key stays server-side.
-const _imageKitPublicKey = 'public_P11hw/x56/P9U8POVr73zeODHgU=';
+const _imageKitPublicKey = 'public_K4Zyxo+kyiJX3YM2MZC3jvIuPyE=';
 const _imageKitUploadUrl = 'https://upload.imagekit.io/api/v1/files/upload';
 
 Future<String> uploadToImageKit(
