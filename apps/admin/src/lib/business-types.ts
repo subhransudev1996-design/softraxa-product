@@ -1,9 +1,10 @@
 // R1 shop categories — the `business_type` values in the database
-// (migrations 0001, 0047 and 0066). Keep in step with the app's
+// (migrations 0001, 0047, 0066 and 0081). Keep in step with the app's
 // lib/core/business_category.dart.
 export const BUSINESS_TYPES = [
   { value: "grocery", label: "Grocery / kirana store" },
   { value: "stationery", label: "Stationery & gift shop" },
+  { value: "book_store", label: "Book store" },
   { value: "cosmetics", label: "Cosmetics & general store" },
   { value: "mobile", label: "Mobile shop" },
   { value: "mobile_repair", label: "Mobile repair" },

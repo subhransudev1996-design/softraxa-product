@@ -52,6 +52,13 @@ List<BusinessCategory> get businessCategories => [
     variantFields: ['Size', 'Color', 'Brand'],
   ),
   BusinessCategory(
+    key: 'book_store',
+    label: t('Book store'),
+    description: 'School books, novels, guides; editions and languages',
+    icon: Icons.menu_book,
+    variantFields: ['Edition', 'Language', 'Class'],
+  ),
+  BusinessCategory(
     key: 'cosmetics',
     label: t('Cosmetics & general store'),
     description: 'Beauty, personal care, daily-use items',
