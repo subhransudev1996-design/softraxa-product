@@ -48,22 +48,29 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.canvas,
-      appBar: AppBar(
-        title: Text(t('Reset password')),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/login'),
+    // Opened with go(), so the phone's back button would close the app.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/login');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(
+          title: Text(t('Reset password')),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/login'),
+          ),
         ),
-      ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: _sent ? _sentPanel() : _requestPanel(),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: _sent ? _sentPanel() : _requestPanel(),
+              ),
             ),
           ),
         ),
@@ -77,12 +84,16 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       children: [
         const Icon(Icons.lock_reset, size: 64, color: AppColors.primary),
         const SizedBox(height: 20),
-        Text(t('Forgot your password?'),
+        Text(
+          t('Forgot your password?'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 10),
-        Text(t('Enter your account email and we\'ll send you a link to set a new password.'),
+        Text(
+          t(
+            'Enter your account email and we\'ll send you a link to set a new password.',
+          ),
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.inkSoft, height: 1.5),
         ),
@@ -122,7 +133,8 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
           color: AppColors.primary,
         ),
         const SizedBox(height: 20),
-        Text(t('Check your email'),
+        Text(
+          t('Check your email'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),

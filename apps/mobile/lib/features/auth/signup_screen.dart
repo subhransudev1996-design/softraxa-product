@@ -66,7 +66,12 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
             email: email,
             emailRedirectTo: authCallbackUrl,
           );
-      if (mounted) showSuccess(context, t('Verification email sent to {email}.', {'email': email}));
+      if (mounted) {
+        showSuccess(
+          context,
+          t('Verification email sent to {email}.', {'email': email}),
+        );
+      }
     } catch (e) {
       if (mounted) showError(context, e);
     } finally {
@@ -76,87 +81,109 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.canvas,
-      appBar: AppBar(title: Text(t('Create account'))),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: _signedUpEmail != null
-                  ? _VerifyPanel(
-                      email: _signedUpEmail!,
-                      busy: _busy,
-                      onResend: _resend,
-                      onGoToLogin: () => context.go('/login'),
-                    )
-                  : Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          TextFormField(
-                            controller: _name,
-                            textCapitalization: TextCapitalization.words,
-                            decoration: InputDecoration(
-                              labelText: t('Your name'),
-                              prefixIcon: Icon(Icons.person_outline),
-                            ),
-                            validator: (v) => v == null || v.trim().isEmpty
-                                ? t('Enter your name')
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _email,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              labelText: t('Email'),
-                              prefixIcon: Icon(Icons.email_outlined),
-                            ),
-                            validator: (v) => v == null || !v.contains('@')
-                                ? t('Enter a valid email')
-                                : null,
-                          ),
-                          const SizedBox(height: 16),
-                          TextFormField(
-                            controller: _password,
-                            obscureText: _obscure,
-                            decoration: InputDecoration(
-                              labelText: t('Password'),
-                              prefixIcon: const Icon(Icons.lock_outline),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscure
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
-                                ),
-                                onPressed: () =>
-                                    setState(() => _obscure = !_obscure),
+    // Opened with go('/signup'), so there is no page behind it: the
+    // phone's back button would close the app. Back goes to login instead.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) context.go('/login');
+      },
+      child: Scaffold(
+        backgroundColor: AppColors.canvas,
+        appBar: AppBar(
+          title: Text(t('Create account')),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            tooltip: t('Back'),
+            onPressed: () => context.go('/login'),
+          ),
+        ),
+        body: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: _signedUpEmail != null
+                    ? _VerifyPanel(
+                        email: _signedUpEmail!,
+                        busy: _busy,
+                        onResend: _resend,
+                        onGoToLogin: () => context.go('/login'),
+                      )
+                    : Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            TextFormField(
+                              controller: _name,
+                              textCapitalization: TextCapitalization.words,
+                              decoration: InputDecoration(
+                                labelText: t('Your name'),
+                                prefixIcon: Icon(Icons.person_outline),
                               ),
+                              validator: (v) => v == null || v.trim().isEmpty
+                                  ? t('Enter your name')
+                                  : null,
                             ),
-                            validator: (v) => v == null || v.length < 6
-                                ? t('Minimum 6 characters')
-                                : null,
-                          ),
-                          const SizedBox(height: 24),
-                          FilledButton(
-                            onPressed: _busy ? null : _signup,
-                            child: _busy
-                                ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                    ),
-                                  )
-                                : Text(t('Sign up')),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _email,
+                              keyboardType: TextInputType.emailAddress,
+                              decoration: InputDecoration(
+                                labelText: t('Email'),
+                                prefixIcon: Icon(Icons.email_outlined),
+                              ),
+                              validator: (v) => v == null || !v.contains('@')
+                                  ? t('Enter a valid email')
+                                  : null,
+                            ),
+                            const SizedBox(height: 16),
+                            TextFormField(
+                              controller: _password,
+                              obscureText: _obscure,
+                              decoration: InputDecoration(
+                                labelText: t('Password'),
+                                prefixIcon: const Icon(Icons.lock_outline),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscure
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () =>
+                                      setState(() => _obscure = !_obscure),
+                                ),
+                              ),
+                              validator: (v) => v == null || v.length < 6
+                                  ? t('Minimum 6 characters')
+                                  : null,
+                            ),
+                            const SizedBox(height: 24),
+                            FilledButton(
+                              onPressed: _busy ? null : _signup,
+                              child: _busy
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : Text(t('Sign up')),
+                            ),
+                            const SizedBox(height: 8),
+                            TextButton(
+                              onPressed: _busy
+                                  ? null
+                                  : () => context.go('/login'),
+                              child: Text(t('Already have an account? Log in')),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
+              ),
             ),
           ),
         ),
@@ -192,7 +219,8 @@ class _VerifyPanel extends StatelessWidget {
           color: AppColors.primary,
         ),
         const SizedBox(height: 20),
-        Text(t('Check your email'),
+        Text(
+          t('Check your email'),
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall,
         ),

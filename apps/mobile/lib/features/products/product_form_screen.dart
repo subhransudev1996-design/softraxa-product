@@ -522,6 +522,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
   }
 
   Future<void> _scanBarcode() async {
+    // Otherwise the typed-in field takes focus again on return and the
+    // keyboard covers the barcode that was just scanned.
+    FocusScope.of(context).unfocus();
     final code = isDesktopPlatform
         ? await promptBarcode(context, title: t('Enter barcode'))
         : await context.push<String>('/scan?mode=return');
