@@ -2,6 +2,7 @@ import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:pdf/pdf.dart';
 import 'package:printing/printing.dart';
 import '../../core/file_export.dart';
 import '../../core/data_refresh.dart';
@@ -19,6 +20,7 @@ import 'advance_actions.dart';
 import 'bill_layout.dart' show BillExchange, loadBillLogo;
 import 'invoice_pdf.dart';
 import 'invoice_providers.dart';
+import 'bill_paper.dart';
 import 'thermal_printer.dart';
 import '../../core/theme.dart';
 import 'eway_bill.dart';
@@ -147,6 +149,34 @@ class InvoiceDetailScreen extends ConsumerWidget {
     ),
   );
 
+  /// A4 or A5 for print and Share PDF; remembered on this device.
+  Widget _paperChoice(WidgetRef ref) {
+    final paper = ref.watch(billPaperProvider);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          Text(
+            t('Paper size'),
+            style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+          ),
+          const Spacer(),
+          SegmentedButton<BillPaper>(
+            showSelectedIcon: false,
+            style: const ButtonStyle(visualDensity: VisualDensity.compact),
+            segments: const [
+              ButtonSegment(value: BillPaper.a4, label: Text('A4')),
+              ButtonSegment(value: BillPaper.a5, label: Text('A5')),
+            ],
+            selected: {paper},
+            onSelectionChanged: (s) =>
+                ref.read(billPaperProvider.notifier).set(s.first),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _sharePdf(
     BuildContext context,
     WidgetRef ref,
@@ -166,7 +196,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
         invoiceExchangeProvider(invoice['id'] as String).future,
       ),
     );
-    final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
+    final doc = thermal
+        ? await pdf.buildThermal()
+        : ref.read(billPaperProvider) == BillPaper.a5
+        ? await pdf.buildA5()
+        : await pdf.buildA4();
     await Printing.sharePdf(
       bytes: await doc.save(),
       filename: safeFileName('${invoice['invoice_no']}.pdf'),
@@ -192,9 +226,20 @@ class InvoiceDetailScreen extends ConsumerWidget {
         invoiceExchangeProvider(invoice['id'] as String).future,
       ),
     );
-    final doc = thermal ? await pdf.buildThermal() : await pdf.buildA4();
+    final doc = thermal
+        ? await pdf.buildThermal()
+        : ref.read(billPaperProvider) == BillPaper.a5
+        ? await pdf.buildA5()
+        : await pdf.buildA4();
     await Printing.layoutPdf(
       name: safeFileName('${invoice['invoice_no']}'),
+      // Start the print dialog on the bill's own paper (A5 bills were
+      // offered A4 paper and came out small in a corner).
+      format: thermal
+          ? PdfPageFormat.standard
+          : ref.read(billPaperProvider) == BillPaper.a5
+          ? PdfPageFormat.a5
+          : PdfPageFormat.a4,
       onLayout: (_) => doc.save(),
     );
   }
@@ -901,6 +946,9 @@ class InvoiceDetailScreen extends ConsumerWidget {
                   },
                 ),
                 const SizedBox(height: 8),
+                if ((features?.featureOn('pdf_invoice') ?? true) ||
+                    (features?.featureOn('a4_print') ?? true))
+                  _paperChoice(ref),
                 Row(
                   children: [
                     if (features?.featureOn('pdf_invoice') ?? true)
@@ -919,7 +967,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           onPressed: () =>
                               _printPdf(context, ref, inv, thermal: false),
                           icon: const Icon(Icons.print),
-                          label: Text(t('A4 print')),
+                          label: Text(
+                            ref.watch(billPaperProvider) == BillPaper.a5
+                                ? t('A5 print')
+                                : t('A4 print'),
+                          ),
                         ),
                       ),
                     ],
@@ -966,8 +1018,11 @@ class InvoiceDetailScreen extends ConsumerWidget {
                 // E-way bill file for the portal's bulk upload.
                 if ((features?.gstEnabled ?? false) &&
                     inv['is_cancelled'] != true &&
-                    const {'gst', 'non_gst', 'cash_memo'}
-                        .contains(inv['invoice_type'])) ...[
+                    const {
+                      'gst',
+                      'non_gst',
+                      'cash_memo',
+                    }.contains(inv['invoice_type'])) ...[
                   const SizedBox(height: 8),
                   OutlinedButton.icon(
                     onPressed: () => showEwayBillSheet(context, ref, inv),

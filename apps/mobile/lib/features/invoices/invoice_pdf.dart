@@ -15,7 +15,7 @@ String _rs(num? v) =>
 /// 3,490.00 — table cells, where "Rs." would only crowd the columns.
 String _n(num v) => billMoney(v);
 
-/// Builds invoice PDFs (PRD 7.8): A4 and thermal (80mm) layouts, laid out
+/// Builds invoice PDFs (PRD 7.8): A4, A5 and thermal (80mm) layouts, laid out
 /// like a shop's sales invoice (bill_layout.dart): stock no., rate, amount,
 /// discount and total per line; amount in words; payment details; GST
 /// summary by rate; the shop's terms & conditions (migration 0076).
@@ -63,7 +63,7 @@ class InvoicePdf {
     ).toString();
   }
 
-  pw.Widget _upiQr(double size) => pw.Column(
+  pw.Widget _upiQr(double size, {double k = 1}) => pw.Column(
     children: [
       pw.BarcodeWidget(
         barcode: pw.Barcode.qrCode(),
@@ -74,11 +74,11 @@ class InvoicePdf {
       pw.SizedBox(height: 3),
       pw.Text(
         'Scan to pay ${_rs(invoice['due_amount'] as num?)} by UPI',
-        style: const pw.TextStyle(fontSize: 8),
+        style: pw.TextStyle(fontSize: 8 * k),
       ),
       pw.Text(
         business['upi_id'] as String,
-        style: const pw.TextStyle(fontSize: 7),
+        style: pw.TextStyle(fontSize: 7 * k),
       ),
     ],
   );
@@ -121,13 +121,25 @@ class InvoicePdf {
   bool get _anyDiscount => bill.lines.any((l) => l.discount > 0);
   bool get _anySku => bill.lines.any((l) => l.sku.isNotEmpty);
 
-  // ---------------- A4 ----------------
+  // ---------------- A4 / A5 ----------------
 
-  Future<pw.Document> buildA4() async {
+  Future<pw.Document> buildA4() => buildFullPage();
+
+  /// Half of A4 (148 x 210 mm): the A4 bill, everything about 80% size.
+  Future<pw.Document> buildA5() => buildFullPage(a5: true);
+
+  /// The full-page bill. On A5 the text, margins, logo, QR code and fixed
+  /// widths shrink by [k] so the same bill fits the smaller sheet.
+  Future<pw.Document> buildFullPage({bool a5 = false}) async {
+    final k = a5 ? 0.8 : 1.0;
+    double f(double v) => v * k;
     final doc = pw.Document();
     final bold = pw.TextStyle(fontWeight: pw.FontWeight.bold);
-    const small = pw.TextStyle(fontSize: 9);
-    final smallBold = pw.TextStyle(fontSize: 9, fontWeight: pw.FontWeight.bold);
+    final small = pw.TextStyle(fontSize: f(9));
+    final smallBold = pw.TextStyle(
+      fontSize: f(9),
+      fontWeight: pw.FontWeight.bold,
+    );
     final email = _s(business['email']);
 
     // Item table columns, each only when some line needs it.
@@ -148,16 +160,18 @@ class InvoicePdf {
 
     doc.addPage(
       pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: const pw.EdgeInsets.all(28),
+        pageFormat: a5 ? PdfPageFormat.a5 : PdfPageFormat.a4,
+        margin: pw.EdgeInsets.all(a5 ? 18 : 28),
+        // Text with no size of its own (customer name, bill no.).
+        theme: pw.ThemeData(defaultTextStyle: pw.TextStyle(fontSize: f(12))),
         build: (ctx) => [
           // header
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             children: [
               if (logo != null) ...[
-                pw.Image(pw.MemoryImage(logo!), width: 64, height: 64),
-                pw.SizedBox(width: 12),
+                pw.Image(pw.MemoryImage(logo!), width: f(64), height: f(64)),
+                pw.SizedBox(width: f(12)),
               ],
               pw.Expanded(
                 child: pw.Column(
@@ -166,7 +180,7 @@ class InvoicePdf {
                     pw.Text(
                       _s(business['name']),
                       style: pw.TextStyle(
-                        fontSize: 18,
+                        fontSize: f(18),
                         fontWeight: pw.FontWeight.bold,
                       ),
                     ),
@@ -195,16 +209,16 @@ class InvoicePdf {
                   pw.Text(
                     title,
                     style: pw.TextStyle(
-                      fontSize: 14,
+                      fontSize: f(14),
                       fontWeight: pw.FontWeight.bold,
                     ),
                   ),
                   if (isComposition)
                     pw.SizedBox(
-                      width: 190,
+                      width: f(190),
                       child: pw.Text(
                         compositionDeclaration,
-                        style: const pw.TextStyle(fontSize: 8),
+                        style: pw.TextStyle(fontSize: f(8)),
                         textAlign: pw.TextAlign.right,
                       ),
                     ),
@@ -234,14 +248,23 @@ class InvoicePdf {
           // items
           pw.TableHelper.fromTextArray(
             headerStyle: pw.TextStyle(
-              fontSize: 9,
+              fontSize: f(9),
               fontWeight: pw.FontWeight.bold,
               color: PdfColors.white,
             ),
             headerDecoration: const pw.BoxDecoration(
               color: PdfColors.blueGrey800,
             ),
-            cellStyle: const pw.TextStyle(fontSize: 9),
+            cellStyle: pw.TextStyle(fontSize: f(9)),
+            cellPadding: pw.EdgeInsets.all(a5 ? 3 : 5),
+            // Codes and numbers take the width they need and never break
+            // ("3,490." / "00"); only the item name wraps.
+            columnWidths: {
+              for (var i = 0; i < headers.length; i++)
+                i: headers[i] == 'Item'
+                    ? const pw.FlexColumnWidth()
+                    : const pw.IntrinsicColumnWidth(),
+            },
             cellAlignments: {
               for (var i = 0; i < headers.length; i++)
                 i: i >= firstNumber
@@ -305,25 +328,34 @@ class InvoicePdf {
                   ],
                 ),
               ),
-              pw.SizedBox(width: 16),
+              pw.SizedBox(width: f(16)),
               // totals
               pw.SizedBox(
-                width: 220,
+                width: f(220),
                 child: pw.Column(
                   children: [
                     if (bill.billDiscount > 0)
-                      _totRow('Bill discount', '- ${_rs(bill.billDiscount)}'),
+                      _totRow(
+                        'Bill discount',
+                        '- ${_rs(bill.billDiscount)}',
+                        size: f(9),
+                      ),
                     if (bill.roundOff != 0)
-                      _totRow('Round off', _rs(bill.roundOff)),
+                      _totRow('Round off', _rs(bill.roundOff), size: f(9)),
                     pw.Divider(),
                     _totRow(
                       'NET AMOUNT',
                       _rs(bill.netAmount),
                       bold: true,
-                      size: 12,
+                      size: f(12),
                     ),
                     if (bill.due > 0)
-                      _totRow('Balance Due', _rs(bill.due), bold: true),
+                      _totRow(
+                        'Balance Due',
+                        _rs(bill.due),
+                        bold: true,
+                        size: f(9),
+                      ),
                   ],
                 ),
               ),
@@ -333,9 +365,9 @@ class InvoicePdf {
             pw.SizedBox(height: 12),
             pw.Text('GST Summary', style: smallBold),
             pw.SizedBox(height: 4),
-            _gstTable(fontSize: 9),
+            _gstTable(fontSize: f(9)),
           ],
-          pw.SizedBox(height: 16),
+          pw.SizedBox(height: f(16)),
           pw.Row(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
@@ -344,8 +376,8 @@ class InvoicePdf {
                 child: pw.Column(
                   crossAxisAlignment: pw.CrossAxisAlignment.start,
                   children: [
-                    if (_upiLink != null) _upiQr(84),
-                    ..._termsBlock(fontSize: 8.5),
+                    if (_upiLink != null) _upiQr(f(84), k: k),
+                    ..._termsBlock(fontSize: f(8.5)),
                     if (bill.footer.isNotEmpty) ...[
                       pw.SizedBox(height: 6),
                       pw.Text(bill.footer, style: small),
@@ -353,19 +385,19 @@ class InvoicePdf {
                   ],
                 ),
               ),
-              pw.SizedBox(width: 16),
+              pw.SizedBox(width: f(16)),
               pw.Column(
                 children: [
-                  pw.SizedBox(height: 24),
+                  pw.SizedBox(height: f(24)),
                   pw.Container(
-                    width: 120,
+                    width: f(120),
                     decoration: const pw.BoxDecoration(
                       border: pw.Border(top: pw.BorderSide()),
                     ),
                   ),
                   pw.Text(
                     'Authorised Signatory',
-                    style: const pw.TextStyle(fontSize: 8),
+                    style: pw.TextStyle(fontSize: f(8)),
                   ),
                 ],
               ),
