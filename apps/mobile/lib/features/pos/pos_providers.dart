@@ -22,7 +22,7 @@ const posProductColumns =
     'id, name, sku, barcode, selling_price, mrp, purchase_price, gst_rate, '
     'hsn_code, current_stock, track_serial, has_variants, is_active, '
     'wholesale_price, wholesale_min_qty, image_url, '
-    'secondary_unit_name, conversion_factor, pack_price, track_pieces, '
+    'secondary_unit_name, conversion_factor, pack_price, track_pieces, category_id, '
     'cutting_charge, '
     'units(name, short_name, allow_decimal), '
     'product_variants(id, name, sku, barcode, attributes, purchase_price, '
@@ -122,14 +122,15 @@ final pricingRightsProvider = FutureProvider<PricingRights>((ref) async {
 
 /// Why this bill's prices are over the user's rights, or null if fine.
 String? pricingProblem(CartState cart, PricingRights rights) {
-  final reduction = cart.priceReduction;
+  // A discount card's own discount is allowed (0083).
+  final reduction = cart.countedReduction;
   if (rights.unlimited || reduction <= 0.05) return null;
   if (!rights.canEditPrices) {
     return 'This bill is ${money(reduction)} below the default prices — '
         'you don\'t have permission to change prices or give discounts.';
   }
   if (reduction > cart.defaultTotal * rights.limitPct / 100 + 0.05) {
-    return 'This bill is ${money(reduction)} (${qty(cart.priceReductionPct)}%) below '
+    return 'This bill is ${money(reduction)} (${qty(cart.countedReductionPct)}%) below '
         'the default prices — your discount limit is ${qty(rights.limitPct)}%. Ask the owner.';
   }
   return null;

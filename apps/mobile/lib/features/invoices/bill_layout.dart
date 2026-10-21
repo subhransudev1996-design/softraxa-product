@@ -171,6 +171,20 @@ class BillLayout {
 
   double get due => isEstimate ? 0 : toDouble(invoice['due_amount']);
 
+  /// The discount card on the bill (0083): "Gold card 2017 1234 1234 4109
+  /// (10% off)", or '' when none. Its discount is already in the lines.
+  String get cardLine {
+    final no = (invoice['discount_card_no'] as String? ?? '').trim();
+    if (no.isEmpty) return '';
+    final type = (invoice['discount_card_type'] as String? ?? '').trim();
+    final pct = toDouble(invoice['discount_card_pct']);
+    return '${type.isEmpty ? 'Discount' : type} card $no'
+        '${pct > 0 ? ' (${qty(pct)}% off)' : ''}';
+  }
+
+  /// What the card took off the bill.
+  double get cardAmount => toDouble(invoice['discount_card_amount']);
+
   /// GST by rate, from each line's stored split (after any bill discount,
   /// migration 0040). Only for GST bills that charged GST.
   List<GstSummaryRow> get gstSummary =>

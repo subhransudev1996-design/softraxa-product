@@ -318,6 +318,15 @@ class InvoicePdf {
                   children: [
                     pw.Text('Amount in words:', style: smallBold),
                     pw.Text(bill.amountInWords, style: small),
+                    if (bill.cardLine.isNotEmpty) ...[
+                      pw.SizedBox(height: 8),
+                      pw.Text(
+                        bill.cardAmount > 0
+                            ? '${bill.cardLine}: ${_rs(bill.cardAmount)}'
+                            : bill.cardLine,
+                        style: smallBold,
+                      ),
+                    ],
                     if (bill.payments.isNotEmpty) ...[
                       pw.SizedBox(height: 8),
                       pw.Text('Payment details:', style: smallBold),
@@ -566,6 +575,12 @@ class InvoicePdf {
                 ],
               ),
             ),
+            if (bill.cardLine.isNotEmpty) ...[
+              pw.SizedBox(height: 4),
+              pw.Text(bill.cardLine, style: smallBold),
+              if (bill.cardAmount > 0)
+                _tRow('Card discount', _n(bill.cardAmount), small),
+            ],
             if (bill.payments.isNotEmpty || bill.due > 0) ...[
               pw.SizedBox(height: 4),
               pw.Text('Payment Details', style: smallBold),

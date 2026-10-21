@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/formatters.dart';
+import '../discount_cards/discount_card.dart';
 
 /// Rounds [amount] to the nearest whole rupee, returning the (possibly
 /// negative) adjustment needed to get there — shared by POS bills and
@@ -42,6 +43,8 @@ class CartLine {
     this.packSize,
     this.baseUnitName = '',
     this.exchangePrice,
+    this.categoryId,
+    this.cardPct = 0,
   });
 
   final String key; // productId:variantId (":pack" for a pack line)
@@ -100,6 +103,13 @@ class CartLine {
   /// [unitName] — the price it starts at (0077). Null otherwise.
   final double? exchangePrice;
 
+  /// The product's category, for discount cards that cover only some.
+  final String? categoryId;
+
+  /// The applied discount card's % for this line (0 when none or not
+  /// covered). Set by the cart, never typed (migration 0083).
+  double cardPct;
+
   bool get isPack => packSize != null;
 
   /// Quantity in the base unit stock is kept in.
@@ -154,9 +164,20 @@ class CartLine {
     return r > 0 ? r : 0;
   }
 
-  /// Resolved ₹ discount, whichever unit [discount] was entered in.
-  double get discountAmount =>
+  /// The discount typed on the line, in ₹, whichever unit it was entered in.
+  double get manualDiscountAmount =>
       discountIsPercent ? (qty * price) * discount / 100 : discount;
+
+  /// The discount card's part: its % of what is left after [discount].
+  double get cardDiscountAmount {
+    if (cardPct <= 0) return 0;
+    final base = qty * price - manualDiscountAmount;
+    return base > 0 ? base * cardPct / 100 : 0;
+  }
+
+  /// The line's whole discount — typed plus card. This is what the bill
+  /// records per line.
+  double get discountAmount => manualDiscountAmount + cardDiscountAmount;
   double get gross => (qty * price) - discountAmount;
   double get net => gstRate > 0 ? gross / (1 + gstRate / 100) : gross;
   double get tax => gross - net;
@@ -193,6 +214,8 @@ class CartLine {
     packSize: packSize,
     baseUnitName: baseUnitName,
     exchangePrice: exchangePrice,
+    categoryId: categoryId,
+    cardPct: cardPct,
   );
 }
 
@@ -238,9 +261,17 @@ class CartState {
     this.customerPrices = const {},
     this.wholesaleCustomer = false,
     this.exchangePrices = const {},
+    this.card,
   });
 
   final List<CartLine> lines;
+
+  /// The discount card shown for this bill (0083), or null.
+  final DiscountCard? card;
+
+  /// What the card takes off the bill.
+  double get cardDiscountTotal =>
+      lines.fold(0.0, (s, l) => s + l.cardDiscountAmount);
 
   /// In an exchange: per-piece price paid for each product coming back,
   /// by product id (exchangeOldPrices).
@@ -262,6 +293,23 @@ class CartState {
 
   double get priceReductionPct =>
       defaultTotal > 0 ? priceReduction / defaultTotal * 100 : 0;
+
+  /// What the discount card may take off: its % of the covered lines at
+  /// their default prices — as the server allows it (0083).
+  double get cardAllowance => lines.fold(
+    0.0,
+    (s, l) => s + l.qty * (l.defaultPrice ?? l.price) * l.cardPct / 100,
+  );
+
+  /// The part of [priceReduction] that counts towards a staff member's
+  /// discount limit: everything beyond the card's allowance.
+  double get countedReduction {
+    final r = priceReduction - cardAllowance;
+    return r > 0.005 ? r : 0;
+  }
+
+  double get countedReductionPct =>
+      defaultTotal > 0 ? countedReduction / defaultTotal * 100 : 0;
   final double
   billDiscount; // a ₹ amount, or a 0-100 percent if billDiscountIsPercent
   final bool billDiscountIsPercent;
@@ -318,6 +366,7 @@ class CartState {
     Map<String, double>? customerPrices,
     bool? wholesaleCustomer,
     Map<String, double>? exchangePrices,
+    Object? card = _sentinel,
   }) => CartState(
     lines: lines ?? this.lines,
     customer: customer == _sentinel
@@ -329,6 +378,7 @@ class CartState {
     customerPrices: customerPrices ?? this.customerPrices,
     wholesaleCustomer: wholesaleCustomer ?? this.wholesaleCustomer,
     exchangePrices: exchangePrices ?? this.exchangePrices,
+    card: card == _sentinel ? this.card : card as DiscountCard?,
   );
 
   static const _sentinel = Object();
@@ -372,6 +422,32 @@ final cartProvider = NotifierProvider<CartNotifier, CartState>(
 class CartNotifier extends Notifier<CartState> {
   @override
   CartState build() => const CartState();
+
+  /// Every change to the cart passes through here, so each line always
+  /// carries the applied discount card's % — new lines, quantity and price
+  /// changes, held bills, all of them.
+  @override
+  set state(CartState value) => super.state = _withCard(value);
+
+  static CartState _withCard(CartState s) {
+    final card = s.card;
+    var changed = false;
+    final lines = [
+      for (final l in s.lines)
+        () {
+          final pct = card == null
+              ? 0.0
+              : card.pctFor(productId: l.productId, categoryId: l.categoryId);
+          if ((pct - l.cardPct).abs() < 0.0001) return l;
+          changed = true;
+          return l.copy()..cardPct = pct;
+        }(),
+    ];
+    return changed ? s.copyWith(lines: lines) : s;
+  }
+
+  /// Applies a discount card to the bill, or removes it (null).
+  void setCard(DiscountCard? card) => state = state.copyWith(card: card);
 
   /// Total quantity already in the cart for this product/variant — sums
   /// across lines, since serial-tracked items get one line per unit rather
@@ -442,6 +518,7 @@ class CartNotifier extends Notifier<CartState> {
         mrp: toDouble(product['mrp']) * size,
         availableStock: toDouble(product['current_stock']) / size,
         exchangePrice: _exchangePrice(product, size),
+        categoryId: product['category_id'] as String?,
       );
       line.price = line.defaultPrice ?? pack.price;
       state = state.copyWith(lines: [...state.lines, line]);
@@ -481,6 +558,7 @@ class CartNotifier extends Notifier<CartState> {
       wholesalePrice: (product['wholesale_price'] as num?)?.toDouble(),
       wholesaleMinQty: (product['wholesale_min_qty'] as num?)?.toDouble(),
       exchangePrice: _exchangePrice(product, 1),
+      categoryId: product['category_id'] as String?,
     );
     line.price = line.defaultPrice ?? retail;
     // Optional cutting charge (PD44): its own line, once per cut, billed
@@ -789,6 +867,8 @@ Map<String, dynamic> buildInvoicePayload({
     if (payments != null && payments.isNotEmpty) 'payments': payments,
     'notes': notes,
     'items': items,
+    // Only when a card is shown: an edit without one keeps the bill's card.
+    if (cart.card != null) 'discount_card_id': cart.card!.id,
     if (localId != null) 'local_id': localId,
     'offline_created': offlineCreated,
     if (invoiceDate != null)

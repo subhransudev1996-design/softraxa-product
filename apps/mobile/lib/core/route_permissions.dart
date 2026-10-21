@@ -13,25 +13,30 @@ String? permissionRedirect(String loc, AppContext c) {
     // The /reports tab itself shows a "no permission" notice instead (a tab
     // that bounces back to Home looks broken); individual reports are guarded.
     _ when loc.startsWith('/reports/') => c.canViewReports,
-    _ when under('/purchases') || under('/purchase-returns') ||
-        under('/suppliers') =>
+    _
+        when under('/purchases') ||
+            under('/purchase-returns') ||
+            under('/suppliers') =>
       c.canManagePurchases,
     // Held returned goods: returns staff reclassify, stock staff release (PD29).
-    _ when under('/sale-returns/held') => c.canManageReturns || c.canManageStock,
+    _ when under('/sale-returns/held') =>
+      c.canManageReturns || c.canManageStock,
     _ when under('/sale-returns/exchange') =>
       c.canManageReturns && c.canCreateInvoice,
     _ when under('/sale-returns') => c.canManageReturns,
     _ when under('/expenses') => c.canManageExpenses,
+    _ when under('/discount-cards') => c.isOwner || c.canEditPrices,
     _ when under('/cashbook') => c.canManageCash,
     _ when under('/services') || under('/job-cards') => c.canManageServices,
     // Opening balances move money owed: owner only (migration 0051).
     _ when under('/import/customers') || under('/import/suppliers') =>
       c.isOwner,
-    _ when under('/import') ||
-        loc == '/products/new' ||
-        loc == '/products/master-data' ||
-        loc == '/products/suggested' ||
-        (loc.startsWith('/products/') && loc.endsWith('/edit')) =>
+    _
+        when under('/import') ||
+            loc == '/products/new' ||
+            loc == '/products/master-data' ||
+            loc == '/products/suggested' ||
+            (loc.startsWith('/products/') && loc.endsWith('/edit')) =>
       c.canManageProducts,
     _ when loc.startsWith('/invoices/') && loc.endsWith('/edit') =>
       c.canEditInvoices,

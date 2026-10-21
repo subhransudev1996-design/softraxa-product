@@ -237,6 +237,17 @@ class MoreScreen extends ConsumerWidget {
                       (features?.featureOn('expense_module') ?? true) &&
                       (appContext?.canManageExpenses ?? false),
                 ),
+                const Divider(),
+                tile(
+                  Icons.card_membership_outlined,
+                  t('Discount cards'),
+                  '/discount-cards',
+                  color: AppColors.primary,
+                  enabled:
+                      (appContext?.isOwner ?? false) ||
+                      (appContext?.canEditPrices ?? false),
+                  subtitle: t('Privilege and membership cards'),
+                ),
               ],
             ),
           ),

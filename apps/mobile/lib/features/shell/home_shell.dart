@@ -475,6 +475,13 @@ class AppSidebar extends ConsumerWidget {
                       label: t('Expenses'),
                       route: '/expenses',
                     ),
+                  if ((appContext?.isOwner ?? false) ||
+                      (appContext?.canEditPrices ?? false))
+                    link(
+                      icon: Icons.card_membership_outlined,
+                      label: t('Discount cards'),
+                      route: '/discount-cards',
+                    ),
                 ]),
                 if (appContext?.isOwner == true)
                   ...section(t('Store management'), [

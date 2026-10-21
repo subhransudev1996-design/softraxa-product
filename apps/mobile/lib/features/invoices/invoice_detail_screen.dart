@@ -803,6 +803,16 @@ class InvoiceDetailScreen extends ConsumerWidget {
                               'Discount',
                               '- ${money(inv['discount_amount'] as num?)}',
                             ),
+                          // Discount card (0083): already in the item lines.
+                          if ((inv['discount_card_no'] as String? ?? '')
+                              .isNotEmpty)
+                            _row(
+                              '${inv['discount_card_type']} card ${inv['discount_card_no']}',
+                              toDouble(inv['discount_card_amount']) > 0
+                                  ? '- ${money(inv['discount_card_amount'] as num?)}'
+                                  : '${qty(inv['discount_card_pct'] as num?)}%',
+                              dim: true,
+                            ),
                           if (isGst && toDouble(inv['tax_amount']) > 0)
                             for (final (label, amount) in gstBreakupRows(items))
                               _row('Included $label', money(amount), dim: true),

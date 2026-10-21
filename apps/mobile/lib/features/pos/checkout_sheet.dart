@@ -9,6 +9,7 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
+import '../discount_cards/card_entry.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../../core/approvals.dart';
 import '../approvals/approval_dialogs.dart';
@@ -641,7 +642,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
     if (upi.isEmpty) {
       showError(
         context,
-        t('Add your UPI ID in business settings to show a scan-to-pay QR here.'),
+        t(
+          'Add your UPI ID in business settings to show a scan-to-pay QR here.',
+        ),
       );
       return;
     }
@@ -948,6 +951,9 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             money(cart.billTaxTotal),
                             dim: true,
                           ),
+                        // Privilege / membership card (0083): open to every
+                        // cashier — the card's discount needs no rights.
+                        const DiscountCardRow(),
                         // Bill discounts need price permission (enforced by the
                         // server's invoice guard, migration 0037).
                         if (appContext?.canEditPrices ?? false) ...[
@@ -981,7 +987,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                               ),
                             ),
                           ),
-                        if (cart.priceReduction > 0.05)
+                        if (cart.countedReduction > 0.05)
                           Builder(
                             builder: (context) {
                               final rights = ref
@@ -992,7 +998,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                                   pricingProblem(cart, rights) != null;
                               return _row(
                                 'Below default prices',
-                                '${money(cart.priceReduction)} (${qty(cart.priceReductionPct)}%)'
+                                '${money(cart.countedReduction)} (${qty(cart.countedReductionPct)}%)'
                                     '${rights != null && !rights.unlimited ? ' of ${qty(rights.limitPct)}% allowed' : ''}',
                                 dim: !over,
                                 color: over ? AppColors.red : null,

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'route_permissions.dart';
+import '../features/discount_cards/discount_cards_screen.dart';
 import '../features/approvals/approvals_screen.dart';
 import '../features/cashbook/cashbook_screen.dart';
 import '../features/auth/forgot_password_screen.dart';
@@ -431,6 +432,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/expenses',
             pageBuilder: (context, state) =>
                 _page(context, state, const ExpensesScreen()),
+          ),
+          GoRoute(
+            path: '/discount-cards',
+            pageBuilder: (context, state) =>
+                _page(context, state, const DiscountCardsScreen()),
           ),
           GoRoute(
             path: '/import',
