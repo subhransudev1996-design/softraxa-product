@@ -310,6 +310,13 @@ class ThermalPrinterService {
     bytes += generator.text('Amount In Words:', styles: bold);
     bytes += generator.text(bill.amountInWords);
 
+    // ---- offer (0084) ----
+    if (bill.offerLine.isNotEmpty) {
+      bytes += generator.hr();
+      bytes += generator.text(bill.offerLine, styles: bold);
+      totalRow('Offer discount', bill.offerAmount);
+    }
+
     // ---- discount card (0083) ----
     if (bill.cardLine.isNotEmpty) {
       bytes += generator.hr();

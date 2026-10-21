@@ -15,6 +15,7 @@ import '../../core/widgets.dart';
 import '../customers/customer_picker.dart';
 import '../customers/customer_providers.dart';
 import '../dashboard/dashboard_screen.dart';
+import '../offers/offer.dart';
 import '../pos/cart.dart';
 import 'advance_actions.dart';
 import 'bill_layout.dart' show BillExchange, loadBillLogo;
@@ -82,7 +83,11 @@ Future<void> startModifyInvoice(
         CartState(
           lines: invoiceItemsToCartLines(items),
           customer: customer,
-          billDiscount: toDouble(inv['discount_amount']),
+          // The offer comes back as itself (what it gave), the rest as the
+          // typed bill discount (0084).
+          billDiscount:
+              toDouble(inv['discount_amount']) - toDouble(inv['offer_amount']),
+          offer: offerOnSavedBill(inv),
         ),
       );
   ref
@@ -802,6 +807,15 @@ class InvoiceDetailScreen extends ConsumerWidget {
                             _row(
                               'Discount',
                               '- ${money(inv['discount_amount'] as num?)}',
+                            ),
+                          // Offer (0084): part of the discount above.
+                          if (toDouble(inv['offer_amount']) > 0)
+                            _row(
+                              (inv['offer_code'] as String? ?? '').isEmpty
+                                  ? 'Offer: ${inv['offer_name']}'
+                                  : 'Offer: ${inv['offer_name']} (${inv['offer_code']})',
+                              '- ${money(inv['offer_amount'] as num?)}',
+                              dim: true,
                             ),
                           // Discount card (0083): already in the item lines.
                           if ((inv['discount_card_no'] as String? ?? '')

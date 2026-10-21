@@ -248,6 +248,16 @@ class MoreScreen extends ConsumerWidget {
                       (appContext?.canEditPrices ?? false),
                   subtitle: t('Privilege and membership cards'),
                 ),
+                if (appContext?.isOwner ?? false) ...[
+                  const Divider(),
+                  tile(
+                    Icons.local_offer_outlined,
+                    t('Offers & coupons'),
+                    '/offers',
+                    color: AppColors.orange,
+                    subtitle: t('Scratch cards, coupon codes and vouchers'),
+                  ),
+                ],
               ],
             ),
           ),

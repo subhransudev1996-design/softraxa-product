@@ -185,6 +185,17 @@ class BillLayout {
   /// What the card took off the bill.
   double get cardAmount => toDouble(invoice['discount_card_amount']);
 
+  /// The offer on the bill (0084): "Scratch & Win (SC-0001)", or '' when
+  /// none. Its amount is part of the bill discount.
+  String get offerLine {
+    final name = (invoice['offer_name'] as String? ?? '').trim();
+    if (name.isEmpty || offerAmount <= 0) return '';
+    final code = (invoice['offer_code'] as String? ?? '').trim();
+    return code.isEmpty ? 'Offer: $name' : 'Offer: $name ($code)';
+  }
+
+  double get offerAmount => toDouble(invoice['offer_amount']);
+
   /// GST by rate, from each line's stored split (after any bill discount,
   /// migration 0040). Only for GST bills that charged GST.
   List<GstSummaryRow> get gstSummary =>

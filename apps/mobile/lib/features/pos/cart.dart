@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/formatters.dart';
 import '../discount_cards/discount_card.dart';
+import '../offers/offer.dart';
 
 /// Rounds [amount] to the nearest whole rupee, returning the (possibly
 /// negative) adjustment needed to get there — shared by POS bills and
@@ -262,9 +263,13 @@ class CartState {
     this.wholesaleCustomer = false,
     this.exchangePrices = const {},
     this.card,
+    this.offer,
   });
 
   final List<CartLine> lines;
+
+  /// The offer / coupon on this bill (0084), or null.
+  final AppliedOffer? offer;
 
   /// The discount card shown for this bill (0083), or null.
   final DiscountCard? card;
@@ -304,7 +309,7 @@ class CartState {
   /// The part of [priceReduction] that counts towards a staff member's
   /// discount limit: everything beyond the card's allowance.
   double get countedReduction {
-    final r = priceReduction - cardAllowance;
+    final r = priceReduction - cardAllowance - offerAmount;
     return r > 0.005 ? r : 0;
   }
 
@@ -320,9 +325,19 @@ class CartState {
   double get netTotal =>
       applyGst ? lines.fold(0.0, (s, l) => s + l.net) : itemsGross;
 
-  /// Resolved ₹ bill discount, whichever unit [billDiscount] was entered in.
-  double get billDiscountAmount =>
+  /// The bill discount typed at checkout, in ₹, whichever unit it was
+  /// entered in.
+  double get manualBillDiscountAmount =>
       billDiscountIsPercent ? itemsGross * billDiscount / 100 : billDiscount;
+
+  /// What the offer takes off: worked out on the bill after every other
+  /// discount (0084).
+  double get offerAmount =>
+      offer?.discountOn(itemsGross - manualBillDiscountAmount) ?? 0;
+
+  /// The bill's whole bill-level discount — typed plus offer. This is what
+  /// the bill records as its discount.
+  double get billDiscountAmount => manualBillDiscountAmount + offerAmount;
   double get grandBeforeRound => itemsGross - billDiscountAmount;
 
   /// GST inside the amount actually charged: the bill discount comes off the
@@ -367,6 +382,7 @@ class CartState {
     bool? wholesaleCustomer,
     Map<String, double>? exchangePrices,
     Object? card = _sentinel,
+    Object? offer = _sentinel,
   }) => CartState(
     lines: lines ?? this.lines,
     customer: customer == _sentinel
@@ -379,6 +395,7 @@ class CartState {
     wholesaleCustomer: wholesaleCustomer ?? this.wholesaleCustomer,
     exchangePrices: exchangePrices ?? this.exchangePrices,
     card: card == _sentinel ? this.card : card as DiscountCard?,
+    offer: offer == _sentinel ? this.offer : offer as AppliedOffer?,
   );
 
   static const _sentinel = Object();
@@ -448,6 +465,9 @@ class CartNotifier extends Notifier<CartState> {
 
   /// Applies a discount card to the bill, or removes it (null).
   void setCard(DiscountCard? card) => state = state.copyWith(card: card);
+
+  /// Applies an offer / coupon to the bill, or removes it (null).
+  void setOffer(AppliedOffer? offer) => state = state.copyWith(offer: offer);
 
   /// Total quantity already in the cart for this product/variant — sums
   /// across lines, since serial-tracked items get one line per unit rather
@@ -869,6 +889,11 @@ Map<String, dynamic> buildInvoicePayload({
     'items': items,
     // Only when a card is shown: an edit without one keeps the bill's card.
     if (cart.card != null) 'discount_card_id': cart.card!.id,
+    if (cart.offer != null) ...{
+      'offer_id': cart.offer!.offerId,
+      'offer_code': cart.offer!.code,
+      'offer_amount': r2(cart.offerAmount),
+    },
     if (localId != null) 'local_id': localId,
     'offline_created': offlineCreated,
     if (invoiceDate != null)

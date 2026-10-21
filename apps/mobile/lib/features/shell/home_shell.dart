@@ -482,6 +482,12 @@ class AppSidebar extends ConsumerWidget {
                       label: t('Discount cards'),
                       route: '/discount-cards',
                     ),
+                  if (appContext?.isOwner ?? false)
+                    link(
+                      icon: Icons.local_offer_outlined,
+                      label: t('Offers & coupons'),
+                      route: '/offers',
+                    ),
                 ]),
                 if (appContext?.isOwner == true)
                   ...section(t('Store management'), [

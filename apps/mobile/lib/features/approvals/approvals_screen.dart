@@ -8,6 +8,7 @@ import '../../core/formatters.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../offers/offer.dart';
 import '../pos/cart.dart';
 import '../pos/pos_providers.dart';
 import 'approval_dialogs.dart';
@@ -74,7 +75,11 @@ CartState cartFromSalePayload(Map<String, dynamic> payload) {
   ];
   return CartState(
     lines: invoiceItemsToCartLines(items),
-    billDiscount: toDouble(payload['discount_amount']),
+    // The offer comes back as itself, the rest as the typed discount (0084).
+    billDiscount:
+        toDouble(payload['discount_amount']) -
+        toDouble(payload['offer_amount']),
+    offer: offerOnSavedBill(payload),
   );
 }
 

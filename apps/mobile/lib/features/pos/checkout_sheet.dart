@@ -1,3 +1,4 @@
+import '../offers/offer_entry.dart';
 import '../../core/i18n.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -954,6 +955,8 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                         // Privilege / membership card (0083): open to every
                         // cashier — the card's discount needs no rights.
                         const DiscountCardRow(),
+                        // Scratch card, coupon code or voucher (0084).
+                        const OfferRow(),
                         // Bill discounts need price permission (enforced by the
                         // server's invoice guard, migration 0037).
                         if (appContext?.canEditPrices ?? false) ...[
@@ -979,7 +982,7 @@ class _CheckoutSheetState extends ConsumerState<_CheckoutSheet> {
                             child: Align(
                               alignment: Alignment.centerRight,
                               child: Text(
-                                '− ${money(cart.billDiscountAmount)}',
+                                '− ${money(cart.manualBillDiscountAmount)}',
                                 style: TextStyle(
                                   fontSize: 13,
                                   color: AppColors.inkSoft,

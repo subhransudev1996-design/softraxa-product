@@ -104,7 +104,9 @@ class PosCartTable extends StatelessWidget {
             child: lines.isEmpty
                 ? EmptyState(
                     icon: Icons.shopping_cart_outlined,
-                    message: t('No items yet.\nSearch above or scan a barcode to add products.'),
+                    message: t(
+                      'No items yet.\nSearch above or scan a barcode to add products.',
+                    ),
                   )
                 : ListView.separated(
                     itemCount: lines.length,
@@ -147,7 +149,9 @@ class _CartRow extends StatelessWidget {
       if (line.isPack)
         '${line.unitName} of ${qtyUnit(line.packSize, line.baseUnitName)}',
       if (line.trackSerial)
-        line.serialNo.isEmpty ? t('IMEI/serial missing') : 'S/N ${line.serialNo}',
+        line.serialNo.isEmpty
+            ? t('IMEI/serial missing')
+            : 'S/N ${line.serialNo}',
       if (line.priceSource != 'retail' && line.priceSource != 'manual')
         priceSourceLabel(line.priceSource),
     ];
@@ -467,7 +471,8 @@ class PosBillPanel extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-            child: Text(t('CUSTOMER'),
+            child: Text(
+              t('CUSTOMER'),
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -486,7 +491,8 @@ class PosBillPanel extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
               children: [
-                Text(t('BILL SUMMARY'),
+                Text(
+                  t('BILL SUMMARY'),
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -497,10 +503,16 @@ class PosBillPanel extends StatelessWidget {
                 const SizedBox(height: 8),
                 row('Items', '${cart.itemCount}  ·  Qty ${qty(cart.totalQty)}'),
                 row('Subtotal', money(cart.itemsGross)),
-                if (cart.billDiscountAmount > 0)
+                if (cart.manualBillDiscountAmount > 0)
                   row(
                     'Bill discount',
-                    '− ${money(cart.billDiscountAmount)}',
+                    '− ${money(cart.manualBillDiscountAmount)}',
+                    color: AppColors.green,
+                  ),
+                if (cart.offerAmount > 0)
+                  row(
+                    cart.offer!.name,
+                    '− ${money(cart.offerAmount)}',
                     color: AppColors.green,
                   ),
                 if (cart.billTaxTotal > 0)
@@ -525,7 +537,8 @@ class PosBillPanel extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Text(t('Total'),
+                      child: Text(
+                        t('Total'),
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,

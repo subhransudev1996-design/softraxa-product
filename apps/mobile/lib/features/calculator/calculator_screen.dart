@@ -273,7 +273,7 @@ class _CalculatorScreenState extends ConsumerState<CalculatorScreen> {
       }
     }
     if (discount > 0) {
-      final already = ref.read(cartProvider).billDiscountAmount;
+      final already = ref.read(cartProvider).manualBillDiscountAmount;
       notifier
         ..setBillDiscountMode(false)
         ..setBillDiscount(((already + discount) * 100).roundToDouble() / 100);
