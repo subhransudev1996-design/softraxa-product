@@ -803,12 +803,16 @@ class InvoiceDetailScreen extends ConsumerWidget {
                                   toDouble(inv['tax_amount']),
                             ),
                           ),
-                          if (toDouble(inv['discount_amount']) > 0)
+                          // The typed bill discount; the offer's part is
+                          // shown on its own line below (0084).
+                          if (toDouble(inv['discount_amount']) -
+                                  toDouble(inv['offer_amount']) >
+                              0.005)
                             _row(
                               'Discount',
-                              '- ${money(inv['discount_amount'] as num?)}',
+                              '- ${money(toDouble(inv['discount_amount']) - toDouble(inv['offer_amount']))}',
                             ),
-                          // Offer (0084): part of the discount above.
+                          // Offer (0084).
                           if (toDouble(inv['offer_amount']) > 0)
                             _row(
                               (inv['offer_code'] as String? ?? '').isEmpty

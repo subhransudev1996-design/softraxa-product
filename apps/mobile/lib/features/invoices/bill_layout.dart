@@ -137,7 +137,11 @@ class BillLayout {
   double get totalAmount => lines.fold(0.0, (s, l) => s + l.amount);
   double get totalLineDiscount => lines.fold(0.0, (s, l) => s + l.discount);
   double get linesTotal => lines.fold(0.0, (s, l) => s + l.total);
-  double get billDiscount => toDouble(invoice['discount_amount']);
+
+  /// The typed bill discount. An offer's part is printed on its own line
+  /// ([offerLine], 0084), so it isn't counted here as well.
+  double get billDiscount =>
+      toDouble(invoice['discount_amount']) - toDouble(invoice['offer_amount']);
   double get roundOff => toDouble(invoice['round_off']);
   double get netAmount => toDouble(invoice['total']);
 

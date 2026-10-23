@@ -314,12 +314,18 @@ Future<bool> showCardTypeEditor(
   };
   var active = existing?['is_active'] as bool? ?? true;
   var busy = false;
+  // Loaded first: the dialog doesn't rebuild when the list arrives later
+  // (it said "Add categories first" to shops that have them).
+  List<Map<String, dynamic>> categories = const [];
+  try {
+    categories = await ref.read(categoriesProvider.future);
+  } catch (_) {}
+  if (!context.mounted) return false;
 
   final saved = await showDialog<bool>(
     context: context,
     builder: (ctx) => StatefulBuilder(
       builder: (ctx, setLocal) {
-        final categories = ref.watch(categoriesProvider).value ?? const [];
         return AlertDialog(
           title: Text(
             existing == null ? t('Add card type') : t('Change card type'),
