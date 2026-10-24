@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient, type OAuthAuthorizationDetails } from "@supabase/supabase-js";
 
-type Step = "loading" | "login" | "consent" | "working" | "error" | "not-admin";
+type Step = "loading" | "login" | "consent" | "working" | "error" | "refused";
 
 export default function ConsentClient() {
   // Its own session, kept only for this page (not the CMS's login).
@@ -21,6 +21,8 @@ export default function ConsentClient() {
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [authorizationId, setAuthorizationId] = useState("");
+  // Who is connecting: the SOFTRAXA admin (Dukania Admin) or a shop (Dukania).
+  const [shopName, setShopName] = useState<string | null>(null);
 
   async function load(id: string) {
     setStep("loading");
@@ -29,11 +31,19 @@ export default function ConsentClient() {
       setStep("login");
       return;
     }
-    // Only SOFTRAXA admins may connect an AI app to the admin panel.
+    // SOFTRAXA admins connect Dukania Admin; shop users connect Dukania,
+    // if their plan includes the AI assistant and (staff) the owner allows it.
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.user.id).maybeSingle();
-    if (profile?.role !== "admin") {
-      setStep("not-admin");
-      return;
+    if (profile?.role === "admin") {
+      setShopName(null);
+    } else {
+      const { data: ai } = await supabase.rpc("ai_context");
+      if (!ai?.allowed) {
+        setMessage(ai?.reason ?? "This account can't use the Dukania AI assistant.");
+        setStep("refused");
+        return;
+      }
+      setShopName(ai.shop?.name ?? "your shop");
     }
     const { data, error } = await supabase.auth.oauth.getAuthorizationDetails(id);
     if (error || !data) {
@@ -110,7 +120,9 @@ export default function ConsentClient() {
   return (
     <main className="grid min-h-screen place-items-center px-6 py-16">
       <div className="w-full max-w-md rounded-2xl border border-black/10 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-neutral-900">
-        <p className="text-center text-xs font-semibold uppercase tracking-wider text-neutral-500">Dukania Admin</p>
+        <p className="text-center text-xs font-semibold uppercase tracking-wider text-neutral-500">
+          {shopName === null ? "Dukania Admin" : "Dukania"}
+        </p>
 
         {(step === "loading" || step === "working") && (
           <div className="py-10 text-center">
@@ -123,7 +135,7 @@ export default function ConsentClient() {
           <form onSubmit={signIn}>
             <h1 className="mt-3 text-center text-xl font-semibold">Sign in to connect</h1>
             <p className="mt-2 text-center text-sm leading-6 text-neutral-500">
-              An AI app wants to use your Dukania admin panel. Sign in with your admin account first.
+              An AI app (ChatGPT or Claude) wants to use your Dukania account. Sign in with the email and password you use in the Dukania app.
             </p>
             <label className="mt-6 block text-sm font-medium" htmlFor="email">Email</label>
             <input id="email" type="email" autoComplete="email" required value={email}
@@ -139,14 +151,24 @@ export default function ConsentClient() {
         {step === "consent" && details && (
           <div>
             <h1 className="mt-3 text-center text-xl font-semibold">
-              Allow {details.client.name || "this app"} to manage Dukania?
+              {shopName === null
+                ? `Allow ${details.client.name || "this app"} to manage Dukania?`
+                : `Allow ${details.client.name || "this app"} to use ${shopName}?`}
             </h1>
             <p className="mt-2 text-center text-sm text-neutral-500">Signed in as {details.user.email}</p>
-            <div className="mt-6 space-y-3 rounded-xl bg-neutral-50 p-4 text-sm leading-6 dark:bg-neutral-800/60">
-              <p><strong>It can read</strong> your clients, subscriptions, payments, payment claims, support tickets, leads, plans, master products, health checks and the audit log.</p>
-              <p><strong>It can act</strong> — renew subscriptions, suspend or restore shops, change features, reply to tickets, add notes — but only after showing you a preview and you saying yes in the chat. Every action is in the audit log.</p>
-              <p className="text-neutral-500">It never sees passwords or keys. You can disconnect it any time from the AI app.</p>
-            </div>
+            {shopName === null ? (
+              <div className="mt-6 space-y-3 rounded-xl bg-neutral-50 p-4 text-sm leading-6 dark:bg-neutral-800/60">
+                <p><strong>It can read</strong> your clients, subscriptions, payments, payment claims, support tickets, leads, plans, master products, health checks and the audit log.</p>
+                <p><strong>It can act</strong> — renew subscriptions, suspend or restore shops, change features, reply to tickets, add notes — but only after showing you a preview and you saying yes in the chat. Every action is in the audit log.</p>
+                <p className="text-neutral-500">It never sees passwords or keys. You can disconnect it any time from the AI app.</p>
+              </div>
+            ) : (
+              <div className="mt-6 space-y-3 rounded-xl bg-neutral-50 p-4 text-sm leading-6 dark:bg-neutral-800/60">
+                <p><strong>It can read</strong> your shop&apos;s products and stock, customers and dues, bills, purchases and reports — only what you can see in the Dukania app.</p>
+                <p><strong>It can&apos;t change anything</strong> yet. When it can, it will always show you what it&apos;s about to do and wait for your yes.</p>
+                <p className="text-neutral-500">It never sees your password. You can disconnect it any time from the AI app.</p>
+              </div>
+            )}
             <p className="mt-4 break-all text-xs text-neutral-400">Sends you back to: {details.redirect_uri}</p>
             <div className="mt-6 grid gap-3">
               <button type="button" onClick={() => decide(true)} className={primary}>Allow</button>
@@ -158,12 +180,10 @@ export default function ConsentClient() {
           </div>
         )}
 
-        {step === "not-admin" && (
+        {step === "refused" && (
           <div className="text-center">
-            <h1 className="mt-3 text-xl font-semibold">Admins only</h1>
-            <p className="mt-2 text-sm leading-6 text-neutral-500">
-              This account isn&apos;t a Dukania admin, so it can&apos;t be connected. Sign in with the admin account.
-            </p>
+            <h1 className="mt-3 text-xl font-semibold">Can&apos;t connect this account</h1>
+            <p className="mt-2 text-sm leading-6 text-neutral-500">{message}</p>
             <button type="button" onClick={signOut} className={`mt-6 ${secondary}`}>Use another account</button>
           </div>
         )}

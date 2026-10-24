@@ -22,6 +22,7 @@ const FEATURES: [string, string][] = [
   ["expense_module", "Expenses"],
   ["excel_import", "Excel import"],
   ["service_module", "Services & job cards"],
+  ["ai_assistant", "AI assistant (ChatGPT / Claude)"],
 ];
 
 const ACTION_LABELS: Record<string, string> = {
@@ -293,7 +294,7 @@ export default function ClientDetailPage() {
             <h2 className="mb-2 text-sm font-semibold text-zinc-700">Features</h2>
             <p className="mb-2 text-xs text-zinc-500">Set by the plan. Change one only as an exception — it&apos;s logged.</p>
             {FEATURES.map(([key, label]) => (
-              <Toggle key={key} label={label} checked={flags?.[key] ?? true} onChange={(v) => toggleFlag(key, v)} />
+              <Toggle key={key} label={label} checked={flags?.[key] ?? key !== "ai_assistant"} onChange={(v) => toggleFlag(key, v)} />
             ))}
           </CardBody>
         </Card>
