@@ -149,7 +149,8 @@ String _stockValueTitle(Map<String, dynamic>? s) =>
 /// Desktop KPI cards: all in one row, equal widths.
 Widget _statRow(List<Widget> cards) {
   return SizedBox(
-    height: 84,
+    // Room for a two-line label (narrow windows, longer translations).
+    height: 96,
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -1115,15 +1116,19 @@ class _StatCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      title,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 12.5,
-                        height: 1.2,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.inkSoft,
+                    // Flexible: a label taller than the tile is cut off
+                    // instead of overflowing it.
+                    Flexible(
+                      child: Text(
+                        title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 12.5,
+                          height: 1.2,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.inkSoft,
+                        ),
                       ),
                     ),
                   ],
