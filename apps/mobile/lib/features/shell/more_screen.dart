@@ -348,6 +348,14 @@ class MoreScreen extends ConsumerWidget {
                 ),
                 const Divider(),
                 tile(
+                  Icons.auto_awesome,
+                  t('ChatGPT & Claude'),
+                  '/ai-assistant',
+                  color: AppColors.primary,
+                  subtitle: t('Run your shop by chatting with AI'),
+                ),
+                const Divider(),
+                tile(
                   Icons.sync_outlined,
                   'Pending offline bills',
                   '/offline-bills',

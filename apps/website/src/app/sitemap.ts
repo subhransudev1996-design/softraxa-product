@@ -8,6 +8,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     ["/", 1],
     ["/dukania", 1],
     ["/download", 0.9],
+    ["/ai", 0.7],
     ["/contact", 0.8],
     ["/products", 0.6],
     ["/services", 0.6],

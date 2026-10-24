@@ -509,6 +509,11 @@ class AppSidebar extends ConsumerWidget {
                     route: '/calculator',
                   ),
                   link(
+                    icon: Icons.auto_awesome,
+                    label: t('ChatGPT & Claude'),
+                    route: '/ai-assistant',
+                  ),
+                  link(
                     icon: Icons.sync_outlined,
                     label: t('Pending offline bills'),
                     route: '/offline-bills',

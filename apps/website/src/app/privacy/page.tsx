@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
-    <LegalPage eyebrow="Legal" title="Privacy policy" updated="1 October 2026">
+    <LegalPage eyebrow="Legal" title="Privacy policy" updated="24 October 2026">
       <p>
         This policy explains what Softraxa (&quot;we&quot;) collects when a shop uses the Dukania app and website,
         why, and what you can ask us to do with it. Dukania is billing and stock software for shops; the shop
@@ -53,6 +53,16 @@ export default function PrivacyPage() {
         <p>
           The customers and suppliers you enter are your records. You are responsible for having their
           permission to keep their details; we keep them only to provide the app to you.
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2>AI apps you connect</h2>
+        <p>
+          If your plan includes the AI assistant and you connect Dukania to ChatGPT (OpenAI) or Claude (Anthropic)
+          — see <Link href="/ai">Use Dukania from ChatGPT or Claude</Link> — the records you ask about are sent to
+          that app to answer you, under your own account with them and their privacy policy. It can only see what
+          your Dukania login can see. Nothing is sent unless you connect it, and you can disconnect it any time.
         </p>
       </section>
 

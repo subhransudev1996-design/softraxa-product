@@ -24,6 +24,7 @@ import '../features/jobcards/job_card_detail_screen.dart';
 import '../features/jobcards/job_card_form_screen.dart';
 import '../features/jobcards/job_estimates.dart' show EstimateDraftLine;
 import '../features/calculator/calculator_screen.dart';
+import '../features/ai/ai_assistant_screen.dart';
 import '../features/jobcards/job_cards_screen.dart';
 import '../features/offline/offline_bills_screen.dart';
 import 'splash_screen.dart';
@@ -532,6 +533,11 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: '/calculator',
             pageBuilder: (context, state) =>
                 _page(context, state, const CalculatorScreen()),
+          ),
+          GoRoute(
+            path: '/ai-assistant',
+            pageBuilder: (context, state) =>
+                _page(context, state, const AiAssistantScreen()),
           ),
           GoRoute(
             path: '/job-cards/:id',

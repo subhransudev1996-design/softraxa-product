@@ -96,6 +96,12 @@ List<StaffPermission> get staffPermissions => [
     chip: 'Profit',
     byDefault: false,
   ),
+  (
+    key: 'can_use_ai',
+    label: t('Use the AI assistant (ChatGPT / Claude)'),
+    chip: 'AI',
+    byDefault: false,
+  ),
 ];
 
 /// Checkbox list shared by the add and edit dialogs.
@@ -636,11 +642,17 @@ class _AddStaffDialogState extends ConsumerState<_AddStaffDialog> {
           'p_permissions': _perms,
         },
       );
-      // The cash permission (0045) is set by its own owner-only call.
+      // The cash (0045) and AI (0086) permissions have their own owner-only calls.
       final userId = (created as Map?)?['user_id'] as String?;
       if (userId != null && _perms['can_manage_cash'] == true) {
         await client.rpc(
           'set_staff_cash_permission',
+          params: {'p_profile': userId, 'p_value': true},
+        );
+      }
+      if (userId != null && _perms['can_use_ai'] == true) {
+        await client.rpc(
+          'set_staff_ai_permission',
           params: {'p_profile': userId, 'p_value': true},
         );
       }
@@ -791,6 +803,13 @@ class _EditPermissionsDialogState
         params: {
           'p_profile': widget.staff['id'],
           'p_value': _perms['can_manage_cash'] == true,
+        },
+      );
+      await client.rpc(
+        'set_staff_ai_permission',
+        params: {
+          'p_profile': widget.staff['id'],
+          'p_value': _perms['can_use_ai'] == true,
         },
       );
 

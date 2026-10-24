@@ -127,6 +127,11 @@ class AppContext {
   bool get canEditInvoices => _perm('can_edit_invoices', false);
   bool get canRecordPayments => _perm('can_record_payments', true);
   bool get canManageCash => _perm('can_manage_cash', false); // 0045
+  bool get canUseAi => _perm('can_use_ai', false); // 0086
+
+  /// The AI assistant (ChatGPT / Claude) is in the shop's plan (0086). Off
+  /// unless the plan or SOFTRAXA switched it on, unlike other features.
+  bool get aiInPlan => (features?['ai_assistant'] as bool?) ?? false;
 
   /// Staff management is owner-only at launch (LAUNCH_SPECIFICATION roles).
   bool get canManageStaff => isOwner;
