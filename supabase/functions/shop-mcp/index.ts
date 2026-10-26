@@ -17,7 +17,9 @@
 // Phase 1 (0086): reading. Phase 2 (0087): sales, payments, expenses,
 // cancelling bills, products and customers. Phase 3/4 (0088): supplier bills
 // read by the AI app (enter_purchase), sale returns, stock corrections,
-// suppliers. Every change is two-step like
+// suppliers. 0089: discount cards, offers and coupons on sales, split
+// payments, quotations / cash memos, editing a bill; creating offers and
+// giving discount cards. Every change is two-step like
 // admin-mcp's actions: the first call returns a preview and changes
 // nothing; only a second call with confirm: true (after the user said yes)
 // saves it. A sale's preview is a dry run of the app's own create_invoice
@@ -169,12 +171,50 @@ function saleInput(a: Args) {
     bill_discount: a.bill_discount ?? null,
     paid: a.paid ?? "full",
     payment_mode: str(a.payment_mode) || "cash",
-    notes: str(a.notes),
+    notes: a.notes == null ? null : str(a.notes),
     due_date: isDate(a.due_date) ? a.due_date : null,
     sale_ref: isUuid(a.sale_ref) ? a.sale_ref : null,
     expected_total: a.expected_total ?? null,
     owner_ack: a.accept_warnings === true,
+    // 0089
+    bill_type: str(a.bill_type) || "bill",
+    card: str(a.card) || null,
+    offer_code: str(a.offer_code) || null,
+    offer_id: str(a.offer_id) || null,
+    offer_amount: a.offer_amount ?? null,
+    payments: Array.isArray(a.payments) && a.payments.length ? a.payments : null,
   };
+}
+
+const saleLinesProp = {
+  type: "array", minItems: 1, maxItems: 100,
+  items: obj({
+    product_id: { type: "string" },
+    variant_id: { type: "string" },
+    quantity: { type: "number", exclusiveMinimum: 0 },
+    price: { type: "number", minimum: 0, description: "Per unit incl. GST; leave out for the product's price." },
+    discount: { type: "number", minimum: 0, description: "Rupees off this line." },
+  }, ["product_id", "quantity"]),
+};
+
+/** One offer as get_offers returns it (the whole row, for save_offer). */
+async function offerRow(ctx: Ctx, id: unknown) {
+  if (!isUuid(id)) throw new Error("Give the offer_id from list_offers");
+  const all = must(await ctx.db.rpc("get_offers", { p_offer: null })) as { offers: Array<Record<string, unknown>> };
+  const o = all.offers.find((x) => x.id === id);
+  if (!o) throw new Error("No such offer in your shop");
+  return o;
+}
+
+/** A discount card type by name. */
+async function cardType(ctx: Ctx, name: string) {
+  const all = must(await ctx.db.rpc("get_discount_cards", { p_search: "", p_limit: 1 })) as {
+    types: Array<{ id: string; name: string; discount_pct: number; is_active: boolean }>;
+  };
+  const t = all.types.find((x) => x.name.toLowerCase() === name.toLowerCase());
+  if (!t) throw new Error(`No card type "${name}" (the shop has: ${all.types.map((x) => x.name).join(", ") || "none — add one in the app"})`);
+  if (!t.is_active) throw new Error(`${t.name} cards are switched off`);
+  return t;
 }
 
 const WARNING_TEXT: Record<string, string> = {
@@ -546,26 +586,29 @@ const TOOLS: Tool[] = [
     description:
       "Bills products to a customer or a walk-in. Get product_id (and variant_id for products with variants) from find_products and customer_id from find_customers. " +
       "price (per unit, incl. GST) is only for selling at a different price than the product's; discount is rupees off a line; bill_discount is rupees off the whole bill. " +
-      "paid: 'full' (default), 'none' (on credit, needs a customer) or an amount. The first call returns the exact bill, totals and any warnings, and a sale_ref; " +
+      "paid: 'full' (default), 'none' (on credit, needs a customer) or an amount; or payments for a split (₹200 cash + ₹300 UPI). " +
+      "card: a discount card's number or last digits. offer_code: a coupon / voucher / scratch-card code; offer_id: a counter offer without a code " +
+      "(list_offers); offer_amount: the prize a scratch card shows. bill_type: 'bill' (default), 'cash_memo' or 'estimate' (a quotation: no stock, no payment). " +
+      "The first call returns the exact bill, totals and any warnings, and a sale_ref; " +
       "nothing is saved until you call again with the same arguments plus sale_ref, expected_total and confirm: true.",
     needs: "can_create_invoice",
     write: true,
     inputSchema: obj({
       customer_id: { type: "string" },
       customer_name: { type: "string", description: "Name for a walk-in customer without an account (optional)." },
-      lines: {
-        type: "array", minItems: 1, maxItems: 100,
-        items: obj({
-          product_id: { type: "string" },
-          variant_id: { type: "string" },
-          quantity: { type: "number", exclusiveMinimum: 0 },
-          price: { type: "number", minimum: 0, description: "Per unit incl. GST; leave out for the product's price." },
-          discount: { type: "number", minimum: 0, description: "Rupees off this line." },
-        }, ["product_id", "quantity"]),
-      },
+      lines: saleLinesProp,
       bill_discount: { type: "number", minimum: 0 },
+      card: { type: "string", description: "Discount card number or its last digits." },
+      offer_code: { type: "string", description: "Coupon / voucher / scratch-card code." },
+      offer_id: { type: "string", description: "A counter offer without a code (list_offers)." },
+      offer_amount: { type: "number", description: "For a scratch card: the prize it shows." },
+      bill_type: { type: "string", enum: ["bill", "cash_memo", "estimate"], default: "bill" },
       paid: { type: ["string", "number"], description: "'full' (default), 'none' or an amount." },
       payment_mode: modeProp,
+      payments: {
+        type: "array", minItems: 2, description: "A split payment instead of paid / payment_mode.",
+        items: obj({ mode: { type: "string", enum: ["cash", "upi", "card", "other"] }, amount: { type: "number", exclusiveMinimum: 0 } }, ["mode", "amount"]),
+      },
       due_date: { type: "string", description: "YYYY-MM-DD, for a sale on credit." },
       notes: { type: "string" },
       sale_ref: { type: "string", description: "From the preview; required with confirm." },
@@ -1063,6 +1106,179 @@ const TOOLS: Tool[] = [
       return { added: must(r) };
     },
   },
+  {
+    name: "edit_bill",
+    title: "Change a sales bill",
+    description:
+      "Changes an existing bill's items, quantities, prices or discounts. Send the bill's COMPLETE new list of lines (get_bill shows the current ones). " +
+      "Its customer, bill type and the payments already taken stay; its discount card and offer stay unless you give card / offer_code / offer_id " +
+      "('none' removes them). The first call previews the new bill; save with the same arguments plus expected_total and confirm: true.",
+    needs: "can_edit_invoices",
+    write: true,
+    inputSchema: obj({
+      bill_id: { type: "string" },
+      lines: saleLinesProp,
+      bill_discount: { type: "number", minimum: 0 },
+      card: { type: "string", description: "Discount card number or its last digits; 'none' removes the bill's card." },
+      offer_code: { type: "string", description: "Coupon / voucher code; 'none' removes the bill's offer." },
+      offer_id: { type: "string", description: "A counter offer without a code (list_offers)." },
+      offer_amount: { type: "number", description: "For a scratch card: the prize it shows." },
+      notes: { type: "string" },
+      expected_total: { type: "number", description: "The total shown in the preview; required with confirm." },
+      accept_warnings: { type: "boolean", description: "Owner only: true if the user accepted the warnings in the preview." },
+      ...confirmProp,
+    }, ["bill_id", "lines"]),
+    preview: async (ctx, a) => {
+      if (!isUuid(a.bill_id)) throw new Error("Give the bill_id from list_bills or get_bill");
+      const r = must(await ctx.db.rpc("ai_preview_sale", { p: { ...saleInput(a), edit_bill_id: a.bill_id, expected_total: null } })) as {
+        error?: string; needs?: string; summary?: { total?: number }; warnings?: Array<Record<string, unknown>>;
+      };
+      if (r.error) throw new Error(r.error);
+      const warnings = (r.warnings ?? []).map((w) => WARNING_TEXT[String(w.kind)] ?? String(w.kind));
+      const details = JSON.stringify({ ...r.summary, warnings: r.warnings?.length ? r.warnings : undefined }, null, 1);
+      if (r.needs === "owner_approval") {
+        throw new Final(`This change needs the shop owner's approval (${warnings.join("; ")}), so it can't be made from here.\n${details}`);
+      }
+      return `${details}\n\n` +
+        (warnings.length ? `WARNING — ${warnings.join("; ")}. Only if the user accepts it, add accept_warnings: true.\n` : "") +
+        `To save: call edit_bill again with the same arguments plus expected_total: ${r.summary?.total} and confirm: true.`;
+    },
+    run: async (ctx, a) => {
+      if (a.expected_total == null) throw new Error("Preview the change first, then confirm it with the expected_total from the preview");
+      const r = must(await ctx.db.rpc("ai_create_sale", { p: { ...saleInput(a), edit_bill_id: a.bill_id } })) as Record<string, unknown>;
+      return { ...r, note: "Saved. The changed bill is in the Dukania app." };
+    },
+  },
+  {
+    name: "list_offers",
+    title: "Offers, coupons and scratch cards",
+    description: "The shop's offers: % or ₹ off, minimum bill, code (shared coupon code, own voucher codes, or none for a counter offer), dates, on/off, and how often each was used.",
+    inputSchema: obj({ offer_id: { type: "string", description: "Also list this offer's own codes and the bills it was used on." } }),
+    run: async (ctx, a) => must(await ctx.db.rpc("get_offers", { p_offer: isUuid(a.offer_id) ? a.offer_id : null })),
+  },
+  {
+    name: "find_discount_card",
+    title: "Discount cards",
+    description: "Finds a discount card by its number or last digits (is it valid, whose, what %), or lists the card types and cards (search by holder or number).",
+    inputSchema: obj({
+      card: { type: "string", description: "The number or its last digits, to check one card." },
+      search: { type: "string", description: "To list cards: part of the number or the holder's name; empty for all." },
+    }),
+    run: async (ctx, a) =>
+      str(a.card)
+        ? must(await ctx.db.rpc("find_discount_card", { p_query: str(a.card) }))
+        : must(await ctx.db.rpc("get_discount_cards", { p_search: str(a.search), p_limit: 100 })),
+  },
+  {
+    name: "create_offer",
+    title: "Create an offer or coupon",
+    description:
+      "Owner only. kind 'percent' (percent, optional max_discount) or 'amount' (amounts: one ₹ value, or several scratch-card prizes). " +
+      "code: 'none' (applied at the counter), 'shared' (one code like DIWALI10 for everyone — give shared_code) or 'unique' (own voucher codes — give code_count). " +
+      "Optional: min_bill, valid_from / valid_until, needs_customer, uses_per_customer (shared code).",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({
+      name: { type: "string" },
+      kind: { type: "string", enum: ["percent", "amount"] },
+      percent: { type: "number", exclusiveMinimum: 0, maximum: 100 },
+      max_discount: { type: "number", exclusiveMinimum: 0 },
+      amounts: { type: "array", items: { type: "number", exclusiveMinimum: 0 }, minItems: 1 },
+      min_bill: { type: "number", minimum: 0 },
+      code: { type: "string", enum: ["none", "shared", "unique"], default: "none" },
+      shared_code: { type: "string" },
+      code_count: { type: "integer", minimum: 1, maximum: 2000 },
+      code_prefix: { type: "string", maxLength: 8 },
+      valid_from: { type: "string", description: "YYYY-MM-DD" },
+      valid_until: { type: "string", description: "YYYY-MM-DD" },
+      needs_customer: { type: "boolean" },
+      uses_per_customer: { type: "integer", minimum: 1 },
+      ...confirmProp,
+    }, ["name", "kind"]),
+    preview: async (_ctx, a) => {
+      const what = a.kind === "percent"
+        ? `${a.percent}% off${a.max_discount ? `, at most ${rupees(a.max_discount)}` : ""}`
+        : `${(Array.isArray(a.amounts) ? a.amounts : []).map(rupees).join(" / ")} off`;
+      const code = a.code === "shared" ? `code ${str(a.shared_code)} for everyone`
+        : a.code === "unique" ? `${a.code_count ?? 0} own voucher codes${str(a.code_prefix) ? ` starting ${str(a.code_prefix)}` : ""}`
+        : "no code (applied at the counter)";
+      return `Create offer "${str(a.name)}": ${what}; ${code}` +
+        (a.min_bill ? `; bills of ${rupees(a.min_bill)} or more` : "") +
+        (isDate(a.valid_from) || isDate(a.valid_until) ? `; ${a.valid_from ?? "now"} to ${a.valid_until ?? "no end"}` : "") +
+        (a.needs_customer ? "; needs the customer's name and phone" : "") +
+        (a.uses_per_customer ? `; ${a.uses_per_customer} use(s) per customer` : "") + ".";
+    },
+    run: async (ctx, a) => {
+      const id = must(await ctx.db.rpc("save_offer", {
+        p_id: null,
+        p: {
+          name: str(a.name), kind: a.kind, percent: a.percent ?? 0, max_discount: a.max_discount ?? null,
+          amounts: Array.isArray(a.amounts) ? a.amounts : [], min_bill: a.min_bill ?? 0,
+          code_mode: str(a.code) || "none", shared_code: str(a.shared_code),
+          uses_per_customer: a.uses_per_customer ?? null, needs_customer: a.needs_customer === true,
+          valid_from: isDate(a.valid_from) ? a.valid_from : null, valid_until: isDate(a.valid_until) ? a.valid_until : null,
+        },
+      })) as string;
+      let codes = 0;
+      if (a.code === "unique" && num(a.code_count) > 0) {
+        codes = must(await ctx.db.rpc("add_offer_codes", {
+          p_offer: id, p_count: num(a.code_count), p_prefix: str(a.code_prefix), p_codes: [], p_amount: null,
+        })) as number;
+      }
+      return { offer_id: id, codes_made: codes, note: codes ? "See the codes with list_offers (offer_id) or print them from the app." : "Saved." };
+    },
+  },
+  {
+    name: "set_offer_active",
+    title: "Switch an offer on or off",
+    description: "Owner only. Stops an offer (or starts it again); its past bills stay as they are.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({ offer_id: { type: "string" }, active: { type: "boolean" }, ...confirmProp }, ["offer_id", "active"]),
+    preview: async (ctx, a) => {
+      const o = await offerRow(ctx, a.offer_id);
+      return `Switch the offer "${o.name}" ${a.active ? "ON" : "OFF"} (it is ${o.is_active ? "on" : "off"} now).`;
+    },
+    run: async (ctx, a) => {
+      const o = await offerRow(ctx, a.offer_id);
+      must(await ctx.db.rpc("save_offer", { p_id: o.id, p: { ...o, is_active: a.active === true } }));
+      return { offer: o.name, active: a.active === true };
+    },
+  },
+  {
+    name: "give_discount_card",
+    title: "Give a customer a discount card",
+    description: "Adds a discount card: its printed number, the card type (e.g. Gold — see find_discount_card for the types), and the customer (customer_id) or holder's name; optional valid_until.",
+    needs: "can_edit_prices",
+    write: true,
+    inputSchema: obj({
+      card_no: { type: "string" },
+      card_type: { type: "string", description: "The type's name, e.g. Gold." },
+      customer_id: { type: "string" },
+      holder_name: { type: "string" },
+      valid_until: { type: "string", description: "YYYY-MM-DD" },
+      ...confirmProp,
+    }, ["card_no", "card_type"]),
+    preview: async (ctx, a) => {
+      const t = await cardType(ctx, str(a.card_type));
+      const who = isUuid(a.customer_id)
+        ? String((await rowOf(ctx, "customers", a.customer_id, "name", "find_customers")).name)
+        : str(a.holder_name) || "no name";
+      return `Add ${t.name} card (${t.discount_pct}% off) number ${str(a.card_no)} for ${who}` +
+        (isDate(a.valid_until) ? `, valid until ${a.valid_until}` : "") + ".";
+    },
+    run: async (ctx, a) => {
+      const t = await cardType(ctx, str(a.card_type));
+      const id = must(await ctx.db.rpc("save_discount_card", {
+        p_id: null,
+        p: {
+          card_no: str(a.card_no), card_type_id: t.id, customer_id: isUuid(a.customer_id) ? a.customer_id : null,
+          holder_name: str(a.holder_name), valid_until: isDate(a.valid_until) ? a.valid_until : null,
+        },
+      }));
+      return { card_id: id, card_no: str(a.card_no), type: t.name };
+    },
+  },
 ];
 
 /** A bill by bill_id or exact bill_no. */
@@ -1083,7 +1299,8 @@ const INSTRUCTIONS =
   "Amounts are Indian rupees (₹), dates are India time (YYYY-MM-DD). Call shop_overview first to learn the shop, " +
   "what this person may do, and today's date. Find ids with find_products / find_customers / list_bills before " +
   "using the detail tools. You can also make sales, take customer payments, pay suppliers, add expenses, cancel bills, " +
-  "add or change products, customers and suppliers, correct stock, take returns, and enter supplier bills: when the user " +
+  "add or change products, customers and suppliers, correct stock, take returns, edit bills, use discount cards and coupons, " +
+  "create offers, and enter supplier bills: when the user " +
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
@@ -1123,6 +1340,8 @@ async function callTool(ctx: Ctx, name: string, args: Args) {
             ? " (and the sale_ref and expected_total above)."
             : ["enter_purchase", "return_items"].includes(name)
             ? " (and the ref above)."
+            : name === "edit_bill"
+            ? " (and the expected_total above)."
             : " and the same arguments."),
       );
     }
@@ -1147,7 +1366,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania", title: "Dukania", version: "3.0.0" },
+        serverInfo: { name: "dukania", title: "Dukania", version: "4.0.0" },
         instructions: INSTRUCTIONS,
       });
     }

@@ -64,7 +64,8 @@ export default function AiHelpPage() {
         <p>
           It sees only what you can see in the Dukania app: products and stock, customers and dues, bills,
           purchases and reports. It can also make bills, take customer payments, pay suppliers, add expenses,
-          cancel bills, take returns, correct stock, add or change products, customers and suppliers, and enter a
+          cancel or change bills, make quotations and cash memos, split a payment (cash + UPI), use discount cards
+          and coupons, create offers, take returns, correct stock, add or change products, customers and suppliers, and enter a
           supplier&apos;s bill from a photo or PDF (new items are added and remembered for next time) — but it always
           shows you a preview first and
           saves only after you say yes, and it follows the same rules as the app (staff permissions, discount
