@@ -15,7 +15,9 @@
 // reason (e.g. "not included in your plan").
 //
 // Phase 1 (0086): reading. Phase 2 (0087): sales, payments, expenses,
-// cancelling bills, products and customers. Every change is two-step like
+// cancelling bills, products and customers. Phase 3/4 (0088): supplier bills
+// read by the AI app (enter_purchase), sale returns, stock corrections,
+// suppliers. Every change is two-step like
 // admin-mcp's actions: the first call returns a preview and changes
 // nothing; only a second call with confirm: true (after the user said yes)
 // saves it. A sale's preview is a dry run of the app's own create_invoice
@@ -209,6 +211,84 @@ const PRODUCT_FIELDS: Record<string, string> = {
 };
 const productColumn = (k: string) => (k === "hsn" ? "hsn_code" : k);
 
+// The app's key for a supplier's item name (bill_reader/bill_match.dart
+// billItemKey), so the AI and the app's bill reader share what the shop
+// taught (supplier_bill_items, 0078).
+const FILLER = new Set(["of", "the", "and", "with", "new", "pkt", "packet", "pouch", "tin", "jar", "bottle", "btl", "box",
+  "pack", "pc", "pcs", "nos", "no", "each", "rs", "mrp"]);
+const fmtNum = (v: number) => v.toFixed(3).replace(/\.?0+$/, "");
+function billItemKey(name: string): string {
+  let s = name.toLowerCase().replaceAll("&", " and ");
+  s = s.replace(/[^a-z0-9.]+/g, " ");
+  s = s.replace(
+    /(\d+(?:\.\d+)?)\s*(kgs?|kilos?|kilograms?|gms?|grams?|grms?|g|gr|mls?|millilitres?|milliliters?|ltrs?|litres?|liters?|lt|l)(?![a-z])/g,
+    (_m, n: string, u: string) => {
+      let v = parseFloat(n);
+      let unit = u.startsWith("k") ? "kg" : u.startsWith("g") ? "g" : u.startsWith("m") ? "ml" : "l";
+      if (unit === "g" && v >= 1000) { v /= 1000; unit = "kg"; } else if (unit === "ml" && v >= 1000) { v /= 1000; unit = "l"; }
+      return ` ${fmtNum(v)}${unit} `;
+    },
+  );
+  const words = s.split(" ")
+    .filter((w) => w !== "" && w !== "." && !FILLER.has(w))
+    .map((w) => w.replace(/^\.+|\.+$/g, ""))
+    .filter((w) => w !== "");
+  let t = words.join(" ");
+  if (!t) t = name.trim().toLowerCase();
+  return t.length > 200 ? t.substring(0, 200) : t;
+}
+
+/** The purchase input for ai_purchase (migration 0088). */
+function purchaseInput(a: Args) {
+  const lines = (Array.isArray(a.lines) ? a.lines : []) as Array<Record<string, unknown>>;
+  return {
+    supplier_id: isUuid(a.supplier_id) ? a.supplier_id : null,
+    new_supplier: a.new_supplier && typeof a.new_supplier === "object" ? a.new_supplier : null,
+    bill_no: str(a.bill_no),
+    bill_date: isDate(a.bill_date) ? a.bill_date : null,
+    lines: lines.map((l) => ({ ...l, bill_key: str(l.bill_name) ? billItemKey(str(l.bill_name)) : null })),
+    bill_discount: a.bill_discount ?? null,
+    extra_charges: a.extra_charges ?? null,
+    bill_total: a.bill_total ?? null,
+    paid: a.paid ?? "full",
+    payment_mode: str(a.payment_mode) || "cash",
+    notes: str(a.notes),
+    ref: isUuid(a.ref) ? a.ref : null,
+  };
+}
+
+/** The return input for ai_return (migration 0088). */
+function returnInput(a: Args) {
+  return {
+    bill_id: a.bill_id,
+    lines: Array.isArray(a.lines) ? a.lines : [],
+    refund: a.refund ?? "full",
+    refund_mode: str(a.refund_mode) || "cash",
+    late_reason: str(a.late_reason),
+    notes: str(a.notes),
+    ref: isUuid(a.ref) ? a.ref : null,
+  };
+}
+
+/** A stock correction: the product, its stock now and the signed change. */
+async function stockChange(ctx: Ctx, a: Args) {
+  const p = await rowOf(ctx, "products", a.product_id, "name, current_stock, has_variants, track_serial", "find_products");
+  if (p.track_serial) throw new Error(`${p.name} is tracked by IMEI / serial — correct its stock in the Dukania app`);
+  let name = String(p.name);
+  let now = Number(p.current_stock);
+  let variantId: string | null = null;
+  if (p.has_variants) {
+    const v = await rowOf(ctx, "product_variants", a.variant_id, "name, current_stock, product_id", "find_products (the variant's id)");
+    if (v.product_id !== a.product_id) throw new Error("That variant belongs to another product");
+    name = `${name} (${v.name})`;
+    now = Number(v.current_stock);
+    variantId = String(a.variant_id);
+  }
+  const delta = a.set_to != null ? num(a.set_to) - now : num(a.change);
+  if (!Number.isFinite(delta) || delta === 0) throw new Final(`${name}: nothing to change (stock is ${now}).`);
+  return { name, now, delta, variantId, reason: str(a.reason) === "damage" ? "damage" : "adjustment" };
+}
+
 const BILL_FIELDS =
   "id, invoice_no, invoice_type, invoice_date, customer_id, customer_name, customer_phone, subtotal, discount_amount, tax_amount, round_off, total, paid_amount, due_amount, due_date, payment_status, payment_mode, is_cancelled, notes";
 
@@ -339,7 +419,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_bill",
     title: "One bill with items and payments",
-    description: "A sales bill by id or bill number: customer, every item (qty, price, discount, GST) and the payments taken.",
+    description: "A sales bill by id or bill number: customer, every item (qty, price, discount, GST; each item's id is its bill_line_id for return_items) and the payments taken.",
     inputSchema: obj({
       bill_id: { type: "string" },
       bill_no: { type: "string", description: "The exact bill number, e.g. INV/26-27/0061." },
@@ -353,7 +433,7 @@ const TOOLS: Tool[] = [
       if (!bill) throw new Error("No such bill in your shop");
       const [items, pays] = await Promise.all([
         ctx.db.from("invoice_items")
-          .select("product_id, variant_id, product_name, variant_name, hsn_code, serial_no, quantity, unit_name, unit_price, mrp, cost_price, discount_amount, gst_rate, tax_amount, line_total")
+          .select("id, product_id, variant_id, product_name, variant_name, hsn_code, serial_no, quantity, unit_name, unit_price, mrp, cost_price, discount_amount, gst_rate, tax_amount, line_total")
           .eq("invoice_id", bill.id),
         ctx.db.from("invoice_payments").select("amount, payment_mode, payment_date, note, is_advance, reversed")
           .eq("invoice_id", bill.id).order("payment_date"),
@@ -799,6 +879,190 @@ const TOOLS: Tool[] = [
       return { added: must(r) };
     },
   },
+  {
+    name: "enter_purchase",
+    title: "Enter a supplier bill (purchase)",
+    description:
+      "Enters a supplier's bill as a purchase: stock goes up, the cost price is updated and what is owed to the supplier is recorded. " +
+      "Read the bill (photo or PDF) yourself and send every line as printed: bill_name, quantity, rate (per bill unit, before GST unless rate_includes_gst) and GST %. " +
+      "Lines are matched to the shop's products by product_id (if you looked it up with find_products), by what the shop taught for that item name, or by barcode; " +
+      "for an item the shop doesn't stock yet, describe new_product (name and selling price incl. GST). pack_size = how many of the shop's units are in one bill unit (a box of 12). " +
+      "Give supplier_id (find_suppliers) or new_supplier from the bill, and bill_total as printed so the preview can check it adds up. " +
+      "The first call previews (nothing saved) and returns a ref; save by calling again with the same arguments plus ref and confirm: true.",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({
+      supplier_id: { type: "string" },
+      new_supplier: obj({ name: { type: "string" }, phone: { type: "string" }, gstin: { type: "string" } }, ["name"]),
+      bill_no: { type: "string" },
+      bill_date: { type: "string", description: "YYYY-MM-DD as printed; default today." },
+      lines: {
+        type: "array", minItems: 1, maxItems: 300,
+        items: obj({
+          bill_name: { type: "string", description: "The item's name exactly as printed on the bill." },
+          product_id: { type: "string" },
+          variant_id: { type: "string" },
+          barcode: { type: "string" },
+          new_product: obj({
+            name: { type: "string", description: "The shop's name for it, e.g. 'Parle-G 100 g'." },
+            selling_price: { type: "number", minimum: 0, description: "Per shop unit, incl. GST — ask the user if unsure." },
+            mrp: { type: "number", minimum: 0 },
+            gst_rate: { type: "number" },
+            hsn: { type: "string" },
+            unit: { type: "string" },
+            barcode: { type: "string" },
+          }, ["name", "selling_price"]),
+          quantity: { type: "number", exclusiveMinimum: 0, description: "In bill units (boxes, if the bill counts boxes)." },
+          pack_size: { type: "number", exclusiveMinimum: 0, description: "Shop units in one bill unit; leave out if the same." },
+          rate: { type: "number", minimum: 0, description: "Price of one bill unit." },
+          rate_includes_gst: { type: "boolean", description: "true if the printed rate already includes GST." },
+          gst_rate: { type: "number", minimum: 0, maximum: 40 },
+          discount: { type: "number", minimum: 0, description: "Rupees off this line." },
+        }, ["quantity", "rate"]),
+      },
+      bill_discount: { type: "number", minimum: 0 },
+      extra_charges: { type: "number", minimum: 0, description: "Freight, loading etc. on the bill." },
+      bill_total: { type: "number", description: "The bill's grand total as printed." },
+      paid: { type: ["string", "number"], description: "'full' (default), 'none' (on credit) or an amount paid now." },
+      payment_mode: modeProp,
+      notes: { type: "string" },
+      ref: { type: "string", description: "From the preview; required with confirm." },
+      ...confirmProp,
+    }, ["lines"]),
+    preview: async (ctx, a) => {
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      const r = must(await ctx.db.rpc("ai_purchase", { p: { ...purchaseInput(a), ref }, p_commit: false })) as {
+        already_saved?: boolean; purchase_no?: string; ok?: boolean;
+        summary?: { total?: number; not_matched?: unknown[]; matches_printed_total?: boolean; printed_total?: number };
+      };
+      if (r.already_saved) throw new Final(`This bill is already entered as purchase ${r.purchase_no}. Nothing more to do.`);
+      const s = r.summary ?? {};
+      const notes: string[] = [];
+      if (s.not_matched?.length) {
+        notes.push(
+          "NOT READY — these lines aren't matched to a product: " + JSON.stringify(s.not_matched) +
+            ". For each, look it up with find_products (then give product_id) or describe new_product, then preview again.",
+        );
+      }
+      if (s.matches_printed_total === false) {
+        notes.push(
+          `WARNING — this comes to ${rupees(s.total)} but the bill says ${rupees(s.printed_total)}. Check the lines, discount and charges with the user before saving.`,
+        );
+      }
+      const body = `${JSON.stringify(s, null, 1)}\n\n${notes.join("\n")}${notes.length ? "\n" : ""}`;
+      if (s.not_matched?.length) throw new Final(`PREVIEW — nothing saved.\n${body}`);
+      return body + `To save: call enter_purchase again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => {
+      if (!isUuid(a.ref)) throw new Error("Preview the purchase first, then confirm it with the ref from the preview");
+      const r = must(await ctx.db.rpc("ai_purchase", { p: purchaseInput(a), p_commit: true })) as Record<string, unknown>;
+      return { ...r, note: r.already_saved ? "This bill was already entered." : "Saved. The purchase is in the Dukania app." };
+    },
+  },
+  {
+    name: "return_items",
+    title: "Take back items from a sales bill (sale return)",
+    description:
+      "Customer returns items from a bill. Get the bill with get_bill and use each item's id as bill_line_id. condition: sellable (back to stock, default), " +
+      "damaged, inspection or scrap (kept out of stock). refund: 'full' (default; money back now), 'none' (comes off what they owe or becomes their advance) or an amount. " +
+      "The value is worked out from the bill. The first call previews; save with the same arguments plus ref and confirm: true.",
+    needs: "can_manage_returns",
+    write: true,
+    inputSchema: obj({
+      bill_id: { type: "string" },
+      lines: {
+        type: "array", minItems: 1,
+        items: obj({
+          bill_line_id: { type: "string" },
+          quantity: { type: "number", exclusiveMinimum: 0 },
+          condition: { type: "string", enum: ["sellable", "damaged", "inspection", "scrap"], default: "sellable" },
+        }, ["bill_line_id", "quantity"]),
+      },
+      refund: { type: ["string", "number"], description: "'full' (default), 'none' or an amount." },
+      refund_mode: modeProp,
+      late_reason: { type: "string", description: "Owner only: why a return after the shop's return window is accepted." },
+      notes: { type: "string" },
+      ref: { type: "string", description: "From the preview; required with confirm." },
+      ...confirmProp,
+    }, ["bill_id", "lines"]),
+    preview: async (ctx, a) => {
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      const r = must(await ctx.db.rpc("ai_return", { p: { ...returnInput(a), ref }, p_commit: false })) as {
+        already_saved?: boolean; return_no?: string; summary?: unknown;
+      };
+      if (r.already_saved) throw new Final(`This return is already saved as ${r.return_no}. Nothing more to do.`);
+      return `${JSON.stringify(r.summary, null, 1)}\n\nTo save: call return_items again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => {
+      if (!isUuid(a.ref)) throw new Error("Preview the return first, then confirm it with the ref from the preview");
+      const r = must(await ctx.db.rpc("ai_return", { p: returnInput(a), p_commit: true })) as Record<string, unknown>;
+      return { ...r, note: r.already_saved ? "This return was already saved." : "Saved. The return is in the Dukania app." };
+    },
+  },
+  {
+    name: "adjust_stock",
+    title: "Correct a product's stock",
+    description:
+      "Corrects stock after a count, or removes damaged/expired goods. Give change (+ add, − remove) or set_to (the counted quantity). " +
+      "reason 'damage' for broken or expired goods, otherwise 'adjustment'. For goods bought from a supplier use enter_purchase instead.",
+    needs: "can_manage_stock",
+    write: true,
+    inputSchema: obj({
+      product_id: { type: "string" },
+      variant_id: { type: "string" },
+      change: { type: "number", description: "Signed: +5 adds, -2 removes." },
+      set_to: { type: "number", minimum: 0, description: "The counted stock; the change is worked out." },
+      reason: { type: "string", enum: ["adjustment", "damage"], default: "adjustment" },
+      note: { type: "string" },
+      ...confirmProp,
+    }, ["product_id"]),
+    preview: async (ctx, a) => {
+      const s = await stockChange(ctx, a);
+      return `${s.name}: stock ${s.now} → ${s.now + s.delta} (${s.delta > 0 ? "+" : ""}${s.delta}, ${s.reason})` +
+        `${str(a.note) ? `, note "${str(a.note)}"` : ""}.`;
+    },
+    run: async (ctx, a) => {
+      const s = await stockChange(ctx, a);
+      must(await ctx.db.rpc("adjust_stock", {
+        p_product_id: a.product_id, p_variant_id: s.variantId, p_quantity: s.delta, p_type: s.reason, p_note: str(a.note),
+      }));
+      return { product: s.name, stock_before: s.now, stock_now: s.now + s.delta };
+    },
+  },
+  {
+    name: "add_supplier",
+    title: "Add a supplier",
+    description: "Adds a supplier (name; phone, GSTIN and address optional). Check find_suppliers first. enter_purchase can also add one from a bill.",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({
+      name: { type: "string" },
+      phone: { type: "string" },
+      gstin: { type: "string" },
+      address: { type: "string" },
+      ...confirmProp,
+    }, ["name"]),
+    preview: async (ctx, a) => {
+      if (!str(a.name)) throw new Error("Give the supplier a name");
+      const r = await ctx.db.from("suppliers").select("name, gst_number").eq("is_active", true)
+        .or(`name.ilike.${str(a.name).replace(/[%,()]/g, " ")}${str(a.gstin) ? `,gst_number.eq.${str(a.gstin).toUpperCase().replace(/[^0-9A-Z]/g, "")}` : ""}`)
+        .limit(3);
+      const same = ((r.data ?? []) as Array<{ name: string }>).map((x) => x.name);
+      return `Add supplier "${str(a.name)}"` + (str(a.phone) ? `, phone ${str(a.phone)}` : "") +
+        (str(a.gstin) ? `, GSTIN ${str(a.gstin).toUpperCase()}` : "") + (str(a.address) ? `, ${str(a.address)}` : "") + "." +
+        (same.length ? `\nCAREFUL — already in the shop: ${same.join(", ")}.` : "");
+    },
+    run: async (ctx, a) => {
+      const r = await ctx.db.from("suppliers").insert({
+        business_id: await businessId(ctx),
+        name: str(a.name),
+        phone: str(a.phone).replace(/[^0-9+]/g, ""),
+        gst_number: str(a.gstin).toUpperCase(),
+        address: str(a.address),
+      }).select("id, name").single();
+      return { added: must(r) };
+    },
+  },
 ];
 
 /** A bill by bill_id or exact bill_no. */
@@ -819,7 +1083,8 @@ const INSTRUCTIONS =
   "Amounts are Indian rupees (₹), dates are India time (YYYY-MM-DD). Call shop_overview first to learn the shop, " +
   "what this person may do, and today's date. Find ids with find_products / find_customers / list_bills before " +
   "using the detail tools. You can also make sales, take customer payments, pay suppliers, add expenses, cancel bills, " +
-  "and add or change products and customers. Every change is two-step: the first call only previews it; show the user " +
+  "add or change products, customers and suppliers, correct stock, take returns, and enter supplier bills: when the user " +
+  "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
   "If a tool says something isn't allowed, tell the user exactly that — don't try to get around it.";
@@ -854,7 +1119,11 @@ async function callTool(ctx: Ctx, name: string, args: Args) {
       const what = tool.preview ? await tool.preview(ctx, args) : `Run ${name}.`;
       return text(
         `PREVIEW — nothing has been saved yet.\n${what}\n\nShow this to the user. Only if they say yes, call ${name} again with confirm: true` +
-          (name === "make_sale" ? " (and the sale_ref and expected_total above)." : " and the same arguments."),
+          (name === "make_sale"
+            ? " (and the sale_ref and expected_total above)."
+            : ["enter_purchase", "return_items"].includes(name)
+            ? " (and the ref above)."
+            : " and the same arguments."),
       );
     }
     const result = await tool.run(ctx, args);
@@ -878,7 +1147,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania", title: "Dukania", version: "2.0.0" },
+        serverInfo: { name: "dukania", title: "Dukania", version: "3.0.0" },
         instructions: INSTRUCTIONS,
       });
     }

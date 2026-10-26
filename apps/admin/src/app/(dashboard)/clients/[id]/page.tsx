@@ -52,7 +52,7 @@ export default function ClientDetailPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [claims, setClaims] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
-  const [usage, setUsage] = useState<{ products: number; invoices: number; staff: number; lastBill: string | null; bills30: number } | null>(null);
+  const [usage, setUsage] = useState<{ products: number; invoices: number; staff: number; lastBill: string | null; bills30: number; ai30: number | null } | null>(null);
   const [staff, setStaff] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [issues, setIssues] = useState<any[]>([]);
@@ -87,7 +87,7 @@ export default function ClientDetailPage() {
 
     // Users, tickets, mismatches in the latest nightly check, private notes.
     const since = new Date(Date.now() - 30 * 86400000).toISOString();
-    const [people, tk, run, nt, recent] = await Promise.all([
+    const [people, tk, run, nt, recent, ai] = await Promise.all([
       supabase.from("profiles").select("id, full_name, email, role").eq("business_id", id).order("role"),
       supabase.from("support_tickets").select("id, subject, status, created_at, last_reply_at, last_shop_message_at")
         .eq("business_id", id).order("created_at", { ascending: false }).limit(5),
@@ -95,6 +95,9 @@ export default function ClientDetailPage() {
       supabase.from("admin_notes").select("*").eq("business_id", id).is("ticket_id", null)
         .order("created_at", { ascending: false }).limit(30),
       supabase.from("invoices").select("id", { count: "exact", head: true }).eq("business_id", id).gte("created_at", since),
+      // Saved through ChatGPT / Claude (audit_logs.source, migration 0087).
+      supabase.from("audit_logs").select("id", { count: "exact", head: true }).eq("business_id", id)
+        .eq("source", "ai").gte("created_at", since),
     ]);
     setStaff(people.data ?? []);
     setTickets(tk.data ?? []);
@@ -118,6 +121,7 @@ export default function ClientDetailPage() {
       staff: staffCount.count ?? 0,
       lastBill: lastInv.data?.created_at ?? null,
       bills30: recent.count ?? 0,
+      ai30: ai.error ? null : ai.count ?? 0,
     });
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -262,6 +266,7 @@ export default function ClientDetailPage() {
               <div className="flex justify-between gap-4"><dt className="text-zinc-500">Joined</dt><dd>{dateStr(business.created_at)}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-zinc-500">Last bill</dt><dd>{usage?.lastBill ? dateTimeStr(usage.lastBill) : "never"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-zinc-500">Bills in 30 days</dt><dd className={usage && usage.bills30 === 0 ? "font-semibold text-orange-700" : ""}>{usage?.bills30 ?? "…"}</dd></div>
+              <div className="flex justify-between gap-4"><dt className="text-zinc-500">AI actions in 30 days</dt><dd>{usage ? usage.ai30 ?? "—" : "…"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-zinc-500">Bills / products (all time)</dt><dd>{usage ? `${usage.invoices} / ${usage.products}` : "…"}</dd></div>
               <div className="flex justify-between gap-4"><dt className="text-zinc-500">Users</dt><dd>{usage?.staff ?? "…"} / {subscription?.plans?.user_limit ?? "unlimited"}</dd></div>
             </dl>

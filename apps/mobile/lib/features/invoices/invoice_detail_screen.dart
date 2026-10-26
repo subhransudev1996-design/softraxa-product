@@ -691,6 +691,29 @@ class InvoiceDetailScreen extends ConsumerWidget {
                           fontSize: 13,
                         ),
                       ),
+                      // Made through the AI assistant (migration 0087).
+                      if (inv['created_via'] == 'ai')
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Row(
+                            children: [
+                              const Icon(
+                                Icons.auto_awesome,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                t('Made with AI (ChatGPT / Claude)'),
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                       // PD19/PD20: when the unpaid amount is due.
                       if (due > 0 && inv['due_date'] != null && !cancelled)
                         Builder(
