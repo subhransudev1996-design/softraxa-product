@@ -329,6 +329,70 @@ async function stockChange(ctx: Ctx, a: Args) {
   return { name, now, delta, variantId, reason: str(a.reason) === "damage" ? "damage" : "adjustment" };
 }
 
+// One variant as the app's variant sheet saves it (VariantDraft.toRow);
+// a price left out is the product's own (null = inherit).
+const variantProps = {
+  name: { type: "string", description: "e.g. 'Size 8', 'Red / M', '500 g'." },
+  attributes: {
+    type: "object", additionalProperties: { type: "string" },
+    description: "Optional, e.g. {\"size\": \"8\", \"colour\": \"Black\"}.",
+  },
+  selling_price: { type: "number", minimum: 0, description: "Only if different from the product's price (incl. GST)." },
+  mrp: { type: "number", minimum: 0 },
+  purchase_price: { type: "number", minimum: 0 },
+  barcode: { type: "string" },
+  low_stock_qty: { type: "number", minimum: 0 },
+};
+const newVariantProp = {
+  type: "array", minItems: 1, maxItems: 100,
+  items: obj({ ...variantProps, opening_stock: { type: "number", minimum: 0 } }, ["name"]),
+};
+
+function variantRow(v: Record<string, unknown>) {
+  const row: Record<string, unknown> = {};
+  if (v.name !== undefined) row.name = str(v.name);
+  if (v.attributes && typeof v.attributes === "object") row.attributes = v.attributes;
+  for (const k of ["selling_price", "mrp", "purchase_price", "low_stock_qty"]) {
+    if (v[k] !== undefined && v[k] !== null) row[k] = num(v[k]);
+  }
+  if (v.barcode !== undefined) row.barcode = str(v.barcode);
+  return row;
+}
+
+function variantText(v: Record<string, unknown>) {
+  const bits = [
+    v.selling_price != null ? rupees(v.selling_price) : "",
+    v.mrp != null ? `MRP ${rupees(v.mrp)}` : "",
+    v.purchase_price != null ? `cost ${rupees(v.purchase_price)}` : "",
+    str(v.barcode) ? `barcode ${str(v.barcode)}` : "",
+    num(v.opening_stock) > 0 ? `${v.opening_stock} in stock` : "",
+  ].filter(Boolean);
+  return `${str(v.name)}${bits.length ? ` (${bits.join(", ")})` : ""}`;
+}
+
+function checkVariantCost(ctx: Ctx, list: unknown) {
+  if (!can(ctx, "can_view_profit") && Array.isArray(list) &&
+      list.some((v) => v && typeof v === "object" && (v as Record<string, unknown>).purchase_price != null)) {
+    throw new Error("You don't have permission to see or set cost prices — leave the cost price out");
+  }
+}
+
+/** Adds variants to a product, with their opening stock. */
+async function insertVariants(ctx: Ctx, productId: string, list: Array<Record<string, unknown>>) {
+  const biz = await businessId(ctx);
+  const rows = must(await ctx.db.from("product_variants").insert(
+    list.map((v) => ({ ...variantRow(v), product_id: productId, business_id: biz })),
+  ).select("id, name")) as Array<{ id: string; name: string }>;
+  for (let i = 0; i < rows.length && i < list.length; i++) {
+    if (num(list[i].opening_stock) > 0) {
+      must(await ctx.db.rpc("add_opening_stock", {
+        p_product_id: productId, p_variant_id: rows[i].id, p_quantity: num(list[i].opening_stock),
+      }));
+    }
+  }
+  return rows;
+}
+
 const BILL_FIELDS =
   "id, invoice_no, invoice_type, invoice_date, customer_id, customer_name, customer_phone, subtotal, discount_amount, tax_amount, round_off, total, paid_amount, due_amount, due_date, payment_status, payment_mode, is_cancelled, notes";
 
@@ -764,7 +828,9 @@ const TOOLS: Tool[] = [
     title: "Add a new product",
     description:
       "Adds a product to the shop: name and selling price (incl. GST) are needed; MRP, cost price, GST %, HSN, barcode, unit (e.g. Piece, Kg), " +
-      "category, low-stock level and opening stock are optional. Check find_products first so you don't add one that already exists.",
+      "category, low-stock level and opening stock are optional. Check find_products first so you don't add one that already exists. " +
+      "Ask the user whether it comes in variants (sizes, colours, weights, models); if it does, give each one in variants " +
+      "(name, and price / MRP / barcode / opening stock where they differ) instead of opening_stock.",
     needs: "can_manage_products",
     write: true,
     inputSchema: obj({
@@ -779,6 +845,7 @@ const TOOLS: Tool[] = [
       category: { type: "string" },
       low_stock_qty: { type: "number", minimum: 0 },
       opening_stock: { type: "number", minimum: 0 },
+      variants: newVariantProp,
       ...confirmProp,
     }, ["name", "selling_price"]),
     preview: async (ctx, a) => {
@@ -787,6 +854,14 @@ const TOOLS: Tool[] = [
       if (a.purchase_price != null && !can(ctx, "can_view_profit")) {
         throw new Error("You don't have permission to see or set cost prices — leave the cost price out");
       }
+      checkVariantCost(ctx, a.variants);
+      const variants = (Array.isArray(a.variants) ? a.variants : []) as Array<Record<string, unknown>>;
+      if (variants.length && num(a.opening_stock) > 0) {
+        throw new Error("With variants, give each variant's opening_stock instead of the product's");
+      }
+      const names = variants.map((v) => str(v.name).toLowerCase());
+      if (names.some((n) => !n)) throw new Error("Every variant needs a name");
+      if (new Set(names).size !== names.length) throw new Error("Two variants have the same name");
       const same = await ctx.db.rpc("ai_find_products", { p_search: str(a.barcode) || name, p_filter: "all", p_limit: 5 });
       const found = ((same.data as { products?: Array<{ name: string }> } | null)?.products ?? []).map((p) => p.name);
       const unit = await lookupName(ctx, "units", str(a.unit));
@@ -804,6 +879,7 @@ const TOOLS: Tool[] = [
         num(a.opening_stock) > 0 ? `opening stock ${a.opening_stock}` : "",
       ].filter(Boolean);
       return `Add "${name}": ${parts.join(", ")}.` +
+        (variants.length ? `\nVariants (${variants.length}): ${variants.map(variantText).join("; ")}.` : "") +
         (found.length ? `\nCAREFUL — similar products already exist: ${found.join(", ")}. Make sure this isn't one of them.` : "") +
         [unit.note, cat.note].filter(Boolean).map((n) => `\n${n}`).join("");
     },
@@ -811,6 +887,8 @@ const TOOLS: Tool[] = [
       if (a.purchase_price != null && !can(ctx, "can_view_profit")) {
         throw new Error("You don't have permission to see or set cost prices — leave the cost price out");
       }
+      checkVariantCost(ctx, a.variants);
+      const variants = (Array.isArray(a.variants) ? a.variants : []) as Array<Record<string, unknown>>;
       const unit = await lookupName(ctx, "units", str(a.unit));
       const cat = await lookupName(ctx, "categories", str(a.category));
       const r = await ctx.db.from("products").insert({
@@ -825,8 +903,19 @@ const TOOLS: Tool[] = [
         unit_id: unit.id,
         category_id: cat.id,
         low_stock_qty: a.low_stock_qty != null ? num(a.low_stock_qty) : 0,
+        has_variants: variants.length > 0,
       }).select("id, name").single();
       const product = must(r) as { id: string; name: string };
+      if (variants.length) {
+        try {
+          const made = await insertVariants(ctx, product.id, variants);
+          return { added: product, variants: made };
+        } catch (e) {
+          // Don't leave a product without the variants it was meant to have.
+          await ctx.db.from("products").delete().eq("id", product.id);
+          throw e;
+        }
+      }
       if (num(a.opening_stock) > 0) {
         must(await ctx.db.rpc("add_opening_stock", {
           p_product_id: product.id, p_variant_id: null, p_quantity: num(a.opening_stock),
@@ -881,6 +970,63 @@ const TOOLS: Tool[] = [
       const rows = must(r) as unknown[];
       if (!rows.length) throw new Error("The product wasn't changed — it isn't in your shop or you may not edit it");
       return { updated: rows[0] };
+    },
+  },
+  {
+    name: "edit_variants",
+    title: "Add or change a product's variants",
+    description:
+      "For products in sizes, colours, weights or models. add: new variants (name; price / MRP / cost / barcode / opening stock where they differ). " +
+      "change: existing variants by variant_id (find_products shows them) — name, price, MRP, cost, barcode, low-stock level. " +
+      "switch_off / switch_on: variant_ids no longer (or again) sold; their history stays. To change a variant's stock use adjust_stock with its variant_id.",
+    needs: "can_manage_products",
+    write: true,
+    inputSchema: obj({
+      product_id: { type: "string" },
+      add: newVariantProp,
+      change: {
+        type: "array", minItems: 1,
+        items: obj({ variant_id: { type: "string" }, ...variantProps }, ["variant_id"]),
+      },
+      switch_off: { type: "array", items: { type: "string" } },
+      switch_on: { type: "array", items: { type: "string" } },
+      ...confirmProp,
+    }, ["product_id"]),
+    preview: async (ctx, a) => {
+      const v = await variantEdit(ctx, a);
+      const lines: string[] = [];
+      if (v.add.length) lines.push(`Add ${v.add.length}: ${v.add.map(variantText).join("; ")}.`);
+      for (const c of v.change) {
+        const old = v.byId.get(String(c.variant_id))!;
+        const diff = Object.entries(variantRow(c))
+          .filter(([k, val]) => k !== "attributes" && String(val) !== String(old[k] ?? ""))
+          .map(([k, val]) => `${k.replace("_", " ")} ${old[k] ?? "—"} → ${val}`);
+        if (diff.length) lines.push(`Change ${old.name}: ${diff.join(", ")}.`);
+      }
+      if (v.off.length) lines.push(`Switch off: ${v.off.map((id) => v.byId.get(id)!.name).join(", ")}.`);
+      if (v.on.length) lines.push(`Switch on again: ${v.on.map((id) => v.byId.get(id)!.name).join(", ")}.`);
+      if (!lines.length) throw new Final("Nothing to change.");
+      if (!v.product.has_variants && Number(v.product.current_stock) !== 0) {
+        lines.push(
+          `NOTE: ${v.product.name} has ${v.product.current_stock} in stock that isn't in any variant yet — ` +
+            "after this, put it into the right variants with adjust_stock (and take it off the product).",
+        );
+      }
+      return `${v.product.name}:\n${lines.join("\n")}`;
+    },
+    run: async (ctx, a) => {
+      const v = await variantEdit(ctx, a);
+      const made = v.add.length ? await insertVariants(ctx, String(a.product_id), v.add) : [];
+      for (const c of v.change) {
+        const row = variantRow(c);
+        if (Object.keys(row).length) must(await ctx.db.from("product_variants").update(row).eq("id", c.variant_id));
+      }
+      if (v.off.length) must(await ctx.db.from("product_variants").update({ is_active: false }).in("id", v.off));
+      if (v.on.length) must(await ctx.db.from("product_variants").update({ is_active: true }).in("id", v.on));
+      if (!v.product.has_variants && made.length) {
+        must(await ctx.db.from("products").update({ has_variants: true }).eq("id", a.product_id));
+      }
+      return { product: v.product.name, added: made, changed: v.change.length, switched_off: v.off.length, switched_on: v.on.length };
     },
   },
   {
@@ -1281,6 +1427,30 @@ const TOOLS: Tool[] = [
   },
 ];
 
+/** Checks an edit_variants request against the product's variants. */
+async function variantEdit(ctx: Ctx, a: Args) {
+  const product = await rowOf(ctx, "products", a.product_id, "id, name, has_variants, current_stock, track_serial", "find_products");
+  const all = must(await ctx.db.from("product_variants").select("id, name, selling_price, mrp, purchase_price, barcode, low_stock_qty, is_active")
+    .eq("product_id", a.product_id)) as Array<Record<string, unknown>>;
+  const byId = new Map(all.map((x) => [String(x.id), x]));
+  const add = (Array.isArray(a.add) ? a.add : []) as Array<Record<string, unknown>>;
+  const change = (Array.isArray(a.change) ? a.change : []) as Array<Record<string, unknown>>;
+  const off = (Array.isArray(a.switch_off) ? a.switch_off : []).map(String);
+  const on = (Array.isArray(a.switch_on) ? a.switch_on : []).map(String);
+  checkVariantCost(ctx, [...add, ...change]);
+  for (const id of [...change.map((c) => String(c.variant_id)), ...off, ...on]) {
+    if (!byId.has(id)) throw new Error(`Variant ${id} isn't one of ${product.name}'s — find_products shows their ids`);
+  }
+  const taken = new Set(all.filter((x) => x.is_active).map((x) => String(x.name).toLowerCase()));
+  for (const v of add) {
+    const n = str(v.name).toLowerCase();
+    if (!n) throw new Error("Every new variant needs a name");
+    if (taken.has(n)) throw new Error(`${product.name} already has a variant "${str(v.name)}"`);
+    taken.add(n);
+  }
+  return { product, byId, add, change, off, on };
+}
+
 /** A bill by bill_id or exact bill_no. */
 async function findBill(ctx: Ctx, a: Args) {
   let q = ctx.db.from("invoices").select("id, invoice_no, invoice_date, customer_name, total, paid_amount, is_cancelled");
@@ -1300,7 +1470,7 @@ const INSTRUCTIONS =
   "what this person may do, and today's date. Find ids with find_products / find_customers / list_bills before " +
   "using the detail tools. You can also make sales, take customer payments, pay suppliers, add expenses, cancel bills, " +
   "add or change products, customers and suppliers, correct stock, take returns, edit bills, use discount cards and coupons, " +
-  "create offers, and enter supplier bills: when the user " +
+  "create offers, manage product variants (sizes, colours) and enter supplier bills: when the user " +
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
