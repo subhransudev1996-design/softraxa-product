@@ -139,6 +139,7 @@ class AiAssistantScreen extends ConsumerWidget {
                       t('Who owes me money?'),
                       t('What is running low?'),
                       t('Show this week\'s sales.'),
+                      t('Bill 2 Parle-G to Ramesh, paid by UPI.'),
                     ])
                       Chip(label: Text(q)),
                   ],
@@ -148,7 +149,7 @@ class AiAssistantScreen extends ConsumerWidget {
             const SizedBox(height: 12),
             Text(
               t(
-                'It sees only what you can see in Dukania, and for now it can only read: it can\'t make bills or change anything. Some ChatGPT and Claude plans don\'t allow connectors.',
+                'It sees only what you can see in Dukania. It can also make bills, take payments and add products, but it always shows you a preview first and saves only after you say yes. Some ChatGPT and Claude plans don\'t allow connectors.',
               ),
               style: TextStyle(color: AppColors.inkSoft, fontSize: 13),
             ),

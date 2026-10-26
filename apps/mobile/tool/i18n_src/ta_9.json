@@ -400,9 +400,10 @@
 "Who owes me money?": "யார் யார் எனக்குப் பணம் தர வேண்டும்?",
 "What is running low?": "எவை எல்லாம் குறைவாக உள்ளன?",
 "Show this week's sales.": "இந்த வார விற்பனையைக் காட்டு.",
-"It sees only what you can see in Dukania, and for now it can only read: it can't make bills or change anything. Some ChatGPT and Claude plans don't allow connectors.": "Dukania-வில் நீங்கள் பார்க்கக்கூடியதை மட்டுமே இது பார்க்கும், இப்போதைக்கு படிக்க மட்டுமே முடியும்: பில் போடவோ எதையும் மாற்றவோ முடியாது. ChatGPT, Claude-இன் சில திட்டங்களில் கனெக்டர் வசதி இல்லை.",
 "Let staff use it too: Staff & Permissions": "ஊழியர்களும் பயன்படுத்தட்டும்: Staff & Permissions",
 "Copy link": "லிங்கை நகலெடு",
 "Link copied": "லிங்க் நகலெடுக்கப்பட்டது",
-"Use the AI assistant (ChatGPT / Claude)": "AI உதவியாளரைப் பயன்படுத்தலாம் (ChatGPT / Claude)"
+"Use the AI assistant (ChatGPT / Claude)": "AI உதவியாளரைப் பயன்படுத்தலாம் (ChatGPT / Claude)",
+"It sees only what you can see in Dukania. It can also make bills, take payments and add products, but it always shows you a preview first and saves only after you say yes. Some ChatGPT and Claude plans don't allow connectors.": "Dukania-வில் நீங்கள் பார்க்கக்கூடியதை மட்டுமே இது பார்க்கும். இது பில் போடவும், பணம் பெறவும், பொருட்களைச் சேர்க்கவும் முடியும், ஆனால் எப்போதும் முதலில் உங்களுக்குக் காட்டி, நீங்கள் சரி என்றால் மட்டுமே சேமிக்கும். ChatGPT, Claude-இன் சில திட்டங்களில் கனெக்டர் வசதி இல்லை.",
+"Bill 2 Parle-G to Ramesh, paid by UPI.": "ரமேஷுக்கு 2 Parle-G பில் போடு, UPI-இல் பணம்."
 }

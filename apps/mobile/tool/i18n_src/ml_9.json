@@ -400,9 +400,10 @@
 "Who owes me money?": "ആരൊക്കെ എനിക്ക് പണം തരാനുണ്ട്?",
 "What is running low?": "എന്തൊക്കെയാണ് കുറഞ്ഞുവരുന്നത്?",
 "Show this week's sales.": "ഈ ആഴ്ചയിലെ വിൽപ്പന കാണിക്കൂ.",
-"It sees only what you can see in Dukania, and for now it can only read: it can't make bills or change anything. Some ChatGPT and Claude plans don't allow connectors.": "Dukania-യിൽ നിങ്ങൾക്ക് കാണാൻ കഴിയുന്നത് മാത്രമേ ഇത് കാണൂ, ഇപ്പോൾ വായിക്കാൻ മാത്രമേ കഴിയൂ: ബിൽ ഉണ്ടാക്കാനോ ഒന്നും മാറ്റാനോ കഴിയില്ല. ChatGPT-യുടെയും Claude-ന്റെയും ചില പ്ലാനുകളിൽ കണക്ടർ സൗകര്യമില്ല.",
 "Let staff use it too: Staff & Permissions": "സ്റ്റാഫിനും ഉപയോഗിക്കാൻ അനുവദിക്കൂ: Staff & Permissions",
 "Copy link": "ലിങ്ക് കോപ്പി ചെയ്യുക",
 "Link copied": "ലിങ്ക് കോപ്പി ചെയ്തു",
-"Use the AI assistant (ChatGPT / Claude)": "AI അസിസ്റ്റന്റ് ഉപയോഗിക്കുക (ChatGPT / Claude)"
+"Use the AI assistant (ChatGPT / Claude)": "AI അസിസ്റ്റന്റ് ഉപയോഗിക്കുക (ChatGPT / Claude)",
+"It sees only what you can see in Dukania. It can also make bills, take payments and add products, but it always shows you a preview first and saves only after you say yes. Some ChatGPT and Claude plans don't allow connectors.": "Dukania-യിൽ നിങ്ങൾക്ക് കാണാൻ കഴിയുന്നത് മാത്രമേ ഇത് കാണൂ. ഇതിന് ബിൽ ഉണ്ടാക്കാനും പണം സ്വീകരിക്കാനും സാധനങ്ങൾ ചേർക്കാനും കഴിയും, പക്ഷേ എപ്പോഴും ആദ്യം നിങ്ങളെ കാണിക്കും, നിങ്ങൾ സമ്മതിച്ചാൽ മാത്രമേ സേവ് ചെയ്യൂ. ChatGPT-യുടെയും Claude-ന്റെയും ചില പ്ലാനുകളിൽ കണക്ടർ സൗകര്യമില്ല.",
+"Bill 2 Parle-G to Ramesh, paid by UPI.": "രമേശിന് 2 Parle-G ബിൽ ചെയ്യൂ, UPI വഴി പണം."
 }

@@ -165,7 +165,7 @@ export default function ConsentClient() {
             ) : (
               <div className="mt-6 space-y-3 rounded-xl bg-neutral-50 p-4 text-sm leading-6 dark:bg-neutral-800/60">
                 <p><strong>It can read</strong> your shop&apos;s products and stock, customers and dues, bills, purchases and reports — only what you can see in the Dukania app.</p>
-                <p><strong>It can&apos;t change anything</strong> yet. When it can, it will always show you what it&apos;s about to do and wait for your yes.</p>
+                <p><strong>It can act</strong> — make bills, take payments, add expenses, add or change products and customers, cancel bills — but only after showing you a preview and you saying yes in the chat. Everything it saves is marked as made by AI.</p>
                 <p className="text-neutral-500">It never sees your password. You can disconnect it any time from the AI app.</p>
               </div>
             )}

@@ -14,11 +14,12 @@ const CONNECTOR_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/shop
 
 export default function AiHelpPage() {
   return (
-    <LegalPage eyebrow="Dukania AI" title="Use Dukania from ChatGPT or Claude" updated="24 October 2026">
+    <LegalPage eyebrow="Dukania AI" title="Use Dukania from ChatGPT or Claude" updated="26 October 2026">
       <p>
         Connect your shop to ChatGPT or Claude once, then just ask: <i>&quot;How is my shop doing today?&quot;</i>,{" "}
         <i>&quot;Who owes me money?&quot;</i>, <i>&quot;What is running low?&quot;</i>,{" "}
-        <i>&quot;Show this week&apos;s sales.&quot;</i> You can ask in Hindi or your own language too.
+        <i>&quot;Show this week&apos;s sales.&quot;</i>, <i>&quot;Bill Ramesh 2 Parle-G, paid by UPI.&quot;</i>,{" "}
+        <i>&quot;Add Maggi 70g at ₹14, GST 12%.&quot;</i> You can ask in Hindi or your own language too.
       </p>
 
       <section className="space-y-3">
@@ -61,9 +62,11 @@ export default function AiHelpPage() {
         <h2>What it can see and do</h2>
         <p>
           It sees only what you can see in the Dukania app: products and stock, customers and dues, bills,
-          purchases and reports. Staff see only what their permissions allow. For now it can only read; it can&apos;t
-          make bills or change anything. It never sees your password, and you can disconnect it any time from
-          ChatGPT or Claude.
+          purchases and reports. It can also make bills, take customer payments, pay suppliers, add expenses,
+          cancel bills, and add or change products and customers — but it always shows you a preview first and
+          saves only after you say yes, and it follows the same rules as the app (staff permissions, discount
+          limits, GST). Everything it saves is marked as made by AI. It never sees your password, and you can
+          disconnect it any time from ChatGPT or Claude.
         </p>
         <p>
           Gemini isn&apos;t supported yet: Google doesn&apos;t let people in India add their own connectors to Gemini.
