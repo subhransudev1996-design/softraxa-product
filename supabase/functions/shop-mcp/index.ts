@@ -19,7 +19,9 @@
 // read by the AI app (enter_purchase), sale returns, stock corrections,
 // suppliers. 0089: discount cards, offers and coupons on sales, split
 // payments, quotations / cash memos, editing a bill; creating offers and
-// giving discount cards. Every change is two-step like
+// giving discount cards. 0090: free goods and new prices on supplier bills,
+// changing / deleting a purchase, purchase returns. 0091: services and job
+// cards (open, estimate, customer's answer, work, status, bill & deliver). Every change is two-step like
 // admin-mcp's actions: the first call returns a preview and changes
 // nothing; only a second call with confirm: true (after the user said yes)
 // saves it. A sale's preview is a dry run of the app's own create_invoice
@@ -194,6 +196,7 @@ const saleLinesProp = {
     quantity: { type: "number", exclusiveMinimum: 0 },
     price: { type: "number", minimum: 0, description: "Per unit incl. GST; leave out for the product's price." },
     discount: { type: "number", minimum: 0, description: "Rupees off this line." },
+    serial_nos: { type: "array", items: { type: "string" }, description: "For IMEI items: the numbers sold, one per piece (get_product lists those in stock)." },
   }, ["product_id", "quantity"]),
 };
 
@@ -290,8 +293,60 @@ function purchaseInput(a: Args) {
     bill_discount: a.bill_discount ?? null,
     extra_charges: a.extra_charges ?? null,
     bill_total: a.bill_total ?? null,
-    paid: a.paid ?? "full",
+    paid: a.paid ?? (isUuid(a.edit_purchase_id) ? null : "full"),
     payment_mode: str(a.payment_mode) || "cash",
+    payments: Array.isArray(a.payments) && a.payments.length ? a.payments : null,
+    notes: a.notes == null ? null : str(a.notes),
+    ref: isUuid(a.ref) ? a.ref : null,
+    edit_purchase_id: isUuid(a.edit_purchase_id) ? a.edit_purchase_id : null,
+  };
+}
+
+/** The purchase-line schema shared by enter_purchase and edit_purchase. */
+const purchaseLinesProp = {
+  type: "array", minItems: 1, maxItems: 300,
+  items: obj({
+    bill_name: { type: "string", description: "The item's name exactly as printed on the bill." },
+    product_id: { type: "string" },
+    variant_id: { type: "string" },
+    barcode: { type: "string" },
+    new_product: obj({
+      name: { type: "string", description: "The shop's name for it, e.g. 'Parle-G 100 g'." },
+      selling_price: { type: "number", minimum: 0, description: "Per shop unit, incl. GST — ask the user if unsure." },
+      mrp: { type: "number", minimum: 0 },
+      gst_rate: { type: "number" },
+      hsn: { type: "string" },
+      unit: { type: "string" },
+      barcode: { type: "string" },
+      variant: { type: "string", description: "For a new product in sizes / colours: this line's variant, e.g. 'Size 8'. Lines with the same new product name become one product." },
+      variant_selling_price: { type: "number", minimum: 0, description: "This variant's own price, if different." },
+      variant_mrp: { type: "number", minimum: 0 },
+    }, ["name", "selling_price"]),
+    new_variant: obj({
+      name: { type: "string", description: "A variant the shop's product doesn't have yet, e.g. 'Size 10'." },
+      selling_price: { type: "number", minimum: 0 },
+      mrp: { type: "number", minimum: 0 },
+      barcode: { type: "string" },
+    }, ["name"]),
+    serial_nos: { type: "array", items: { type: "string" }, description: "IMEI / serial numbers, one per piece, for items tracked by IMEI." },
+    quantity: { type: "number", exclusiveMinimum: 0, description: "Paid quantity, in bill units (boxes, if the bill counts boxes)." },
+    free_quantity: { type: "number", minimum: 0, description: "Free goods on top (\"10 + 1 free\" → 1), in bill units." },
+    pack_size: { type: "number", exclusiveMinimum: 0, description: "Shop units in one bill unit; leave out if the same." },
+    rate: { type: "number", minimum: 0, description: "Price of one bill unit." },
+    rate_includes_gst: { type: "boolean", description: "true if the printed rate already includes GST." },
+    gst_rate: { type: "number", minimum: 0, maximum: 40 },
+    discount: { type: "number", minimum: 0, description: "Rupees off this line." },
+    new_selling_price: { type: "number", minimum: 0, description: "Change the product's selling price (incl. GST, per shop unit) — only if the user wants it." },
+    new_mrp: { type: "number", minimum: 0, description: "The product's new MRP printed on the bill / pack." },
+  }, ["quantity", "rate"]),
+};
+
+/** The input for ai_purchase_return (migration 0090). */
+function supplierReturnInput(a: Args) {
+  return {
+    purchase_id: a.purchase_id,
+    lines: Array.isArray(a.lines) ? a.lines : [],
+    received: a.received ?? "none",
     notes: str(a.notes),
     ref: isUuid(a.ref) ? a.ref : null,
   };
@@ -393,6 +448,86 @@ async function insertVariants(ctx: Ctx, productId: string, list: Array<Record<st
   return rows;
 }
 
+const JOB_STATUSES = ["received", "checking", "estimate_given", "waiting_approval", "in_progress",
+  "waiting_parts", "ready", "delivered", "cancelled", "returned_unrepaired"];
+
+const jobLinesProp = {
+  type: "array", minItems: 1, maxItems: 50,
+  items: obj({
+    service_id: { type: "string", description: "A service (labour) from list_services." },
+    product_id: { type: "string", description: "A part from find_products (taken out of stock when added to a job)." },
+    variant_id: { type: "string" },
+    estimate_line_id: { type: "string", description: "An approved estimate line (get_job)." },
+    name: { type: "string", description: "Only for work that isn't a listed service / product." },
+    quantity: { type: "number", exclusiveMinimum: 0, default: 1 },
+    unit_price: { type: "number", minimum: 0, description: "Before GST; leave out for the service's / product's price." },
+    gst_rate: { type: "number", minimum: 0, maximum: 40 },
+  }),
+};
+
+function serviceRow(a: Args) {
+  const row: Record<string, unknown> = {};
+  if (a.name !== undefined) row.name = str(a.name);
+  for (const k of ["price", "gst_rate"]) if (a[k] != null) row[k] = num(a[k]);
+  for (const k of ["estimated_minutes", "warranty_days"]) if (a[k] != null) row[k] = Math.round(num(a[k]));
+  for (const k of ["sac_code", "category"]) if (a[k] !== undefined) row[k] = str(a[k]);
+  if (typeof a.active === "boolean") row.is_active = a.active;
+  return row;
+}
+
+/** A job card by id or job number. */
+async function findJob(ctx: Ctx, a: Args) {
+  let q = ctx.db.from("job_cards").select("*");
+  if (isUuid(a.job_id)) q = q.eq("id", a.job_id);
+  else if (str(a.job_no)) q = q.ilike("job_no", str(a.job_no));
+  else throw new Error("Give job_id or job_no (list_jobs)");
+  const j = must(await q.maybeSingle()) as Record<string, unknown> | null;
+  if (!j) throw new Error("No such job card in your shop");
+  return j;
+}
+
+/** One job action through ai_job_action (migration 0091). */
+async function jobAction(ctx: Ctx, p: Record<string, unknown>) {
+  if (!isUuid(p.ref)) throw new Error("Preview it first, then confirm with the ref from the preview");
+  const r = must(await ctx.db.rpc("ai_job_action", { p })) as Record<string, unknown>;
+  return { ...r, note: r.already_saved ? "This was already done." : "Saved. It's in the Dukania app." };
+}
+
+/** Preview of job lines: names and prices as they will be used. */
+async function jobPreview(ctx: Ctx, a: Args, tool: string, verb: string) {
+  const j = await findJob(ctx, { job_id: a.job_id });
+  if (j.invoice_id) throw new Final(`Job ${j.job_no} is already billed — its work can't change.`);
+  const lines = (Array.isArray(a.lines) ? a.lines : []) as Array<Record<string, unknown>>;
+  const shown: string[] = [];
+  let total = 0;
+  for (const l of lines) {
+    let name = str(l.name), price = l.unit_price != null ? num(l.unit_price) : NaN, gst = l.gst_rate != null ? num(l.gst_rate) : NaN;
+    if (isUuid(l.service_id)) {
+      const sv = await rowOf(ctx, "services", l.service_id, "name, price, gst_rate", "list_services");
+      name ||= String(sv.name); if (Number.isNaN(price)) price = Number(sv.price); if (Number.isNaN(gst)) gst = Number(sv.gst_rate);
+    } else if (isUuid(l.product_id)) {
+      const pr = await rowOf(ctx, "products", l.product_id, "name, selling_price, gst_rate, current_stock", "find_products");
+      name ||= `${pr.name} (part, ${pr.current_stock} in stock)`;
+      if (Number.isNaN(gst)) gst = Number(pr.gst_rate);
+      if (Number.isNaN(price)) price = Math.round(Number(pr.selling_price) / (1 + Number(pr.gst_rate) / 100) * 100) / 100;
+    } else if (isUuid(l.estimate_line_id)) {
+      const el = await rowOf(ctx, "job_estimate_lines", l.estimate_line_id, "name, unit_price, gst_rate, quantity", "get_job");
+      name ||= `${el.name} (approved)`; if (Number.isNaN(price)) price = Number(el.unit_price); if (Number.isNaN(gst)) gst = Number(el.gst_rate);
+    }
+    if (!name) throw new Error("Each line needs a service_id, product_id, estimate_line_id or a name");
+    if (Number.isNaN(price)) throw new Error(`Give a price (before GST) for ${name}`);
+    gst = Number.isNaN(gst) ? 0 : gst;
+    const qty = l.quantity != null ? num(l.quantity) : 1;
+    const amount = Math.round(qty * price * (1 + gst / 100) * 100) / 100;
+    total += amount;
+    shown.push(`${qty} × ${name} @ ${rupees(price)} + ${gst}% = ${rupees(amount)}`);
+  }
+  const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+  return `${verb} job ${j.job_no} (${j.customer_name || "walk-in"}, ${[j.item_name, j.brand, j.model].filter(Boolean).join(" ")}):\n` +
+    `${shown.join("\n")}\nTotal ${rupees(total)}.\n` +
+    `To save: call ${tool} again with the same arguments plus ref: "${ref}" and confirm: true.`;
+}
+
 const BILL_FIELDS =
   "id, invoice_no, invoice_type, invoice_date, customer_id, customer_name, customer_phone, subtotal, discount_amount, tax_amount, round_off, total, paid_amount, due_amount, due_date, payment_status, payment_mode, is_cancelled, notes";
 
@@ -428,7 +563,7 @@ const TOOLS: Tool[] = [
   {
     name: "get_product",
     title: "One product in detail",
-    description: "A product with its variants and its latest stock movements (sales, purchases, returns, adjustments).",
+    description: "A product with its variants, its latest stock movements (sales, purchases, returns, adjustments) and, for IMEI items, the IMEI / serial numbers in stock.",
     inputSchema: obj({ product_id: { type: "string", description: "From find_products." } }, ["product_id"]),
     run: async (ctx, a) => {
       if (!isUuid(a.product_id)) throw new Error("product_id must be an id from find_products");
@@ -440,7 +575,13 @@ const TOOLS: Tool[] = [
           .eq("product_id", a.product_id).order("created_at", { ascending: false }).limit(20),
       ]);
       if (!p.data) throw new Error("No product with that id in your shop");
-      return hideCost(ctx, { product: p.data, variants: variants.data, recent_stock_movements: moves.data });
+      const serials = (p.data as { track_serial?: boolean }).track_serial
+        ? (await ctx.db.rpc("get_available_serials", { p_product_id: a.product_id, p_variant_id: null })).data
+        : undefined;
+      return hideCost(ctx, {
+        product: p.data, variants: variants.data, recent_stock_movements: moves.data,
+        ...(serials ? { imei_serials_in_stock: serials } : {}),
+      });
     },
   },
   {
@@ -1077,6 +1218,9 @@ const TOOLS: Tool[] = [
       "Lines are matched to the shop's products by product_id (if you looked it up with find_products), by what the shop taught for that item name, or by barcode; " +
       "for an item the shop doesn't stock yet, describe new_product (name and selling price incl. GST). pack_size = how many of the shop's units are in one bill unit (a box of 12). " +
       "Give supplier_id (find_suppliers) or new_supplier from the bill, and bill_total as printed so the preview can check it adds up. " +
+      "Free goods (\"10 + 1 free\") go in free_quantity. If the bill shows a new MRP, or the user wants a new selling price, give new_mrp / new_selling_price. " +
+      "A new product in sizes / colours: one line per variant with new_product.variant; a new size of an existing product: new_variant. " +
+      "IMEI items (phones): serial_nos, one per piece. Paid partly cash, partly UPI: payments. " +
       "The first call previews (nothing saved) and returns a ref; save by calling again with the same arguments plus ref and confirm: true.",
     needs: "can_manage_purchases",
     write: true,
@@ -1085,35 +1229,16 @@ const TOOLS: Tool[] = [
       new_supplier: obj({ name: { type: "string" }, phone: { type: "string" }, gstin: { type: "string" } }, ["name"]),
       bill_no: { type: "string" },
       bill_date: { type: "string", description: "YYYY-MM-DD as printed; default today." },
-      lines: {
-        type: "array", minItems: 1, maxItems: 300,
-        items: obj({
-          bill_name: { type: "string", description: "The item's name exactly as printed on the bill." },
-          product_id: { type: "string" },
-          variant_id: { type: "string" },
-          barcode: { type: "string" },
-          new_product: obj({
-            name: { type: "string", description: "The shop's name for it, e.g. 'Parle-G 100 g'." },
-            selling_price: { type: "number", minimum: 0, description: "Per shop unit, incl. GST — ask the user if unsure." },
-            mrp: { type: "number", minimum: 0 },
-            gst_rate: { type: "number" },
-            hsn: { type: "string" },
-            unit: { type: "string" },
-            barcode: { type: "string" },
-          }, ["name", "selling_price"]),
-          quantity: { type: "number", exclusiveMinimum: 0, description: "In bill units (boxes, if the bill counts boxes)." },
-          pack_size: { type: "number", exclusiveMinimum: 0, description: "Shop units in one bill unit; leave out if the same." },
-          rate: { type: "number", minimum: 0, description: "Price of one bill unit." },
-          rate_includes_gst: { type: "boolean", description: "true if the printed rate already includes GST." },
-          gst_rate: { type: "number", minimum: 0, maximum: 40 },
-          discount: { type: "number", minimum: 0, description: "Rupees off this line." },
-        }, ["quantity", "rate"]),
-      },
+      lines: purchaseLinesProp,
       bill_discount: { type: "number", minimum: 0 },
       extra_charges: { type: "number", minimum: 0, description: "Freight, loading etc. on the bill." },
       bill_total: { type: "number", description: "The bill's grand total as printed." },
       paid: { type: ["string", "number"], description: "'full' (default), 'none' (on credit) or an amount paid now." },
       payment_mode: modeProp,
+      payments: {
+        type: "array", minItems: 2, description: "A split payment made now (cash + UPI) instead of paid / payment_mode.",
+        items: obj({ mode: { type: "string", enum: ["cash", "upi", "card", "other"] }, amount: { type: "number", exclusiveMinimum: 0 } }, ["mode", "amount"]),
+      },
       notes: { type: "string" },
       ref: { type: "string", description: "From the preview; required with confirm." },
       ...confirmProp,
@@ -1146,6 +1271,102 @@ const TOOLS: Tool[] = [
       if (!isUuid(a.ref)) throw new Error("Preview the purchase first, then confirm it with the ref from the preview");
       const r = must(await ctx.db.rpc("ai_purchase", { p: purchaseInput(a), p_commit: true })) as Record<string, unknown>;
       return { ...r, note: r.already_saved ? "This bill was already entered." : "Saved. The purchase is in the Dukania app." };
+    },
+  },
+  {
+    name: "edit_purchase",
+    title: "Change a purchase already entered",
+    description:
+      "Corrects a purchase: send its COMPLETE new list of lines (get_purchase shows the current ones, product_id and variant_id) and anything else that changes " +
+      "(supplier_id, bill_no, bill_date, bill_discount, extra_charges, paid). Stock already sold or returned limits what can change; payments made later stay. " +
+      "The first call previews; save with the same arguments and confirm: true.",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({
+      purchase_id: { type: "string" },
+      supplier_id: { type: "string" },
+      bill_no: { type: "string" },
+      bill_date: { type: "string" },
+      lines: purchaseLinesProp,
+      bill_discount: { type: "number", minimum: 0 },
+      extra_charges: { type: "number", minimum: 0 },
+      bill_total: { type: "number" },
+      paid: { type: ["string", "number"], description: "Leave out to keep what was paid with the purchase." },
+      payment_mode: modeProp,
+      notes: { type: "string" },
+      ...confirmProp,
+    }, ["purchase_id", "lines"]),
+    preview: async (ctx, a) => {
+      if (!isUuid(a.purchase_id)) throw new Error("Give the purchase_id from list_purchases");
+      const r = must(await ctx.db.rpc("ai_purchase", { p: { ...purchaseInput(a), edit_purchase_id: a.purchase_id }, p_commit: false })) as {
+        summary?: { not_matched?: unknown[]; matches_printed_total?: boolean; total?: number; printed_total?: number };
+      };
+      const sm = r.summary ?? {};
+      if (sm.not_matched?.length) {
+        throw new Final(`NOT READY — lines not matched to a product: ${JSON.stringify(sm.not_matched)}. Give their product_id.\n${JSON.stringify(sm, null, 1)}`);
+      }
+      return JSON.stringify(sm, null, 1) +
+        (sm.matches_printed_total === false ? `\nWARNING — comes to ${rupees(sm.total)} but the bill says ${rupees(sm.printed_total)}.` : "");
+    },
+    run: async (ctx, a) => {
+      const r = must(await ctx.db.rpc("ai_purchase", { p: { ...purchaseInput(a), edit_purchase_id: a.purchase_id }, p_commit: true })) as Record<string, unknown>;
+      return { ...r, note: "Saved. The changed purchase is in the Dukania app." };
+    },
+  },
+  {
+    name: "delete_purchase",
+    title: "Delete a purchase entered by mistake",
+    description:
+      "Removes a purchase entered wrongly or twice: its stock comes off and what was owed to the supplier is undone. " +
+      "Not possible when its goods are already sold, it has returns, or payments were made against it later (then use edit_purchase).",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({ purchase_id: { type: "string" }, reason: { type: "string" }, ...confirmProp }, ["purchase_id"]),
+    preview: async (ctx, a) => {
+      const pu = await rowOf(ctx, "purchases", a.purchase_id,
+        "purchase_no, bill_no, supplier_name, purchase_date, total, paid_amount", "list_purchases");
+      return `DELETE purchase ${pu.purchase_no}${pu.bill_no ? ` (bill ${pu.bill_no})` : ""} of ${pu.purchase_date} from ` +
+        `${pu.supplier_name || "no supplier"}, total ${rupees(pu.total)}. Its stock comes off. This can't be undone.`;
+    },
+    run: async (ctx, a) => {
+      const pu = await rowOf(ctx, "purchases", a.purchase_id, "purchase_no", "list_purchases");
+      must(await ctx.db.rpc("delete_purchase", { p_purchase_id: a.purchase_id, p_reason: str(a.reason) || "Deleted with the AI assistant" }));
+      return { deleted: pu.purchase_no };
+    },
+  },
+  {
+    name: "return_to_supplier",
+    title: "Send goods back to the supplier (purchase return)",
+    description:
+      "Goods returned to the supplier from a purchase (damaged, expired, wrong). Give purchase_id (list_purchases) and each item's product_id / variant_id " +
+      "(get_purchase) with the quantity. Valued at that purchase's cost and GST. received: 'none' (default; comes off what the shop owes them), " +
+      "'full' (they refund now) or an amount. The first call previews; save with the same arguments plus ref and confirm: true.",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({
+      purchase_id: { type: "string" },
+      lines: {
+        type: "array", minItems: 1,
+        items: obj({ product_id: { type: "string" }, variant_id: { type: "string" }, quantity: { type: "number", exclusiveMinimum: 0 } },
+          ["product_id", "quantity"]),
+      },
+      received: { type: ["string", "number"], description: "'none' (default), 'full' or an amount refunded now." },
+      notes: { type: "string" },
+      ref: { type: "string", description: "From the preview; required with confirm." },
+      ...confirmProp,
+    }, ["purchase_id", "lines"]),
+    preview: async (ctx, a) => {
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      const r = must(await ctx.db.rpc("ai_purchase_return", { p: { ...supplierReturnInput(a), ref }, p_commit: false })) as {
+        already_saved?: boolean; return_no?: string; summary?: unknown;
+      };
+      if (r.already_saved) throw new Final(`This return is already saved as ${r.return_no}. Nothing more to do.`);
+      return `${JSON.stringify(r.summary, null, 1)}\n\nTo save: call return_to_supplier again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => {
+      if (!isUuid(a.ref)) throw new Error("Preview the return first, then confirm it with the ref from the preview");
+      const r = must(await ctx.db.rpc("ai_purchase_return", { p: supplierReturnInput(a), p_commit: true })) as Record<string, unknown>;
+      return { ...r, note: r.already_saved ? "This return was already saved." : "Saved. The purchase return is in the Dukania app." };
     },
   },
   {
@@ -1294,6 +1515,275 @@ const TOOLS: Tool[] = [
       const r = must(await ctx.db.rpc("ai_create_sale", { p: { ...saleInput(a), edit_bill_id: a.bill_id } })) as Record<string, unknown>;
       return { ...r, note: "Saved. The changed bill is in the Dukania app." };
     },
+  },
+  // ------------------------------------------------------- services & jobs
+  {
+    name: "list_services",
+    title: "Services (repair / labour price list)",
+    description: "The shop's services with price (before GST), GST %, SAC code, time and warranty. Search by name.",
+    needs: "can_manage_services",
+    inputSchema: obj({ search: { type: "string" }, include_inactive: { type: "boolean" } }),
+    run: async (ctx, a) => {
+      let q = ctx.db.from("services")
+        .select("id, name, category, price, gst_rate, sac_code, estimated_minutes, warranty_days, diagnostic_fee, is_active")
+        .order("name").limit(200);
+      if (a.include_inactive !== true) q = q.eq("is_active", true);
+      if (str(a.search)) q = q.ilike("name", `%${str(a.search).replace(/[%,()]/g, "")}%`);
+      return { services: must(await q) };
+    },
+  },
+  {
+    name: "save_service",
+    title: "Add or change a service",
+    description: "Adds a service (name, price before GST, GST %, optional SAC, category, minutes, warranty days) or, with service_id, changes one (give only what changes; active false stops offering it).",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      service_id: { type: "string" },
+      name: { type: "string" },
+      price: { type: "number", minimum: 0, description: "Before GST." },
+      gst_rate: { type: "number", enum: [0, 5, 12, 18, 28, 40] },
+      sac_code: { type: "string" },
+      category: { type: "string" },
+      estimated_minutes: { type: "integer", minimum: 0 },
+      warranty_days: { type: "integer", minimum: 0 },
+      active: { type: "boolean" },
+      ...confirmProp,
+    }),
+    preview: async (ctx, a) => {
+      const row = serviceRow(a);
+      if (isUuid(a.service_id)) {
+        const old = await rowOf(ctx, "services", a.service_id, "name, price, gst_rate, sac_code, category, estimated_minutes, warranty_days, is_active", "list_services");
+        const diff = Object.entries(row).filter(([k, v]) => String(old[k]) !== String(v)).map(([k, v]) => `${k.replace("_", " ")} ${old[k] ?? "—"} → ${v}`);
+        if (!diff.length) throw new Final(`Nothing to change on ${old.name}.`);
+        return `Change service ${old.name}: ${diff.join(", ")}.`;
+      }
+      if (!str(a.name) || a.price == null) throw new Error("A new service needs a name and a price (before GST)");
+      return `Add service "${str(a.name)}": ${rupees(a.price)} + ${num(a.gst_rate) || 0}% GST` +
+        `${str(a.sac_code) ? `, SAC ${str(a.sac_code)}` : ""}${a.warranty_days ? `, ${a.warranty_days} days warranty` : ""}.`;
+    },
+    run: async (ctx, a) => {
+      const row = serviceRow(a);
+      if (isUuid(a.service_id)) {
+        const r = must(await ctx.db.from("services").update(row).eq("id", a.service_id).select("id, name, price, gst_rate, is_active")) as unknown[];
+        if (!r.length) throw new Error("The service wasn't changed — it isn't in your shop or you may not edit it");
+        return { updated: r[0] };
+      }
+      const r = await ctx.db.from("services").insert({ ...row, business_id: await businessId(ctx) }).select("id, name, price, gst_rate").single();
+      return { added: must(r) };
+    },
+  },
+  {
+    name: "list_jobs",
+    title: "Job cards (repairs)",
+    description: "Repair jobs, newest first: job number, customer, device, problem, status, estimate, advance, delivery date. Filter by status (e.g. ready, waiting_parts) or search (job no, customer, phone, device, IMEI, vehicle number); open_only for jobs not delivered.",
+    needs: "can_manage_services",
+    inputSchema: obj({
+      status: { type: "string", enum: JOB_STATUSES },
+      open_only: { type: "boolean" },
+      search: { type: "string" },
+      limit: limitProp(30, 200),
+    }),
+    run: async (ctx, a) => {
+      let q = ctx.db.from("job_cards")
+        .select("id, job_no, customer_name, customer_phone, item_name, brand, model, serial_no, registration_no, issue_description, status, estimated_cost, advance_amount, expected_delivery, invoice_id, created_at", { count: "exact" })
+        .order("created_at", { ascending: false }).limit(lim(a.limit, 30));
+      if (str(a.status)) q = q.eq("status", str(a.status));
+      if (a.open_only === true) q = q.not("status", "in", "(delivered,cancelled,returned_unrepaired)");
+      const s = str(a.search).replace(/[%,()]/g, " ");
+      if (s) {
+        q = q.or(["job_no", "customer_name", "customer_phone", "item_name", "brand", "model", "serial_no", "registration_no"]
+          .map((c) => `${c}.ilike.%${s}%`).join(","));
+      }
+      const r = await q;
+      return { total: r.count, jobs: must(r) };
+    },
+  },
+  {
+    name: "get_job",
+    title: "One job card in detail",
+    description: "A job by id or job number: the device and problem, work and parts added (with totals), estimates with their lines (line ids for approvals) and the status history.",
+    needs: "can_manage_services",
+    inputSchema: obj({ job_id: { type: "string" }, job_no: { type: "string" } }),
+    run: async (ctx, a) => {
+      const j = await findJob(ctx, a);
+      const [items, est, hist] = await Promise.all([
+        ctx.db.from("job_card_items").select("id, item_type, name, quantity, unit_price, gst_rate, line_total, cost_price, estimate_line_id").eq("job_card_id", j.id).order("created_at"),
+        ctx.db.from("job_estimates").select("id, version, status, total, note, created_at, decided_at, job_estimate_lines(id, line_no, item_type, name, quantity, unit_price, gst_rate, line_total, approved)").eq("job_card_id", j.id).order("version", { ascending: false }),
+        ctx.db.from("job_status_history").select("status, note, created_at").eq("job_card_id", j.id).order("created_at"),
+      ]);
+      const work = (items.data ?? []) as Array<{ line_total: number }>;
+      return hideCost(ctx, {
+        job: j, work: items.data, work_total: work.reduce((t, x) => t + Number(x.line_total), 0),
+        estimates: est.data, history: hist.data,
+      });
+    },
+  },
+  {
+    name: "open_job",
+    title: "Open a job card (repair)",
+    description:
+      "Takes in a repair: the customer (customer_id, or name and phone), the device or vehicle (item_name, brand, model, IMEI / serial, vehicle number), " +
+      "the problem, its condition and accessories received, advance taken, expected delivery date. The first call previews; save with the ref and confirm: true.",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      customer_id: { type: "string" },
+      customer_name: { type: "string" },
+      customer_phone: { type: "string" },
+      job_type: { type: "string", description: "'device' (default) or 'vehicle'." },
+      item_name: { type: "string", description: "e.g. Mobile phone, Laptop, Bike." },
+      brand: { type: "string" },
+      model: { type: "string" },
+      serial_no: { type: "string", description: "IMEI / serial number." },
+      registration_no: { type: "string", description: "Vehicle number." },
+      odometer_km: { type: "integer", minimum: 0 },
+      issue_description: { type: "string" },
+      item_condition: { type: "string" },
+      accessories_received: { type: "string" },
+      technician_name: { type: "string" },
+      estimated_cost: { type: "number", minimum: 0 },
+      advance_amount: { type: "number", minimum: 0 },
+      advance_mode: modeProp,
+      expected_delivery: { type: "string", description: "YYYY-MM-DD" },
+      customer_note: { type: "string" },
+      ref: { type: "string" },
+      ...confirmProp,
+    }, ["issue_description"]),
+    preview: async (ctx, a) => {
+      const who = isUuid(a.customer_id)
+        ? String((await rowOf(ctx, "customers", a.customer_id, "name, phone", "find_customers")).name)
+        : str(a.customer_name) || "no name";
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      const device = [str(a.item_name), str(a.brand), str(a.model), str(a.registration_no)].filter(Boolean).join(" ");
+      return `Open a job card for ${who}: ${device || "device"}${str(a.serial_no) ? ` (IMEI/serial ${str(a.serial_no)})` : ""} — "${str(a.issue_description)}"` +
+        `${str(a.accessories_received) ? `; received with ${str(a.accessories_received)}` : ""}` +
+        `${num(a.advance_amount) > 0 ? `; advance ${rupees(a.advance_amount)} by ${str(a.advance_mode) || "cash"}` : ""}` +
+        `${isDate(a.expected_delivery) ? `; ready by ${a.expected_delivery}` : ""}.\n` +
+        `To save: call open_job again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => {
+      if (!isUuid(a.ref)) throw new Error("Preview it first, then confirm with the ref from the preview");
+      let name = str(a.customer_name), phone = str(a.customer_phone);
+      if (isUuid(a.customer_id)) {
+        const c = await rowOf(ctx, "customers", a.customer_id, "name, phone", "find_customers");
+        name = String(c.name); phone = String(c.phone ?? "");
+      }
+      const job: Record<string, unknown> = {
+        customer_id: isUuid(a.customer_id) ? a.customer_id : null, customer_name: name, customer_phone: phone,
+        job_type: str(a.job_type) || "device", advance_mode: str(a.advance_mode) || "cash",
+      };
+      for (const k of ["item_name", "brand", "model", "serial_no", "registration_no", "issue_description", "item_condition",
+        "accessories_received", "technician_name", "customer_note"]) job[k] = str(a[k]);
+      for (const k of ["odometer_km", "estimated_cost", "advance_amount"]) if (a[k] != null) job[k] = num(a[k]);
+      if (isDate(a.expected_delivery)) job.expected_delivery = a.expected_delivery;
+      return jobAction(ctx, { kind: "create_job", ref: a.ref, job });
+    },
+  },
+  {
+    name: "add_job_work",
+    title: "Add work or parts to a job",
+    description:
+      "Adds services (service_id — labour) and parts (product_id — taken out of stock) to a job. Prices are before GST and default to the service's / " +
+      "the product's price without GST. If the customer approved an estimate, only its approved lines can be added (name them, or give estimate_line_id).",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({ job_id: { type: "string" }, lines: jobLinesProp, ref: { type: "string" }, ...confirmProp }, ["job_id", "lines"]),
+    preview: async (ctx, a) => jobPreview(ctx, a, "add_job_work", "Add to"),
+    run: async (ctx, a) => jobAction(ctx, { kind: "add_items", ref: a.ref, job_id: a.job_id, lines: a.lines }),
+  },
+  {
+    name: "make_estimate",
+    title: "Make a repair estimate",
+    description: "The estimate to send the customer before the work: services and parts (prices before GST). A new estimate replaces one still waiting for an answer.",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({ job_id: { type: "string" }, lines: jobLinesProp, note: { type: "string" }, ref: { type: "string" }, ...confirmProp }, ["job_id", "lines"]),
+    preview: async (ctx, a) => jobPreview(ctx, a, "make_estimate", "Estimate for"),
+    run: async (ctx, a) => jobAction(ctx, { kind: "estimate", ref: a.ref, job_id: a.job_id, lines: a.lines, note: str(a.note) }),
+  },
+  {
+    name: "estimate_answer",
+    title: "Record the customer's answer to an estimate",
+    description: "decision: approved, rejected, or some (give line_ids from get_job). channel: in_person, phone, whatsapp or other. Approval moves the job to in progress.",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      job_id: { type: "string" },
+      decision: { type: "string", enum: ["approved", "rejected", "some"] },
+      line_ids: { type: "array", items: { type: "string" } },
+      customer_name: { type: "string", description: "Who answered; default the job's customer." },
+      channel: { type: "string", enum: ["in_person", "phone", "whatsapp", "other"], default: "phone" },
+      note: { type: "string" },
+      ref: { type: "string" },
+      ...confirmProp,
+    }, ["job_id", "decision"]),
+    preview: async (ctx, a) => {
+      const j = await findJob(ctx, { job_id: a.job_id });
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      return `Job ${j.job_no}: the customer ${a.decision === "some" ? `approved ${(Array.isArray(a.line_ids) ? a.line_ids.length : 0)} line(s)` : a.decision} ` +
+        `the estimate, by ${str(a.channel) || "phone"}${str(a.customer_name) ? ` (${str(a.customer_name)})` : ""}.\n` +
+        `To save: call estimate_answer again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => jobAction(ctx, {
+      kind: "decision", ref: a.ref, job_id: a.job_id, decision: a.decision, line_ids: a.line_ids ?? [],
+      customer_name: str(a.customer_name) || null, channel: str(a.channel) || "phone", note: str(a.note),
+    }),
+  },
+  {
+    name: "set_job_status",
+    title: "Change a job's status",
+    description: "checking, estimate_given, waiting_approval, in_progress, waiting_parts, ready, cancelled or returned_unrepaired. (Delivered comes with close_job.)",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      job_id: { type: "string" },
+      status: { type: "string", enum: JOB_STATUSES.filter((s) => !["received", "delivered"].includes(s)) },
+      note: { type: "string" },
+      ref: { type: "string" },
+      ...confirmProp,
+    }, ["job_id", "status"]),
+    preview: async (ctx, a) => {
+      const j = await findJob(ctx, { job_id: a.job_id });
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      return `Job ${j.job_no} (${j.customer_name || "no name"}, ${j.item_name} ${j.model}): ${j.status} → ${str(a.status)}.\n` +
+        `To save: call set_job_status again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => jobAction(ctx, { kind: "status", ref: a.ref, job_id: a.job_id, status: a.status, note: str(a.note) }),
+  },
+  {
+    name: "close_job",
+    title: "Bill and deliver a job",
+    description: "Makes the bill from the job's work and parts (the advance is counted), takes payment now (paid, payment_mode), starts the warranty, and marks it delivered (deliver false to only bill).",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      job_id: { type: "string" },
+      paid: { type: "number", minimum: 0, description: "Paid now, on top of the advance." },
+      payment_mode: modeProp,
+      warranty_days: { type: "integer", minimum: 0 },
+      deliver: { type: "boolean", default: true },
+      ref: { type: "string" },
+      ...confirmProp,
+    }, ["job_id"]),
+    preview: async (ctx, a) => {
+      const j = await findJob(ctx, { job_id: a.job_id });
+      if (j.invoice_id) throw new Final(`Job ${j.job_no} is already billed.`);
+      const items = (must(await ctx.db.from("job_card_items").select("name, line_total").eq("job_card_id", j.id)) as Array<{ name: string; line_total: number }>);
+      if (!items.length) throw new Error(`Job ${j.job_no} has no work or parts yet — add them first (add_job_work)`);
+      const total = items.reduce((t, x) => t + Number(x.line_total), 0);
+      const paid = Number(j.advance_amount) + num(a.paid || 0);
+      const ref = isUuid(a.ref) ? String(a.ref) : crypto.randomUUID();
+      return `Bill job ${j.job_no} for ${j.customer_name || "walk-in"}: ${items.map((x) => `${x.name} ${rupees(x.line_total)}`).join(", ")} = ${rupees(total)}. ` +
+        `Advance ${rupees(j.advance_amount)} + paid now ${rupees(a.paid || 0)} by ${str(a.payment_mode) || "cash"}; ` +
+        `${total - paid > 0.005 ? `${rupees(total - paid)} stays due` : "fully paid"}` +
+        `${a.warranty_days ? `; warranty ${a.warranty_days} days` : ""}${a.deliver === false ? "" : "; marked delivered"}.\n` +
+        `To save: call close_job again with the same arguments plus ref: "${ref}" and confirm: true.`;
+    },
+    run: async (ctx, a) => jobAction(ctx, {
+      kind: "close", ref: a.ref, job_id: a.job_id, paid: a.paid ?? 0, payment_mode: str(a.payment_mode) || "cash",
+      warranty_days: a.warranty_days ?? null, deliver: a.deliver !== false,
+    }),
   },
   {
     name: "list_offers",
@@ -1470,7 +1960,9 @@ const INSTRUCTIONS =
   "what this person may do, and today's date. Find ids with find_products / find_customers / list_bills before " +
   "using the detail tools. You can also make sales, take customer payments, pay suppliers, add expenses, cancel bills, " +
   "add or change products, customers and suppliers, correct stock, take returns, edit bills, use discount cards and coupons, " +
-  "create offers, manage product variants (sizes, colours) and enter supplier bills: when the user " +
+  "create offers, manage product variants (sizes, colours), change or delete purchases, return goods to suppliers, " +
+  "run repair job cards (open, estimate, customer's answer, work, status, bill and deliver) and services, " +
+  "and enter supplier bills: when the user " +
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
@@ -1508,7 +2000,8 @@ async function callTool(ctx: Ctx, name: string, args: Args) {
         `PREVIEW — nothing has been saved yet.\n${what}\n\nShow this to the user. Only if they say yes, call ${name} again with confirm: true` +
           (name === "make_sale"
             ? " (and the sale_ref and expected_total above)."
-            : ["enter_purchase", "return_items"].includes(name)
+            : ["enter_purchase", "return_items", "return_to_supplier", "open_job", "add_job_work", "make_estimate",
+                "estimate_answer", "set_job_status", "close_job"].includes(name)
             ? " (and the ref above)."
             : name === "edit_bill"
             ? " (and the expected_total above)."
@@ -1536,7 +2029,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania", title: "Dukania", version: "4.0.0" },
+        serverInfo: { name: "dukania", title: "Dukania", version: "6.0.0" },
         instructions: INSTRUCTIONS,
       });
     }
