@@ -83,7 +83,7 @@ function SidebarContent({ email, onNavigate }: { email: string; onNavigate?: () 
     <>
       <div className="flex items-center gap-3 px-5 py-5">
         <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-base font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
-          S
+          D
         </span>
         <div>
           <p className="text-[15px] font-extrabold leading-5 tracking-tight text-white">Dukania</p>

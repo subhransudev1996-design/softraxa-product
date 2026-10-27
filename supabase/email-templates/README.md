@@ -1,7 +1,7 @@
-# Softraxa / Dukania — branded auth email templates
+# Dukania — branded auth email templates
 
 Table-based, inline-styled HTML that renders in Gmail, Outlook, Apple Mail, etc.
-Brand: **Dukania by Softraxa** · primary `#7c3aed`, accent `#0284c7`, ink `#070a14`.
+Brand: **Dukania** · primary `#7c3aed`, accent `#0284c7`, ink `#070a14`.
 
 ## How to install (Supabase Dashboard)
 
@@ -19,8 +19,9 @@ Brand: **Dukania by Softraxa** · primary `#7c3aed`, accent `#0284c7`, ink `#070
 
 ## Important notes
 
-- **Logo:** templates load `https://softraxa.in/images/logo.png`. That URL must
-  be publicly reachable (deploy the website). If the logo 404s, inboxes show a
+- **Logo:** templates load `https://www.dukania.in/images/dukania/icon.png`
+  next to the word "Dukania". That URL must be publicly reachable (deploy the
+  website on dukania.in). If the logo 404s, inboxes show a
   broken image — verify the URL in a browser first.
 - **Token-hash flow, NOT PKCE.** The links use
   `{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=...` and the

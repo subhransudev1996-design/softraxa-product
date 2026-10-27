@@ -20,7 +20,7 @@ type Field = (typeof FIELDS)[number];
 type Form = Record<Field, string>;
 
 const EMPTY: Form = {
-  payment_upi_id: "", payment_payee_name: "SOFTRAXA", support_whatsapp: "", business_name: "SOFTRAXA",
+  payment_upi_id: "", payment_payee_name: "Dukania", support_whatsapp: "", business_name: "Dukania",
   business_address: "", business_phone: "", business_email: "", business_gstin: "", receipt_footer: "",
   android_download_url: "", windows_download_url: "",
 };
@@ -35,10 +35,10 @@ const waDigits = (v: string) => {
 
 // The link the app puts in a shop's renewal QR (no amount: you tell the shop).
 const upiLink = (upi: string, payee: string) =>
-  `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(payee || "SOFTRAXA")}&cu=INR&tn=${encodeURIComponent("Dukania renewal")}`;
+  `upi://pay?pa=${encodeURIComponent(upi)}&pn=${encodeURIComponent(payee || "Dukania")}&cu=INR&tn=${encodeURIComponent("Dukania renewal")}`;
 
 /**
- * How shops pay and reach SOFTRAXA, and what payment receipts say
+ * How shops pay and reach Dukania, and what payment receipts say
  * (migrations 0053 and 0056). Saved through admin_save_settings: checked
  * and logged.
  */
@@ -98,7 +98,7 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!form) return;
     setNotice(null);
-    if (upi && !upiValid) return setNotice({ ok: false, text: "That doesn't look like a UPI ID — it should be like softraxa@okaxis" });
+    if (upi && !upiValid) return setNotice({ ok: false, text: "That doesn't look like a UPI ID — it should be like dukania@okaxis" });
     if (wa && (wa.length < 11 || wa.length > 15)) {
       return setNotice({ ok: false, text: "The WhatsApp number should be 10 digits, or the country code and the number" });
     }
@@ -153,13 +153,13 @@ export default function SettingsPage() {
             <div className="space-y-4">
               <div>
                 <Label>Your UPI ID</Label>
-                <Input value={form.payment_upi_id} onChange={(e) => set("payment_upi_id", e.target.value)} placeholder="softraxa@okaxis" className="font-mono" />
+                <Input value={form.payment_upi_id} onChange={(e) => set("payment_upi_id", e.target.value)} placeholder="dukania@okaxis" className="font-mono" />
                 {upi && !upiValid && <p className="mt-1 text-xs font-medium text-red-600">This isn&apos;t a UPI ID yet — it should look like name@bank.</p>}
                 {!upi && <p className="mt-1 text-xs font-medium text-orange-700">Without a UPI ID, expired shops can only contact you on WhatsApp.</p>}
               </div>
               <div>
                 <Label>Payee name</Label>
-                <Input value={form.payment_payee_name} onChange={(e) => set("payment_payee_name", e.target.value)} placeholder="SOFTRAXA" />
+                <Input value={form.payment_payee_name} onChange={(e) => set("payment_payee_name", e.target.value)} placeholder="Dukania" />
                 <p className="mt-1 text-xs text-zinc-500">Shown under the QR in the app. The UPI app itself shows the name on your bank account.</p>
               </div>
             </div>
@@ -201,7 +201,7 @@ export default function SettingsPage() {
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <Label>Business name</Label>
-              <Input value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="SOFTRAXA" />
+              <Input value={form.business_name} onChange={(e) => set("business_name", e.target.value)} placeholder="Dukania" />
             </div>
             <div>
               <Label>Phone</Label>
@@ -226,7 +226,7 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <Section title="On the website" hint="softraxa.in shows your WhatsApp number, phone and email from above, Dukania's starting price from your cheapest plan, and these download links.">
+        <Section title="On the website" hint="www.dukania.in shows your WhatsApp number, phone and email from above, Dukania's starting price from your cheapest plan, and these download links.">
           {needsWebsiteMigration && (
             <Notice notice={{ ok: false, text: "Migration 0059 isn't applied yet — the download links can't be saved until it is." }} />
           )}

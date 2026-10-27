@@ -198,7 +198,7 @@ export function RenewDialog({
       `Namaste! Payment of ${inr(amountNum)} received for ${target.name}. ` +
       `Your Dukania subscription${result.plan_name ? ` (${result.plan_name})` : ""} is active until ${dateStr(result.expiry_date)}.` +
       (result.receipt_no ? ` Receipt ${result.receipt_no}.` : "") +
-      " Thank you — SOFTRAXA";
+      " Thank you — Dukania";
     return (
       <Modal title="Renewed" onClose={onClose}>
         <div className="space-y-4 text-sm">

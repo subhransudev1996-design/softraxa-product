@@ -1,4 +1,4 @@
-// support-push — tells a shop's phones that SOFTRAXA answered its support
+// support-push — tells a shop's phones that Dukania answered its support
 // request. The reply itself is in the app (Support); this push is best
 // effort.
 //
@@ -74,7 +74,7 @@ Deno.serve(async (req) => {
       sa,
       accessToken,
       token,
-      "SOFTRAXA replied",
+      "Dukania replied",
       `Your support request "${claim.subject}" has an answer. Open Support in Dukania.`,
     );
     if (result === "sent") sent++;

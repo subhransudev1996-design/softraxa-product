@@ -1,10 +1,10 @@
 // admin-mcp — the Dukania admin panel as an MCP server, for ChatGPT and
 // Claude ("connectors"). It reads what the admin panel shows and runs the
-// same admin actions, as the signed-in SOFTRAXA admin.
+// same admin actions, as the signed-in Dukania admin.
 //
 // Login: Supabase Auth's OAuth 2.1 server. A request without a token gets
 // 401 with a link to this server's OAuth metadata; the AI app then sends
-// you to www.softraxa.in/oauth/consent to sign in with your admin account
+// you to www.dukania.in/oauth/consent to sign in with your admin account
 // and approve it. Every call runs with YOUR login, so the database's own
 // checks (platform admin only, RLS, audit log) apply exactly as in the
 // admin panel. Non-admin accounts get nothing.
@@ -19,7 +19,7 @@
 // Setup:
 //   1. Dashboard > Authentication > OAuth Server: enable, Authorization
 //      Path "/oauth/consent", allow dynamic client registration.
-//      (Site URL must be https://www.softraxa.in.)
+//      (Site URL must be https://www.dukania.in.)
 //   2. supabase functions deploy admin-mcp --no-verify-jwt
 //      (the function checks tokens itself, so it can answer 401 with the
 //      discovery link MCP clients need).
@@ -522,7 +522,7 @@ const TOOLS: Tool[] = [
 // ------------------------------------------------------------- protocol
 
 const INSTRUCTIONS =
-  "Dukania admin panel (SOFTRAXA's shop-billing software for Indian retailers). Amounts are in Indian rupees, dates in IST. " +
+  "Dukania admin panel (Dukania is shop-billing software for Indian retailers). Amounts are in Indian rupees, dates in IST. " +
   "Find a client_id with find_clients before using client tools. Every action tool first returns a preview: show it to the user and " +
   "call again with confirm: true only after they clearly agree. Never confirm on your own.";
 

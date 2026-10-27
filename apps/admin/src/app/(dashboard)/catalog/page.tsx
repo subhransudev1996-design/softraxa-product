@@ -140,7 +140,7 @@ const notApplied = (message: string) =>
 /**
  * The master product list (migration 0057): every product a shop adds joins
  * it with its details and without its prices; other shops pick from it
- * while adding a product. Here SOFTRAXA adds, corrects, approves, hides and
+ * while adding a product. Here Dukania adds, corrects, approves, hides and
  * merges entries. Every change is logged.
  */
 export default function CatalogPage() {

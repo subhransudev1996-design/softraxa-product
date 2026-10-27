@@ -177,7 +177,7 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
           </p>
           <div className="flex items-center gap-2">
             {b.phone && (
-              <a href={waLink(b.phone, `Namaste! This is SOFTRAXA, about your support request "${ticket.subject}".`)} target="_blank" rel="noreferrer">
+              <a href={waLink(b.phone, `Namaste! This is Dukania, about your support request "${ticket.subject}".`)} target="_blank" rel="noreferrer">
                 <Button variant="outline">WhatsApp</Button>
               </a>
             )}

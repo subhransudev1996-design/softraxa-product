@@ -1,5 +1,5 @@
 /**
- * Email for the SOFTRAXA admin panel: the welcome / set-password invitation
+ * Email for the Dukania admin panel: the welcome / set-password invitation
  * sent to a client owner. No password is ever emailed or logged — the
  * owner sets their own through a one-time link (LAUNCH_SPECIFICATION,
  * onboarding; PROJECT_ANALYSIS finding 11).
@@ -50,7 +50,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<Emai
 <body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f4f5;margin:0;padding:20px;color:#18181b;">
   <div style="max-width:580px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;">
     <div style="background:#e0284a;padding:28px 24px;text-align:center;color:#ffffff;">
-      <h1 style="margin:0;font-size:22px;">Dukania by SOFTRAXA</h1>
+      <h1 style="margin:0;font-size:22px;">Dukania</h1>
       <p style="margin:6px 0 0;font-size:14px;opacity:.9;">GST Billing &amp; Stock Management</p>
     </div>
     <div style="padding:28px 24px;">
@@ -69,7 +69,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<Emai
       <p style="font-size:13px;color:#64748b;">This link can be used once and expires soon. If it has expired, open the Dukania app and tap <em>Forgot password</em>.</p>
     </div>
     <div style="background:#f1f5f9;padding:14px 24px;text-align:center;font-size:12px;color:#64748b;">
-      &copy; ${new Date().getFullYear()} SOFTRAXA · support@softraxa.com
+      &copy; ${new Date().getFullYear()} Dukania · support@dukania.in
     </div>
   </div>
 </body>
@@ -80,7 +80,7 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<Emai
       method: "POST",
       headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        from: process.env.EMAIL_FROM || "Dukania <noreply@softraxa.com>",
+        from: process.env.EMAIL_FROM || "Dukania <noreply@dukania.in>",
         to: [params.email],
         subject,
         html,

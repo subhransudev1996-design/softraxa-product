@@ -94,7 +94,7 @@ export default function TodayPage() {
       `Namaste ${r.owner_name || ""}! Your Dukania subscription for ${r.name} ` +
       (expired ? `expired on ${dateStr(r.expiry_date)}` : `ends on ${dateStr(r.expiry_date)}`) +
       `. To continue${price}, pay by UPI${upi ? ` to ${upi}` : ""} and send the payment screenshot here, ` +
-      `or tap "I've paid" in the app. — SOFTRAXA`
+      `or tap "I've paid" in the app. — Dukania`
     );
   };
 
@@ -192,7 +192,7 @@ export default function TodayPage() {
               key={r.business_id}
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>Joined {dateStr(r.created_at)} · {r.phone || "no phone"}</>}
-              actions={<a href={waLink(r.phone, `Namaste ${r.owner_name || ""}! This is SOFTRAXA. Can I help you finish setting up Dukania for ${r.name}? It takes 5 minutes.`)} target="_blank" rel="noreferrer"><Button variant="outline">Offer help</Button></a>}
+              actions={<a href={waLink(r.phone, `Namaste ${r.owner_name || ""}! This is Dukania. Can I help you finish setting up Dukania for ${r.name}? It takes 5 minutes.`)} target="_blank" rel="noreferrer"><Button variant="outline">Offer help</Button></a>}
             />
           ))}
         </Group>
@@ -203,7 +203,7 @@ export default function TodayPage() {
               key={r.business_id}
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>Last bill {r.last_bill ? dateStr(r.last_bill) : "never"}</>}
-              actions={<a href={waLink(r.phone, `Namaste ${r.owner_name || ""}! This is SOFTRAXA. We noticed no bills in Dukania for ${r.name} this week — is everything working? Happy to help.`)} target="_blank" rel="noreferrer"><Button variant="outline">Check in</Button></a>}
+              actions={<a href={waLink(r.phone, `Namaste ${r.owner_name || ""}! This is Dukania. We noticed no bills in Dukania for ${r.name} this week — is everything working? Happy to help.`)} target="_blank" rel="noreferrer"><Button variant="outline">Check in</Button></a>}
             />
           ))}
         </Group>

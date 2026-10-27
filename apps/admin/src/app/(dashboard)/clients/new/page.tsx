@@ -76,7 +76,7 @@ export default function NewClientPage() {
       .order("name")
       .then(({ data }) => setPlans((data as Plan[]) ?? []));
 
-    // Softraxa software products. Default the picker to the first live one
+    // Dukania software products. Default the picker to the first live one
     // (Dukania today) so the common case needs no extra click.
     // (software_products, NOT products — `products` is shop inventory items.)
     supabase

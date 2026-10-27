@@ -214,7 +214,7 @@ export default function ClientDetailPage() {
         <div className="flex flex-wrap gap-2">
           {business.phone && (
             <>
-              <a href={waLink(business.phone, `Namaste ${business.owner_name || ""}! This is SOFTRAXA.`)} target="_blank" rel="noreferrer">
+              <a href={waLink(business.phone, `Namaste ${business.owner_name || ""}! This is Dukania.`)} target="_blank" rel="noreferrer">
                 <Button variant="outline">WhatsApp</Button>
               </a>
               <a href={`tel:${business.phone}`}><Button variant="outline">Call {business.phone}</Button></a>

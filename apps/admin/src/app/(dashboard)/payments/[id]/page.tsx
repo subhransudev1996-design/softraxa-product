@@ -38,7 +38,7 @@ export default function ReceiptPage() {
   const { id } = useParams<{ id: string }>();
   const [p, setP] = useState<any>(null);
   const [missing, setMissing] = useState(false);
-  // SOFTRAXA's own details, from Settings (migration 0056).
+  // Dukania's own details, from Settings (migration 0056).
   const [us, setUs] = useState<any>({});
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function ReceiptPage() {
   if (!p) return <Spinner />;
 
   const b = p.businesses ?? {};
-  const seller = us.business_name || "SOFTRAXA";
+  const seller = us.business_name || "Dukania";
   const msg =
     `Receipt ${p.receipt_no ?? ""} — ${seller}\n` +
     `Received ${inr(p.amount)} from ${b.name} on ${dateStr(p.payment_date)} (${MODE_LABEL[p.payment_mode] ?? p.payment_mode}` +

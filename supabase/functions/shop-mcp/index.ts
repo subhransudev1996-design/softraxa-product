@@ -4,7 +4,7 @@
 //
 // Login: Supabase Auth's OAuth 2.1 server, exactly like admin-mcp. A request
 // without a token gets 401 with a link to this server's OAuth metadata; the
-// AI app sends the user to www.softraxa.in/oauth/consent to sign in with
+// AI app sends the user to www.dukania.in/oauth/consent to sign in with
 // their Dukania (shop) account and approve it. Every call runs with THAT
 // login, so the database's own checks apply unchanged: own shop only, staff
 // permissions, plan features, subscription.

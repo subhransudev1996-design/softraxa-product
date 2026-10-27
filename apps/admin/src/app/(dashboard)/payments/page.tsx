@@ -48,7 +48,7 @@ export default function PaymentsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `SOFTRAXA-payments-${month}.csv`;
+    a.download = `Dukania-payments-${month}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   }

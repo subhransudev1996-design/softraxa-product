@@ -52,7 +52,7 @@ export default function LoginPage() {
         />
         <div className="relative flex items-center gap-3">
           <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
-            S
+            D
           </span>
           <p className="text-lg font-extrabold tracking-tight text-white">Dukania</p>
         </div>
@@ -66,7 +66,7 @@ export default function LoginPage() {
           </p>
         </div>
         <p className="relative text-xs text-sidebar-muted">
-          © {new Date().getFullYear()} SOFTRAXA
+          © {new Date().getFullYear()} Dukania
         </p>
       </section>
 
@@ -75,7 +75,7 @@ export default function LoginPage() {
         <div className="animate-rise w-full max-w-sm">
           <div className="mb-8 lg:hidden">
             <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white">
-              S
+              D
             </span>
           </div>
           <h1 className="text-2xl font-extrabold tracking-tight text-ink">Welcome back</h1>
@@ -87,7 +87,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@softraxa.com"
+                placeholder="you@dukania.in"
                 required
               />
             </div>
