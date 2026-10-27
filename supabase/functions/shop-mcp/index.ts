@@ -2457,7 +2457,8 @@ const TOOLS: Tool[] = [
   {
     name: "find_discount_card",
     title: "Discount cards",
-    description: "Finds a discount card by its number or last digits (is it valid, whose, what %), or lists the card types and cards (search by holder or number).",
+    description: "Discount / privilege / membership cards. With card: finds one by its number or last digits (is it valid, whose, what %). " +
+      "Without card: lists all card types (name, %, categories) and the cards given out (search by holder or number).",
     inputSchema: obj({
       card: { type: "string", description: "The number or its last digits, to check one card." },
       search: { type: "string", description: "To list cards: part of the number or the holder's name; empty for all." },
@@ -2644,6 +2645,8 @@ const INSTRUCTIONS =
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
+  "For the shop's offers, coupons and scratch cards use list_offers; for discount cards and card types use find_discount_card " +
+  "(no card number = list them all). " +
   "Staff accounts, permissions, shop settings and the plan can be READ (list_staff, shop_overview) but are changed only in the Dukania app — say so. " +
   "If a tool says something isn't allowed, tell the user exactly that — don't try to get around it.";
 
