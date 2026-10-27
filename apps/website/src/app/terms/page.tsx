@@ -5,7 +5,7 @@ import LegalPage from "@/components/legal-page";
 // Draft written from how Dukania is sold (October 2026). Have a lawyer
 // review it before launch.
 export const metadata: Metadata = {
-  title: "Terms of use — Dukania by Softraxa",
+  title: "Terms of use — Dukania",
   description: "The terms for using the Dukania billing and stock app.",
 };
 
@@ -13,7 +13,7 @@ export default function TermsPage() {
   return (
     <LegalPage eyebrow="Legal" title="Terms of use" updated="1 October 2026">
       <p>
-        These terms apply when a shop uses Dukania, the billing and stock app made by Softraxa. By creating an
+        These terms apply when a shop uses Dukania, the billing and stock app. By creating an
         account you accept them for your shop.
       </p>
 
@@ -21,7 +21,7 @@ export default function TermsPage() {
         <h2>Your subscription</h2>
         <ul>
           <li>New shops get a free trial. After it, the app needs a paid plan.</li>
-          <li>Plans and prices are agreed with Softraxa. You pay by UPI, cash or bank transfer; your plan is extended when we confirm the payment.</li>
+          <li>Plans and prices are agreed with Dukania. You pay by UPI, cash or bank transfer; your plan is extended when we confirm the payment.</li>
           <li>When a subscription ends, you can still open the app, see your records and export them, but you cannot make new bills until you renew.</li>
           <li>Your plan sets how many users, products and bills a month you can have.</li>
         </ul>
@@ -59,7 +59,7 @@ export default function TermsPage() {
         <p>
           You can stop at any time and export your data. To close your account, see{" "}
           <Link href="/delete-account">Delete your account</Link>. These terms follow Indian law. Questions:{" "}
-          <a href="mailto:support@softraxa.com">support@softraxa.com</a>.
+          <a href="mailto:support@dukania.in">support@dukania.in</a>.
         </p>
       </section>
     </LegalPage>

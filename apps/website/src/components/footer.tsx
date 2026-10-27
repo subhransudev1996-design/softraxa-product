@@ -1,5 +1,5 @@
 import Link from "next/link";
-import Image from "next/image";
+import BrandLogo from "@/components/brand-logo";
 import { ArrowRight } from "lucide-react";
 import { getSiteInfo, whatsappLink } from "@/lib/site-info";
 
@@ -7,19 +7,16 @@ const COLS = [
   {
     title: "Product",
     links: [
-      { href: "/dukania", label: "Dukania" },
-      { href: "/dukania#features", label: "Features" },
-      { href: "/dukania#pricing", label: "Pricing" },
+      { href: "/#features", label: "Features" },
+      { href: "/#pricing", label: "Pricing" },
       { href: "/download", label: "Download" },
-      { href: "/dukania#faq", label: "FAQ" },
+      { href: "/ai", label: "ChatGPT & Claude" },
+      { href: "/#faq", label: "FAQ" },
     ],
   },
   {
-    title: "Company",
+    title: "Help",
     links: [
-      { href: "/about", label: "About" },
-      { href: "/services", label: "Services" },
-      { href: "/products", label: "Custom software" },
       { href: "/contact", label: "Contact" },
       { href: "/privacy", label: "Privacy" },
       { href: "/terms", label: "Terms" },
@@ -27,21 +24,12 @@ const COLS = [
     ],
   },
   {
-    title: "Apps we build",
-    links: [
-      { href: "/dukania", label: "Inventory & POS" },
-      { href: "/products", label: "Repair-shop app" },
-      { href: "/products", label: "Salon membership" },
-      { href: "/products", label: "Real-estate manager" },
-    ],
-  },
-  {
     title: "Built for",
     links: [
-      { href: "/dukania", label: "Grocery & kirana" },
-      { href: "/dukania", label: "Mobile & electronics" },
-      { href: "/dukania", label: "Hardware & building" },
-      { href: "/dukania", label: "Repair & service shops" },
+      { href: "/#shops", label: "Grocery & kirana" },
+      { href: "/#shops", label: "Mobile & electronics" },
+      { href: "/#shops", label: "Hardware & building" },
+      { href: "/#shops", label: "Repair & service shops" },
     ],
   },
 ];
@@ -55,15 +43,7 @@ const SOCIALS: { label: string; href: string; path: string }[] = [
 ];
 
 function BrandMark() {
-  return (
-    <Image
-      src="/images/logo.png"
-      alt="Softraxa"
-      width={120}
-      height={32}
-      className="h-8 w-auto"
-    />
-  );
+  return <BrandLogo size={32} />;
 }
 
 export default async function Footer() {
@@ -76,14 +56,14 @@ export default async function Footer() {
   return (
     <footer className="relative mt-10 border-t border-hairline">
       {/* link columns */}
-      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 sm:grid-cols-2 lg:grid-cols-6">
+      <div className="mx-auto grid max-w-7xl gap-10 px-6 py-16 sm:grid-cols-2 lg:grid-cols-5">
         <div className="lg:col-span-2">
           <div className="flex items-center gap-2.5 font-display text-lg font-bold">
             <BrandMark />
           </div>
           <p className="mt-4 max-w-xs text-sm text-dim">
-            A software agency building practical, offline-first business software.
-            Makers of Dukania.
+            Billing, stock and GST software for Indian shops — on the phone you
+            already have and the counter PC, with or without internet.
           </p>
         </div>
 
@@ -109,7 +89,7 @@ export default async function Footer() {
           <div className="flex items-center gap-3">
             <BrandMark />
             <p className="text-sm text-dim">
-              Softraxa builds offline-first business software for India.
+              {"Dukania keeps your shop billing even when the internet doesn't."}
             </p>
           </div>
           <div className="flex items-center gap-5">
@@ -131,7 +111,7 @@ export default async function Footer() {
       <div className="border-t border-hairline">
         <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-6 text-xs text-dim sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <span>© {new Date().getFullYear()} Softraxa. All rights reserved.</span>
+            <span>© {new Date().getFullYear()} Dukania. All rights reserved.</span>
             <Link href="/privacy" className="hover:text-paper">Privacy</Link>
             <Link href="/terms" className="hover:text-paper">Terms</Link>
           </div>

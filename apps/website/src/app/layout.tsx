@@ -26,13 +26,13 @@ const jetbrainsMono = JetBrains_Mono({
 export const revalidate = 3600;
 
 // The live address; relative canonical and share-image URLs resolve against it.
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.softraxa.in";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://www.dukania.in";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "Softraxa — software for businesses that don't stop moving",
+  title: "Dukania — billing, stock & GST software for Indian shops",
   description:
-    "Softraxa is a software agency building practical, offline-first business software. Dukania, our flagship product, runs billing, stock and reporting for real shops across India.",
+    "Dukania runs billing, stock, GST and khata for Indian shops — on Android phones and Windows PCs, online or completely offline.",
 };
 
 export default function RootLayout({

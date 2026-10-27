@@ -5,7 +5,7 @@ import Reveal from "@/components/reveal";
 import { getSiteInfo, whatsappLink, type SiteInfo } from "@/lib/site-info";
 
 export const metadata: Metadata = {
-  title: "Download Dukania — Android app & Windows software | Softraxa",
+  title: "Download Dukania — Android app & Windows software",
   description:
     "Download Dukania billing and inventory software for Android phones and Windows PCs. Start with a free trial — no card, no payment.",
   alternates: { canonical: "/download" },

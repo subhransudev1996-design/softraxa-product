@@ -83,7 +83,7 @@ export default function HonestCall() {
             Get an honest answer from our team without a pitch.
             <br />
             Looking for technical support instead?{" "}
-            <Link href="/dukania#faq" className="font-semibold text-[#1A1A1A] underline underline-offset-4 hover:text-amber-600">
+            <Link href="/#faq" className="font-semibold text-[#1A1A1A] underline underline-offset-4 hover:text-amber-600">
               Visit our FAQ
             </Link>
             .

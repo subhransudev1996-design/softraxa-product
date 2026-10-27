@@ -5,7 +5,7 @@ import LegalPage from "@/components/legal-page";
 // Help page for the Dukania AI assistant (supabase/functions/shop-mcp,
 // migration 0086). The same steps are in the app: More → ChatGPT & Claude.
 export const metadata: Metadata = {
-  title: "Use Dukania from ChatGPT or Claude — Dukania by Softraxa",
+  title: "Use Dukania from ChatGPT or Claude — Dukania",
   description:
     "Connect your Dukania shop to ChatGPT or Claude and ask about sales, stock, dues and bills in plain words.",
 };

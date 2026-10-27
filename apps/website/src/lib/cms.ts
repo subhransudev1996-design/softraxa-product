@@ -4,53 +4,10 @@ import type { CmsJson } from "./cms-types";
 
 // --- Static Default Fallbacks ---
 const DEFAULTS: Record<string, Record<string, CmsJson>> = {
-  home: {
-    hero: {
-      content: {
-        badge: "Made in India · for Indian shops",
-        title: "Software that runs\nyour shop, online or off.",
-        description: "Softraxa makes Dukania — billing, stock and GST software that keeps working when the internet doesn't. On the phone you already have and the counter PC.",
-        primary_cta: "Explore Dukania",
-        secondary_cta: "Book a free demo",
-      }
-    },
-    stats: {
-      items: [
-        { value: 100, suffix: "%", label: "Works offline" },
-        { value: 30, suffix: "d", label: "Expiry alert window" },
-        { value: 3, suffix: "+", label: "Staff roles built in" },
-        { value: 2, suffix: "", label: "Platforms (Android · Windows)" },
-      ]
-    }
-  },
-  about: {
-    hero: {
-      content: {
-        eyebrow: "About",
-        title: "We're Softraxa.",
-        lead: "A small software studio building practical, offline-first business software for the way work actually happens in India."
-      }
-    },
-    story: {
-      paragraphs: [
-        "Softraxa started from a simple frustration: most business software assumes a fast, always-on internet connection and a person sitting at a desk. Real shops don't work like that. The connection drops. The counter is busy. Staff need an answer in seconds.",
-        "So we build software that survives bad connections and keeps up with a busy shop floor — starting with Dukania, our offline-first billing and inventory app. Everything we make is held to the same bar: it works offline, it's priced for real margins, and the people who built it are the ones who support it.",
-        "We're a small, focused team. That's deliberate — it's how one group of people can own a whole product, end to end, and stay accountable for it."
-      ]
-    },
-    values: {
-      items: [
-        { title: "Offline-first, always", body: "We build for the real world, where the network drops mid-sale. The software has to keep working anyway.", icon: "WifiOff" },
-        { title: "India-first", body: "Priced and designed for Indian shops and businesses — their margins, their workflows, their languages.", icon: "IndianRupee" },
-        { title: "Direct support", body: "You talk to the people who wrote the code. No call centre, no ticket lottery.", icon: "MessageCircle" },
-        { title: "Ship, then improve", body: "We'd rather put working software in your hands early and improve it with you than disappear for six months.", icon: "Compass" }
-      ]
-    }
-  },
   dukania: {
     hero: {
       content: {
-        eyebrow: "Softraxa product",
+        eyebrow: "Billing & stock software",
         title: "Inventory & billing\nthat puts you in control.",
         lead: "Know exactly what's in stock, bill online or completely offline, and reorder before you run out — with Dukania.",
         primary_cta: "Book a free demo",
@@ -83,91 +40,19 @@ const DEFAULTS: Record<string, Record<string, CmsJson>> = {
         { q: "Does it handle GST?", a: "Yes — GST on bills and services, plus a GST report showing output and input tax by rate. You can also raise non-GST bills, cash memos and estimates." }
       ]
     }
-  },
-  services: {
-    hero: {
-      content: {
-        eyebrow: "Services",
-        title: "What we build.",
-        lead: "Softraxa is a small studio that ships complete products. Here's the work we take on, end to end."
-      }
-    },
-    list: {
-      items: [
-        {
-          title: "Product engineering",
-          body: "We design and build the whole product as one system — mobile app, backend and admin panel — so nothing falls through the cracks between three separate vendors.",
-          points: ["End-to-end architecture", "Mobile + web + backend", "One team, one roadmap"],
-          icon: "Layers"
-        },
-        {
-          title: "Offline-first mobile apps",
-          body: "Apps that keep working with no signal. Local-first data, background sync and conflict handling built in from the start — not bolted on later.",
-          points: ["Works fully offline", "Automatic background sync", "Android & Windows builds"],
-          icon: "WifiOff"
-        },
-        {
-          title: "Business software (POS & inventory)",
-          body: "Billing, stock, purchases, returns and job cards modelled on how a real business runs its day — the domain we know best from building Dukania.",
-          points: ["Billing & POS", "Stock + expiry tracking", "Returns & purchases"],
-          icon: "Store"
-        },
-        {
-          title: "Data & reporting",
-          body: "Turn raw sales and stock data into reports people actually use — daily takings, top products, expenses — and export them cleanly when needed.",
-          points: ["Sales & stock reports", "Expense tracking", "PDF export"],
-          icon: "BarChart3"
-        },
-        {
-          title: "Admin & operations tooling",
-          body: "The back-office half of a product — client management, plans, subscriptions and support queues — so you can run the business, not just ship the app.",
-          points: ["Client & plan management", "Subscriptions & billing", "Support workflows"],
-          icon: "Settings"
-        },
-        {
-          title: "Support & maintenance",
-          body: "A direct line to the people who built your software. Fixes, updates and new features handled by the same team — not passed to a stranger.",
-          points: ["Direct WhatsApp-speed support", "Ongoing updates", "New features on request"],
-          icon: "LifeBuoy"
-        }
-      ]
-    },
-    stack: {
-      items: ["Flutter", "Supabase", "Next.js", "Postgres", "Edge Functions", "Row-level security"]
-    }
   }
 };
 
 const SEO_DEFAULTS: Record<string, { title: string; description: string; keywords: string[]; og_image?: string; structured_data?: CmsJson }> = {
   "/": {
-    title: "Softraxa — software for businesses that don't stop moving",
-    description: "Softraxa is a software agency building practical, offline-first business software. Dukania, our flagship product, runs billing, stock and reporting for real shops across India.",
-    keywords: ["offline-first", "flutter", "supabase", "billing software", "inventory system"]
-  },
-  "/about": {
-    title: "About — Softraxa",
-    description: "Softraxa is a small software studio building practical, offline-first business software for India — makers of Dukania.",
-    keywords: ["software studio", "odisha tech", "offline mobile apps"]
+    title: "Dukania — billing, stock & GST software for Indian shops",
+    description: "Dukania runs billing, stock, GST and khata for Indian shops — on Android phones and Windows PCs, online or completely offline. Free trial.",
+    keywords: ["gst billing app", "billing software for shops", "offline billing", "inventory app india", "pos app"]
   },
   "/contact": {
-    title: "Contact — Softraxa",
-    description: "Get in touch with Softraxa. Book a free demo for Dukania, or talk to us about custom offline-first billing & inventory software.",
-    keywords: ["contact softraxa", "dukania demo", "custom software india"]
-  },
-  "/dukania": {
-    title: "Dukania — inventory & billing that puts you in control | Softraxa",
-    description: "Dukania is Softraxa's offline-first POS and inventory app: billing, stock and expiry tracking, staff roles, reports and low-stock alerts. Android & Windows.",
-    keywords: ["pos app", "gst billing app", "offline billing", "stock tracking"]
-  },
-  "/services": {
-    title: "Services — Softraxa software agency",
-    description: "What Softraxa builds: product engineering, offline-first mobile apps, business software, data & reporting, admin tooling and ongoing support.",
-    keywords: ["custom app development", "offline mobile apps", "supabase dashboard nextjs"]
-  },
-  "/products": {
-    title: "Products — Softraxa",
-    description: "Explore the software products built by Softraxa, including Dukania, our offline-first inventory & stock management software.",
-    keywords: ["business apps", "dukania billing"]
+    title: "Contact — Dukania",
+    description: "Talk to Dukania. Book a free demo, or ask anything about billing, stock and GST for your shop.",
+    keywords: ["dukania demo", "billing software demo", "gst billing help"]
   }
 };
 
@@ -262,7 +147,7 @@ export function buildPageMetadata(seo: CmsJson): Metadata {
     return text
       .replace(/%title%/g, seo.title || "")
       .replace(/%separator%/g, "—")
-      .replace(/%sitedesc%/g, "Softraxa is a software studio building practical, offline-first business software.");
+      .replace(/%sitedesc%/g, "Dukania is billing, stock and GST software for Indian shops.");
   };
 
   const resolvedTitle = resolveTemplate(seo.title);

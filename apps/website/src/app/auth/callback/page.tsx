@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import CallbackClient from "./callback-client";
 
 export const metadata: Metadata = {
-  title: "Verifying your email — Softraxa",
+  title: "Verifying your email — Dukania",
   robots: { index: false, follow: false },
 };
 

@@ -50,69 +50,23 @@ type ContentRow = {
 };
 
 type PageSelector = {
-  id: string;      // page copy ID (e.g. "home", "about", "dukania", "services", "contact", or null/empty)
+  id: string;      // page copy ID ("dukania" = the home page, "contact", or empty)
   path: string;    // SEO route path
   label: string;   // UI Label
 };
 
 const PAGES_LIST: PageSelector[] = [
-  { id: "home", path: "/", label: "Home Page" },
-  { id: "about", path: "/about", label: "About Page" },
-  { id: "dukania", path: "/dukania", label: "Dukania Product Page" },
-  { id: "services", path: "/services", label: "Services Page" },
+  { id: "dukania", path: "/", label: "Home Page" },
   { id: "contact", path: "/contact", label: "Contact Page" },
-  { id: "", path: "/products", label: "Products Hub Portfolio" },
-  { id: "", path: "/services/custom-solutions", label: "Custom Solutions" },
+  { id: "", path: "/download", label: "Download Page" },
+  { id: "", path: "/ai", label: "ChatGPT & Claude Page" },
 ];
 
 const PAGE_DEFAULTS: Record<string, Record<string, CmsJson>> = {
-  home: {
-    hero: {
-      content: {
-        badge: "Software agency · India",
-        title: "Software that runs\nthe business, not just the browser.",
-        description: "Softraxa builds practical, offline-first business software.",
-        primary_cta: "Book a free demo",
-        secondary_cta: "See Dukania",
-      }
-    },
-    stats: {
-      items: [
-        { value: 100, suffix: "%", label: "Works offline" },
-        { value: 30, suffix: "d", label: "Expiry alert window" },
-        { value: 3, suffix: "+", label: "Staff roles built in" },
-        { value: 2, suffix: "", label: "Platforms (Android · Windows)" },
-      ]
-    }
-  },
-  about: {
-    hero: {
-      content: {
-        eyebrow: "About",
-        title: "We're Softraxa.",
-        lead: "A small software studio building practical, offline-first business software."
-      }
-    },
-    story: {
-      paragraphs: [
-        "Softraxa started from a simple frustration: most business software assumes a fast, always-on internet connection and a person sitting at a desk. Real shops don't work like that. The connection drops. The counter is busy. Staff need an answer in seconds.",
-        "So we build software that survives bad connections and keeps up with a busy shop floor — starting with Dukania, our offline-first billing and inventory app. Everything we make is held to the same bar: it works offline, it's priced for real margins, and the people who built it are the ones who support it.",
-        "We're a small, focused team. That's deliberate — it's how one group of people can own a whole product, end to end, and stay accountable for it."
-      ]
-    },
-    values: {
-      items: [
-        { title: "Offline-first, always", body: "We build for the real world, where the network drops mid-sale. The software has to keep working anyway.", icon: "WifiOff" },
-        { title: "India-first", body: "Priced and designed for Indian shops and businesses — their margins, their workflows, their languages.", icon: "IndianRupee" },
-        { title: "Direct support", body: "You talk to the people who wrote the code. No call centre, no ticket lottery.", icon: "MessageCircle" },
-        { title: "Ship, then improve", body: "We'd rather put working software in your hands early and improve it with you than disappear for six months.", icon: "Compass" }
-      ]
-    }
-  },
   dukania: {
     hero: {
       content: {
-        eyebrow: "Softraxa product",
+        eyebrow: "Billing & stock software",
         title: "Inventory & billing that puts you in control.",
         lead: "Know exactly what's in stock, bill online or completely offline, and reorder before you run out — with Dukania.",
         primary_cta: "Book a free demo",
@@ -136,28 +90,10 @@ const PAGE_DEFAULTS: Record<string, Record<string, CmsJson>> = {
       ]
     }
   },
-  services: {
-    hero: {
-      content: {
-        eyebrow: "Services",
-        title: "What we build.",
-        lead: "Custom POS, billing, and offline-first mobile apps shaped around your business workflows."
-      }
-    },
-    list: {
-      items: [
-        { title: "Product Engineering", icon: "Code2", body: "Full stack engineering...", points: ["Next.js & Supabase dashboards", "API Integrations", "Optimized databases"] },
-        { title: "Offline Mobile Apps", icon: "Smartphone", body: "Practical utility apps...", points: ["Local storage sync", "Cross platform build", "Hardware integrations"] }
-      ]
-    },
-    stack: {
-      items: ["Flutter & Dart", "Next.js", "Supabase & Postgres", "Tailwind CSS", "TypeScript"]
-    }
-  },
   contact: {
     details: {
       items: [
-        { icon: "Mail", label: "Email", value: "hello@softraxa.com", note: "Replace with your address" },
+        { icon: "Mail", label: "Email", value: "support@dukania.in", note: "" },
         { icon: "MessageCircle", label: "WhatsApp", value: "+91 00000 00000", note: "Replace with your number" },
         { icon: "Clock", label: "Response time", value: "Within 1 business day", note: "" }
       ]
@@ -528,7 +464,7 @@ export default function CMSPage() {
     return text
       .replace(/%title%/g, seoForm.title || "[Page Title]")
       .replace(/%separator%/g, "—")
-      .replace(/%sitedesc%/g, "Softraxa is a software studio building practical, offline-first business software.");
+      .replace(/%sitedesc%/g, "Dukania is billing, stock and GST software for Indian shops.");
   };
 
   const insertToken = (token: string, targetField: "title" | "description" | "og_title" | "og_description" | "twitter_title" | "twitter_description") => {
@@ -642,7 +578,7 @@ export default function CMSPage() {
             <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet to-sky text-white shadow-lg shadow-violet-500/20">
               <Lock className="h-5 w-5" />
             </span>
-            <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-paper">Softraxa CMS</h1>
+            <h1 className="mt-4 font-display text-2xl font-bold tracking-tight text-paper">Dukania CMS</h1>
             <p className="mt-1.5 text-sm text-dim">Sign in to manage page content and SEO</p>
           </div>
 
@@ -657,7 +593,7 @@ export default function CMSPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@softraxa.com"
+                  placeholder="admin@dukania.in"
                   required
                   className="w-full rounded-xl border border-zinc-200 bg-white/50 pl-10 pr-3.5 py-2.5 text-sm text-paper outline-none transition placeholder:text-zinc-400 focus:border-violet focus:ring-4 focus:ring-violet/10"
                 />
@@ -706,7 +642,7 @@ export default function CMSPage() {
               <Globe className="h-4.5 w-4.5" />
             </span>
             <div>
-              <h1 className="font-display text-lg font-bold tracking-tight">Softraxa CMS</h1>
+              <h1 className="font-display text-lg font-bold tracking-tight">Dukania CMS</h1>
               <p className="text-[10px] text-dim font-medium uppercase tracking-wider">Unified Control Center</p>
             </div>
           </div>
@@ -980,7 +916,7 @@ export default function CMSPage() {
                           {previewDevice === "desktop" ? (
                             <div className="font-sans text-left text-sm max-w-sm">
                               <div className="text-[12px] text-zinc-400 flex items-center gap-1.5 mb-1.5 truncate">
-                                <span>https://softraxa.com</span>
+                                <span>https://www.dukania.in</span>
                                 <span>›</span>
                                 <span className="truncate">{seoForm.path === "/" ? "" : seoForm.path.substring(1)}</span>
                               </div>
@@ -996,8 +932,8 @@ export default function CMSPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <span className="grid h-6 w-6 place-items-center rounded-full bg-zinc-200 text-[10px] text-zinc-600 font-bold shrink-0">S</span>
                                 <div className="text-[11px] truncate">
-                                  <span className="block leading-none font-bold text-zinc-800">Softraxa</span>
-                                  <span className="block leading-none text-zinc-500 mt-0.5">https://softraxa.com{seoForm.path}</span>
+                                  <span className="block leading-none font-bold text-zinc-800">Dukania</span>
+                                  <span className="block leading-none text-zinc-500 mt-0.5">https://www.dukania.in{seoForm.path}</span>
                                 </div>
                               </div>
                               <h4 className="text-[16px] leading-tight text-[#1a0dab] font-medium hover:underline cursor-pointer truncate mt-1">
@@ -1083,12 +1019,12 @@ export default function CMSPage() {
                             </div>
                           )}
                           <div className="p-3 bg-white border-t border-zinc-200">
-                            <span className="text-[10px] uppercase text-zinc-500 tracking-wider font-semibold">SOFTRAXA.COM</span>
+                            <span className="text-[10px] uppercase text-zinc-500 tracking-wider font-semibold">DUKANIA.IN</span>
                             <h4 className="text-[14px] font-bold text-zinc-900 leading-tight mt-1 truncate">
                               {resolveTemplate(seoForm.og_title || seoForm.title) || "Software shaped around your business."}
                             </h4>
                             <p className="text-[12px] text-zinc-500 mt-1 line-clamp-2 leading-snug">
-                              {resolveTemplate(seoForm.og_description || seoForm.description) || "Softraxa builds practical, offline-first business software."}
+                              {resolveTemplate(seoForm.og_description || seoForm.description) || "Billing, stock and GST software for Indian shops."}
                             </p>
                           </div>
                         </div>
@@ -1136,12 +1072,12 @@ export default function CMSPage() {
                             </div>
                           )}
                           <div className="p-3 border-t border-zinc-100 bg-white">
-                            <span className="text-[10px] text-zinc-500 font-normal">softraxa.com</span>
+                            <span className="text-[10px] text-zinc-500 font-normal">dukania.in</span>
                             <h4 className="text-[13px] font-semibold text-zinc-950 leading-tight mt-0.5 truncate">
                               {resolveTemplate(seoForm.twitter_title || seoForm.og_title || seoForm.title) || "Software shaped around your business."}
                             </h4>
                             <p className="text-[11px] text-zinc-500 mt-1 line-clamp-2 leading-snug">
-                              {resolveTemplate(seoForm.twitter_description || seoForm.og_description || seoForm.description) || "Softraxa builds practical, offline-first business software."}
+                              {resolveTemplate(seoForm.twitter_description || seoForm.og_description || seoForm.description) || "Billing, stock and GST software for Indian shops."}
                             </p>
                           </div>
                         </div>
@@ -1195,7 +1131,7 @@ export default function CMSPage() {
                               type="text"
                               value={seoForm.canonical_url}
                               onChange={(e) => setSeoForm({ ...seoForm, canonical_url: e.target.value })}
-                              placeholder="e.g. https://softraxa.com/original-page-url"
+                              placeholder="e.g. https://www.dukania.in/original-page-url"
                               className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none transition focus:border-violet"
                             />
                           </div>
@@ -1250,297 +1186,8 @@ export default function CMSPage() {
                   ) : (
                     <>
                       {/* HOME PAGE FORMS */}
-                      {activePageSelector.id === "home" && (
-                        <>
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Home Page Hero</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("hero", "content", pageContentMap.hero?.content)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Hero
-                              </button>
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Hero Badge Label</label>
-                              <input
-                                type="text"
-                                value={pageContentMap.hero?.content?.badge || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.hero.content.badge = e.target.value;
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Hero Title (Use \n for breaks)</label>
-                              <textarea
-                                rows={2}
-                                value={pageContentMap.hero?.content?.title || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.hero.content.title = e.target.value;
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Hero Description</label>
-                              <textarea
-                                rows={3}
-                                value={pageContentMap.hero?.content?.description || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.hero.content.description = e.target.value;
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Primary CTA text</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.primary_cta || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.primary_cta = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Secondary CTA text</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.secondary_cta || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.secondary_cta = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Homepage Stats Grid</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("stats", "items", pageContentMap.stats?.items)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Stats
-                              </button>
-                            </div>
-
-                            {pageContentMap.stats?.items?.map((stat: CmsItem, index: number) => (
-                              <div key={index} className="grid grid-cols-3 gap-4 border-b border-zinc-50 pb-3 last:border-0 last:pb-0">
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Value</label>
-                                  <input
-                                    type="number"
-                                    value={stat.value}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.stats.items[index].value = parseInt(e.target.value) || 0;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Suffix</label>
-                                  <input
-                                    type="text"
-                                    value={stat.suffix}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.stats.items[index].suffix = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Label</label>
-                                  <input
-                                    type="text"
-                                    value={stat.label}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.stats.items[index].label = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
 
                       {/* ABOUT PAGE FORMS */}
-                      {activePageSelector.id === "about" && (
-                        <>
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">About Hero</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("hero", "content", pageContentMap.hero?.content)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Hero
-                              </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Eyebrow</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.eyebrow || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.eyebrow = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Title</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.title || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.title = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Lead</label>
-                              <textarea
-                                rows={2}
-                                value={pageContentMap.hero?.content?.lead || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.hero.content.lead = e.target.value;
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Our Story Paragraphs</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("story", "paragraphs", pageContentMap.story?.paragraphs)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Story
-                              </button>
-                            </div>
-
-                            {pageContentMap.story?.paragraphs?.map((p: string, idx: number) => (
-                              <div key={idx} className="space-y-1.5">
-                                <label className="text-xs font-semibold text-dim">Paragraph {idx + 1}</label>
-                                <textarea
-                                  rows={3}
-                                  value={p}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.story.paragraphs[idx] = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Core Beliefs & Values</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("values", "items", pageContentMap.values?.items)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Beliefs
-                              </button>
-                            </div>
-
-                            {pageContentMap.values?.items?.map((item: CmsItem, idx: number) => (
-                              <div key={idx} className="grid grid-cols-2 gap-4 border-b border-zinc-100 pb-4 last:border-0 last:pb-0">
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Belief Title</label>
-                                  <input
-                                    type="text"
-                                    value={item.title}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.values.items[idx].title = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Icon ID</label>
-                                  <input
-                                    type="text"
-                                    value={item.icon}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.values.items[idx].icon = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                                <div className="col-span-2 space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Belief Description</label>
-                                  <textarea
-                                    rows={2}
-                                    value={item.body}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.values.items[idx].body = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </>
-                      )}
 
                       {/* DUKANIA PRODUCT FORMS */}
                       {activePageSelector.id === "dukania" && (
@@ -1700,172 +1347,6 @@ export default function CMSPage() {
                       )}
 
                       {/* SERVICES PAGE FORMS */}
-                      {activePageSelector.id === "services" && (
-                        <>
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Services Hero</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("hero", "content", pageContentMap.hero?.content)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Hero
-                              </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Eyebrow</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.eyebrow || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.eyebrow = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                              <div className="space-y-1">
-                                <label className="text-xs font-semibold text-dim">Title</label>
-                                <input
-                                  type="text"
-                                  value={pageContentMap.hero?.content?.title || ""}
-                                  onChange={(e) => {
-                                    const updated = { ...pageContentMap };
-                                    updated.hero.content.title = e.target.value;
-                                    setPageContentMap(updated);
-                                  }}
-                                  className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Lead Copy</label>
-                              <textarea
-                                rows={2}
-                                value={pageContentMap.hero?.content?.lead || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.hero.content.lead = e.target.value;
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Services List</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("list", "items", pageContentMap.list?.items)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Services
-                              </button>
-                            </div>
-
-                            {pageContentMap.list?.items?.map((item: CmsItem, idx: number) => (
-                              <div key={idx} className="border-b border-zinc-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0 space-y-3">
-                                <div className="grid grid-cols-2 gap-4">
-                                  <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-dim">Service Title</label>
-                                    <input
-                                      type="text"
-                                      value={item.title}
-                                      onChange={(e) => {
-                                        const updated = { ...pageContentMap };
-                                        updated.list.items[idx].title = e.target.value;
-                                        setPageContentMap(updated);
-                                      }}
-                                      className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                    />
-                                  </div>
-                                  <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-dim">Icon Name</label>
-                                    <input
-                                      type="text"
-                                      value={item.icon}
-                                      onChange={(e) => {
-                                        const updated = { ...pageContentMap };
-                                        updated.list.items[idx].icon = e.target.value;
-                                        setPageContentMap(updated);
-                                      }}
-                                      className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                    />
-                                  </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Service Description</label>
-                                  <textarea
-                                    rows={2}
-                                    value={item.body}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.list.items[idx].body = e.target.value;
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-
-                                <div className="space-y-1">
-                                  <label className="text-xs font-semibold text-dim">Bullets / Details (Comma separated)</label>
-                                  <input
-                                    type="text"
-                                    value={item.points?.join(", ") || ""}
-                                    onChange={(e) => {
-                                      const updated = { ...pageContentMap };
-                                      updated.list.items[idx].points = e.target.value
-                                        .split(",")
-                                        .map((p: string) => p.trim())
-                                        .filter(Boolean);
-                                      setPageContentMap(updated);
-                                    }}
-                                    className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                                  />
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-
-                          <div className="rounded-2xl border border-hairline bg-white p-6 shadow-sm space-y-4">
-                            <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
-                              <h3 className="font-bold text-paper">Tech Stack Highlights</h3>
-                              <button
-                                disabled={saving}
-                                onClick={() => saveContentSection("stack", "items", pageContentMap.stack?.items)}
-                                className="flex items-center gap-1.5 rounded-xl bg-violet px-3 py-1.5 text-xs font-bold text-white shadow-md hover:bg-violet-600 transition"
-                              >
-                                <Save size={13} /> Save Stack
-                              </button>
-                            </div>
-
-                            <div className="space-y-1">
-                              <label className="text-xs font-semibold text-dim">Stack items (Comma separated)</label>
-                              <input
-                                type="text"
-                                value={pageContentMap.stack?.items?.join(", ") || ""}
-                                onChange={(e) => {
-                                  const updated = { ...pageContentMap };
-                                  updated.stack.items = e.target.value
-                                    .split(",")
-                                    .map((t: string) => t.trim())
-                                    .filter(Boolean);
-                                  setPageContentMap(updated);
-                                }}
-                                className="w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-paper outline-none focus:border-violet"
-                              />
-                            </div>
-                          </div>
-                        </>
-                      )}
 
                       {/* CONTACT PAGE FORMS */}
                       {activePageSelector.id === "contact" && (

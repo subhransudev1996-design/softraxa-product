@@ -5,7 +5,7 @@ import LegalPage from "@/components/legal-page";
 // Draft written from what the software actually does (October 2026).
 // Have a lawyer review it before launch.
 export const metadata: Metadata = {
-  title: "Privacy policy — Dukania by Softraxa",
+  title: "Privacy policy — Dukania",
   description: "What data the Dukania app keeps, why, who processes it, and how to have it deleted.",
 };
 
@@ -13,7 +13,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage eyebrow="Legal" title="Privacy policy" updated="24 October 2026">
       <p>
-        This policy explains what Softraxa (&quot;we&quot;) collects when a shop uses the Dukania app and website,
+        This policy explains what Dukania (&quot;we&quot;) collects when a shop uses the Dukania app and website,
         why, and what you can ask us to do with it. Dukania is billing and stock software for shops; the shop
         that uses it decides what goes into it.
       </p>
@@ -92,7 +92,7 @@ export default function PrivacyPage() {
         <p>
           You can see and correct your data in the app, export it, and ask us to delete your account — see{" "}
           <Link href="/delete-account">Delete your account</Link>. For anything else write to{" "}
-          <a href="mailto:support@softraxa.com">support@softraxa.com</a>.
+          <a href="mailto:support@dukania.in">support@dukania.in</a>.
         </p>
       </section>
     </LegalPage>

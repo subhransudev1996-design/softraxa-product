@@ -21,7 +21,7 @@ export default function ConsentClient() {
   const [password, setPassword] = useState("");
   const [formError, setFormError] = useState("");
   const [authorizationId, setAuthorizationId] = useState("");
-  // Who is connecting: the SOFTRAXA admin (Dukania Admin) or a shop (Dukania).
+  // Who is connecting: the Dukania admin (Dukania Admin) or a shop (Dukania).
   const [shopName, setShopName] = useState<string | null>(null);
 
   async function load(id: string) {
@@ -31,7 +31,7 @@ export default function ConsentClient() {
       setStep("login");
       return;
     }
-    // SOFTRAXA admins connect Dukania Admin; shop users connect Dukania,
+    // Dukania admins connect Dukania Admin; shop users connect Dukania,
     // if their plan includes the AI assistant and (staff) the owner allows it.
     const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.user.id).maybeSingle();
     if (profile?.role === "admin") {

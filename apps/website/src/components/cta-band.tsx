@@ -5,7 +5,7 @@ import AuroraBg from "./aurora-bg";
 
 export default function CtaBand({
   title = "Have a business that deserves better software?",
-  lead = "Tell us what you're running and we'll show you what Softraxa can build for it.",
+  lead = "Tell us about your shop and we'll show you how Dukania runs it.",
   cta = "Start a project",
   href = "/contact",
 }: {

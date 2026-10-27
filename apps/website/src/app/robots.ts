@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 
-const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.softraxa.in";
+const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.dukania.in";
 
 /** /robots.txt — everything public except the CMS editor and auth pages. */
 export default function robots(): MetadataRoute.Robots {

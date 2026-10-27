@@ -6,7 +6,7 @@ import LegalPage from "@/components/legal-page";
 // the app. The in-app route is Business profile → Delete my account
 // (request_account_deletion, migration 0058).
 export const metadata: Metadata = {
-  title: "Delete your account — Dukania by Softraxa",
+  title: "Delete your account — Dukania",
   description: "How to delete your Dukania account and data.",
 };
 
@@ -25,7 +25,7 @@ export default function DeleteAccountPage() {
       <section className="space-y-3">
         <h2>Without the app</h2>
         <p>
-          Email <a href="mailto:support@softraxa.com?subject=Delete%20my%20Dukania%20account">support@softraxa.com</a>{" "}
+          Email <a href="mailto:support@dukania.in?subject=Delete%20my%20Dukania%20account">support@dukania.in</a>{" "}
           from the email address of the owner&apos;s login, with your shop&apos;s name. We may ask you to confirm
           it is you before deleting anything.
         </p>

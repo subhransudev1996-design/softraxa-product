@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 };
 
 // OAuth consent for the Dukania MCP servers (supabase/functions/admin-mcp
-// for the SOFTRAXA admin, shop-mcp for shops). ChatGPT or Claude sends the
+// for the Dukania admin, shop-mcp for shops). ChatGPT or Claude sends the
 // user here with ?authorization_id=… (Supabase Auth's OAuth 2.1 server,
 // Authorization Path "/oauth/consent"); they sign in and allow or deny the
 // connection. Shop users need the AI assistant in their plan (ai_context).
