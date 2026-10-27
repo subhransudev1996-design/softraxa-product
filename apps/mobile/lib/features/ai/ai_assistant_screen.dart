@@ -78,7 +78,7 @@ class AiAssistantScreen extends ConsumerWidget {
               title: t('Not in your plan yet'),
               body: ctx?.isOwner ?? false
                   ? t(
-                      'The AI assistant is an add-on. Ask SOFTRAXA to add it to your plan.',
+                      'The AI assistant is an add-on. Ask Dukania to add it to your plan.',
                     )
                   : t(
                       'The AI assistant isn\'t in your shop\'s plan. Ask the shop owner.',
@@ -86,7 +86,7 @@ class AiAssistantScreen extends ConsumerWidget {
               action: ctx?.isOwner ?? false
                   ? FilledButton.icon(
                       icon: const Icon(Icons.chat),
-                      label: Text(t('Ask SOFTRAXA on WhatsApp')),
+                      label: Text(t('Ask Dukania on WhatsApp')),
                       onPressed: () => launchWhatsAppContact(
                         context,
                         ctx,

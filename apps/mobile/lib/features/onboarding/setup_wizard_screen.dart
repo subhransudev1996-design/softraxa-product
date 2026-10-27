@@ -39,7 +39,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
     'Printer check',
   ];
 
-  // An existing shop (created by SOFTRAXA) pre-fills the wizard.
+  // An existing shop (created by Dukania) pre-fills the wizard.
   late final Map<String, dynamic>? _existing = ref
       .read(appContextProvider)
       .value
@@ -429,7 +429,7 @@ class _SetupWizardScreenState extends ConsumerState<SetupWizardScreen> {
                   color: AppColors.red.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(t('Above ₹5 crore, GST needs e-invoicing (IRN), which Dukania doesn\'t support yet. Please contact SOFTRAXA support before billing with Dukania.'),
+                child: Text(t('Above ₹5 crore, GST needs e-invoicing (IRN), which Dukania doesn\'t support yet. Please contact Dukania support before you start billing.'),
                   style: TextStyle(color: AppColors.red, fontSize: 13),
                 ),
               ),

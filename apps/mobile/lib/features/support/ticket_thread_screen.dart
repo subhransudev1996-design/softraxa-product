@@ -31,7 +31,7 @@ final supportUnreadProvider = FutureProvider.autoDispose<int>((ref) async {
 });
 
 /// A support request as a conversation: the shop's first message,
-/// SOFTRAXA's replies and a box to write back.
+/// Dukania's replies and a box to write back.
 class TicketThreadScreen extends ConsumerStatefulWidget {
   const TicketThreadScreen({super.key, required this.ticket});
 
@@ -50,7 +50,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
   @override
   void initState() {
     super.initState();
-    // Opening the request marks SOFTRAXA's answer as read.
+    // Opening the request marks Dukania's answer as read.
     Future.microtask(() async {
       try {
         await ref
@@ -109,7 +109,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              softraxa ? 'SOFTRAXA' : 'You',
+              softraxa ? 'Dukania' : 'You',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -160,7 +160,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
                         ? [
                             Padding(
                               padding: const EdgeInsets.only(top: 16),
-                              child: Text(i18n.t('SOFTRAXA will reply here. You\'ll get a notification.'),
+                              child: Text(i18n.t('Dukania will reply here. You\'ll get a notification.'),
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
                                   color: AppColors.inkSoft,

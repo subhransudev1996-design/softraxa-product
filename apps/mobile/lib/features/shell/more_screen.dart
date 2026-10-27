@@ -405,7 +405,7 @@ class MoreScreen extends ConsumerWidget {
                   onTap: () => launchWhatsAppContact(context, appContext),
                 ),
                 const Divider(),
-                // Shows when SOFTRAXA has answered (migration 0054).
+                // Shows when Dukania has answered (migration 0054).
                 Builder(
                   builder: (context) {
                     final unread = ref.watch(supportUnreadProvider).value ?? 0;
@@ -415,7 +415,7 @@ class MoreScreen extends ConsumerWidget {
                       '/support',
                       color: unread > 0 ? AppColors.red : AppColors.indigo,
                       subtitle: unread > 0
-                          ? '$unread new repl${unread == 1 ? 'y' : 'ies'} from SOFTRAXA'
+                          ? '$unread new repl${unread == 1 ? 'y' : 'ies'} from Dukania'
                           : null,
                     );
                   },

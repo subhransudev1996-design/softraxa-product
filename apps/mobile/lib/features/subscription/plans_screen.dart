@@ -10,7 +10,7 @@ import '../../core/widgets.dart';
 
 /// This shop's plan with its usage, and the plans it can ask for
 /// (get_plans_for_app, migration 0055). Prices never reach the app:
-/// SOFTRAXA agrees them with each shop.
+/// Dukania agrees them with each shop.
 final plansForAppProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   ref,
 ) async {
@@ -28,7 +28,7 @@ class PlansScreen extends ConsumerStatefulWidget {
 class _PlansScreenState extends ConsumerState<PlansScreen> {
   String? _busyPlan;
 
-  /// Sends the request to SOFTRAXA as a support request (request_plan_change).
+  /// Sends the request to Dukania as a support request (request_plan_change).
   Future<void> _ask(Map<String, dynamic> plan) async {
     final id = plan['id'] as String;
     setState(() => _busyPlan = id);
@@ -40,7 +40,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
       if (mounted) {
         showSuccess(
           context,
-          t('Request sent — SOFTRAXA will contact you about the {v1} plan', {'v1': plan['name']}),
+          t('Request sent — Dukania will contact you about the {v1} plan', {'v1': plan['name']}),
         );
       }
     } catch (e) {
@@ -125,7 +125,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                                 'I would like to know more about the Dukania plans for my shop.',
                           ),
                           icon: const Icon(Icons.chat_outlined),
-                          label: Text(t('Talk to SOFTRAXA on WhatsApp')),
+                          label: Text(t('Talk to Dukania on WhatsApp')),
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -460,7 +460,7 @@ class _PlanCard extends StatelessWidget {
                 ? OutlinedButton.icon(
                     onPressed: null,
                     icon: const Icon(Icons.hourglass_top, size: 18),
-                    label: Text(t('Requested — SOFTRAXA will contact you')),
+                    label: Text(t('Requested — Dukania will contact you')),
                   )
                 : FilledButton.icon(
                     onPressed: busy ? null : onAsk,
@@ -474,7 +474,7 @@ class _PlanCard extends StatelessWidget {
   }
 }
 
-/// The highlight lines SOFTRAXA wrote for the plan, then every feature of
+/// The highlight lines Dukania wrote for the plan, then every feature of
 /// the app marked included or not.
 class _PlanDetails extends StatelessWidget {
   const _PlanDetails({required this.plan});

@@ -188,7 +188,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
     }
   }
 
-  /// Ask SOFTRAXA to delete the shop's account and data (migration 0058).
+  /// Ask Dukania to delete the shop's account and data (migration 0058).
   Future<void> _requestDeletion() async {
     final reason = TextEditingController();
     final ok = await showDialog<bool>(
@@ -201,7 +201,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
           children: [
             Text(
               t(
-                'SOFTRAXA will delete your shop, its logins and its data, and confirm on WhatsApp or by email. Bills may be kept for as long as GST law requires. Export your data first if you want a copy.',
+                'Dukania will delete your shop, its logins and its data, and confirm on WhatsApp or by email. Bills may be kept for as long as GST law requires. Export your data first if you want a copy.',
               ),
             ),
             const SizedBox(height: 12),
@@ -236,7 +236,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
         showSuccess(
           context,
           t(
-            'Request sent — SOFTRAXA will confirm when your account is deleted',
+            'Request sent — Dukania will confirm when your account is deleted',
           ),
         );
       }
@@ -390,7 +390,7 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                     decoration: InputDecoration(
                       labelText: t('Annual turnover'),
                       helperText: t(
-                        'Above ₹5 crore needs e-invoicing — contact SOFTRAXA',
+                        'Above ₹5 crore needs e-invoicing — contact Dukania',
                       ),
                     ),
                     items: [

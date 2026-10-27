@@ -8,7 +8,7 @@ import '../../core/theme.dart';
 import 'renewal_payment.dart';
 
 /// Shown when the subscription is expired or the account is suspended.
-/// An expired shop's owner can pay SOFTRAXA by UPI right here (0053).
+/// An expired shop's owner can pay Dukania by UPI right here (0053).
 class BlockedScreen extends ConsumerWidget {
   const BlockedScreen({super.key});
 

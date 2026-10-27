@@ -10,9 +10,9 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 
-/// SOFTRAXA's UPI details, this shop's plan name and any payment still
+/// Dukania's UPI details, this shop's plan name and any payment still
 /// being checked (get_payment_info, migrations 0053 and 0055). Works while
-/// blocked. No prices: SOFTRAXA tells each shop its renewal amount.
+/// blocked. No prices: Dukania tells each shop its renewal amount.
 final paymentInfoProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   ref,
 ) async {
@@ -20,9 +20,9 @@ final paymentInfoProvider = FutureProvider.autoDispose<Map<String, dynamic>>((
   return Map<String, dynamic>.from((res ?? const {}) as Map);
 });
 
-/// Renewal without a payment gateway: the owner pays SOFTRAXA by UPI (QR or
-/// UPI ID) the amount SOFTRAXA told them, then reports it with the UTR.
-/// SOFTRAXA checks its UPI app and renews; "Check again" unlocks the app.
+/// Renewal without a payment gateway: the owner pays Dukania by UPI (QR or
+/// UPI ID) the amount Dukania told them, then reports it with the UTR.
+/// Dukania checks its UPI app and renews; "Check again" unlocks the app.
 class RenewalPaymentCard extends ConsumerStatefulWidget {
   const RenewalPaymentCard({super.key});
 
@@ -31,7 +31,7 @@ class RenewalPaymentCard extends ConsumerStatefulWidget {
 }
 
 class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
-  // No amount in the link: the owner types what SOFTRAXA asked for.
+  // No amount in the link: the owner types what Dukania asked for.
   String _upiLink(String upi, String payee, String shop) => Uri(
     scheme: 'upi',
     host: 'pay',
@@ -108,7 +108,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
       if (mounted) {
         showSuccess(
           context,
-          t('Sent — you\'ll be unlocked as soon as SOFTRAXA confirms it'),
+          t('Sent — you\'ll be unlocked as soon as Dukania confirms it'),
         );
       }
     } catch (e) {
@@ -134,7 +134,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
       error: (e, _) => Text(friendlyError(e), textAlign: TextAlign.center),
       data: (d) {
         final upi = d['upi_id'] as String? ?? '';
-        final payee = d['payee_name'] as String? ?? 'SOFTRAXA';
+        final payee = d['payee_name'] as String? ?? 'Dukania';
         final support = d['support_whatsapp'] as String? ?? '';
         final planName = (d['plan'] as Map?)?['name'] as String?;
         final pending = d['pending_claim'] as Map?;
@@ -160,7 +160,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                     ),
                     child: Text(
                       'We\'re checking your payment of ${money(pending['amount'] as num?)} '
-                      '(UTR ${pending['reference']}). The app unlocks as soon as SOFTRAXA '
+                      '(UTR ${pending['reference']}). The app unlocks as soon as Dukania '
                       'confirms it — tap Check again.',
                       style: const TextStyle(fontSize: 13),
                     ),
@@ -183,7 +183,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 ],
                 const SizedBox(height: 12),
                 if (upi.isEmpty)
-                  Text(t('Contact SOFTRAXA on WhatsApp to renew.'),
+                  Text(t('Contact Dukania on WhatsApp to renew.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.inkSoft),
                   )
@@ -202,7 +202,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                   const SizedBox(height: 8),
                   Text(
                     'Scan with any UPI app and pay $payee the renewal amount '
-                    'SOFTRAXA shared with you',
+                    'Dukania shared with you',
                     textAlign: TextAlign.center,
                     style: const TextStyle(fontSize: 13),
                   ),
@@ -242,7 +242,7 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                         'Please tell me the renewal amount.',
                   ),
                   icon: const Icon(Icons.chat_outlined),
-                  label: Text(t('Ask SOFTRAXA the amount on WhatsApp')),
+                  label: Text(t('Ask Dukania the amount on WhatsApp')),
                 ),
               ],
             ),

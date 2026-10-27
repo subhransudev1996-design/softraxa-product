@@ -210,7 +210,7 @@ class SupportScreen extends ConsumerWidget {
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, i) {
                         final t = rows[i];
-                        // SOFTRAXA answered and the shop hasn't opened it.
+                        // Dukania answered and the shop hasn't opened it.
                         final reply = DateTime.tryParse(
                           t['last_reply_at'] as String? ?? '',
                         );

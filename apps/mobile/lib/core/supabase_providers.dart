@@ -80,14 +80,14 @@ class AppContext {
   final Map<String, dynamic>? subscription;
   final Map<String, dynamic>? permissions;
 
-  /// How to reach SOFTRAXA, set in the admin panel (migration 0056).
+  /// How to reach Dukania, set in the admin panel (migration 0056).
   final Map<String, dynamic>? support;
 
   /// Staff login beyond the plan's user limit (migration 0058): the server
   /// refuses it, the app shows "ask the owner".
   final bool overUserLimit;
 
-  /// SOFTRAXA's WhatsApp number from the admin panel; empty when not set.
+  /// Dukania's WhatsApp number from the admin panel; empty when not set.
   String get supportWhatsApp => support?['whatsapp'] as String? ?? '';
 
   bool get hasBusiness => business != null;
@@ -130,7 +130,7 @@ class AppContext {
   bool get canUseAi => _perm('can_use_ai', false); // 0086
 
   /// The AI assistant (ChatGPT / Claude) is in the shop's plan (0086). Off
-  /// unless the plan or SOFTRAXA switched it on, unlike other features.
+  /// unless the plan or Dukania switched it on, unlike other features.
   bool get aiInPlan => (features?['ai_assistant'] as bool?) ?? false;
 
   /// Staff management is owner-only at launch (LAUNCH_SPECIFICATION roles).
