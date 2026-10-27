@@ -654,6 +654,26 @@ async function cardTypeInput(ctx: Ctx, a: Args) {
   return { id: old?.id ?? null, old: old?.name, p, catNames: cats.filter((c) => ids.includes(c.id)).map((c) => c.name) };
 }
 
+// Staff permissions as the app's Staff screen names them; [key, text, default].
+const PERMISSION_TEXT: Record<string, string> = {};
+const PERMISSION_LIST: Array<[string, string, boolean]> = [
+  ["can_create_invoice", "create bills", true],
+  ["can_edit_prices", "change prices & give discounts", false],
+  ["can_record_payments", "receive customer payments", true],
+  ["can_edit_invoices", "edit or cancel bills", false],
+  ["can_manage_returns", "sale returns & refunds", false],
+  ["can_manage_products", "add & edit products", true],
+  ["can_manage_stock", "stock adjustments", false],
+  ["can_manage_purchases", "purchases, suppliers & supplier payments", false],
+  ["can_manage_expenses", "expenses", false],
+  ["can_manage_cash", "cash drawer & day closing", false],
+  ["can_manage_services", "services & job cards", true],
+  ["can_view_reports", "view reports", false],
+  ["can_view_profit", "see cost prices & profit", false],
+  ["can_use_ai", "use the AI assistant", false],
+];
+for (const [k, text] of PERMISSION_LIST) PERMISSION_TEXT[k] = text;
+
 const BILL_FIELDS =
   "id, invoice_no, invoice_type, invoice_date, customer_id, customer_name, customer_phone, subtotal, discount_amount, tax_amount, round_off, total, paid_amount, due_amount, due_date, payment_status, payment_mode, is_cancelled, notes";
 
@@ -2390,6 +2410,44 @@ const TOOLS: Tool[] = [
       })),
   },
   {
+    name: "list_staff",
+    title: "Staff and their permissions (read only)",
+    description:
+      "Owner: everyone with a login for this shop — owner, managers and staff — with their email, role and what each staff member is allowed to do, " +
+      "and how many users the plan allows. READ ONLY: adding, removing or changing staff and their permissions is done in the Dukania app (Staff & Permissions).",
+    needs: "owner",
+    inputSchema: obj({}),
+    run: async (ctx) => {
+      const biz = await businessId(ctx);
+      const [people, perms, me] = await Promise.all([
+        ctx.db.from("profiles").select("id, full_name, email, role, created_at").eq("business_id", biz).order("created_at"),
+        ctx.db.from("staff_permissions").select("*").eq("business_id", biz),
+        ctx.db.rpc("get_my_context"),
+      ]);
+      const byId = new Map(((perms.data ?? []) as Array<Record<string, unknown>>).map((x) => [String(x.profile_id), x]));
+      const yes = (v: unknown) => v === true;
+      const staff = ((must(people) ?? []) as Array<Record<string, unknown>>).map((u) => {
+        if (u.role === "owner") return { name: u.full_name, email: u.email, role: "owner", can: "everything" };
+        const pm = byId.get(String(u.id)) ?? {};
+        const allowed = PERMISSION_LIST
+          .filter(([k, , def]) => (pm[k] === undefined ? def : yes(pm[k])))
+          .map(([, text]) => text);
+        return {
+          name: u.full_name, email: u.email, role: u.role, since: String(u.created_at).slice(0, 10),
+          allowed_to: allowed,
+          discount_limit_percent: pm.discount_limit_pct ?? 0,
+        };
+      });
+      const sub = ((me.data as { subscription?: { user_limit?: number; staff_count?: number } } | null)?.subscription) ?? {};
+      return {
+        users: staff.length,
+        plan_allows: sub.user_limit === 999 || sub.user_limit == null ? "unlimited" : sub.user_limit,
+        people: staff,
+        note: "To add, remove or change staff, use the Dukania app → Staff & Permissions.",
+      };
+    },
+  },
+  {
     name: "list_offers",
     title: "Offers, coupons and scratch cards",
     description: "The shop's offers: % or ₹ off, minimum bill, code (shared coupon code, own voucher codes, or none for a counter offer), dates, on/off, and how often each was used.",
@@ -2586,6 +2644,7 @@ const INSTRUCTIONS =
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
+  "Staff accounts, permissions, shop settings and the plan can be READ (list_staff, shop_overview) but are changed only in the Dukania app — say so. " +
   "If a tool says something isn't allowed, tell the user exactly that — don't try to get around it.";
 
 function toolList() {
