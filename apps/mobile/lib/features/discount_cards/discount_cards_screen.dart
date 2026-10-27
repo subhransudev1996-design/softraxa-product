@@ -59,6 +59,14 @@ class _DiscountCardsScreenState extends ConsumerState<DiscountCardsScreen> {
         appBar: AppBar(
           leading: appBarBack(context),
           title: Text(t('Discount cards')),
+          actions: [
+            if (isOwner)
+              IconButton(
+                tooltip: t('Card numbers'),
+                icon: const Icon(Icons.pin_outlined),
+                onPressed: () => showCardNumberPattern(context, ref),
+              ),
+          ],
           bottom: TabBar(
             tabs: [
               Tab(text: t('Cards')),
@@ -467,16 +475,152 @@ Future<bool> showCardTypeEditor(
 
 /// Add or change a card. [initialNo] pre-fills the number (a card shown at
 /// checkout that isn't in the list yet). Returns the card's id when saved.
+/// The next card number in the shop's pattern (next_discount_card_no,
+/// 0094). With [onlyWithPattern], null when the shop has no prefix set.
+Future<String?> nextCardNo(
+  WidgetRef ref, {
+  bool onlyWithPattern = false,
+}) async {
+  try {
+    final client = ref.read(supabaseProvider);
+    if (onlyWithPattern) {
+      final biz = ref.read(appContextProvider).value?.businessId;
+      if (biz == null) return null;
+      final row = await client
+          .from('businesses')
+          .select('card_no_prefix')
+          .eq('id', biz)
+          .single();
+      if ((row['card_no_prefix'] as String? ?? '').trim().isEmpty) return null;
+    }
+    return await client.rpc('next_discount_card_no') as String?;
+  } catch (_) {
+    return null;
+  }
+}
+
+/// Owner: the shop's card numbering — a prefix printed on every card
+/// ("2017-1234-1234-") and how many digits the running number has.
+Future<void> showCardNumberPattern(BuildContext context, WidgetRef ref) async {
+  final client = ref.read(supabaseProvider);
+  final biz = ref.read(appContextProvider).value?.businessId;
+  if (biz == null) return;
+  Map<String, dynamic> row;
+  try {
+    row = await client
+        .from('businesses')
+        .select('card_no_prefix, card_no_digits')
+        .eq('id', biz)
+        .single();
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+    return;
+  }
+  if (!context.mounted) return;
+  final prefix = TextEditingController(
+    text: row['card_no_prefix'] as String? ?? '',
+  );
+  var digits = (row['card_no_digits'] as num?)?.toInt() ?? 4;
+  await showDialog<void>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setLocal) => AlertDialog(
+        title: Text(t('Card numbers')),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              t(
+                'New cards get the next number by themselves: your prefix, then a running number.',
+              ),
+              style: TextStyle(color: AppColors.inkSoft),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: prefix,
+              textCapitalization: TextCapitalization.characters,
+              maxLength: 30,
+              decoration: InputDecoration(
+                labelText: t('Prefix'),
+                hintText: '2017-1234-1234-',
+                helperText: t('Leave empty to type each card\'s number.'),
+              ),
+              onChanged: (_) => setLocal(() {}),
+            ),
+            DropdownButtonFormField<int>(
+              initialValue: digits,
+              decoration: InputDecoration(labelText: t('Running number')),
+              items: [
+                for (final d in [3, 4, 5, 6])
+                  DropdownMenuItem(
+                    value: d,
+                    child: Text(
+                      t('{v1} digits ({v2})', {
+                        'v1': d,
+                        'v2': '1'.padLeft(d, '0'),
+                      }),
+                    ),
+                  ),
+              ],
+              onChanged: (v) => setLocal(() => digits = v ?? 4),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              t('First card: {v1}', {
+                'v1': '${prefix.text}${'1'.padLeft(digits, '0')}',
+              }),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t('Cancel')),
+          ),
+          FilledButton(
+            style: dialogActionStyle,
+            onPressed: () async {
+              try {
+                await client
+                    .from('businesses')
+                    .update({
+                      'card_no_prefix': prefix.text,
+                      'card_no_digits': digits,
+                    })
+                    .eq('id', biz);
+                if (ctx.mounted) Navigator.pop(ctx);
+              } catch (e) {
+                if (ctx.mounted) showError(ctx, e);
+              }
+            },
+            child: Text(t('Save')),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
 Future<String?> showDiscountCardEditor(
   BuildContext context,
   WidgetRef ref, {
   required List<Map<String, dynamic>> types,
   Map<String, dynamic>? existing,
   String initialNo = '',
+  Map<String, dynamic>? customer,
 }) async {
   final no = TextEditingController(
     text: existing?['card_no'] as String? ?? initialNo,
   );
+  // A new card in the shop's own numbering (0094) starts with the next
+  // number; shops without a pattern type the printed number.
+  if (existing == null && initialNo.isEmpty) {
+    final next = await nextCardNo(ref, onlyWithPattern: true);
+    if (next != null && no.text.isEmpty) no.text = next;
+    if (!context.mounted) return null;
+  }
   final holder = TextEditingController(
     text: existing?['holder_name'] as String? ?? '',
   );
@@ -486,8 +630,12 @@ Future<String?> showDiscountCardEditor(
   String? typeId =
       existing?['card_type_id'] as String? ??
       (types.length == 1 ? types.first['id'] as String : null);
-  String? customerId = existing?['customer_id'] as String?;
-  String customerName = existing?['customer_name'] as String? ?? '';
+  String? customerId =
+      existing?['customer_id'] as String? ?? customer?['id'] as String?;
+  String customerName =
+      existing?['customer_name'] as String? ??
+      customer?['name'] as String? ??
+      '';
   DateTime? until = existing?['valid_until'] == null
       ? null
       : DateTime.tryParse(existing!['valid_until'] as String);
@@ -512,6 +660,17 @@ Future<String?> showDiscountCardEditor(
                   decoration: InputDecoration(
                     labelText: t('Card number, as printed'),
                     helperText: t('Spaces and dashes don\'t matter.'),
+                    suffixIcon: existing != null
+                        ? null
+                        : TextButton(
+                            onPressed: () async {
+                              final next = await nextCardNo(ref);
+                              if (next != null) {
+                                setLocal(() => no.text = next);
+                              }
+                            },
+                            child: Text(t('Next no.')),
+                          ),
                   ),
                 ),
                 const SizedBox(height: 12),

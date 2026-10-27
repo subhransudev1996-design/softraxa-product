@@ -114,9 +114,12 @@ final invoiceDetailProvider = FutureProvider.autoDispose
           .from('invoices')
           .select(
             '*, '
-            'invoice_items(*, products(sku, track_serial, current_stock, units(allow_decimal)), '
+            'invoice_items(*, products(sku, track_serial, current_stock, '
+            'category_id, publisher, author, units(allow_decimal)), '
             'product_variants(sku, current_stock)), '
-            'invoice_payments(*), customers(advance_amount)',
+            'invoice_payments(*), customers(advance_amount), '
+            // The card's type, to print its part on its own row (0094).
+            'discount_cards(discount_card_types(applies_to, category_ids))',
           )
           .eq('id', id)
           .single();

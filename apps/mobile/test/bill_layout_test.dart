@@ -120,4 +120,109 @@ void main() {
     );
     expect(billNoteLines(null), isEmpty);
   });
+
+  // A bookshop bill (0094): Penguin book MRP 250 with its 10% regular
+  // discount and the Privilege card's 10% on what is left; a second item
+  // the card doesn't cover; a scratch coupon of 20.
+  Map<String, dynamic> bookBill({bool withType = true, double card = 22.5}) => {
+    'invoice_type': 'non_gst',
+    'total': 282.0,
+    'discount_amount': 20,
+    'offer_amount': 20,
+    'offer_name': 'Scratch & Win',
+    'offer_code': 'SC-0001',
+    'round_off': -0.5,
+    'paid_amount': 282.0,
+    'payment_mode': 'cash',
+    'due_amount': 0,
+    'invoice_payments': <Map<String, dynamic>>[],
+    'discount_card_no': '2017-1234-1234-0007',
+    'discount_card_type': 'Privilege',
+    'discount_card_pct': 10,
+    'discount_card_amount': card,
+    if (withType)
+      'discount_cards': {
+        'discount_card_types': {
+          'applies_to': 'only',
+          'category_ids': ['books'],
+        },
+      },
+  };
+  final bookItems = [
+    {
+      'product_id': 'p1',
+      'product_name': 'The Guide',
+      'products': {
+        'category_id': 'books',
+        'publisher': 'Penguin',
+        'author': 'R. K. Narayan',
+      },
+      'quantity': 1,
+      'unit_name': 'pcs',
+      'unit_price': 250,
+      'discount_amount': 47.5,
+      'gst_rate': 0,
+      'line_total': 202.5,
+      'mrp': 250,
+    },
+    {
+      'product_id': 'p2',
+      'product_name': 'Notebook',
+      'products': {'category_id': 'stationery'},
+      'quantity': 1,
+      'unit_name': 'pcs',
+      'unit_price': 100,
+      'discount_amount': 0,
+      'gst_rate': 0,
+      'line_total': 100,
+      'mrp': 120,
+    },
+  ];
+
+  test('book bill: card discount on its own row, coupon, you saved', () {
+    final bill = BillLayout(
+      business: const {},
+      invoice: bookBill(),
+      items: bookItems,
+    );
+    expect(bill.cardSplit, isTrue);
+    expect(bill.lines.first.discount, 25);
+    expect(bill.lines.first.cardDiscount, 22.5);
+    expect(bill.lines.first.total, 225);
+    expect(bill.lines.first.publisher, 'Penguin');
+    expect(bill.lines.first.author, 'R. K. Narayan');
+    expect(bill.lines.last.cardDiscount, 0);
+    expect(bill.anyPublisher, isTrue);
+    expect(bill.linesTotal, 325);
+    expect(bill.adjustments, [
+      ('Less card discount (Privilege 10%)', -22.5),
+      ('Less coupon SC-0001', -20.0),
+      ('Round off', -0.5),
+    ]);
+    // 325 - 22.5 - 20 - 0.5 = the net amount.
+    expect(
+      bill.linesTotal + bill.adjustments.fold(0.0, (s, a) => s + a.$2),
+      bill.netAmount,
+    );
+    expect(bill.cardTopLine, 'Privilege card: 2017-1234-1234-0007');
+    // MRP 250 + 120 against 282 paid.
+    expect(bill.youSaved, 88);
+  });
+
+  test('book bill without the card type: split only when it adds up', () {
+    final ok = BillLayout(
+      business: const {},
+      invoice: bookBill(withType: false),
+      items: [bookItems.first],
+    );
+    expect(ok.cardSplit, isTrue);
+    final off = BillLayout(
+      business: const {},
+      invoice: bookBill(withType: false, card: 50),
+      items: bookItems,
+    );
+    expect(off.cardSplit, isFalse);
+    expect(off.lines.first.discount, 47.5);
+    expect(off.adjustments.first.$1, 'Less coupon SC-0001');
+  });
 }

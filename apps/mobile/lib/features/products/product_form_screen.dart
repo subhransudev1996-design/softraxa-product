@@ -53,6 +53,17 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
     text: _num(widget.existing?['selling_price']),
   );
   late final _mrp = TextEditingController(text: _num(widget.existing?['mrp']));
+
+  /// Book details and the shop's standing discount on the item (0094).
+  late final _publisher = TextEditingController(
+    text: widget.existing?['publisher'] as String? ?? '',
+  );
+  late final _author = TextEditingController(
+    text: widget.existing?['author'] as String? ?? '',
+  );
+  late final _regularDiscount = TextEditingController(
+    text: _num(widget.existing?['regular_discount_pct']),
+  );
   late final _wholesale = TextEditingController(
     text: _num(widget.existing?['wholesale_price']),
   );
@@ -660,6 +671,9 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
         'purchase_price': double.tryParse(_purchase.text) ?? 0,
         'selling_price': double.tryParse(_selling.text) ?? 0,
         'mrp': double.tryParse(_mrp.text) ?? 0,
+        'publisher': _publisher.text.trim(),
+        'author': _author.text.trim(),
+        'regular_discount_pct': double.tryParse(_regularDiscount.text) ?? 0,
         'wholesale_price': double.tryParse(_wholesale.text),
         'wholesale_min_qty': double.tryParse(_wholesaleMinQty.text),
         'gst_rate': _gstRate,
@@ -1128,6 +1142,21 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
               ],
+              if (categoryOf(businessType).bookFields) ...[
+                SectionLabel(t('Book details (optional)')),
+                TextFormField(
+                  controller: _publisher,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 120,
+                  decoration: InputDecoration(labelText: t('Publisher')),
+                ),
+                TextFormField(
+                  controller: _author,
+                  textCapitalization: TextCapitalization.words,
+                  maxLength: 120,
+                  decoration: InputDecoration(labelText: t('Author')),
+                ),
+              ],
               SectionLabel(t('Codes')),
               TextFormField(
                 controller: _sku,
@@ -1217,6 +1246,27 @@ class _ProductFormScreenState extends ConsumerState<ProductFormScreen> {
                     ),
                   ),
                 ],
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _regularDiscount,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: InputDecoration(
+                  labelText: t('Regular discount %'),
+                  helperText: t(
+                    'Taken off the selling price on every bill; the cashier can change it. Leave empty for none.',
+                  ),
+                  helperMaxLines: 2,
+                ),
+                validator: (v) {
+                  final d = double.tryParse((v ?? '').trim());
+                  return (v ?? '').trim().isEmpty ||
+                          (d != null && d >= 0 && d < 100)
+                      ? null
+                      : t('0 to 99');
+                },
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<double>(

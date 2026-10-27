@@ -8,10 +8,12 @@ import '../../core/walkthrough.dart';
 
 import '../../core/formatters.dart';
 import '../../core/platform.dart';
+import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
 import '../reports/gst_rates_screen.dart';
 import 'product_providers.dart';
+import 'regular_discount.dart';
 
 class ProductsScreen extends ConsumerWidget {
   const ProductsScreen({super.key});
@@ -40,6 +42,12 @@ class ProductsScreen extends ConsumerWidget {
             tooltip: t('Suggested products'),
             onPressed: () => context.push('/products/suggested'),
           ),
+          if (ref.watch(appContextProvider).value?.canEditPrices ?? false)
+            IconButton(
+              icon: const Icon(Icons.percent),
+              tooltip: t('Regular discount'),
+              onPressed: () => showRegularDiscountSheet(context, ref),
+            ),
           IconButton(
             icon: const Icon(Icons.category_outlined),
             tooltip: t('Categories, brands & units'),

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/supabase_providers.dart';
 import '../../core/formatters.dart';
+import '../discount_cards/discount_card.dart';
 import '../offline/offline_service.dart';
 import 'cart.dart';
 import '../../core/network.dart';
@@ -23,7 +24,7 @@ const posProductColumns =
     'hsn_code, current_stock, track_serial, has_variants, is_active, '
     'wholesale_price, wholesale_min_qty, image_url, '
     'secondary_unit_name, conversion_factor, pack_price, track_pieces, category_id, '
-    'cutting_charge, '
+    'cutting_charge, publisher, author, regular_discount_pct, '
     'units(name, short_name, allow_decimal), '
     'product_variants(id, name, sku, barcode, attributes, purchase_price, '
     'selling_price, mrp, current_stock, is_active)';
@@ -91,6 +92,46 @@ Future<void> setCartCustomer(
   // The cashier may have switched customer while this loaded.
   if (ref.read(cartProvider).customer?['id'] != customer['id']) return;
   notifier.applyCustomerPricing(prices, wholesale: wholesale);
+  await _applyCustomerCard(ref, customer['id'] as String);
+}
+
+/// The customer's own discount card (0083), applied to the bill when no
+/// card is on it yet — the cashier needn't ask for it. Quietly skipped
+/// offline or when the card can't be used today.
+Future<void> _applyCustomerCard(WidgetRef ref, String customerId) async {
+  if (ref.read(cartProvider).card != null) return;
+  try {
+    final client = ref.read(supabaseProvider);
+    final rows = List<Map<String, dynamic>>.from(
+      await quickCall(
+        client
+            .from('discount_cards')
+            .select('card_no')
+            .eq('customer_id', customerId)
+            .eq('is_active', true)
+            .order('created_at', ascending: false)
+            .limit(3),
+      ),
+    );
+    for (final r in rows) {
+      final res = Map<String, dynamic>.from(
+        await quickCall(
+              client.rpc(
+                'find_discount_card',
+                params: {'p_query': r['card_no']},
+              ),
+            )
+            as Map,
+      );
+      if (res['found'] != true || res['usable'] != true) continue;
+      final cart = ref.read(cartProvider);
+      if (cart.customer?['id'] != customerId || cart.card != null) return;
+      ref.read(cartProvider.notifier).setCard(DiscountCard.fromJson(res));
+      return;
+    }
+  } catch (_) {
+    // Offline: the cashier can still add the card by its number.
+  }
 }
 
 /// The signed-in user's pricing rights (get_my_pricing_rights, 0043):

@@ -147,6 +147,8 @@ class InvoicePdf {
       '#',
       if (_anySku) 'Stock No',
       'Item',
+      if (bill.anyPublisher) 'Publisher',
+      if (bill.anyAuthor) 'Author',
       if (_anySize) 'Size',
       if (isGst) 'HSN',
       'Qty',
@@ -243,6 +245,11 @@ class InvoicePdf {
               pw.Text('GSTIN: $_customerGstin', style: smallBold),
             if (_s(invoice['customer_phone']).isNotEmpty)
               pw.Text('Mob: ${invoice['customer_phone']}', style: small),
+            if (bill.cardTopLine.isNotEmpty)
+              pw.Text(bill.cardTopLine, style: smallBold),
+            pw.SizedBox(height: 8),
+          ] else if (bill.cardTopLine.isNotEmpty) ...[
+            pw.Text(bill.cardTopLine, style: smallBold),
             pw.SizedBox(height: 8),
           ],
           // items
@@ -263,6 +270,8 @@ class InvoicePdf {
               for (var i = 0; i < headers.length; i++)
                 i: headers[i] == 'Item'
                     ? const pw.FlexColumnWidth()
+                    : headers[i] == 'Publisher' || headers[i] == 'Author'
+                    ? const pw.FlexColumnWidth(0.6)
                     : const pw.IntrinsicColumnWidth(),
             },
             cellAlignments: {
@@ -281,6 +290,8 @@ class InvoicePdf {
                     '${i + 1}',
                     if (_anySku) l.sku,
                     l.name,
+                    if (bill.anyPublisher) l.publisher,
+                    if (bill.anyAuthor) l.author,
                     if (_anySize) l.size,
                     if (isGst) it['hsn_code'] as String? ?? '',
                     qtyUnit(l.qty, l.unit),
@@ -296,6 +307,8 @@ class InvoicePdf {
                 '',
                 if (_anySku) '',
                 'Total',
+                if (bill.anyPublisher) '',
+                if (bill.anyAuthor) '',
                 if (_anySize) '',
                 if (isGst) '',
                 qty(bill.totalQty),
@@ -318,14 +331,7 @@ class InvoicePdf {
                   children: [
                     pw.Text('Amount in words:', style: smallBold),
                     pw.Text(bill.amountInWords, style: small),
-                    if (bill.offerLine.isNotEmpty) ...[
-                      pw.SizedBox(height: 8),
-                      pw.Text(
-                        '${bill.offerLine}: ${_rs(bill.offerAmount)}',
-                        style: smallBold,
-                      ),
-                    ],
-                    if (bill.cardLine.isNotEmpty) ...[
+                    if (bill.cardLine.isNotEmpty && !bill.cardSplit) ...[
                       pw.SizedBox(height: 8),
                       pw.Text(
                         bill.cardAmount > 0
@@ -350,14 +356,12 @@ class InvoicePdf {
                 width: f(220),
                 child: pw.Column(
                   children: [
-                    if (bill.billDiscount > 0)
+                    for (final (label, amount) in bill.adjustments)
                       _totRow(
-                        'Bill discount',
-                        '- ${_rs(bill.billDiscount)}',
+                        label,
+                        amount < 0 ? '- ${_rs(-amount)}' : _rs(amount),
                         size: f(9),
                       ),
-                    if (bill.roundOff != 0)
-                      _totRow('Round off', _rs(bill.roundOff), size: f(9)),
                     pw.Divider(),
                     _totRow(
                       'NET AMOUNT',
@@ -372,6 +376,15 @@ class InvoicePdf {
                         bold: true,
                         size: f(9),
                       ),
+                    if (bill.youSaved > 0) ...[
+                      pw.SizedBox(height: 4),
+                      _totRow(
+                        'You saved',
+                        _rs(bill.youSaved),
+                        bold: true,
+                        size: f(10),
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -520,6 +533,8 @@ class InvoicePdf {
                     pw.Text('Mob: ${invoice['customer_phone']}', style: small),
                 ],
               ),
+            if (bill.cardTopLine.isNotEmpty)
+              pw.Text(bill.cardTopLine, style: smallBold),
             if (isGst && _customerGstin.isNotEmpty)
               pw.Text('GSTIN: $_customerGstin', style: small),
             if (isGst && _placeOfSupply.isNotEmpty)
@@ -544,6 +559,14 @@ class InvoicePdf {
                 l.sku.isEmpty ? l.name : '${l.sku}   ${l.name}',
                 style: small,
               ),
+              if (l.publisher.isNotEmpty || l.author.isNotEmpty)
+                pw.Text(
+                  [
+                    l.author,
+                    l.publisher,
+                  ].where((v) => v.isNotEmpty).join(' · '),
+                  style: const pw.TextStyle(fontSize: 6.5),
+                ),
               cols([
                 if (_anySize) l.size,
                 l.isPack ? qtyUnit(l.qty, l.unit) : qty(l.qty),
@@ -564,10 +587,8 @@ class InvoicePdf {
               _n(bill.linesTotal),
             ], smallBold),
             pw.Divider(height: 6),
-            if (bill.billDiscount > 0)
-              _tRow('Bill discount', '-${_n(bill.billDiscount)}', small),
-            if (bill.roundOff != 0)
-              _tRow('Round off', _n(bill.roundOff), small),
+            for (final (label, amount) in bill.adjustments)
+              _tRow(label, amount < 0 ? '-${_n(-amount)}' : _n(amount), small),
             _tRow(
               'Net Bill Amount',
               _n(bill.netAmount),
@@ -585,12 +606,11 @@ class InvoicePdf {
                 ],
               ),
             ),
-            if (bill.offerLine.isNotEmpty) ...[
-              pw.SizedBox(height: 4),
-              pw.Text(bill.offerLine, style: smallBold),
-              _tRow('Offer discount', _n(bill.offerAmount), small),
+            if (bill.youSaved > 0) ...[
+              pw.SizedBox(height: 3),
+              centered('You saved Rs. ${_n(bill.youSaved)}', smallBold),
             ],
-            if (bill.cardLine.isNotEmpty) ...[
+            if (bill.cardLine.isNotEmpty && !bill.cardSplit) ...[
               pw.SizedBox(height: 4),
               pw.Text(bill.cardLine, style: smallBold),
               if (bill.cardAmount > 0)

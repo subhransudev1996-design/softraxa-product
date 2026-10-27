@@ -14,6 +14,7 @@ class BusinessCategory {
     this.jobCards = false,
     this.vehicleJobs = false,
     this.bulkPricing = false,
+    this.bookFields = false,
     this.variantFields = const ['Option'],
   });
 
@@ -30,6 +31,9 @@ class BusinessCategory {
 
   /// Wholesale price with a minimum quantity on the product form.
   final bool bulkPricing;
+
+  /// Publisher and author on products, printed on the bill (0094).
+  final bool bookFields;
 
   /// Attribute names suggested for product variants.
   final List<String> variantFields;
@@ -49,6 +53,7 @@ List<BusinessCategory> get businessCategories => [
     label: t('Stationery & gift shop'),
     description: 'Books, pens, school and office supplies, gifts',
     icon: Icons.edit_note,
+    bookFields: true,
     variantFields: ['Size', 'Color', 'Brand'],
   ),
   BusinessCategory(
@@ -56,6 +61,7 @@ List<BusinessCategory> get businessCategories => [
     label: t('Book store'),
     description: 'School books, novels, guides; editions and languages',
     icon: Icons.menu_book,
+    bookFields: true,
     variantFields: ['Edition', 'Language', 'Class'],
   ),
   BusinessCategory(
@@ -130,6 +136,7 @@ List<BusinessCategory> get businessCategories => [
     icon: Icons.storefront,
     jobCards: true,
     bulkPricing: true,
+    bookFields: true,
   ),
 ];
 

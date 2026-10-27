@@ -46,6 +46,7 @@ class CartLine {
     this.exchangePrice,
     this.categoryId,
     this.cardPct = 0,
+    this.regularPct = 0,
   });
 
   final String key; // productId:variantId (":pack" for a pack line)
@@ -110,6 +111,11 @@ class CartLine {
   /// The applied discount card's % for this line (0 when none or not
   /// covered). Set by the cart, never typed (migration 0083).
   double cardPct;
+
+  /// The product's regular discount % (0094) — the shop's standing
+  /// discount, filled in as the line's % discount when it is added. The
+  /// server allows it like the card's, outside a staff discount limit.
+  final double regularPct;
 
   bool get isPack => packSize != null;
 
@@ -217,6 +223,7 @@ class CartLine {
     exchangePrice: exchangePrice,
     categoryId: categoryId,
     cardPct: cardPct,
+    regularPct: regularPct,
   );
 }
 
@@ -299,17 +306,32 @@ class CartState {
   double get priceReductionPct =>
       defaultTotal > 0 ? priceReduction / defaultTotal * 100 : 0;
 
+  /// What the products' regular discounts may take off, at default prices
+  /// — as the server allows it (0094).
+  double get regularAllowance => lines.fold(
+    0.0,
+    (s, l) => s + l.qty * (l.defaultPrice ?? l.price) * l.regularPct / 100,
+  );
+
   /// What the discount card may take off: its % of the covered lines at
-  /// their default prices — as the server allows it (0083).
+  /// their default prices, after the regular discount — as the server
+  /// allows it (0083, 0094).
   double get cardAllowance => lines.fold(
     0.0,
-    (s, l) => s + l.qty * (l.defaultPrice ?? l.price) * l.cardPct / 100,
+    (s, l) =>
+        s +
+        l.qty *
+            (l.defaultPrice ?? l.price) *
+            (1 - l.regularPct / 100) *
+            l.cardPct /
+            100,
   );
 
   /// The part of [priceReduction] that counts towards a staff member's
-  /// discount limit: everything beyond the card's allowance.
+  /// discount limit: everything beyond the regular discounts, the card's
+  /// allowance and the offer.
   double get countedReduction {
-    final r = priceReduction - cardAllowance - offerAmount;
+    final r = priceReduction - regularAllowance - cardAllowance - offerAmount;
     return r > 0.005 ? r : 0;
   }
 
@@ -539,8 +561,10 @@ class CartNotifier extends Notifier<CartState> {
         availableStock: toDouble(product['current_stock']) / size,
         exchangePrice: _exchangePrice(product, size),
         categoryId: product['category_id'] as String?,
+        regularPct: toDouble(product['regular_discount_pct']),
       );
       line.price = line.defaultPrice ?? pack.price;
+      _applyRegularDiscount(line);
       state = state.copyWith(lines: [...state.lines, line]);
       return;
     }
@@ -579,8 +603,10 @@ class CartNotifier extends Notifier<CartState> {
       wholesaleMinQty: (product['wholesale_min_qty'] as num?)?.toDouble(),
       exchangePrice: _exchangePrice(product, 1),
       categoryId: product['category_id'] as String?,
+      regularPct: toDouble(product['regular_discount_pct']),
     );
     line.price = line.defaultPrice ?? retail;
+    _applyRegularDiscount(line);
     // Optional cutting charge (PD44): its own line, once per cut, billed
     // under the product's HSN and GST rate (the cut goes with the goods).
     final charge = toDouble(product['cutting_charge']);
@@ -603,6 +629,14 @@ class CartNotifier extends Notifier<CartState> {
           ),
       ],
     );
+  }
+
+  /// A new line at the shop's own price starts with the product's regular
+  /// discount (0094); an agreed, wholesale or exchange price doesn't.
+  static void _applyRegularDiscount(CartLine line) {
+    if (line.regularPct <= 0 || line.priceSource != 'retail') return;
+    line.discount = line.regularPct;
+    line.discountIsPercent = true;
   }
 
   /// A line that isn't a stock item — a service or a typed charge from the

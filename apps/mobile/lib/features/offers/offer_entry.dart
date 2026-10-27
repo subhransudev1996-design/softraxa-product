@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' show SupabaseClient;
 
 import '../../core/formatters.dart';
 import '../../core/i18n.dart';
@@ -101,6 +102,106 @@ Future<void> _pickCustomer(BuildContext context, WidgetRef ref) async {
   if (c != null) await setCartCustomer(ref, c);
 }
 
+/// The unused codes of the shop's offers that are on, searchable; the
+/// picked code is checked like a typed one.
+Future<String?> _pickUnusedCode(
+  BuildContext context,
+  SupabaseClient client,
+) async {
+  List<Map<String, dynamic>> rows;
+  try {
+    rows = List<Map<String, dynamic>>.from(
+      await client
+          .from('offer_codes')
+          .select('code, amount, offers!inner(name, is_active)')
+          .isFilter('redeemed_invoice_id', null)
+          .eq('offers.is_active', true)
+          .order('code')
+          .limit(500),
+    );
+  } catch (e) {
+    if (context.mounted) {
+      showError(
+        context,
+        isNetworkError(e) ? t('The list of codes needs the internet.') : e,
+      );
+    }
+    return null;
+  }
+  if (!context.mounted) return null;
+  if (rows.isEmpty) {
+    showError(context, t('No unused coupon codes. Add codes in Offers.'));
+    return null;
+  }
+  var search = '';
+  return showDialog<String>(
+    context: context,
+    builder: (ctx) => StatefulBuilder(
+      builder: (ctx, setLocal) {
+        final q = search.toLowerCase();
+        final shown = [
+          for (final r in rows)
+            if (q.isEmpty ||
+                '${r['code']}'.toLowerCase().contains(q) ||
+                '${(r['offers'] as Map?)?['name']}'.toLowerCase().contains(q))
+              r,
+        ];
+        return AlertDialog(
+          title: Text(t('Pick a coupon')),
+          content: SizedBox(
+            width: 380,
+            height: 420,
+            child: Column(
+              children: [
+                TextField(
+                  autofocus: true,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: t('Code or offer'),
+                    isDense: true,
+                  ),
+                  onChanged: (v) => setLocal(() => search = v.trim()),
+                ),
+                const SizedBox(height: 8),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: shown.length,
+                    itemBuilder: (_, i) {
+                      final r = shown[i];
+                      final amount = toDouble(r['amount']);
+                      return ListTile(
+                        dense: true,
+                        contentPadding: EdgeInsets.zero,
+                        title: Text(
+                          r['code'] as String,
+                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        ),
+                        subtitle: Text(
+                          [
+                            (r['offers'] as Map?)?['name'] as String? ?? '',
+                            if (amount > 0) money(amount),
+                          ].join(' · '),
+                        ),
+                        onTap: () => Navigator.pop(ctx, r['code'] as String),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: Text(t('Cancel')),
+            ),
+          ],
+        );
+      },
+    ),
+  );
+}
+
 /// Type or scan a code, or pick one of the shop's counter offers.
 Future<void> askOffer(BuildContext context, WidgetRef ref) async {
   final client = ref.read(supabaseProvider);
@@ -151,13 +252,25 @@ Future<void> askOffer(BuildContext context, WidgetRef ref) async {
                 onSubmitted: (v) => Navigator.pop(ctx, v),
               ),
               const SizedBox(height: 8),
-              Align(
-                alignment: Alignment.centerRight,
-                child: FilledButton(
-                  style: dialogActionStyle,
-                  onPressed: () => Navigator.pop(ctx, code.text),
-                  child: Text(t('Apply code')),
-                ),
+              Row(
+                children: [
+                  // The shop's unused coupon / scratch-card numbers, to
+                  // pick instead of typing (0094).
+                  TextButton.icon(
+                    onPressed: () async {
+                      final c = await _pickUnusedCode(ctx, client);
+                      if (c != null && ctx.mounted) Navigator.pop(ctx, c);
+                    },
+                    icon: const Icon(Icons.list_alt, size: 18),
+                    label: Text(t('Pick from list')),
+                  ),
+                  const Spacer(),
+                  FilledButton(
+                    style: dialogActionStyle,
+                    onPressed: () => Navigator.pop(ctx, code.text),
+                    child: Text(t('Apply code')),
+                  ),
+                ],
               ),
               if (counter.isNotEmpty) ...[
                 const SizedBox(height: 12),

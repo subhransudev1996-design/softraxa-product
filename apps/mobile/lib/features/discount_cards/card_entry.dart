@@ -23,13 +23,26 @@ class DiscountCardRow extends ConsumerWidget {
     final cart = ref.watch(cartProvider);
     final card = cart.card;
     if (card == null) {
-      return Align(
-        alignment: Alignment.centerLeft,
-        child: TextButton.icon(
-          onPressed: () => askDiscountCard(context, ref),
-          icon: const Icon(Icons.card_membership_outlined, size: 18),
-          label: Text(t('Discount card')),
-        ),
+      final ctx = ref.watch(appContextProvider).value;
+      final canIssue = (ctx?.isOwner ?? false) || (ctx?.canEditPrices ?? false);
+      final customer = cart.customer;
+      return Wrap(
+        spacing: 4,
+        children: [
+          TextButton.icon(
+            onPressed: () => askDiscountCard(context, ref),
+            icon: const Icon(Icons.card_membership_outlined, size: 18),
+            label: Text(t('Discount card')),
+          ),
+          // A new card for the bill's customer, numbered by the shop's
+          // pattern (0094), and used on this bill straight away.
+          if (canIssue && customer != null)
+            TextButton.icon(
+              onPressed: () => _giveCard(context, ref, customer),
+              icon: const Icon(Icons.add_card_outlined, size: 18),
+              label: Text(t('Give card')),
+            ),
+        ],
       );
     }
     final off = cart.cardDiscountTotal;
@@ -127,6 +140,48 @@ Future<void> askDiscountCard(BuildContext context, WidgetRef ref) async {
   );
   if (query == null || query.trim().isEmpty || !context.mounted) return;
   await _findAndApply(context, ref, query.trim());
+}
+
+Future<void> _giveCard(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> customer,
+) async {
+  Map<String, dynamic> data;
+  try {
+    data = await ref.read(discountCardsProvider('').future);
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+    return;
+  }
+  if (!context.mounted) return;
+  final types = [
+    for (final ty in (data['types'] as List? ?? const []))
+      if ((ty as Map)['is_active'] == true) Map<String, dynamic>.from(ty),
+  ];
+  if (types.isEmpty) {
+    showError(
+      context,
+      t('There are no card types yet. The owner adds them in Discount cards.'),
+    );
+    return;
+  }
+  final id = await showDiscountCardEditor(
+    context,
+    ref,
+    types: types,
+    customer: customer,
+  );
+  ref.invalidate(discountCardsProvider);
+  if (id == null || !context.mounted) return;
+  final row = await ref
+      .read(supabaseProvider)
+      .from('discount_cards')
+      .select('card_no')
+      .eq('id', id)
+      .single();
+  if (!context.mounted) return;
+  await _findAndApply(context, ref, row['card_no'] as String);
 }
 
 Future<void> _findAndApply(

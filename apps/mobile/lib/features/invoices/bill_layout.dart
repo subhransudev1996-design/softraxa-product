@@ -26,9 +26,21 @@ class BillLine {
     required this.discount,
     required this.total,
     this.isPack = false,
+    this.publisher = '',
+    this.author = '',
+    this.cardDiscount = 0,
   });
 
   final String name;
+
+  /// Book details (0094), printed as columns when any line has them.
+  final String publisher;
+  final String author;
+
+  /// The discount card's part of this line, when the bill shows it on its
+  /// own row ([BillLayout.cardSplit]); [discount] is then the line's own
+  /// (regular) discount and [total] is before the card.
+  final double cardDiscount;
 
   /// Sold by the pack (0061): [qty] and [rate] are per pack, [unit] the pack.
   final bool isPack;
@@ -91,7 +103,98 @@ class BillLayout {
   double _incl(Map<String, dynamic> it) =>
       isGst ? 1 + toDouble(it['gst_rate']) / 100 : 1;
 
-  late final List<BillLine> lines = [for (final it in items) _line(it)];
+  late final List<BillLine> lines = _splitCard([
+    for (final it in items) _line(it),
+  ]);
+
+  /// The card's % on this bill (0083).
+  double get _cardPct => toDouble(invoice['discount_card_pct']);
+
+  /// The card type as it is now, when the bill was loaded with it.
+  Map? get _cardType =>
+      (invoice['discount_cards'] as Map?)?['discount_card_types'] as Map?;
+
+  /// Whether the card covered this item: stock items only, and the
+  /// categories its type names.
+  bool _cardCovers(Map<String, dynamic> it) {
+    if ((it['product_id'] as String? ?? '').isEmpty) return false;
+    final type = _cardType;
+    if (type == null) return true;
+    final cats = {
+      for (final c in (type['category_ids'] as List? ?? const [])) '$c',
+    };
+    final cat = (it['products'] as Map?)?['category_id'] as String?;
+    return switch (type['applies_to']) {
+      'only' => cats.contains(cat),
+      'except' => !cats.contains(cat),
+      _ => true,
+    };
+  }
+
+  /// True when each line's card part could be told apart from its own
+  /// discount, so the bill prints the regular discount in the lines and
+  /// "Less card discount" below the total (0094).
+  bool get cardSplit {
+    lines; // worked out with the lines
+    return _cardSplit;
+  }
+
+  bool _cardSplit = false;
+
+  /// The card took its % of what was left after the line's own discount,
+  /// so its part is (amount - discount) x pct / (100 - pct).
+  List<BillLine> _splitCard(List<BillLine> raw) {
+    final pct = _cardPct;
+    if (pct <= 0 || pct >= 100 || raw.length != items.length) return raw;
+    final parts = [
+      for (var i = 0; i < raw.length; i++)
+        () {
+          if (!_cardCovers(items[i])) return 0.0;
+          final part = _r2(
+            (raw[i].amount - raw[i].discount) * pct / (100 - pct),
+          );
+          // More than the line's whole discount: the card wasn't used on
+          // it (an item it didn't cover when billed).
+          return part < 0 || part > raw[i].discount + 0.01 ? 0.0 : part;
+        }(),
+    ];
+    final sum = parts.fold(0.0, (s, v) => s + v);
+    if (sum <= 0) return raw;
+    // Without the card type to go by, every item was taken as covered:
+    // only trust that when it adds up to what the bill recorded.
+    if (_cardType == null &&
+        (sum - cardAmount).abs() > (cardAmount * 0.02).clamp(1, 1e9)) {
+      return raw;
+    }
+    _cardSplit = true;
+    return [
+      for (var i = 0; i < raw.length; i++)
+        parts[i] == 0
+            ? raw[i]
+            : BillLine(
+                name: raw[i].name,
+                isPack: raw[i].isPack,
+                sku: raw[i].sku,
+                size: raw[i].size,
+                qty: raw[i].qty,
+                unit: raw[i].unit,
+                rate: raw[i].rate,
+                amount: raw[i].amount,
+                discount: _r2(raw[i].discount - parts[i]),
+                total: _r2(raw[i].total + parts[i]),
+                publisher: raw[i].publisher,
+                author: raw[i].author,
+                cardDiscount: parts[i],
+              ),
+    ];
+  }
+
+  /// The card's whole part, when printed on its own row.
+  double get cardSplitAmount => lines.fold(0.0, (s, l) => s + l.cardDiscount);
+
+  /// Publisher / Author columns: only when some line has them.
+  bool get anyPublisher => lines.any((l) => l.publisher.isNotEmpty);
+  bool get anyAuthor => lines.any((l) => l.author.isNotEmpty);
 
   BillLine _line(Map<String, dynamic> it) {
     final billed = billedQty(it);
@@ -130,6 +233,9 @@ class BillLayout {
       amount: _r2(billed.qty * rate),
       discount: _r2(discount),
       total: toDouble(it['line_total']),
+      publisher: ((it['products'] as Map?)?['publisher'] as String? ?? '')
+          .trim(),
+      author: ((it['products'] as Map?)?['author'] as String? ?? '').trim(),
     );
   }
 
@@ -174,6 +280,51 @@ class BillLayout {
   }
 
   double get due => isEstimate ? 0 : toDouble(invoice['due_amount']);
+
+  /// What comes off (or is added to) the items' total, in order, down to
+  /// the net amount: the card's part when printed on its own row, the
+  /// offer / coupon, the typed bill discount and the round-off.
+  List<(String, double)> get adjustments => [
+    if (cardSplit && cardSplitAmount > 0)
+      (
+        'Less card discount'
+            '${_cardTypeName.isEmpty ? '' : ' ($_cardTypeName ${qty(_cardPct)}%)'}',
+        -cardSplitAmount,
+      ),
+    if (offerAmount > 0) (offerTotalLabel, -offerAmount),
+    if (billDiscount > 0.005) ('Bill discount', -billDiscount),
+    if (roundOff != 0) ('Round off', roundOff),
+  ];
+
+  String get _cardTypeName =>
+      (invoice['discount_card_type'] as String? ?? '').trim();
+
+  /// "Less coupon SC-0001" / "Less offer: Diwali 10%".
+  String get offerTotalLabel {
+    final name = (invoice['offer_name'] as String? ?? '').trim();
+    final code = (invoice['offer_code'] as String? ?? '').trim();
+    if (code.isNotEmpty) return 'Less coupon $code';
+    return name.isEmpty ? 'Less offer' : 'Less offer: $name';
+  }
+
+  /// The card's number by the customer's name: "Gold card: 2017 1234".
+  String get cardTopLine {
+    final no = (invoice['discount_card_no'] as String? ?? '').trim();
+    if (no.isEmpty) return '';
+    return '${_cardTypeName.isEmpty ? 'Discount' : _cardTypeName} card: $no';
+  }
+
+  /// What the customer saved: the MRP (or the rate, when higher) of every
+  /// line against what they pay. 0 when nothing was saved.
+  double get youSaved {
+    var full = 0.0;
+    for (var i = 0; i < items.length && i < lines.length; i++) {
+      final mrp = toDouble(items[i]['mrp']) * toDouble(items[i]['quantity']);
+      full += mrp > lines[i].amount ? mrp : lines[i].amount;
+    }
+    final saved = _r2(full - netAmount);
+    return saved >= 1 ? saved : 0;
+  }
 
   /// The discount card on the bill (0083): "Gold card 2017 1234 1234 4109
   /// (10% off)", or '' when none. Its discount is already in the lines.

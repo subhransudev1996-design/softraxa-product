@@ -756,6 +756,42 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                         setDialogState(() => discountIsPercent = v),
                     label: t('Line discount'),
                   ),
+                  // Quick picks: the product's regular discount (0094) and
+                  // the usual percentages.
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 4,
+                    children: [
+                      for (final p in {
+                        if (line.regularPct > 0) line.regularPct,
+                        5.0,
+                        10.0,
+                        15.0,
+                        20.0,
+                        25.0,
+                      }.toList()..sort())
+                        ChoiceChip(
+                          label: Text(
+                            p == line.regularPct
+                                ? t('Regular {v1}%', {'v1': qty(p)})
+                                : '${qty(p)}%',
+                          ),
+                          selected:
+                              discountIsPercent &&
+                              (double.tryParse(discount.text) ?? -1) == p,
+                          onSelected: (_) => setDialogState(() {
+                            discountIsPercent = true;
+                            discount.text = qty(p);
+                          }),
+                        ),
+                      ActionChip(
+                        label: Text(t('None')),
+                        onPressed: () =>
+                            setDialogState(() => discount.text = ''),
+                      ),
+                    ],
+                  ),
                 ],
                 if (line.trackSerial) ...[
                   const SizedBox(height: 12),

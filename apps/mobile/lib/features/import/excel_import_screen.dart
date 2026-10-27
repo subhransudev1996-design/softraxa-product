@@ -29,7 +29,14 @@ const _headers = [
   'GST %',
   'Opening Stock',
   'Low Stock Alert',
+  // Optional (0094): files made from the older template stop before these.
+  'Regular Discount %',
+  'Publisher',
+  'Author',
 ];
+
+/// Columns every file must have; the rest may be missing.
+const _requiredHeaders = 13;
 
 /// Strips thousands separators / currency symbol / stray percent sign so
 /// "28,999", "₹28999" and "18%" (typed as literal text) all parse — throws
@@ -115,6 +122,25 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
       DoubleCellValue(20),
       DoubleCellValue(5),
     ]);
+    // A book with its regular discount, publisher and author (0094).
+    sheet.appendRow([
+      TextCellValue('Wings of Fire'),
+      TextCellValue('Biography'),
+      TextCellValue(''),
+      TextCellValue('Piece'),
+      TextCellValue(''),
+      TextCellValue('9788173711466'),
+      TextCellValue('4901'),
+      DoubleCellValue(180),
+      DoubleCellValue(250),
+      DoubleCellValue(250),
+      DoubleCellValue(0),
+      DoubleCellValue(10),
+      DoubleCellValue(2),
+      DoubleCellValue(10),
+      TextCellValue('Universities Press'),
+      TextCellValue('A. P. J. Abdul Kalam'),
+    ]);
     final bytes = excel.encode()!;
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/product_import_sample.xlsx');
@@ -155,6 +181,7 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
       final headerRow = sheet.rows[0];
       for (var i = 0; i < _headers.length; i++) {
         final actual = cellStr(headerRow, i);
+        if (i >= _requiredHeaders && actual.isEmpty) continue;
         if (normalizeImportHeader(actual) !=
             normalizeImportHeader(_headers[i])) {
           throw Exception(
@@ -245,8 +272,20 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
           'gst_rate': gstRate,
           'opening_stock': numOrZero(row, 11, 'Opening stock', errors),
           'low_stock_qty': numOrZero(row, 12, 'Low stock alert', errors),
+          'regular_discount_pct': numOrZero(
+            row,
+            13,
+            'Regular discount %',
+            errors,
+          ),
+          'publisher': cellStr(row, 14),
+          'author': cellStr(row, 15),
         });
         item.errors.addAll(errors);
+        final regular = item.values['regular_discount_pct'] as double;
+        if (regular < 0 || regular >= 100) {
+          item.errors.add('Regular discount % must be from 0 to 99');
+        }
 
         // validation (PRD 7.6)
         if (name.isEmpty) item.errors.add('Name is required');
@@ -357,6 +396,9 @@ class _ExcelImportScreenState extends ConsumerState<ExcelImportScreen> {
                 'mrp': v['mrp'],
                 'gst_rate': v['gst_rate'],
                 'low_stock_qty': v['low_stock_qty'],
+                'regular_discount_pct': v['regular_discount_pct'],
+                'publisher': v['publisher'],
+                'author': v['author'],
               })
               .select('id')
               .single();

@@ -217,6 +217,9 @@ class ThermalPrinterService {
         ),
       ]);
     }
+    if (bill.cardTopLine.isNotEmpty) {
+      bytes += generator.text(bill.cardTopLine, styles: bold);
+    }
     final customerGstin = s(invoice['customer_gstin']);
     if (isGst && customerGstin.isNotEmpty) {
       bytes += generator.text('GSTIN: $customerGstin');
@@ -256,6 +259,8 @@ class ThermalPrinterService {
       bytes += generator.text(
         l.sku.isEmpty ? '${l.name}$size' : '${l.sku}  ${l.name}$size',
       );
+      final book = [l.author, l.publisher].where((v) => v.isNotEmpty);
+      if (book.isNotEmpty) bytes += generator.text(book.join(' - '));
       bytes += generator.row(
         cols([
           l.isPack ? qtyUnit(l.qty, l.unit) : qty(l.qty),
@@ -289,8 +294,9 @@ class ThermalPrinterService {
       ]);
     }
 
-    if (bill.billDiscount > 0) totalRow('Bill discount', -bill.billDiscount);
-    if (bill.roundOff != 0) totalRow('Round off', bill.roundOff);
+    for (final (label, amount) in bill.adjustments) {
+      totalRow(label, amount);
+    }
     bytes += generator.row([
       PosColumn(
         text: 'Net Bill Amount',
@@ -309,16 +315,15 @@ class ThermalPrinterService {
     ]);
     bytes += generator.text('Amount In Words:', styles: bold);
     bytes += generator.text(bill.amountInWords);
-
-    // ---- offer (0084) ----
-    if (bill.offerLine.isNotEmpty) {
-      bytes += generator.hr();
-      bytes += generator.text(bill.offerLine, styles: bold);
-      totalRow('Offer discount', bill.offerAmount);
+    if (bill.youSaved > 0) {
+      bytes += generator.text(
+        'You saved Rs. ${n(bill.youSaved)}',
+        styles: center.copyWith(bold: true),
+      );
     }
 
-    // ---- discount card (0083) ----
-    if (bill.cardLine.isNotEmpty) {
+    // ---- discount card (0083), when its part is inside the lines ----
+    if (bill.cardLine.isNotEmpty && !bill.cardSplit) {
       bytes += generator.hr();
       bytes += generator.text(bill.cardLine, styles: bold);
       if (bill.cardAmount > 0) totalRow('Card discount', bill.cardAmount);
