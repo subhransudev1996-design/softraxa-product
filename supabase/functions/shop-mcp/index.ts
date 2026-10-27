@@ -2646,7 +2646,8 @@ const INSTRUCTIONS =
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
   "never accept warnings for them, and never guess a product, customer or price — look it up or ask. " +
   "For the shop's offers, coupons and scratch cards use list_offers; for discount cards and card types use find_discount_card " +
-  "(no card number = list them all). " +
+  "(no card number = list them all). For services use list_services; for repair job cards use list_jobs and get_job. " +
+  "Never ask the user for a screenshot of the app to read data — there is a tool for every list in the app. " +
   "Staff accounts, permissions, shop settings and the plan can be READ (list_staff, shop_overview) but are changed only in the Dukania app — say so. " +
   "If a tool says something isn't allowed, tell the user exactly that — don't try to get around it.";
 
