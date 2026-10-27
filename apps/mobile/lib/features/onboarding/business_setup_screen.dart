@@ -564,13 +564,19 @@ class _BusinessSetupScreenState extends ConsumerState<BusinessSetupScreen> {
                 const SizedBox(height: 8),
                 TextFormField(
                   controller: _billFooter,
-                  maxLength: 200,
+                  minLines: 2,
+                  maxLines: 8,
+                  maxLength: 1000,
                   decoration: InputDecoration(
-                    labelText: t('Closing line'),
-                    hintText: t('Thank you! Visit again.'),
-                    helperText: t(
-                      'Printed last, in the middle. Leave empty for none.',
+                    labelText: t('Note at the bottom of the bill'),
+                    alignLabelWithHint: true,
+                    hintText: t(
+                      'Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*',
                     ),
+                    helperText: t(
+                      'Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.',
+                    ),
+                    helperMaxLines: 4,
                   ),
                 ),
                 SwitchListTile(

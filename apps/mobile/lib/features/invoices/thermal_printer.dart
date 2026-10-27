@@ -364,7 +364,12 @@ class ThermalPrinterService {
     }
     if (bill.footer.isNotEmpty) {
       bytes += generator.feed(1);
-      bytes += generator.text(bill.footer, styles: center);
+      for (final l in bill.footer) {
+        bytes += generator.text(
+          l.text,
+          styles: PosStyles(align: PosAlign.center, bold: l.bold),
+        );
+      }
     }
     bytes += generator.feed(2);
     bytes += generator.cut();

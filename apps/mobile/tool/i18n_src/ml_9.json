@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "ഉദാ. തെറ്റായി രേഖപ്പെടുത്തി",
 "Return undone": "റിട്ടേൺ റദ്ദാക്കി",
 "{v1} — reversed": "{v1} — തിരിച്ചെടുത്തു",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ഇത് പണമടച്ച പർച്ചേസുകൾ വീണ്ടും ബാക്കിയായി കാണും. പേയ്മെന്റ് ചരിത്രത്തിൽ തുടരും, തിരിച്ചെടുത്തതായി അടയാളപ്പെടുത്തും."
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ഇത് പണമടച്ച പർച്ചേസുകൾ വീണ്ടും ബാക്കിയായി കാണും. പേയ്മെന്റ് ചരിത്രത്തിൽ തുടരും, തിരിച്ചെടുത്തതായി അടയാളപ്പെടുത്തും.",
+"Note at the bottom of the bill": "ബില്ലിന്റെ താഴെയുള്ള കുറിപ്പ്",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "നന്ദി! വീണ്ടും വരിക.\n*കട സമയം: രാവിലെ 9 മുതൽ രാത്രി 9 വരെ, ചൊവ്വാഴ്ച അവധി*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "അവസാനം, നടുവിൽ, വരി വരിയായി അച്ചടിക്കും: കട സമയം, അവധി ദിവസം, റിട്ടേൺ അല്ലെങ്കിൽ മാറ്റൽ നിയമം. ഒരു വരി *നക്ഷത്രങ്ങൾക്ക്* ഇടയിൽ എഴുതിയാൽ അത് ബോൾഡായി അച്ചടിക്കും. വേണ്ടെങ്കിൽ ഒഴിച്ചിടുക."
 }

@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "जैसे गलती से दर्ज हुआ",
 "Return undone": "वापसी रद्द हो गई",
 "{v1} — reversed": "{v1} — उलटा किया गया",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "जिन खरीद का इसने भुगतान किया था, वे फिर से बकाया दिखेंगी। भुगतान इतिहास में रहेगा, उलटा किया गया चिह्नित।"
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "जिन खरीद का इसने भुगतान किया था, वे फिर से बकाया दिखेंगी। भुगतान इतिहास में रहेगा, उलटा किया गया चिह्नित।",
+"Note at the bottom of the bill": "बिल के नीचे का नोट",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "धन्यवाद! फिर आइए।\n*दुकान का समय: सुबह 9 से रात 9, मंगलवार बंद*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "सबसे आख़िर में, बीच में, लाइन दर लाइन छपता है: दुकान का समय, बंद का दिन, वापसी या बदलने की शर्तें। किसी लाइन को *तारों* के बीच लिखें तो वह बोल्ड छपेगी। कुछ नहीं चाहिए तो खाली छोड़ें।"
 }

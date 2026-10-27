@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "যেমন ভুল করে লেখা হয়েছে",
 "Return undone": "ফেরত বাতিল হয়েছে",
 "{v1} — reversed": "{v1} — উল্টানো হয়েছে",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "এটি যে কেনাকাটাগুলোর দাম দিয়েছিল সেগুলো আবার বাকি দেখাবে। পেমেন্টটি ইতিহাসে থাকবে, উল্টানো হিসেবে চিহ্নিত।"
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "এটি যে কেনাকাটাগুলোর দাম দিয়েছিল সেগুলো আবার বাকি দেখাবে। পেমেন্টটি ইতিহাসে থাকবে, উল্টানো হিসেবে চিহ্নিত।",
+"Note at the bottom of the bill": "বিলের নিচের নোট",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "ধন্যবাদ! আবার আসবেন।\n*দোকানের সময়: সকাল ৯টা থেকে রাত ৯টা, মঙ্গলবার বন্ধ*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "সবশেষে, মাঝখানে, লাইন ধরে ছাপা হয়: দোকানের সময়, বন্ধের দিন, ফেরত বা বদলের নিয়ম। কোনো লাইন *তারা*-র মাঝে লিখলে তা বোল্ড ছাপা হবে। না চাইলে খালি রাখুন।"
 }

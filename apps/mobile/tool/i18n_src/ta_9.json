@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "எ.கா. தவறாக பதிவானது",
 "Return undone": "திருப்பம் ரத்தானது",
 "{v1} — reversed": "{v1} — திரும்பப் பெறப்பட்டது",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "இது செலுத்திய கொள்முதல்கள் மீண்டும் நிலுவையாகக் காட்டும். பணம் செலுத்தல் வரலாற்றில் இருக்கும், திரும்பப் பெறப்பட்டதாகக் குறிக்கப்படும்."
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "இது செலுத்திய கொள்முதல்கள் மீண்டும் நிலுவையாகக் காட்டும். பணம் செலுத்தல் வரலாற்றில் இருக்கும், திரும்பப் பெறப்பட்டதாகக் குறிக்கப்படும்.",
+"Note at the bottom of the bill": "பில்லின் கீழே குறிப்பு",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "நன்றி! மீண்டும் வருக.\n*கடை நேரம்: காலை 9 முதல் இரவு 9 வரை, செவ்வாய் விடுமுறை*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "கடைசியில், நடுவில், வரி வரியாக அச்சாகும்: கடை நேரம், விடுமுறை நாள், திருப்பம் அல்லது மாற்று விதிகள். ஒரு வரியை *நட்சத்திரங்களுக்கு* இடையே எழுதினால் அது தடித்த எழுத்தில் அச்சாகும். வேண்டாமெனில் காலியாக விடவும்."
 }

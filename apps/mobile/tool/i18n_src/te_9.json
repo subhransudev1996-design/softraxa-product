@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "ఉదా. పొరపాటున నమోదైంది",
 "Return undone": "రిటర్న్ రద్దయింది",
 "{v1} — reversed": "{v1} — వెనక్కి తీసుకున్నారు",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ఇది చెల్లించిన కొనుగోళ్లు మళ్లీ బాకీగా కనిపిస్తాయి. చెల్లింపు చరిత్రలో ఉంటుంది, వెనక్కి తీసుకున్నదిగా గుర్తించబడుతుంది."
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ఇది చెల్లించిన కొనుగోళ్లు మళ్లీ బాకీగా కనిపిస్తాయి. చెల్లింపు చరిత్రలో ఉంటుంది, వెనక్కి తీసుకున్నదిగా గుర్తించబడుతుంది.",
+"Note at the bottom of the bill": "బిల్లు కింద నోట్",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "ధన్యవాదాలు! మళ్లీ రండి.\n*షాప్ సమయం: ఉదయం 9 నుండి రాత్రి 9 వరకు, మంగళవారం సెలవు*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "చివరగా, మధ్యలో, లైన్ వారీగా ముద్రించబడుతుంది: షాప్ సమయం, సెలవు రోజు, రిటర్న్ లేదా మార్పు నియమాలు. ఒక లైన్‌ను *నక్షత్రాల* మధ్య రాస్తే అది బోల్డ్‌గా ముద్రించబడుతుంది. వద్దనుకుంటే ఖాళీగా వదలండి."
 }

@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "उदा. चुकून नोंदवले",
 "Return undone": "परतावा रद्द झाला",
 "{v1} — reversed": "{v1} — उलटवले",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ज्या खरेदींसाठी हे भरले होते त्या पुन्हा बाकी दिसतील. पेमेंट इतिहासात राहील, उलटवले म्हणून."
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ज्या खरेदींसाठी हे भरले होते त्या पुन्हा बाकी दिसतील. पेमेंट इतिहासात राहील, उलटवले म्हणून.",
+"Note at the bottom of the bill": "बिलाच्या खालची टीप",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "धन्यवाद! पुन्हा या.\n*दुकानाची वेळ: सकाळी 9 ते रात्री 9, मंगळवारी बंद*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "सर्वात शेवटी, मध्यभागी, ओळीने छापले जाते: दुकानाची वेळ, बंदचा दिवस, परतावा किंवा बदलाचे नियम. एखादी ओळ *ताऱ्यांच्या* मध्ये लिहिली तर ती ठळक छापली जाईल. नको असल्यास रिकामे ठेवा."
 }

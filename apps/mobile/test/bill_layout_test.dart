@@ -83,7 +83,7 @@ void main() {
     expect(bill.totalLineDiscount, 384);
     expect(bill.linesTotal, 3456);
     expect(bill.payments, [('UPI', 3456.0)]);
-    expect(bill.footer, 'Visit again');
+    expect(bill.footer, [(text: 'Visit again', bold: false)]);
 
     final gst = bill.gstSummary.single;
     expect(gst.rate, 5);
@@ -105,4 +105,19 @@ void main() {
       expect(bill.gstSummary, isEmpty);
     },
   );
+
+  test('bottom note: one line each, *starred* lines bold, blanks dropped', () {
+    expect(
+      billNoteLines(
+        '*BUSINESS HOURS - 9 AM TO 10 PM*\n\n  Last Tuesday closed \n**\n*Exchange: 12 noon to 4 pm*',
+      ),
+      [
+        (text: 'BUSINESS HOURS - 9 AM TO 10 PM', bold: true),
+        (text: 'Last Tuesday closed', bold: false),
+        (text: '**', bold: false),
+        (text: 'Exchange: 12 noon to 4 pm', bold: true),
+      ],
+    );
+    expect(billNoteLines(null), isEmpty);
+  });
 }

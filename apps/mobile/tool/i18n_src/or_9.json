@@ -413,5 +413,8 @@
 "e.g. entered by mistake": "ଯେପରି ଭୁଲରେ ଲେଖାଯାଇଛି",
 "Return undone": "ଫେରସ୍ତ ବାତିଲ ହେଲା",
 "{v1} — reversed": "{v1} — ଓଲଟାଯାଇଛି",
-"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ଏହା ଯେଉଁ କିଣାଣିର ଦେୟ ଦେଇଥିଲା ସେଗୁଡ଼ିକ ପୁଣି ବାକି ଦେଖାଯିବ। ଦେୟଟି ଇତିହାସରେ ରହିବ, ଓଲଟାଯାଇଥିବା ଭାବେ।"
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ଏହା ଯେଉଁ କିଣାଣିର ଦେୟ ଦେଇଥିଲା ସେଗୁଡ଼ିକ ପୁଣି ବାକି ଦେଖାଯିବ। ଦେୟଟି ଇତିହାସରେ ରହିବ, ଓଲଟାଯାଇଥିବା ଭାବେ।",
+"Note at the bottom of the bill": "ବିଲ୍ ତଳର ନୋଟ୍",
+"Thank you! Visit again.\n*Shop hours: 9 AM to 9 PM, closed on Tuesday*": "ଧନ୍ୟବାଦ! ପୁଣି ଆସନ୍ତୁ।\n*ଦୋକାନ ସମୟ: ସକାଳ 9ରୁ ରାତି 9, ମଙ୍ଗଳବାର ବନ୍ଦ*",
+"Printed last, in the middle, line by line: business hours, closed day, return or exchange policy. Put a line between *stars* to print it bold. Leave empty for none.": "ଶେଷରେ, ମଝିରେ, ଧାଡ଼ି ଧାଡ଼ି ଛପାଯାଏ: ଦୋକାନ ସମୟ, ବନ୍ଦ ଦିନ, ଫେରସ୍ତ ବା ବଦଳ ନିୟମ। କୌଣସି ଧାଡ଼ିକୁ *ତାରା* ମଝିରେ ଲେଖିଲେ ତାହା ମୋଟା ଅକ୍ଷରରେ ଛପାଯିବ। ନଚାହିଁଲେ ଖାଲି ରଖନ୍ତୁ।"
 }

@@ -394,10 +394,6 @@ class InvoicePdf {
                   children: [
                     if (_upiLink != null) _upiQr(f(84), k: k),
                     ..._termsBlock(fontSize: f(8.5)),
-                    if (bill.footer.isNotEmpty) ...[
-                      pw.SizedBox(height: 6),
-                      pw.Text(bill.footer, style: small),
-                    ],
                   ],
                 ),
               ),
@@ -419,6 +415,13 @@ class InvoicePdf {
               ),
             ],
           ),
+          if (bill.footer.isNotEmpty) ...[
+            pw.SizedBox(height: f(10)),
+            ..._noteLines(
+              small,
+              pw.TextStyle(fontSize: f(9), fontWeight: pw.FontWeight.bold),
+            ),
+          ],
         ],
       ),
     );
@@ -618,7 +621,7 @@ class InvoicePdf {
             ],
             if (bill.footer.isNotEmpty) ...[
               pw.SizedBox(height: 6),
-              centered(bill.footer, small),
+              ..._noteLines(small, smallBold),
             ],
           ],
         ),
@@ -649,6 +652,18 @@ class InvoicePdf {
       for (final (label, amount) in ex.rows) _tRow(label, _n(amount), style),
     ];
   }
+
+  /// The shop's bottom note, each line in the middle; *starred* lines bold.
+  List<pw.Widget> _noteLines(pw.TextStyle style, pw.TextStyle boldStyle) => [
+    for (final l in bill.footer)
+      pw.Center(
+        child: pw.Text(
+          l.text,
+          style: l.bold ? boldStyle : style,
+          textAlign: pw.TextAlign.center,
+        ),
+      ),
+  ];
 
   /// "Terms & Conditions:" and the shop's terms, numbered.
   List<pw.Widget> _termsBlock({required double fontSize}) {

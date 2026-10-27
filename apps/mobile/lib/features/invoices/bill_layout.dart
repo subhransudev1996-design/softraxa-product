@@ -210,8 +210,27 @@ class BillLayout {
   /// The shop's terms & conditions, one per line, blank lines dropped.
   List<String> get terms => billTerms(business['bill_terms'] as String?);
 
-  String get footer => (business['bill_footer'] as String? ?? '').trim();
+  /// The note at the bottom of the bill, line by line (migration 0093).
+  List<BillNoteLine> get footer =>
+      billNoteLines(business['bill_footer'] as String?);
 }
+
+/// One line of the bill's bottom note; a line written between *stars*
+/// prints in bold.
+typedef BillNoteLine = ({String text, bool bold});
+
+List<BillNoteLine> billNoteLines(String? text) => [
+  for (final raw in (text ?? '').split('\n'))
+    if (raw.trim().isNotEmpty)
+      () {
+        final l = raw.trim();
+        final starred = l.length > 2 && l.startsWith('*') && l.endsWith('*');
+        return (
+          text: starred ? l.substring(1, l.length - 1).trim() : l,
+          bold: starred,
+        );
+      }(),
+];
 
 /// GST by rate, from each line's stored split (after any bill discount,
 /// migration 0040): bill lines or return lines alike. Lines at 0% are left
