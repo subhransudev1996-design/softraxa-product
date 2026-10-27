@@ -25,7 +25,8 @@
 // Corrections (no migration): editing customers, suppliers, expenses, job
 // details, offers, cards and card types; reversing a customer payment;
 // changing a bill's customer / due date; categories and units; the owner's
-// approvals. Settings, staff and the plan stay in the app. Every change is two-step like
+// approvals. Settings, staff and the plan stay in the app. 0092: reversing
+// a supplier payment and undoing a sale / purchase return (owner). Every change is two-step like
 // admin-mcp's actions: the first call returns a preview and changes
 // nothing; only a second call with confirm: true (after the user said yes)
 // saves it. A sale's preview is a dry run of the app's own create_invoice
@@ -2307,6 +2308,88 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "get_supplier",
+    title: "One supplier with purchases and payments",
+    description: "A supplier's details, what the shop owes them, their latest purchases and the payments made to them (payment ids for reverse_supplier_payment).",
+    needs: "can_manage_purchases",
+    inputSchema: obj({ supplier_id: { type: "string" } }, ["supplier_id"]),
+    run: async (ctx, a) => {
+      const sp = await rowOf(ctx, "suppliers", a.supplier_id, "*", "find_suppliers");
+      const [pur, pays] = await Promise.all([
+        ctx.db.from("purchases").select("id, purchase_no, bill_no, purchase_date, total, paid_amount, due_amount, payment_status")
+          .eq("supplier_id", a.supplier_id).order("purchase_date", { ascending: false }).limit(15),
+        ctx.db.from("supplier_payments").select("id, amount, payment_mode, payment_date, note, reversed_at, reversal_reason")
+          .eq("supplier_id", a.supplier_id).order("created_at", { ascending: false }).limit(15),
+      ]);
+      return { supplier: sp, latest_purchases: pur.data, latest_payments: pays.data };
+    },
+  },
+  {
+    name: "list_returns",
+    title: "Sale returns and purchase returns",
+    description: "Returns between two dates (default last 30 days), newest first: kind 'sale' (customers returning) or 'purchase' (goods sent back to suppliers), with their ids for undo_return.",
+    inputSchema: obj({ kind: { type: "string", enum: ["sale", "purchase"] }, ...dateProps, limit: limitProp(30) }, ["kind"]),
+    run: async (ctx, a) => {
+      const { from, to } = period(a, 30);
+      if (a.kind === "purchase") {
+        if (!can(ctx, "can_manage_purchases")) throw new Error("You don't have permission for purchases");
+        return { returns: must(await ctx.db.from("purchase_returns")
+          .select("id, return_no, return_date, total, received_amount, purchases(purchase_no), suppliers(name)")
+          .gte("return_date", from).lte("return_date", to).order("return_date", { ascending: false }).limit(lim(a.limit, 30))) };
+      }
+      return { returns: must(await ctx.db.from("sale_returns")
+        .select("id, return_no, return_date, total, refund_amount, refund_mode, invoices(invoice_no), customers(name)")
+        .gte("return_date", istStart(from)).lt("return_date", istEnd(to)).order("return_date", { ascending: false }).limit(lim(a.limit, 30))) };
+    },
+  },
+  {
+    name: "reverse_supplier_payment",
+    title: "Undo a supplier payment entered by mistake",
+    description: "Owner: reverses a payment to a supplier (get_supplier lists them): the purchases it paid are due again and the cash comes back in the cash book today. A payment made when the purchase was entered is changed with edit_purchase instead.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({ payment_id: { type: "string" }, reason: { type: "string" }, ...confirmProp }, ["payment_id", "reason"]),
+    preview: async (ctx, a) => {
+      const pay = await rowOf(ctx, "supplier_payments", a.payment_id, "amount, payment_mode, payment_date, note, reversed_at, suppliers(name)", "get_supplier");
+      if (pay.reversed_at) throw new Final("This payment is already reversed.");
+      if (pay.note === "Paid with purchase") throw new Final("This was paid when the purchase was entered — change it with edit_purchase (paid).");
+      if (str(a.reason).length < 3) throw new Error("Give a reason");
+      return `UNDO ${rupees(pay.amount)} paid by ${pay.payment_mode} on ${pay.payment_date} to ` +
+        `${(pay.suppliers as { name?: string } | null)?.name ?? "the supplier"} — reason: "${str(a.reason)}". ` +
+        "The shop owes them that again; the cash book shows it back today.";
+    },
+    run: async (ctx, a) => {
+      must(await ctx.db.rpc("reverse_supplier_payment", { p_payment_id: a.payment_id, p_reason: str(a.reason) }));
+      return { reversed: true };
+    },
+  },
+  {
+    name: "undo_return",
+    title: "Undo a return entered by mistake",
+    description: "Owner: removes a sale return or purchase return (list_returns) and puts stock, money and dues back as they were. Only in the same month (its GST note isn't filed yet), while its cash day is open, and if the goods weren't sold or moved on since.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({ kind: { type: "string", enum: ["sale", "purchase"] }, return_id: { type: "string" }, reason: { type: "string" }, ...confirmProp },
+      ["kind", "return_id", "reason"]),
+    preview: async (ctx, a) => {
+      if (str(a.reason).length < 3) throw new Error("Give a reason");
+      if (a.kind === "purchase") {
+        const r = await rowOf(ctx, "purchase_returns", a.return_id, "return_no, return_date, total, received_amount, suppliers(name)", "list_returns");
+        return `UNDO purchase return ${r.return_no} of ${r.return_date} (${rupees(r.total)} to ${(r.suppliers as { name?: string } | null)?.name ?? "the supplier"}): ` +
+          `the goods come back into stock and the shop owes the supplier again` +
+          `${Number(r.received_amount) > 0 ? `; the ${rupees(r.received_amount)} they refunded is to be given back` : ""}. Reason: "${str(a.reason)}".`;
+      }
+      const r = await rowOf(ctx, "sale_returns", a.return_id, "return_no, return_date, total, refund_amount, customers(name)", "list_returns");
+      return `UNDO sale return ${r.return_no} of ${String(r.return_date).slice(0, 10)} (${rupees(r.total)}, ${(r.customers as { name?: string } | null)?.name ?? "walk-in"}): ` +
+        `the goods go out of stock again and the bill / dues go back` +
+        `${Number(r.refund_amount) > 0 ? `; the ${rupees(r.refund_amount)} refunded should be collected back from the customer` : ""}. Reason: "${str(a.reason)}".`;
+    },
+    run: async (ctx, a) =>
+      must(await ctx.db.rpc(a.kind === "purchase" ? "undo_purchase_return" : "undo_sale_return", {
+        p_return_id: a.return_id, p_reason: str(a.reason),
+      })),
+  },
+  {
     name: "list_offers",
     title: "Offers, coupons and scratch cards",
     description: "The shop's offers: % or ₹ off, minimum bill, code (shared coupon code, own voucher codes, or none for a counter offer), dates, on/off, and how often each was used.",
@@ -2496,7 +2579,8 @@ const INSTRUCTIONS =
   "add or change products, customers and suppliers, correct stock, take returns, edit bills, use discount cards and coupons, " +
   "create offers, manage product variants (sizes, colours), change or delete purchases, return goods to suppliers, " +
   "run repair job cards (open, estimate, customer's answer, work, status, bill and deliver) and services, " +
-  "fix mistakes (edit customers, suppliers, expenses, job details; undo a customer payment; change a bill's customer or due date), " +
+  "fix mistakes (edit customers, suppliers, expenses, job details; undo a customer or supplier payment; undo a return; " +
+  "change a bill's customer or due date), " +
   "manage categories, units, offers, discount cards and card types, approve staff sales (owner), " +
   "and enter supplier bills: when the user " +
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
@@ -2565,7 +2649,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania", title: "Dukania", version: "7.0.0" },
+        serverInfo: { name: "dukania", title: "Dukania", version: "8.0.0" },
         instructions: INSTRUCTIONS,
       });
     }

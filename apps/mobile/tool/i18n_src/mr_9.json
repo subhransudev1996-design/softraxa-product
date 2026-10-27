@@ -406,5 +406,12 @@
 "Use the AI assistant (ChatGPT / Claude)": "AI असिस्टंट वापरा (ChatGPT / Claude)",
 "It sees only what you can see in Dukania. It can also make bills, take payments and add products, but it always shows you a preview first and saves only after you say yes. Some ChatGPT and Claude plans don't allow connectors.": "हे Dukania मध्ये तुम्ही जे पाहू शकता तेवढंच पाहतं. हे बिल बनवू शकतं, पेमेंट घेऊ शकतं आणि माल जोडू शकतं, पण नेहमी आधी तुम्हाला दाखवतं आणि तुम्ही हो म्हटल्यावरच सेव्ह करतं. ChatGPT आणि Claude च्या काही प्लॅनमध्ये कनेक्टरची सुविधा नसते.",
 "Bill 2 Parle-G to Ramesh, paid by UPI.": "रमेशला 2 Parle-G चं बिल करा, UPI ने पेमेंट.",
-"Made with AI (ChatGPT / Claude)": "AI ने बनवलेले (ChatGPT / Claude)"
+"Made with AI (ChatGPT / Claude)": "AI ने बनवलेले (ChatGPT / Claude)",
+"Undo return": "परतावा रद्द करा",
+"Undo return {v1}?": "परतावा {v1} रद्द करायचा?",
+"Its goods, money and stock go back to how they were before the return, and the return is removed.": "त्याचा माल, पैसे आणि स्टॉक परताव्याआधी जसे होते तसे होतील, आणि परतावा काढला जाईल.",
+"e.g. entered by mistake": "उदा. चुकून नोंदवले",
+"Return undone": "परतावा रद्द झाला",
+"{v1} — reversed": "{v1} — उलटवले",
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "ज्या खरेदींसाठी हे भरले होते त्या पुन्हा बाकी दिसतील. पेमेंट इतिहासात राहील, उलटवले म्हणून."
 }

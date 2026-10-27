@@ -9,6 +9,7 @@ import '../../core/formatters.dart';
 import '../../core/opening_balance.dart';
 import '../../core/gst.dart';
 import '../../core/platform.dart';
+import '../../core/reason_dialog.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/widgets.dart';
 import '../dashboard/dashboard_screen.dart';
@@ -98,9 +99,14 @@ final supplierLedgerProvider = FutureProvider.autoDispose
               {
                 'kind': 'payment',
                 'date': p['payment_date'],
-                'label': 'Payment made (${p['payment_mode']})',
+                'label': p['reversed_at'] != null
+                    ? t('{v1} — reversed', {
+                        'v1': 'Payment made (${p['payment_mode']})',
+                      })
+                    : 'Payment made (${p['payment_mode']})',
                 'debit': null,
-                'credit': p['amount'],
+                // A reversed payment (0092) no longer counts.
+                'credit': p['reversed_at'] != null ? null : p['amount'],
                 'data': p,
               },
             for (final r in returns)
@@ -921,7 +927,8 @@ class SupplierDetailScreen extends ConsumerWidget {
                     child: Card(
                       child: Column(
                         children: [
-                          for (final e in entries) _ledgerTile(context, e),
+                          for (final e in entries)
+                            _ledgerTile(context, ref, e, supplierId),
                         ],
                       ),
                     ),
@@ -935,8 +942,20 @@ class SupplierDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _ledgerTile(BuildContext context, Map<String, dynamic> e) {
+  Widget _ledgerTile(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> e,
+    String supplierId,
+  ) {
     final data = e['data'] as Map;
+    // Owner: a payment entered by mistake can be reversed (0092); one paid
+    // with the purchase is changed by editing that purchase.
+    final reversible =
+        e['kind'] == 'payment' &&
+        data['reversed_at'] == null &&
+        data['note'] != 'Paid with purchase' &&
+        (ref.watch(appContextProvider).value?.isOwner ?? false);
     final discount = e['kind'] == 'purchase'
         ? toDouble(data['discount_amount'])
         : 0.0;
@@ -950,6 +969,13 @@ class SupplierDetailScreen extends ConsumerWidget {
     return InkWell(
       onTap: e['kind'] == 'purchase'
           ? () => context.push('/purchases/${data['id']}')
+          : reversible
+          ? () => _reverseSupplierPayment(
+              context,
+              ref,
+              Map<String, dynamic>.from(data),
+              supplierId,
+            )
           : null,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -1005,5 +1031,41 @@ class SupplierDetailScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+}
+
+/// Owner: reverse a supplier payment entered by mistake (migration 0092).
+/// The purchases it paid are due again; it stays in the ledger, reversed.
+Future<void> _reverseSupplierPayment(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> payment,
+  String supplierId,
+) async {
+  final reason = await askReason(
+    context,
+    title: t('Reverse payment of {v1}?', {
+      'v1': money(payment['amount'] as num?),
+    }),
+    message: t(
+      'The purchases it paid will show as due again. The payment stays in the history, marked reversed.',
+    ),
+    action: t('Reverse'),
+    hint: t('e.g. cheque bounced, entered twice'),
+  );
+  if (reason == null || !context.mounted) return;
+  try {
+    await ref
+        .read(supabaseProvider)
+        .rpc(
+          'reverse_supplier_payment',
+          params: {'p_payment_id': payment['id'], 'p_reason': reason},
+        );
+    ref.invalidate(supplierLedgerProvider(supplierId));
+    ref.invalidate(suppliersProvider);
+    ref.invalidate(purchasesProvider);
+    if (context.mounted) showSuccess(context, t('Payment reversed'));
+  } catch (e) {
+    if (context.mounted) showError(context, e);
   }
 }

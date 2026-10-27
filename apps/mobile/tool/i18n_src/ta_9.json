@@ -406,5 +406,12 @@
 "Use the AI assistant (ChatGPT / Claude)": "AI உதவியாளரைப் பயன்படுத்தலாம் (ChatGPT / Claude)",
 "It sees only what you can see in Dukania. It can also make bills, take payments and add products, but it always shows you a preview first and saves only after you say yes. Some ChatGPT and Claude plans don't allow connectors.": "Dukania-வில் நீங்கள் பார்க்கக்கூடியதை மட்டுமே இது பார்க்கும். இது பில் போடவும், பணம் பெறவும், பொருட்களைச் சேர்க்கவும் முடியும், ஆனால் எப்போதும் முதலில் உங்களுக்குக் காட்டி, நீங்கள் சரி என்றால் மட்டுமே சேமிக்கும். ChatGPT, Claude-இன் சில திட்டங்களில் கனெக்டர் வசதி இல்லை.",
 "Bill 2 Parle-G to Ramesh, paid by UPI.": "ரமேஷுக்கு 2 Parle-G பில் போடு, UPI-இல் பணம்.",
-"Made with AI (ChatGPT / Claude)": "AI மூலம் உருவாக்கப்பட்டது (ChatGPT / Claude)"
+"Made with AI (ChatGPT / Claude)": "AI மூலம் உருவாக்கப்பட்டது (ChatGPT / Claude)",
+"Undo return": "திருப்பத்தை ரத்து செய்",
+"Undo return {v1}?": "திருப்பம் {v1}-ஐ ரத்து செய்யவா?",
+"Its goods, money and stock go back to how they were before the return, and the return is removed.": "இதன் பொருட்கள், பணம், ஸ்டாக் திருப்பத்துக்கு முன் இருந்தபடி ஆகும், திருப்பம் நீக்கப்படும்.",
+"e.g. entered by mistake": "எ.கா. தவறாக பதிவானது",
+"Return undone": "திருப்பம் ரத்தானது",
+"{v1} — reversed": "{v1} — திரும்பப் பெறப்பட்டது",
+"The purchases it paid will show as due again. The payment stays in the history, marked reversed.": "இது செலுத்திய கொள்முதல்கள் மீண்டும் நிலுவையாகக் காட்டும். பணம் செலுத்தல் வரலாற்றில் இருக்கும், திரும்பப் பெறப்பட்டதாகக் குறிக்கப்படும்."
 }

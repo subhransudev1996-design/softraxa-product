@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../core/walkthrough.dart';
 import '../../core/data_refresh.dart';
+import '../../core/reason_dialog.dart';
 
 import '../../core/file_export.dart';
 import '../../core/formatters.dart';
@@ -805,6 +806,48 @@ class _InvoicePickerState extends ConsumerState<_InvoicePicker> {
 }
 
 /// Sale return detail: which products were returned, quantities and amounts.
+/// Owner: undo a return entered by mistake (migration 0092) — same month,
+/// cash day still open, its goods not sold on since. The server checks it
+/// all; the return is removed and everything goes back.
+Future<void> _undoReturn(
+  BuildContext context,
+  WidgetRef ref,
+  Map<String, dynamic> r, {
+  required bool sale,
+}) async {
+  final reason = await askReason(
+    context,
+    title: t('Undo return {v1}?', {'v1': r['return_no'] as String? ?? ''}),
+    message: t(
+      'Its goods, money and stock go back to how they were before the return, and the return is removed.',
+    ),
+    action: t('Undo return'),
+    hint: t('e.g. entered by mistake'),
+  );
+  if (reason == null || !context.mounted) return;
+  try {
+    await ref
+        .read(supabaseProvider)
+        .rpc(
+          sale ? 'undo_sale_return' : 'undo_purchase_return',
+          params: {'p_return_id': r['id'], 'p_reason': reason},
+        );
+    if (sale) {
+      ref.invalidate(saleReturnsProvider);
+    } else {
+      ref.invalidate(purchaseReturnsProvider);
+      ref.invalidate(suppliersProvider);
+    }
+    invalidateStockData(ref);
+    if (context.mounted) {
+      showSuccess(context, t('Return undone'));
+      context.pop();
+    }
+  } catch (e) {
+    if (context.mounted) showError(context, e);
+  }
+}
+
 class SaleReturnDetailScreen extends ConsumerWidget {
   const SaleReturnDetailScreen({super.key, required this.returnId});
 
@@ -838,6 +881,13 @@ class SaleReturnDetailScreen extends ConsumerWidget {
               tooltip: t('Credit note PDF'),
               onPressed: () =>
                   _shareNotePdf(context, ref, data.value!, isDebitNote: false),
+            ),
+          if (data.value != null &&
+              (ref.watch(appContextProvider).value?.isOwner ?? false))
+            IconButton(
+              icon: const Icon(Icons.undo),
+              tooltip: t('Undo return'),
+              onPressed: () => _undoReturn(context, ref, data.value!, sale: true),
             ),
         ],
       ),
@@ -2131,6 +2181,14 @@ class PurchaseReturnDetailScreen extends ConsumerWidget {
               tooltip: t('Debit note PDF'),
               onPressed: () =>
                   _shareNotePdf(context, ref, data.value!, isDebitNote: true),
+            ),
+          if (data.value != null &&
+              (ref.watch(appContextProvider).value?.isOwner ?? false))
+            IconButton(
+              icon: const Icon(Icons.undo),
+              tooltip: t('Undo return'),
+              onPressed: () =>
+                  _undoReturn(context, ref, data.value!, sale: false),
             ),
         ],
       ),
