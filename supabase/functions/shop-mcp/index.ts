@@ -21,7 +21,11 @@
 // payments, quotations / cash memos, editing a bill; creating offers and
 // giving discount cards. 0090: free goods and new prices on supplier bills,
 // changing / deleting a purchase, purchase returns. 0091: services and job
-// cards (open, estimate, customer's answer, work, status, bill & deliver). Every change is two-step like
+// cards (open, estimate, customer's answer, work, status, bill & deliver).
+// Corrections (no migration): editing customers, suppliers, expenses, job
+// details, offers, cards and card types; reversing a customer payment;
+// changing a bill's customer / due date; categories and units; the owner's
+// approvals. Settings, staff and the plan stay in the app. Every change is two-step like
 // admin-mcp's actions: the first call returns a preview and changes
 // nothing; only a second call with confirm: true (after the user said yes)
 // saves it. A sale's preview is a dry run of the app's own create_invoice
@@ -251,6 +255,9 @@ const PRODUCT_FIELDS: Record<string, string> = {
   hsn: "HSN code",
   barcode: "barcode",
   low_stock_qty: "low-stock level",
+  wholesale_price: "wholesale price",
+  wholesale_min_qty: "wholesale from (qty)",
+  expiry_date: "expiry date",
 };
 const productColumn = (k: string) => (k === "hsn" ? "hsn_code" : k);
 
@@ -528,6 +535,124 @@ async function jobPreview(ctx: Ctx, a: Args, tool: string, verb: string) {
     `To save: call ${tool} again with the same arguments plus ref: "${ref}" and confirm: true.`;
 }
 
+/** "old → new" for the fields that change; Final when nothing does. */
+function diffText(what: string, old: Record<string, unknown>, row: Record<string, unknown>) {
+  const diff = Object.entries(row)
+    .filter(([k, v]) => !k.startsWith("_") && JSON.stringify(old[k] ?? null) !== JSON.stringify(v ?? null) && String(old[k] ?? "") !== String(v ?? ""))
+    .map(([k, v]) => `${k.replaceAll("_", " ")}: ${old[k] === "" || old[k] == null ? "—" : JSON.stringify(old[k])} → ${v === "" || v == null ? "—" : JSON.stringify(v)}`);
+  if (!diff.length) throw new Final(`Nothing to change on ${what}.`);
+  return `Change ${what}:\n${diff.join("\n")}`;
+}
+
+/** Updates one row of the shop's table; an error if nothing was changed. */
+async function updateRow(ctx: Ctx, table: string, id: unknown, row: Record<string, unknown>, fields: string) {
+  if (!Object.keys(row).length) throw new Error("Nothing to change");
+  const r = must(await ctx.db.from(table).update(row).eq("id", id).select(fields)) as unknown[];
+  if (!r.length) throw new Error("Nothing was changed — it isn't in your shop or you may not edit it");
+  return r[0];
+}
+
+function partyRow(a: Args, customer: boolean) {
+  const row: Record<string, unknown> = {};
+  for (const k of ["name", "address", "notes"]) if (a[k] !== undefined) row[k] = str(a[k]);
+  if (a.phone !== undefined) row.phone = str(a.phone).replace(/[^0-9+]/g, "");
+  if (a.gstin !== undefined) row.gst_number = str(a.gstin).toUpperCase();
+  if (a.credit_limit != null) row.credit_limit = num(a.credit_limit);
+  if (customer) {
+    if (a.credit_limit != null) row.credit_unlimited = false;
+    if (a.credit_unlimited === true) { row.credit_unlimited = true; row.credit_limit = null; }
+    if (typeof a.is_wholesale === "boolean") row.is_wholesale = a.is_wholesale;
+  }
+  if (typeof a.active === "boolean") row.is_active = a.active;
+  return row;
+}
+
+async function expenseRow(ctx: Ctx, a: Args) {
+  const row: Record<string, unknown> = {};
+  if (a.amount != null) row.amount = num(a.amount);
+  if (a.payment_mode !== undefined) row.payment_mode = str(a.payment_mode);
+  if (isDate(a.date)) row.expense_date = a.date;
+  if (a.note !== undefined) row.note = str(a.note);
+  if (str(a.category)) {
+    const cat = await lookupName(ctx, "expense_categories", str(a.category));
+    if (cat.id) row.category_id = cat.id; else row._note = cat.note;
+  }
+  return row;
+}
+
+function jobRow(a: Args) {
+  const row: Record<string, unknown> = {};
+  for (const k of ["item_name", "brand", "model", "serial_no", "registration_no", "issue_description", "item_condition",
+    "accessories_received", "technician_name", "customer_note", "internal_note"]) if (a[k] !== undefined) row[k] = str(a[k]);
+  if (isDate(a.expected_delivery)) row.expected_delivery = a.expected_delivery;
+  return row;
+}
+
+function unitRow(a: Args) {
+  const row: Record<string, unknown> = {};
+  if (a.name !== undefined) row.name = str(a.name);
+  if (a.short_name !== undefined) row.short_name = str(a.short_name);
+  if (typeof a.allow_decimal === "boolean") row.allow_decimal = a.allow_decimal;
+  return row;
+}
+
+function offerChanges(a: Args) {
+  const row: Record<string, unknown> = {};
+  for (const k of ["name", "shared_code"]) if (a[k] !== undefined) row[k] = str(a[k]);
+  for (const k of ["percent", "max_discount", "min_bill", "uses_per_customer"]) if (a[k] != null) row[k] = num(a[k]);
+  if (Array.isArray(a.amounts)) row.amounts = a.amounts;
+  for (const k of ["valid_from", "valid_until"]) if (isDate(a[k])) row[k] = a[k];
+  if (typeof a.needs_customer === "boolean") row.needs_customer = a.needs_customer;
+  return row;
+}
+
+/** One discount card (full row, for save_discount_card) by number or ending. */
+async function cardRow(ctx: Ctx, card: string) {
+  const f = must(await ctx.db.rpc("find_discount_card", { p_query: card })) as { found?: boolean; id?: string };
+  if (!f.found || !f.id) throw new Error(`No discount card ${card} in your shop`);
+  const all = must(await ctx.db.rpc("get_discount_cards", { p_search: "", p_limit: 1000 })) as { cards: Array<Record<string, unknown>> };
+  const c = all.cards.find((x) => x.id === f.id);
+  if (!c) throw new Error("Card not found");
+  return c;
+}
+
+async function cardChanges(ctx: Ctx, a: Args) {
+  const row: Record<string, unknown> = {};
+  if (typeof a.active === "boolean") row.is_active = a.active;
+  if (isDate(a.valid_until)) row.valid_until = a.valid_until;
+  if (a.holder_name !== undefined) row.holder_name = str(a.holder_name);
+  if (isUuid(a.customer_id)) row.customer_id = a.customer_id;
+  if (str(a.card_type)) row.card_type_id = (await cardType(ctx, str(a.card_type))).id;
+  return row;
+}
+
+/** save_discount_card_type input: an existing type (by name) merged with the changes. */
+async function cardTypeInput(ctx: Ctx, a: Args) {
+  const all = must(await ctx.db.rpc("get_discount_cards", { p_search: "", p_limit: 1 })) as {
+    types: Array<{ id: string; name: string; discount_pct: number; applies_to: string; category_ids: string[]; is_active: boolean }>;
+  };
+  const old = str(a.card_type) ? all.types.find((t) => t.name.toLowerCase() === str(a.card_type).toLowerCase()) : undefined;
+  if (str(a.card_type) && !old) throw new Error(`No card type "${str(a.card_type)}" (the shop has: ${all.types.map((t) => t.name).join(", ") || "none"})`);
+  const cats = must(await ctx.db.from("categories").select("id, name")) as Array<{ id: string; name: string }>;
+  let ids = old?.category_ids ?? [];
+  if (Array.isArray(a.categories)) {
+    ids = a.categories.map((n) => {
+      const c = cats.find((x) => x.name.toLowerCase() === String(n).trim().toLowerCase());
+      if (!c) throw new Error(`No category "${n}" (the shop has: ${cats.map((x) => x.name).join(", ")})`);
+      return c.id;
+    });
+  }
+  const p = {
+    name: str(a.name) || old?.name || "",
+    discount_pct: a.discount_pct != null ? num(a.discount_pct) : old?.discount_pct,
+    applies_to: str(a.applies_to) || old?.applies_to || "all",
+    category_ids: ids,
+    is_active: typeof a.active === "boolean" ? a.active : old?.is_active ?? true,
+  };
+  if (!p.name || p.discount_pct == null) throw new Error("A card type needs a name and a discount %");
+  return { id: old?.id ?? null, old: old?.name, p, catNames: cats.filter((c) => ids.includes(c.id)).map((c) => c.name) };
+}
+
 const BILL_FIELDS =
   "id, invoice_no, invoice_type, invoice_date, customer_id, customer_name, customer_phone, subtotal, discount_amount, tax_amount, round_off, total, paid_amount, due_amount, due_date, payment_status, payment_mode, is_cancelled, notes";
 
@@ -615,17 +740,19 @@ const TOOLS: Tool[] = [
   {
     name: "get_customer",
     title: "One customer with their bills",
-    description: "A customer's details, dues and advance, and their latest bills.",
+    description: "A customer's details, dues and advance, their latest bills and payments (payment ids for reverse_customer_payment).",
     inputSchema: obj({ customer_id: { type: "string" }, bills: limitProp(15, 100) }, ["customer_id"]),
     run: async (ctx, a) => {
       if (!isUuid(a.customer_id)) throw new Error("customer_id must be an id from find_customers");
-      const [c, bills] = await Promise.all([
+      const [c, bills, pays] = await Promise.all([
         ctx.db.from("customers").select("*").eq("id", a.customer_id).maybeSingle(),
         ctx.db.from("invoices").select(BILL_FIELDS).eq("customer_id", a.customer_id)
           .order("invoice_date", { ascending: false }).limit(lim(a.bills, 15, 100)),
+        ctx.db.from("customer_payments").select("id, amount, payment_mode, payment_date, note, reversed_at")
+          .eq("customer_id", a.customer_id).order("created_at", { ascending: false }).limit(15),
       ]);
       if (!c.data) throw new Error("No customer with that id in your shop");
-      return { customer: c.data, latest_bills: bills.data };
+      return { customer: c.data, latest_bills: bills.data, latest_payments: pays.data };
     },
   },
   {
@@ -1068,7 +1195,7 @@ const TOOLS: Tool[] = [
   {
     name: "update_product",
     title: "Change a product's price or details",
-    description: "Changes a product's name, selling price, MRP, cost price, GST %, HSN, barcode or low-stock level. Give only what changes.",
+    description: "Changes a product's name, selling price, MRP, cost price, GST %, HSN, barcode, low-stock level, wholesale price (and from which quantity), expiry date, category or unit; active false stops selling it (its history stays). Give only what changes.",
     needs: "can_manage_products",
     write: true,
     inputSchema: obj({
@@ -1081,19 +1208,32 @@ const TOOLS: Tool[] = [
       hsn: { type: "string" },
       barcode: { type: "string" },
       low_stock_qty: { type: "number", minimum: 0 },
+      wholesale_price: { type: "number", minimum: 0 },
+      wholesale_min_qty: { type: "number", minimum: 0 },
+      expiry_date: { type: "string", description: "YYYY-MM-DD" },
+      category: { type: "string", description: "A category name (list_categories_units)." },
+      unit: { type: "string", description: "A unit name (list_categories_units)." },
+      active: { type: "boolean" },
       ...confirmProp,
     }, ["product_id"]),
     preview: async (ctx, a) => {
       const p = await rowOf(ctx, "products", a.product_id,
-        "name, selling_price, mrp, purchase_price, gst_rate, hsn_code, barcode, low_stock_qty", "find_products");
+        "name, selling_price, mrp, purchase_price, gst_rate, hsn_code, barcode, low_stock_qty, wholesale_price, wholesale_min_qty, expiry_date, is_active, categories(name), units(name)", "find_products");
       const changes = Object.keys(PRODUCT_FIELDS)
         .filter((k) => a[k] !== undefined && a[k] !== null && String(a[k]) !== String(p[productColumn(k)]));
-      if (!changes.length) throw new Final(`Nothing to change: ${p.name} already has these values.`);
+      const extra = await productExtra(ctx, a);
+      const extraText = [
+        extra.row.category_id !== undefined ? `category ${(p.categories as { name?: string } | null)?.name ?? "—"} → ${str(a.category)}` : "",
+        extra.row.unit_id !== undefined ? `unit ${(p.units as { name?: string } | null)?.name ?? "—"} → ${str(a.unit)}` : "",
+        typeof a.active === "boolean" && a.active !== p.is_active ? (a.active ? "selling it again" : "STOP selling it (hidden; history stays)") : "",
+        ...extra.notes,
+      ].filter(Boolean);
+      if (!changes.length && !extraText.length) throw new Final(`Nothing to change: ${p.name} already has these values.`);
       if (changes.includes("purchase_price") && !can(ctx, "can_view_profit")) {
         throw new Error("You don't have permission to see or change cost prices");
       }
       return `Change ${p.name}: ` +
-        changes.map((k) => `${PRODUCT_FIELDS[k]} ${k === "purchase_price" || p[productColumn(k)] !== "" ? p[productColumn(k)] : "—"} → ${a[k]}`).join(", ") + ".";
+        [...changes.map((k) => `${PRODUCT_FIELDS[k]} ${p[productColumn(k)] === "" || p[productColumn(k)] == null ? "—" : p[productColumn(k)]} → ${a[k]}`), ...extraText].join(", ") + ".";
     },
     run: async (ctx, a) => {
       if (!isUuid(a.product_id)) throw new Error("Give the product_id from find_products");
@@ -1103,8 +1243,10 @@ const TOOLS: Tool[] = [
       const row: Record<string, unknown> = {};
       for (const k of Object.keys(PRODUCT_FIELDS)) {
         if (a[k] === undefined || a[k] === null) continue;
-        row[productColumn(k)] = ["name", "hsn", "barcode"].includes(k) ? str(a[k]) : num(a[k]);
+        row[productColumn(k)] = ["name", "hsn", "barcode", "expiry_date"].includes(k) ? str(a[k]) || null : num(a[k]);
       }
+      Object.assign(row, (await productExtra(ctx, a)).row);
+      if (typeof a.active === "boolean") row.is_active = a.active;
       if (!Object.keys(row).length) throw new Error("Nothing to change");
       const r = await ctx.db.from("products").update(row).eq("id", a.product_id)
         .select("id, name, selling_price, mrp, gst_rate, hsn_code, barcode, low_stock_qty");
@@ -1785,6 +1927,385 @@ const TOOLS: Tool[] = [
       warranty_days: a.warranty_days ?? null, deliver: a.deliver !== false,
     }),
   },
+  // ------------------------------------------------- corrections & settings
+  {
+    name: "edit_customer",
+    title: "Change a customer's details",
+    description: "Name, phone, address, GSTIN, notes; credit limit (owner only; credit_unlimited true for no limit); wholesale prices (needs price rights); active false hides the customer. Give only what changes.",
+    write: true,
+    inputSchema: obj({
+      customer_id: { type: "string" },
+      name: { type: "string" }, phone: { type: "string" }, address: { type: "string" }, gstin: { type: "string" },
+      notes: { type: "string" },
+      credit_limit: { type: "number", minimum: 0 }, credit_unlimited: { type: "boolean" },
+      is_wholesale: { type: "boolean" }, active: { type: "boolean" },
+      ...confirmProp,
+    }, ["customer_id"]),
+    preview: async (ctx, a) => {
+      const old = await rowOf(ctx, "customers", a.customer_id, "name, phone, address, gst_number, notes, credit_limit, credit_unlimited, is_wholesale, is_active", "find_customers");
+      return diffText(`customer ${old.name}`, old, partyRow(a, true));
+    },
+    run: async (ctx, a) => ({ updated: await updateRow(ctx, "customers", a.customer_id, partyRow(a, true), "id, name, phone, credit_limit, is_active") }),
+  },
+  {
+    name: "edit_supplier",
+    title: "Change a supplier's details",
+    description: "Name, phone, address, GSTIN, notes, credit limit; active false hides the supplier. Give only what changes.",
+    needs: "can_manage_purchases",
+    write: true,
+    inputSchema: obj({
+      supplier_id: { type: "string" },
+      name: { type: "string" }, phone: { type: "string" }, address: { type: "string" }, gstin: { type: "string" },
+      notes: { type: "string" }, credit_limit: { type: "number", minimum: 0 }, active: { type: "boolean" },
+      ...confirmProp,
+    }, ["supplier_id"]),
+    preview: async (ctx, a) => {
+      const old = await rowOf(ctx, "suppliers", a.supplier_id, "name, phone, address, gst_number, notes, credit_limit, is_active", "find_suppliers");
+      return diffText(`supplier ${old.name}`, old, partyRow(a, false));
+    },
+    run: async (ctx, a) => ({ updated: await updateRow(ctx, "suppliers", a.supplier_id, partyRow(a, false), "id, name, phone, is_active") }),
+  },
+  {
+    name: "list_expenses",
+    title: "Expenses",
+    description: "Expenses between two dates (default last 30 days), newest first, with category and payment mode — and their ids for edit_expense.",
+    needs: "can_manage_expenses",
+    inputSchema: obj({ ...dateProps, limit: limitProp(50) }),
+    run: async (ctx, a) => {
+      const { from, to } = period(a, 30);
+      const r = must(await ctx.db.from("expenses").select("id, amount, expense_date, payment_mode, note, created_via, expense_categories(name)")
+        .gte("expense_date", from).lte("expense_date", to).order("expense_date", { ascending: false }).limit(lim(a.limit, 50))) as Array<{ amount: number }>;
+      return { from, to, total: r.reduce((t, x) => t + Number(x.amount), 0), expenses: r };
+    },
+  },
+  {
+    name: "edit_expense",
+    title: "Change or delete an expense",
+    description: "Fixes an expense: amount, category, payment mode, date, note — or delete: true to remove it. (A cash expense on a day already closed needs the owner.)",
+    needs: "can_manage_expenses",
+    write: true,
+    inputSchema: obj({
+      expense_id: { type: "string" },
+      amount: { type: "number", exclusiveMinimum: 0 }, category: { type: "string" }, payment_mode: modeProp,
+      date: { type: "string" }, note: { type: "string" }, delete: { type: "boolean" },
+      ...confirmProp,
+    }, ["expense_id"]),
+    preview: async (ctx, a) => {
+      const old = await rowOf(ctx, "expenses", a.expense_id, "amount, expense_date, payment_mode, note, category_id", "list_expenses");
+      if (a.delete === true) return `DELETE the expense of ${rupees(old.amount)} on ${old.expense_date}${old.note ? ` ("${old.note}")` : ""}.`;
+      const row = await expenseRow(ctx, a);
+      return diffText("expense", old, row) + (row._note ? `\n${row._note}` : "");
+    },
+    run: async (ctx, a) => {
+      if (a.delete === true) {
+        const old = await rowOf(ctx, "expenses", a.expense_id, "amount", "list_expenses");
+        const r = must(await ctx.db.from("expenses").delete().eq("id", a.expense_id).select("id")) as unknown[];
+        if (!r.length) throw new Error("The expense wasn't deleted — you may not delete it");
+        return { deleted: rupees(old.amount) };
+      }
+      const row = await expenseRow(ctx, a);
+      delete row._note;
+      return { updated: await updateRow(ctx, "expenses", a.expense_id, row, "id, amount, expense_date, payment_mode, note") };
+    },
+  },
+  {
+    name: "reverse_customer_payment",
+    title: "Undo a customer payment entered by mistake",
+    description: "Reverses a customer payment (get_customer lists their payments with ids): what they owe goes back up and the bills it paid become unpaid again. Give the reason.",
+    needs: "can_record_payments",
+    write: true,
+    inputSchema: obj({ payment_id: { type: "string" }, reason: { type: "string" }, ...confirmProp }, ["payment_id", "reason"]),
+    preview: async (ctx, a) => {
+      const pmt = await rowOf(ctx, "customer_payments", a.payment_id, "amount, payment_mode, payment_date, reversed_at, customers(name)", "get_customer");
+      if (pmt.reversed_at) throw new Final("This payment is already reversed.");
+      return `UNDO ${rupees(pmt.amount)} received by ${pmt.payment_mode} on ${pmt.payment_date} from ` +
+        `${(pmt.customers as { name?: string } | null)?.name ?? "the customer"} — reason: "${str(a.reason)}". What they owe goes back up.`;
+    },
+    run: async (ctx, a) => {
+      must(await ctx.db.rpc("reverse_customer_payment", { p_payment_id: a.payment_id, p_reason: str(a.reason) }));
+      return { reversed: true };
+    },
+  },
+  {
+    name: "refund_advance",
+    title: "Give back a customer's advance",
+    description: "Pays back money a customer has with the shop as advance (get_customer shows advance_amount).",
+    needs: "can_record_payments",
+    write: true,
+    inputSchema: obj({ customer_id: { type: "string" }, amount: { type: "number", exclusiveMinimum: 0 }, payment_mode: modeProp, note: { type: "string" }, ...confirmProp }, ["customer_id", "amount"]),
+    preview: async (ctx, a) => {
+      const c = await rowOf(ctx, "customers", a.customer_id, "name, advance_amount", "find_customers");
+      return `Give back ${rupees(a.amount)} of ${c.name}'s advance (${rupees(c.advance_amount)}) by ${str(a.payment_mode) || "cash"}.`;
+    },
+    run: async (ctx, a) => ({
+      refunded: must(await ctx.db.rpc("refund_customer_advance", {
+        p_customer_id: a.customer_id, p_amount: num(a.amount), p_mode: str(a.payment_mode) || "cash", p_note: str(a.note),
+      })),
+    }),
+  },
+  {
+    name: "change_bill_details",
+    title: "Change a bill's customer or due date",
+    description: "Moves a bill to another customer (customer_id — e.g. billed to walk-in by mistake), and/or changes when it is due (due_date, with a reason).",
+    needs: "can_edit_invoices",
+    write: true,
+    inputSchema: obj({ bill_id: { type: "string" }, customer_id: { type: "string" }, due_date: { type: "string" }, reason: { type: "string" }, ...confirmProp }, ["bill_id"]),
+    preview: async (ctx, a) => {
+      const b = await findBill(ctx, { bill_id: a.bill_id });
+      const parts: string[] = [];
+      if (isUuid(a.customer_id)) parts.push(`customer ${b.customer_name || "walk-in"} → ${(await rowOf(ctx, "customers", a.customer_id, "name", "find_customers")).name}`);
+      if (isDate(a.due_date)) parts.push(`due date → ${a.due_date}${str(a.reason) ? ` ("${str(a.reason)}")` : ""}`);
+      if (!parts.length) throw new Error("Give customer_id and/or due_date");
+      return `Bill ${b.invoice_no}: ${parts.join("; ")}.`;
+    },
+    run: async (ctx, a) => {
+      if (isUuid(a.customer_id)) must(await ctx.db.rpc("change_invoice_customer", { p_invoice_id: a.bill_id, p_customer_id: a.customer_id }));
+      if (isDate(a.due_date)) must(await ctx.db.rpc("change_invoice_due_date", { p_invoice: a.bill_id, p_due_date: a.due_date, p_reason: str(a.reason) || "Changed with the AI assistant" }));
+      return { done: true };
+    },
+  },
+  {
+    name: "edit_job",
+    title: "Change a job card's details or remove an item",
+    description: "Fixes a job: device (item_name, brand, model, serial_no, registration_no), problem, condition, accessories, technician, expected delivery, notes; remove_item_ids removes work / parts added by mistake (a part goes back to stock). Not for billed jobs.",
+    needs: "can_manage_services",
+    write: true,
+    inputSchema: obj({
+      job_id: { type: "string" },
+      item_name: { type: "string" }, brand: { type: "string" }, model: { type: "string" }, serial_no: { type: "string" },
+      registration_no: { type: "string" }, issue_description: { type: "string" }, item_condition: { type: "string" },
+      accessories_received: { type: "string" }, technician_name: { type: "string" }, expected_delivery: { type: "string" },
+      customer_note: { type: "string" }, internal_note: { type: "string" },
+      remove_item_ids: { type: "array", items: { type: "string" } },
+      ...confirmProp,
+    }, ["job_id"]),
+    preview: async (ctx, a) => {
+      const j = await findJob(ctx, { job_id: a.job_id });
+      if (j.invoice_id) throw new Final(`Job ${j.job_no} is already billed — it can't be changed.`);
+      const lines: string[] = [];
+      const row = jobRow(a);
+      if (Object.keys(row).length) lines.push(diffText(`job ${j.job_no}`, j, row));
+      const ids = (Array.isArray(a.remove_item_ids) ? a.remove_item_ids : []).map(String);
+      if (ids.length) {
+        const items = must(await ctx.db.from("job_card_items").select("id, name, item_type").eq("job_card_id", j.id).in("id", ids)) as Array<{ name: string; item_type: string }>;
+        if (items.length !== ids.length) throw new Error("An item id isn't on this job — get_job lists them");
+        lines.push(`Remove: ${items.map((x) => `${x.name}${x.item_type === "part" ? " (back to stock)" : ""}`).join(", ")}.`);
+      }
+      if (!lines.length) throw new Final("Nothing to change.");
+      return lines.join("\n");
+    },
+    run: async (ctx, a) => {
+      const j = await findJob(ctx, { job_id: a.job_id });
+      for (const id of (Array.isArray(a.remove_item_ids) ? a.remove_item_ids : []).map(String)) {
+        must(await ctx.db.rpc("remove_job_card_item", { p_item_id: id }));
+      }
+      const row = jobRow(a);
+      if (Object.keys(row).length) await updateRow(ctx, "job_cards", j.id, row, "id");
+      return { job: j.job_no, changed: true };
+    },
+  },
+  {
+    name: "save_category",
+    title: "Add, rename or switch off a category",
+    description: "kind 'product' (product categories) or 'expense' (expense categories). Without category_id adds one; with it, renames (name) or switches it off / on (active).",
+    write: true,
+    inputSchema: obj({
+      kind: { type: "string", enum: ["product", "expense"] },
+      category_id: { type: "string" }, name: { type: "string" }, active: { type: "boolean" },
+      ...confirmProp,
+    }, ["kind"]),
+    preview: async (ctx, a) => {
+      const table = a.kind === "expense" ? "expense_categories" : "categories";
+      if (isUuid(a.category_id)) {
+        const old = await rowOf(ctx, table, a.category_id, "name, is_active", "the category list");
+        const row: Record<string, unknown> = {};
+        if (str(a.name)) row.name = str(a.name);
+        if (typeof a.active === "boolean") row.is_active = a.active;
+        return diffText(`${a.kind} category ${old.name}`, old, row);
+      }
+      if (!str(a.name)) throw new Error("Give the new category's name");
+      return `Add ${a.kind} category "${str(a.name)}".`;
+    },
+    run: async (ctx, a) => {
+      const table = a.kind === "expense" ? "expense_categories" : "categories";
+      if (a.kind === "product" && !can(ctx, "can_manage_products")) throw new Error("You don't have permission to manage products");
+      if (a.kind === "expense" && !can(ctx, "can_manage_expenses")) throw new Error("You don't have permission to manage expenses");
+      if (isUuid(a.category_id)) {
+        const row: Record<string, unknown> = {};
+        if (str(a.name)) row.name = str(a.name);
+        if (typeof a.active === "boolean") row.is_active = a.active;
+        return { updated: await updateRow(ctx, table, a.category_id, row, "id, name, is_active") };
+      }
+      return { added: must(await ctx.db.from(table).insert({ business_id: await businessId(ctx), name: str(a.name) }).select("id, name").single()) };
+    },
+  },
+  {
+    name: "list_categories_units",
+    title: "Categories and units",
+    description: "The shop's product categories, expense categories and units (with ids for save_category / save_unit).",
+    inputSchema: obj({}),
+    run: async (ctx) => {
+      const [c, e, u] = await Promise.all([
+        ctx.db.from("categories").select("id, name, is_active").order("name"),
+        ctx.db.from("expense_categories").select("id, name, is_active").order("name"),
+        ctx.db.from("units").select("id, name, short_name, allow_decimal").order("name"),
+      ]);
+      return { product_categories: c.data, expense_categories: e.data, units: u.data };
+    },
+  },
+  {
+    name: "save_unit",
+    title: "Add or change a unit",
+    description: "Units products are sold in (Piece, Kg, Metre, Box…). Without unit_id adds one; with it, renames it or changes short name / whether fractions are allowed (allow_decimal: 1.5 kg yes, 1.5 pieces no).",
+    needs: "can_manage_products",
+    write: true,
+    inputSchema: obj({
+      unit_id: { type: "string" }, name: { type: "string" }, short_name: { type: "string" }, allow_decimal: { type: "boolean" },
+      ...confirmProp,
+    }),
+    preview: async (ctx, a) => {
+      const row = unitRow(a);
+      if (isUuid(a.unit_id)) {
+        const old = await rowOf(ctx, "units", a.unit_id, "name, short_name, allow_decimal", "list_categories_units");
+        return diffText(`unit ${old.name}`, old, row);
+      }
+      if (!str(a.name)) throw new Error("Give the unit's name");
+      return `Add unit "${str(a.name)}"${str(a.short_name) ? ` (${str(a.short_name)})` : ""}, ${a.allow_decimal ? "fractions allowed" : "whole numbers only"}.`;
+    },
+    run: async (ctx, a) => {
+      const row = unitRow(a);
+      if (isUuid(a.unit_id)) return { updated: await updateRow(ctx, "units", a.unit_id, row, "id, name, short_name, allow_decimal") };
+      return { added: must(await ctx.db.from("units").insert({ ...row, business_id: await businessId(ctx) }).select("id, name").single()) };
+    },
+  },
+  {
+    name: "list_approvals",
+    title: "Sales waiting for the owner's OK",
+    description: "Owner: staff sales that need approval (below cost, over a credit limit, overdue customer, too much discount) and offline bills flagged for review.",
+    needs: "owner",
+    inputSchema: obj({ include_done: { type: "boolean", description: "Also the last decided ones." } }),
+    run: async (ctx, a) => {
+      let q = ctx.db.from("sale_approvals")
+        .select("id, status, total, exceptions, reason, expires_at, created_at, customer_id, customers(name), profiles:requested_by(full_name)")
+        .order("created_at", { ascending: false }).limit(50);
+      if (a.include_done !== true) q = q.in("status", ["pending", "flagged"]);
+      return { approvals: must(await q) };
+    },
+  },
+  {
+    name: "decide_approval",
+    title: "Approve or reject a staff sale",
+    description: "Owner: approve (accepting every warning on it) or reject a sale waiting for approval; the staff member can then complete it in the app. A flagged offline bill is marked reviewed.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({ approval_id: { type: "string" }, approve: { type: "boolean" }, note: { type: "string" }, ...confirmProp }, ["approval_id", "approve"]),
+    preview: async (ctx, a) => {
+      const ap = await rowOf(ctx, "sale_approvals", a.approval_id, "status, total, exceptions, customers(name), profiles:requested_by(full_name)", "list_approvals");
+      const kinds = ((ap.exceptions ?? []) as Array<{ kind: string }>).map((e) => WARNING_TEXT[e.kind] ?? e.kind);
+      return `${a.approve ? "APPROVE" : "REJECT"} ${(ap.profiles as { full_name?: string } | null)?.full_name ?? "staff"}'s sale of ${rupees(ap.total)} ` +
+        `to ${(ap.customers as { name?: string } | null)?.name ?? "walk-in"} (${ap.status})${kinds.length ? ` — ${kinds.join("; ")}` : ""}.`;
+    },
+    run: async (ctx, a) => {
+      const ap = await rowOf(ctx, "sale_approvals", a.approval_id, "exceptions", "list_approvals");
+      const kinds = ((ap.exceptions ?? []) as Array<{ kind: string }>).map((e) => e.kind);
+      must(await ctx.db.rpc("decide_sale_approval", { p_id: a.approval_id, p_approve: a.approve === true, p_note: str(a.note), p_ticked: kinds }));
+      return { decided: a.approve === true ? "approved" : "rejected" };
+    },
+  },
+  {
+    name: "edit_offer",
+    title: "Change an offer",
+    description: "Owner: change an offer's name, % / max discount, ₹ amounts, minimum bill, dates, shared code, per-customer limit or 'needs customer'. Give only what changes.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({
+      offer_id: { type: "string" }, name: { type: "string" }, percent: { type: "number", exclusiveMinimum: 0, maximum: 100 },
+      max_discount: { type: "number", exclusiveMinimum: 0 }, amounts: { type: "array", items: { type: "number", exclusiveMinimum: 0 } },
+      min_bill: { type: "number", minimum: 0 }, valid_from: { type: "string" }, valid_until: { type: "string" },
+      shared_code: { type: "string" }, uses_per_customer: { type: "integer", minimum: 1 }, needs_customer: { type: "boolean" },
+      ...confirmProp,
+    }, ["offer_id"]),
+    preview: async (ctx, a) => {
+      const o = await offerRow(ctx, a.offer_id);
+      return diffText(`offer ${o.name}`, o, offerChanges(a));
+    },
+    run: async (ctx, a) => {
+      const o = await offerRow(ctx, a.offer_id);
+      must(await ctx.db.rpc("save_offer", { p_id: o.id, p: { ...o, ...offerChanges(a) } }));
+      return { offer: o.name, changed: true };
+    },
+  },
+  {
+    name: "add_voucher_codes",
+    title: "Add voucher codes to an offer",
+    description: "Owner: more of an offer's own codes — count to make new random ones (optional prefix), or codes to add printed ones; amount gives each its own ₹ value.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({
+      offer_id: { type: "string" }, count: { type: "integer", minimum: 1, maximum: 2000 }, prefix: { type: "string", maxLength: 8 },
+      codes: { type: "array", items: { type: "string" } }, amount: { type: "number", exclusiveMinimum: 0 },
+      ...confirmProp,
+    }, ["offer_id"]),
+    preview: async (ctx, a) => {
+      const o = await offerRow(ctx, a.offer_id);
+      const n = num(a.count || 0) + (Array.isArray(a.codes) ? a.codes.length : 0);
+      if (!n) throw new Error("Give count and/or codes");
+      return `Add ${n} code(s) to "${o.name}"${a.amount ? `, each worth ${rupees(a.amount)}` : ""}${str(a.prefix) ? `, starting ${str(a.prefix).toUpperCase()}` : ""}.`;
+    },
+    run: async (ctx, a) => ({
+      added: must(await ctx.db.rpc("add_offer_codes", {
+        p_offer: a.offer_id, p_count: num(a.count || 0), p_prefix: str(a.prefix),
+        p_codes: Array.isArray(a.codes) ? a.codes : [], p_amount: a.amount ?? null,
+      })),
+    }),
+  },
+  {
+    name: "edit_discount_card",
+    title: "Change a discount card",
+    description: "Find a card by its number or last digits: switch it off / on (active), change its expiry (valid_until), holder, customer or card type.",
+    needs: "can_edit_prices",
+    write: true,
+    inputSchema: obj({
+      card: { type: "string" }, active: { type: "boolean" }, valid_until: { type: "string" },
+      holder_name: { type: "string" }, customer_id: { type: "string" }, card_type: { type: "string" },
+      ...confirmProp,
+    }, ["card"]),
+    preview: async (ctx, a) => {
+      const c = await cardRow(ctx, str(a.card));
+      return diffText(`card ${c.card_no} (${c.type_name})`, c, await cardChanges(ctx, a));
+    },
+    run: async (ctx, a) => {
+      const c = await cardRow(ctx, str(a.card));
+      const p = { card_no: c.card_no, card_type_id: c.card_type_id, customer_id: c.customer_id, holder_name: c.holder_name,
+        valid_until: c.valid_until, is_active: c.is_active, notes: c.notes, ...(await cardChanges(ctx, a)) };
+      must(await ctx.db.rpc("save_discount_card", { p_id: c.id, p }));
+      return { card: c.card_no, changed: true };
+    },
+  },
+  {
+    name: "save_card_type",
+    title: "Add or change a discount card type",
+    description: "Owner: card types like Gold 10% or Student 5% — name, discount %, applies_to all / only (these categories) / except (these categories), categories by name, active.",
+    needs: "owner",
+    write: true,
+    inputSchema: obj({
+      card_type: { type: "string", description: "The existing type's name, to change it." },
+      name: { type: "string" }, discount_pct: { type: "number", exclusiveMinimum: 0, maximum: 100 },
+      applies_to: { type: "string", enum: ["all", "only", "except"] }, categories: { type: "array", items: { type: "string" } },
+      active: { type: "boolean" },
+      ...confirmProp,
+    }),
+    preview: async (ctx, a) => {
+      const t = await cardTypeInput(ctx, a);
+      return `${t.id ? `Change card type ${t.old}` : "Add card type"}: ${t.p.name} ${t.p.discount_pct}% on ` +
+        `${t.p.applies_to === "all" ? "everything" : `${t.p.applies_to === "only" ? "only" : "all except"} ${t.catNames.join(", ")}`}` +
+        `${t.p.is_active === false ? " (switched off)" : ""}.`;
+    },
+    run: async (ctx, a) => {
+      const t = await cardTypeInput(ctx, a);
+      return { card_type_id: must(await ctx.db.rpc("save_discount_card_type", { p_id: t.id, p: t.p })) };
+    },
+  },
   {
     name: "list_offers",
     title: "Offers, coupons and scratch cards",
@@ -1917,6 +2438,19 @@ const TOOLS: Tool[] = [
   },
 ];
 
+/** A product's category / unit change, by name. */
+async function productExtra(ctx: Ctx, a: Args) {
+  const row: Record<string, unknown> = {};
+  const notes: string[] = [];
+  for (const [k, table, col] of [["category", "categories", "category_id"], ["unit", "units", "unit_id"]] as const) {
+    if (!str(a[k])) continue;
+    const hit = await lookupName(ctx, table, str(a[k]));
+    if (hit.id) row[col] = hit.id;
+    else notes.push(hit.note.replace("so it will be saved without one", `add it first with ${k === "unit" ? "save_unit" : "save_category"}`));
+  }
+  return { row, notes };
+}
+
 /** Checks an edit_variants request against the product's variants. */
 async function variantEdit(ctx: Ctx, a: Args) {
   const product = await rowOf(ctx, "products", a.product_id, "id, name, has_variants, current_stock, track_serial", "find_products");
@@ -1962,6 +2496,8 @@ const INSTRUCTIONS =
   "add or change products, customers and suppliers, correct stock, take returns, edit bills, use discount cards and coupons, " +
   "create offers, manage product variants (sizes, colours), change or delete purchases, return goods to suppliers, " +
   "run repair job cards (open, estimate, customer's answer, work, status, bill and deliver) and services, " +
+  "fix mistakes (edit customers, suppliers, expenses, job details; undo a customer payment; change a bill's customer or due date), " +
+  "manage categories, units, offers, discount cards and card types, approve staff sales (owner), " +
   "and enter supplier bills: when the user " +
   "shares a photo or PDF of a supplier's bill, read every line carefully and use enter_purchase. Every change is two-step: the first call only previews it; show the user " +
   "the preview in plain words and call again with confirm: true ONLY after they clearly say yes. Never confirm on your own, " +
@@ -2029,7 +2565,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania", title: "Dukania", version: "6.0.0" },
+        serverInfo: { name: "dukania", title: "Dukania", version: "7.0.0" },
         instructions: INSTRUCTIONS,
       });
     }
