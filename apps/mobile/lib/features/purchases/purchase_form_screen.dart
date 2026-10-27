@@ -850,6 +850,20 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
               helperText: _paidLater > 0
                   ? '${money(_paidLater)} paid later is kept as it is'
                   : null,
+              // One tap: the whole purchase paid now, as in the sales checkout.
+              suffixIcon: Padding(
+                padding: const EdgeInsets.only(right: 6),
+                child: TextButton(
+                  onPressed: () => setState(() {
+                    if (_paymentMode == 'credit') _paymentMode = 'cash';
+                    _paid.text = (_total - _paidLater)
+                        .clamp(0, double.infinity)
+                        .toStringAsFixed(2);
+                    _paidTouched = true;
+                  }),
+                  child: Text(t('Exact')),
+                ),
+              ),
             ),
             onChanged: (_) => setState(() => _paidTouched = true),
           ),
