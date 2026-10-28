@@ -3,11 +3,14 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Button, Card, Input, Spinner, Table, subscriptionBadge } from "@/components/ui";
+import { Badge, Button, Card, Input, Select, Spinner, Table, subscriptionBadge } from "@/components/ui";
 import { businessTypeLabel } from "@/lib/business-types";
 import { dateStr } from "@/lib/format";
 
-type Sub = { status: string; expiry_date: string; grace_days: number; created_at: string; plans: { name: string } | null };
+type Sub = {
+  status: string; expiry_date: string; grace_days: number; created_at: string; plan_id: string | null;
+  plans: { name: string; billing?: string } | null;
+};
 type ClientRow = {
   id: string;
   name: string;
@@ -20,15 +23,22 @@ type ClientRow = {
   onboarding_done: boolean;
   created_at: string;
   subscriptions: Sub[];
+  feature_flags: { ai_assistant?: boolean } | { ai_assistant?: boolean }[] | null;
 };
+
+const aiOn = (c: ClientRow) =>
+  Boolean((Array.isArray(c.feature_flags) ? c.feature_flags[0] : c.feature_flags)?.ai_assistant);
 
 const FILTERS = [
   ["all", "All"],
   ["expiring", "Expiring in 7 days"],
+  ["expiring30", "Expiring in 30 days"],
   ["expired", "Expired"],
   ["trial", "Trial"],
   ["active", "Paying"],
   ["suspended", "Suspended"],
+  ["lifetime", "Lifetime"],
+  ["ai", "AI on"],
 ] as const;
 
 /** The shop's state as the app sees it: suspended, expired (past expiry + grace), else the subscription status. */
@@ -47,6 +57,7 @@ export default function ClientsPage() {
   const [rows, setRows] = useState<ClientRow[] | null>(null);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [planFilter, setPlanFilter] = useState("");
 
   useEffect(() => {
     // Arriving from the sidebar search: /clients?q=…
@@ -54,7 +65,7 @@ export default function ClientsPage() {
     if (q) Promise.resolve().then(() => setSearch(q));
     createClient()
       .from("businesses")
-      .select("id, name, owner_name, business_type, phone, email, gst_number, is_active, onboarding_done, created_at, subscriptions(status, expiry_date, grace_days, created_at, plans(name))")
+      .select("id, name, owner_name, business_type, phone, email, gst_number, is_active, onboarding_done, created_at, subscriptions(status, expiry_date, grace_days, created_at, plan_id, plans(name, billing)), feature_flags(ai_assistant)")
       .order("created_at", { ascending: false })
       .then(({ data }) => setRows((data as unknown as ClientRow[]) ?? []));
   }, []);
@@ -65,14 +76,31 @@ export default function ClientsPage() {
     .filter(({ c }) =>
       !q ||
       [c.name, c.owner_name, c.phone, c.email, c.gst_number].some((v) => (v ?? "").toLowerCase().includes(q)))
-    .filter(({ state, daysLeft }) =>
-      filter === "all" ||
-      (filter === "expiring" ? (state === "active" || state === "trial") && daysLeft !== null && daysLeft <= 7 : state === filter));
+    .filter(({ c, state, sub, daysLeft }) => {
+      const live = state === "active" || state === "trial";
+      const lifetime = sub?.plans?.billing === "lifetime";
+      if (planFilter && sub?.plan_id !== planFilter) return false;
+      switch (filter) {
+        case "all": return true;
+        case "expiring": return live && !lifetime && daysLeft !== null && daysLeft <= 7;
+        case "expiring30": return live && !lifetime && daysLeft !== null && daysLeft <= 30;
+        case "lifetime": return lifetime;
+        case "ai": return aiOn(c);
+        default: return state === filter;
+      }
+    });
+
+  // The plans clients are on, for the plan picker.
+  const planNames = new Map<string, string>();
+  for (const c of rows ?? []) {
+    const sub = stateOf(c).sub;
+    if (sub?.plan_id && sub.plans?.name) planNames.set(sub.plan_id, sub.plans.name);
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between gap-3">
-        <h1 className="text-2xl font-bold text-zinc-900">Clients</h1>
+        <h1 className="text-2xl font-bold text-zinc-900">Clients{rows ? <span className="ml-2 text-base font-medium text-zinc-500">{shown.length}</span> : null}</h1>
         <Link href="/clients/new"><Button>+ New client</Button></Link>
       </div>
       <Input
@@ -81,7 +109,11 @@ export default function ClientsPage() {
         onChange={(e) => setSearch(e.target.value)}
         className="max-w-md"
       />
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="w-44"><Select value={planFilter} onChange={(e) => setPlanFilter(e.target.value)}>
+          <option value="">All plans</option>
+          {[...planNames].map(([pid, name]) => <option key={pid} value={pid}>{name}</option>)}
+        </Select></div>
         {FILTERS.map(([key, label]) => (
           <button
             key={key}
@@ -108,11 +140,14 @@ export default function ClientsPage() {
                   </p>
                 </td>
                 <td className="whitespace-nowrap px-4 py-3">{c.phone || "—"}</td>
-                <td className="px-4 py-3">{sub?.plans?.name ?? "—"}</td>
+                <td className="px-4 py-3">
+                  {sub?.plans?.name ?? "—"}
+                  {aiOn(c) && <span className="ml-1.5 text-xs font-semibold text-violet-700">AI</span>}
+                </td>
                 <td className="px-4 py-3"><Badge color={subscriptionBadge(state)}>{state}</Badge></td>
                 <td className="whitespace-nowrap px-4 py-3">
-                  {dateStr(sub?.expiry_date)}
-                  {daysLeft !== null && daysLeft >= 0 && daysLeft <= 7 && state !== "suspended" && (
+                  {sub?.plans?.billing === "lifetime" ? "Lifetime" : dateStr(sub?.expiry_date)}
+                  {sub?.plans?.billing !== "lifetime" && daysLeft !== null && daysLeft >= 0 && daysLeft <= 7 && state !== "suspended" && (
                     <span className="block text-xs font-semibold text-orange-700">{daysLeft === 0 ? "today" : `in ${daysLeft} days`}</span>
                   )}
                 </td>
