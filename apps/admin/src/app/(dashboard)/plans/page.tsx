@@ -19,6 +19,12 @@ type Form = {
   software_id: string;
   monthly_price: string;
   yearly_price: string;
+  /** Pricing (migration 0096). */
+  billing: "yearly" | "lifetime";
+  list_price: string;
+  lowest_price: string;
+  extra_staff_price: string;
+  ai_addon_price: string;
   user_limit: string;
   product_limit: string;
   invoice_limit: string;
@@ -35,6 +41,9 @@ type Form = {
 
 const str = (v: unknown) => (v === null || v === undefined ? "" : String(v));
 const numOrNull = (v: string) => (v.trim() === "" ? null : Number(v));
+
+/** The website's price: the list price less the site-wide discount. */
+const websitePrice = (list: number, pct: number) => Math.round(list * (1 - pct / 100));
 
 const limitsText = (p: { user_limit: any; product_limit: any; invoice_limit: any }) =>
   [
@@ -60,6 +69,7 @@ export default function PlansPage() {
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [discount, setDiscount] = useState<number>(20);
 
   useEffect(() => {
     supabase.from("plans").select("*, software_products(name)").order("sort_order").order("name")
@@ -67,6 +77,8 @@ export default function PlansPage() {
     supabase.from("software_products").select("id, name, slug, status, features, trial_days")
       .eq("is_active", true).order("sort_order")
       .then(({ data }) => setProducts(data ?? []));
+    supabase.from("platform_settings").select("website_discount_pct").eq("id", 1).maybeSingle()
+      .then(({ data }) => data && setDiscount(Number(data.website_discount_pct)));
     // Shops per plan, by each shop's latest subscription.
     supabase.from("subscriptions").select("business_id, plan_id, created_at")
       .order("created_at", { ascending: false }).limit(5000)
@@ -95,6 +107,11 @@ export default function PlansPage() {
       software_id: p?.software_id ?? defaultProduct(),
       monthly_price: p ? str(Number(p.monthly_price) || "") : "",
       yearly_price: p ? str(Number(p.yearly_price) || "") : "",
+      billing: p?.billing === "lifetime" ? "lifetime" : "yearly",
+      list_price: p ? str(Number(p.list_price) || Number(p.yearly_price) || "") : "",
+      lowest_price: p ? str(Number(p.lowest_price) || "") : "",
+      extra_staff_price: p ? str(Number(p.extra_staff_price) || "") : "1000",
+      ai_addon_price: p ? str(Number(p.ai_addon_price) || "") : "",
       user_limit: str(p?.user_limit),
       product_limit: str(p?.product_limit),
       invoice_limit: str(p?.invoice_limit),
@@ -128,15 +145,18 @@ export default function PlansPage() {
     }
     const valid = new Set(productFeatures.map((f) => f.key));
     setBusy(true);
-    const { error } = await supabase.rpc("admin_save_plan", {
+    const list = Number(form.list_price) || 0;
+    const lowest = Number(form.lowest_price) || 0;
+    if (list > 0 && lowest > list) return setFormError("Your lowest price can't be above the list price");
+    const { data: savedId, error } = await supabase.rpc("admin_save_plan", {
       p_id: form.id,
       p: {
         name: form.name.trim(),
         description: form.description.trim(),
         highlights: highlightLines,
         software_id: form.software_id || null,
-        monthly_price: Number(form.monthly_price) || 0,
-        yearly_price: Number(form.yearly_price) || 0,
+        monthly_price: form.billing === "yearly" ? Number(form.monthly_price) || 0 : 0,
+        yearly_price: form.billing === "yearly" ? Number(form.list_price) || 0 : 0,
         user_limit: numOrNull(form.user_limit),
         product_limit: numOrNull(form.product_limit),
         invoice_limit: numOrNull(form.invoice_limit),
@@ -154,6 +174,23 @@ export default function PlansPage() {
         error.message.includes("admin_save_plan") ? "Migration 0055 isn't applied to this database yet." : error.message,
       );
     }
+    const { error: priceError } = await supabase.rpc("admin_save_plan_pricing", {
+      p_id: savedId ?? form.id,
+      p: {
+        billing: form.billing,
+        list_price: list,
+        lowest_price: lowest,
+        extra_staff_price: Number(form.extra_staff_price) || 0,
+        ai_addon_price: form.included.includes("ai_assistant") ? 0 : Number(form.ai_addon_price) || 0,
+      },
+    });
+    if (priceError) {
+      return setFormError(
+        priceError.message.includes("admin_save_plan_pricing")
+          ? "Plan saved, but its prices weren't: migration 0096 isn't applied to this database yet."
+          : `Plan saved, but its prices weren't: ${priceError.message}`,
+      );
+    }
     // New shops get the product's trial length on this plan.
     if (form.is_trial && form.software_id) {
       const { error: daysError } = await supabase
@@ -166,6 +203,17 @@ export default function PlansPage() {
     });
     setForm(null);
     setRefresh((n) => n + 1);
+  }
+
+  async function changeDiscount() {
+    const v = window.prompt("Discount on the list price shown on the website (0–90 %):", String(discount));
+    if (v === null) return;
+    const pct = Number(v);
+    if (!(pct >= 0 && pct <= 90)) return setNotice({ ok: false, text: "The discount must be 0 to 90 %." });
+    const { error } = await supabase.rpc("admin_set_website_discount", { p_pct: pct });
+    if (error) return setNotice({ ok: false, text: error.message });
+    setDiscount(pct);
+    setNotice({ ok: true, text: `The website now shows ${pct}% off list prices.` });
   }
 
   async function toggleActive(p: any) {
@@ -195,7 +243,13 @@ export default function PlansPage() {
             The app shows a plan&apos;s name and details, never its price. Prices stay here — you tell each shop what it pays.
           </p>
         </div>
-        <Button onClick={() => startEdit(null)}>+ New plan</Button>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className="text-sm text-zinc-600">
+            Website discount: <b className="text-ink">{discount}%</b>{" "}
+            <button className="font-medium text-brand hover:underline" onClick={changeDiscount}>Change</button>
+          </span>
+          <Button onClick={() => startEdit(null)}>+ New plan</Button>
+        </div>
       </div>
 
       <Notice notice={notice} />
@@ -218,6 +272,7 @@ export default function PlansPage() {
                         trial plan · {products.find((x) => x.id === p.software_id)?.trial_days ?? "?"} days
                       </Badge>
                     )}
+                    {p.billing === "lifetime" && <Badge color="green">lifetime</Badge>}
                     {p.is_recommended && <Badge color="purple">recommended</Badge>}
                     {p.is_custom && <Badge color="orange">custom</Badge>}
                     {!p.is_active && <Badge>hidden</Badge>}
@@ -228,11 +283,7 @@ export default function PlansPage() {
                   </p>
                 </div>
                 <div className="flex shrink-0 flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-                  <span className="tabular-nums text-zinc-700">
-                    {Number(p.monthly_price) > 0 ? `${inr(p.monthly_price)}/month` : "—"}
-                    {" · "}
-                    {Number(p.yearly_price) > 0 ? `${inr(p.yearly_price)}/year` : "—"}
-                  </span>
+                  <PriceLine p={p} discount={discount} />
                   <Link href="/clients" title="Clients whose current subscription is on this plan" className="text-zinc-500 hover:underline">
                     {count === 0 ? "No clients on this plan" : `${count} client${count === 1 ? "" : "s"} on this plan`}
                   </Link>
@@ -277,18 +328,41 @@ export default function PlansPage() {
               </div>
             </Section>
 
-            <Section title="Price — only you see this">
+            <Section title="Price — only you and the website see this">
+              <div className="flex gap-2">
+                {(["yearly", "lifetime"] as const).map((b) => (
+                  <button key={b} type="button" onClick={() => set("billing", b)}
+                    className={`rounded-full px-4 py-1.5 text-sm font-semibold ${form.billing === b ? "bg-brand text-white" : "bg-zinc-100 text-zinc-600"}`}>
+                    {b === "yearly" ? "Yearly" : "Lifetime (pay once)"}
+                  </button>
+                ))}
+              </div>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div>
-                  <Label>Monthly price ₹</Label>
-                  <Input type="number" min={0} step="0.01" value={form.monthly_price} onChange={(e) => set("monthly_price", e.target.value)} placeholder="0" />
+                  <Label>List price ₹ {form.billing === "yearly" ? "a year" : "once"}</Label>
+                  <Input type="number" min={0} step="1" value={form.list_price} onChange={(e) => set("list_price", e.target.value)} placeholder="e.g. 3499" />
+                  <p className="mt-1 text-xs text-zinc-500">
+                    {Number(form.list_price) > 0
+                      ? `Website shows ${inr(Number(form.list_price))} crossed out and ${inr(websitePrice(Number(form.list_price), discount))} (${discount}% off).`
+                      : "Leave empty to keep this plan off the website."}
+                  </p>
                 </div>
                 <div>
-                  <Label>Yearly price ₹</Label>
-                  <Input type="number" min={0} step="0.01" value={form.yearly_price} onChange={(e) => set("yearly_price", e.target.value)} placeholder="0" />
+                  <Label>Your lowest price ₹ — never shown</Label>
+                  <Input type="number" min={0} step="1" value={form.lowest_price} onChange={(e) => set("lowest_price", e.target.value)} placeholder="e.g. 2500" />
+                  <p className="mt-1 text-xs text-zinc-500">The least you&apos;ll accept. A sale below it is flagged for you.</p>
                 </div>
+                <div>
+                  <Label>Each extra staff login ₹ a year</Label>
+                  <Input type="number" min={0} step="1" value={form.extra_staff_price} onChange={(e) => set("extra_staff_price", e.target.value)} placeholder="e.g. 1000" />
+                </div>
+                {!form.included.includes("ai_assistant") && (
+                  <div>
+                    <Label>AI assistant add-on ₹ a year</Label>
+                    <Input type="number" min={0} step="1" value={form.ai_addon_price} onChange={(e) => set("ai_addon_price", e.target.value)} placeholder="Empty = not offered" />
+                  </div>
+                )}
               </div>
-              <p className="text-xs text-zinc-500">Used to fill in the amount when you renew a shop. You can change the amount for any shop at that moment.</p>
             </Section>
 
             <Section title="Limits — leave empty for unlimited">
@@ -441,5 +515,30 @@ function Check({ checked, onChange, label, hint }: { checked: boolean; onChange:
         <span className="block text-xs text-zinc-500">{hint}</span>
       </span>
     </label>
+  );
+}
+
+/** List · website · lowest, and the add-on prices, for one plan. */
+function PriceLine({ p, discount }: { p: any; discount: number }) {
+  const list = Number(p.list_price) || 0;
+  if (list <= 0) {
+    return (
+      <span className="tabular-nums text-zinc-500">
+        {Number(p.yearly_price) > 0 ? `${inr(p.yearly_price)}/year` : "No price"} · not on the website
+      </span>
+    );
+  }
+  const per = p.billing === "lifetime" ? " once" : "/year";
+  return (
+    <span className="text-right tabular-nums">
+      <span className="text-zinc-700">
+        List {inr(list)}{per} · <b className="text-ink">Website {inr(websitePrice(list, discount))}</b>
+        {Number(p.lowest_price) > 0 && <> · <span className="text-amber-700">Lowest {inr(p.lowest_price)}</span></>}
+      </span>
+      <span className="block text-xs text-zinc-500">
+        {Number(p.extra_staff_price) > 0 ? `Extra staff ${inr(p.extra_staff_price)}/year` : "No extra staff price"}
+        {Number(p.ai_addon_price) > 0 ? ` · AI add-on ${inr(p.ai_addon_price)}/year` : ""}
+      </span>
+    </span>
   );
 }

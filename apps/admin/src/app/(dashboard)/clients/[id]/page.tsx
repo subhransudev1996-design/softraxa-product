@@ -9,6 +9,7 @@ import {
   Badge, Button, Card, CardBody, Input, Label, Select, Spinner, Toggle, subscriptionBadge,
 } from "@/components/ui";
 import { Modal, Notice, RenewDialog, waLink } from "@/components/ops";
+import { AddonDialog, SaleDialog } from "@/components/sale-dialogs";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 
 // Plan features the app enforces (app_feature_keys, migration 0033).
@@ -27,6 +28,9 @@ const FEATURES: [string, string][] = [
 
 const ACTION_LABELS: Record<string, string> = {
   "subscription.renewed": "Renewed",
+  "subscription.sold": "Plan sold",
+  "addon.added": "Add-on added",
+  "addon.ended": "Add-on ended",
   "subscription.updated": "Subscription corrected",
   "subscription.payment_claimed": "Shop reported a payment",
   "subscription.claim_rejected": "Payment claim rejected",
@@ -60,13 +64,16 @@ export default function ClientDetailPage() {
   const [note, setNote] = useState("");
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [renewOpen, setRenewOpen] = useState(false);
+  const [saleOpen, setSaleOpen] = useState(false);
+  const [addonOpen, setAddonOpen] = useState(false);
+  const [addons, setAddons] = useState<any[]>([]);
   const [correctOpen, setCorrectOpen] = useState(false);
   const [confirmSuspend, setConfirmSuspend] = useState(false);
 
   const load = useCallback(async () => {
     const [biz, sub, ff, pl, pay, cl, hist] = await Promise.all([
       supabase.from("businesses").select("*").eq("id", id).single(),
-      supabase.from("subscriptions").select("*, plans(name, user_limit)").eq("business_id", id)
+      supabase.from("subscriptions").select("*, plans(*)").eq("business_id", id)
         .order("created_at", { ascending: false }).limit(1).maybeSingle(),
       supabase.from("feature_flags").select("*").eq("business_id", id).maybeSingle(),
       supabase.from("plans").select("*").eq("is_active", true).order("monthly_price"),
@@ -74,7 +81,7 @@ export default function ClientDetailPage() {
         .order("payment_date", { ascending: false }).limit(20),
       supabase.from("renewal_claims").select("*").eq("business_id", id).eq("status", "pending"),
       supabase.from("audit_logs").select("*").eq("business_id", id)
-        .or("action.like.subscription.%,action.like.business.%,action.like.feature.%,action.like.support.%")
+        .or("action.like.subscription.%,action.like.business.%,action.like.feature.%,action.like.support.%,action.like.addon.%")
         .order("created_at", { ascending: false }).limit(25),
     ]);
     setBusiness(biz.data);
@@ -84,6 +91,11 @@ export default function ClientDetailPage() {
     setPayments(pay.data ?? []);
     setClaims(cl.data ?? []);
     setHistory(hist.data ?? []);
+    // Paid add-ons in force (migration 0096); none before it is applied.
+    const today = new Date().toISOString().slice(0, 10);
+    const ad = await supabase.from("shop_addons").select("*").eq("business_id", id)
+      .gte("valid_until", today).order("valid_until");
+    setAddons(ad.error ? [] : ad.data ?? []);
 
     // Users, tickets, mismatches in the latest nightly check, private notes.
     const since = new Date(Date.now() - 30 * 86400000).toISOString();
@@ -158,6 +170,14 @@ export default function ClientDetailPage() {
     setNotice({ ok: true, text: `${FEATURES.find((f) => f[0] === key)?.[1]} turned ${value ? "on" : "off"}` });
   }
 
+  async function endAddon(a: any) {
+    const reason = window.prompt(`End this ${a.kind === "ai" ? "AI add-on" : "staff add-on"} today? Why (e.g. entered by mistake):`);
+    if (!reason?.trim()) return;
+    const { error } = await supabase.rpc("admin_end_addon", { p_id: a.id, p_reason: reason.trim() });
+    setNotice(error ? { ok: false, text: error.message } : { ok: true, text: "Add-on ended." });
+    load();
+  }
+
   async function addNote() {
     if (!note.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -198,6 +218,10 @@ export default function ClientDetailPage() {
   if (!business) return <Spinner />;
 
   const expired = subscription && new Date(`${subscription.expiry_date}T23:59:59`) < new Date();
+  const plan = subscription?.plans ?? null;
+  const lifetime = plan?.billing === "lifetime";
+  const extraStaff = addons.filter((a) => a.kind === "staff").reduce((n, a) => n + Number(a.quantity), 0);
+  const loginLimit = plan?.user_limit == null ? null : Number(plan.user_limit) + extraStaff;
   const status = !business.is_active ? "suspended" : expired ? "expired" : (subscription?.status ?? "none");
 
   return (
@@ -243,12 +267,47 @@ export default function ClientDetailPage() {
               <Badge color={subscriptionBadge(status)}>{status}</Badge>
             </div>
             <dl className="space-y-2 text-sm">
-              <div className="flex justify-between"><dt className="text-zinc-500">Plan</dt><dd>{subscription?.plans?.name ?? "No plan"}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Expires</dt><dd className={expired ? "font-semibold text-red-600" : ""}>{dateStr(subscription?.expiry_date)}</dd></div>
-              <div className="flex justify-between"><dt className="text-zinc-500">Grace days</dt><dd>{subscription?.grace_days ?? 0}</dd></div>
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">Plan</dt>
+                <dd className="flex items-center gap-2">{plan?.name ?? "No plan"}{lifetime && <Badge color="green">lifetime</Badge>}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">Expires</dt>
+                <dd className={expired ? "font-semibold text-red-600" : ""}>{lifetime ? "Never (lifetime)" : dateStr(subscription?.expiry_date)}</dd>
+              </div>
+              {!lifetime && (
+                <div className="flex justify-between"><dt className="text-zinc-500">Grace days</dt><dd>{subscription?.grace_days ?? 0}</dd></div>
+              )}
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">Logins</dt>
+                <dd className={loginLimit != null && staff.length > loginLimit ? "font-semibold text-red-600" : ""}>
+                  {staff.length} of {loginLimit ?? "unlimited"}
+                  {extraStaff > 0 ? ` (incl. ${extraStaff} extra)` : ""}
+                  {loginLimit != null && staff.length > loginLimit ? " — over the limit" : ""}
+                </dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-zinc-500">AI assistant</dt>
+                <dd>{flags?.ai_assistant ? "On" : "Off"}</dd>
+              </div>
             </dl>
+            {addons.length > 0 && (
+              <ul className="mt-3 space-y-1.5 rounded-xl bg-zinc-50 p-3 text-sm">
+                {addons.map((a) => (
+                  <li key={a.id} className="flex items-center justify-between gap-2">
+                    <span>
+                      {a.kind === "ai" ? "AI assistant" : `${a.quantity} extra staff login${a.quantity > 1 ? "s" : ""}`}
+                      <span className="text-zinc-500"> · until {dateStr(a.valid_until)}{Number(a.price) > 0 ? ` · ${inr(a.price)}` : ""}</span>
+                    </span>
+                    <button className="text-xs font-medium text-zinc-500 hover:text-red-600 hover:underline" onClick={() => endAddon(a)}>End</button>
+                  </li>
+                ))}
+              </ul>
+            )}
             <div className="mt-4 flex flex-wrap gap-2">
-              <Button onClick={() => setRenewOpen(true)}>Renew / record payment</Button>
+              <Button onClick={() => setSaleOpen(true)}>Record a sale</Button>
+              <Button variant="outline" onClick={() => setAddonOpen(true)} disabled={!subscription}>Add-on</Button>
+              <Button variant="outline" onClick={() => setRenewOpen(true)}>Renew (old way)</Button>
               <Button variant="outline" onClick={() => setCorrectOpen(true)}>Correct</Button>
             </div>
           </CardBody>
@@ -402,6 +461,22 @@ export default function ClientDetailPage() {
         </CardBody>
       </Card>
 
+      {saleOpen && (
+        <SaleDialog
+          target={{ businessId: id, name: business.name, phone: business.phone, planId: subscription?.plan_id,
+                    expiry: subscription?.expiry_date, status: expired ? "expired" : subscription?.status }}
+          onClose={() => setSaleOpen(false)}
+          onDone={load}
+        />
+      )}
+      {addonOpen && (
+        <AddonDialog
+          target={{ businessId: id, name: business.name, phone: business.phone, expiry: subscription?.expiry_date }}
+          plan={plan}
+          onClose={() => setAddonOpen(false)}
+          onDone={(text) => { setAddonOpen(false); setNotice({ ok: true, text }); load(); }}
+        />
+      )}
       {renewOpen && (
         <RenewDialog
           target={{ businessId: id, name: business.name, phone: business.phone, planId: subscription?.plan_id, expiry: subscription?.expiry_date }}
