@@ -56,6 +56,9 @@ const SEO_DEFAULTS: Record<string, { title: string; description: string; keyword
   }
 };
 
+/** Shown when a page link is shared on WhatsApp and elsewhere. */
+const SHARE_IMAGE = "/images/site/share-image.jpg";
+
 // --- API Helpers ---
 
 /**
@@ -167,14 +170,15 @@ export function buildPageMetadata(seo: CmsJson): Metadata {
     openGraph: {
       title: ogTitle,
       description: ogDescription,
-      images: seo.og_image ? [{ url: seo.og_image }] : undefined,
+      // The Dukania share picture unless the page has its own (CMS).
+      images: [seo.og_image ? { url: seo.og_image } : { url: SHARE_IMAGE, width: 1200, height: 630 }],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title: twitterTitle,
       description: twitterDescription,
-      images: seo.og_image ? [seo.og_image] : undefined,
+      images: [seo.og_image || SHARE_IMAGE],
     },
   };
 }

@@ -29,9 +29,9 @@ export default function FilmCard({ id = "film" }: { id?: string }) {
       >
         <Image
           src="/images/site/film-poster.jpg"
-          alt="A shop owner billing a customer at the counter"
-          width={1280}
-          height={720}
+          alt="A shop owner scanning a packet at his counter"
+          width={1672}
+          height={941}
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="aspect-[16/10] h-auto w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
         />
@@ -39,12 +39,12 @@ export default function FilmCard({ id = "film" }: { id?: string }) {
         <span className="absolute left-1/2 top-1/2 flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-white/25 ring-2 ring-white/80 backdrop-blur transition-transform group-hover:scale-110">
           <Play className="ml-1 h-9 w-9 fill-white text-white" aria-hidden="true" />
         </span>
-        <span className="hand absolute bottom-10 right-6 -rotate-6 text-right text-3xl leading-tight text-white drop-shadow sm:text-4xl">
+        <span className="hand absolute bottom-10 left-6 -rotate-6 text-left text-3xl leading-tight text-white drop-shadow sm:text-4xl">
           A day
           <br />
           at the counter
         </span>
-        <span className="absolute bottom-4 right-6 text-sm font-semibold text-white/90">2:00</span>
+        <span className="absolute bottom-4 left-6 text-sm font-semibold text-white/90">2:00</span>
       </button>
 
       {open && (

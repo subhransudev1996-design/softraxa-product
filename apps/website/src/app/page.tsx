@@ -50,13 +50,13 @@ const FEATURES: { icon: Icon; title: string; tone: string }[] = [
   { icon: "BookOpen", title: "Book store billing", tone: "bg-yellow-50 text-yellow-700" },
 ];
 
-const TRADES: { title: string; image: string; points: string[] }[] = [
-  { title: "Mobile & electronics", image: "/images/site/trade-mobile.jpg", points: ["IMEI on every bill", "Colour / storage variants", "Repair job cards"] },
-  { title: "Hardware & electrical", image: "/images/site/trade-hardware.jpg", points: ["Sell by metre, kg or piece", "Cut wire and pipe from the roll", "Big product lists"] },
-  { title: "Garments & footwear", image: "/images/site/trade-garments.jpg", points: ["Sizes and colours", "Barcode billing", "Exchanges without paperwork"] },
-  { title: "Grocery & kirana", image: "/images/site/trade-grocery.jpg", points: ["Loose items by weight", "Weighing-scale barcodes", "Khata for regular customers"] },
-  { title: "Car & bike workshops", image: "/images/site/trade-workshop.jpg", points: ["Vehicle job cards", "Parts and labour on one bill", "Estimates the customer approves"] },
-  { title: "Any retail counter", image: "/images/site/trade-retail.jpg", points: ["GST billing from day one", "Stock that stays right", "Works on the phone you have"] },
+const TRADES: { title: string; image: string; focus: string; points: string[] }[] = [
+  { title: "Mobile & electronics", image: "/images/site/trade-mobile.jpg", focus: "70%", points: ["IMEI on every bill", "Colour / storage variants", "Repair job cards"] },
+  { title: "Hardware & electrical", image: "/images/site/trade-hardware.jpg", focus: "50%", points: ["Sell by metre, kg or piece", "Cut wire and pipe from the roll", "Big product lists"] },
+  { title: "Garments & footwear", image: "/images/site/trade-garments.jpg", focus: "55%", points: ["Sizes and colours", "Barcode billing", "Exchanges without paperwork"] },
+  { title: "Grocery & kirana", image: "/images/site/trade-grocery.jpg", focus: "65%", points: ["Loose items by weight", "Weighing-scale barcodes", "Khata for regular customers"] },
+  { title: "Car & bike workshops", image: "/images/site/trade-workshop.jpg", focus: "40%", points: ["Vehicle job cards", "Parts and labour on one bill", "Estimates the customer approves"] },
+  { title: "Any retail counter", image: "/images/site/trade-retail.jpg", focus: "55%", points: ["GST billing from day one", "Stock that stays right", "Works on the phone you have"] },
 ];
 
 const HERO_CHIPS: { icon: Icon; label: string }[] = [
@@ -268,8 +268,8 @@ export default async function HomePage() {
           <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
             {TRADES.map((t) => (
               <li key={t.title} className="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
-                <Image src={t.image} alt={t.title} width={800} height={600} sizes="(max-width: 768px) 50vw, 16vw"
-                  className="aspect-[4/3] h-auto w-full object-cover" />
+                <Image src={t.image} alt={t.title} width={1672} height={941} sizes="(max-width: 768px) 50vw, 16vw"
+                  style={{ objectPosition: `${t.focus} 40%` }} className="aspect-[4/3] h-auto w-full object-cover" />
                 <div className="p-3">
                   <h3 className="text-sm font-bold text-paper">{t.title}</h3>
                   <ul className="mt-2 space-y-1">
@@ -306,8 +306,8 @@ export default async function HomePage() {
               </div>
               <div className="relative justify-self-end pt-14">
                 <p className="hand absolute right-0 top-0 -rotate-6 whitespace-nowrap text-2xl text-paper/80">No internet? No problem!</p>
-                <Image src="/images/site/offline-shopkeeper.jpg" alt="A shop owner billing on the phone with no internet" width={900} height={900}
-                  sizes="176px" className="h-44 w-44 rounded-2xl object-cover" />
+                <Image src="/images/site/offline-shopkeeper.jpg" alt="A shop owner showing Dukania on his phone" width={1672} height={941}
+                  sizes="176px" className="h-44 w-44 rounded-2xl object-cover object-[62%_30%]" />
               </div>
             </div>
           </div>
@@ -386,8 +386,8 @@ export default async function HomePage() {
           </Link>
         </div>
         <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl border border-hairline bg-white p-5 shadow-card">
-          <Image src="/images/site/support-person.jpg" alt="Dukania support on WhatsApp" width={600} height={600} sizes="120px"
-            className="h-28 w-28 shrink-0 rounded-2xl object-cover" />
+          <Image src="/images/site/support-person.jpg" alt="Dukania support on WhatsApp" width={1536} height={1024} sizes="120px"
+            className="h-28 w-28 shrink-0 rounded-2xl object-cover object-[50%_25%]" />
           <div>
             <p className={eyebrow}>WhatsApp help</p>
             <p className="mt-1 font-semibold">Talk to us on WhatsApp.</p>
