@@ -68,6 +68,8 @@ export async function POST(req: Request) {
     city: String(body?.city ?? "").slice(0, 100),
     notes: String(body?.notes ?? "").slice(0, 2000),
     source: "website",
+    // The campaign link the visitor came through (Marketing → Campaigns, 0101).
+    campaign: String(body?.campaign?.campaign || body?.campaign?.source || "").trim().slice(0, 120),
   });
 
   if (error) {

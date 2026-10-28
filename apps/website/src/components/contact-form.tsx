@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { readCampaign } from "@/components/campaign-capture";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -29,6 +30,7 @@ export default function ContactForm() {
           city: fd.get("city"),
           notes: fd.get("notes"),
           website: fd.get("website"), // honeypot — real visitors leave it empty
+          campaign: readCampaign(), // the campaign link they came through, if any
         }),
       });
       if (!res.ok) {

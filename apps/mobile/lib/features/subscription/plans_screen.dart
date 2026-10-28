@@ -8,6 +8,7 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 import 'staff_request.dart';
+import '../marketing/referral_card.dart';
 
 /// This shop's plan with its usage, and the plans it can ask for
 /// (get_plans_for_app, migration 0055). Prices never reach the app:
@@ -104,6 +105,11 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                           staffRequestOpen: d['staff_request_open'] == true,
                           isOwner: appContext?.isOwner ?? false,
                         ),
+                        // Refer a shop (migration 0101), for the owner.
+                        if (appContext?.isOwner ?? false) ...[
+                          const SizedBox(height: 16),
+                          const ReferralCard(),
+                        ],
                         if (others.isNotEmpty) ...[
                           const SizedBox(height: 24),
                           Text(t('Other plans'),

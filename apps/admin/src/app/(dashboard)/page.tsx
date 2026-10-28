@@ -68,6 +68,7 @@ export default function TodayPage() {
   const [refresh, setRefresh] = useState(0);
   const [staffAsks, setStaffAsks] = useState<any[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
+  const [rewards, setRewards] = useState<any[]>([]);
   // Renewing and money are for the people with payments (0098).
   const canPay = useCan("payments");
 
@@ -85,6 +86,10 @@ export default function TodayPage() {
     supabase.from("support_tickets").select("id, subject, priority, created_at, businesses(name)")
       .eq("kind", "complaint").neq("status", "resolved").order("created_at")
       .then(({ data, error }) => setComplaints(error ? [] : data ?? []));
+    // Referral rewards earned and not yet given (migration 0101).
+    supabase.from("referral_rewards").select("id, months, created_at, referrer:businesses!referral_rewards_referrer_id_fkey(name)")
+      .eq("status", "pending").order("created_at")
+      .then(({ data, error }) => setRewards(error ? [] : data ?? []));
     supabase.from("platform_settings").select("payment_upi_id").maybeSingle()
       .then(({ data }) => setUpi(data?.payment_upi_id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -118,6 +123,7 @@ export default function TodayPage() {
   const total =
     data.claims.length + data.expiring.length + data.expired.length + data.tickets.length +
     data.setup.length + data.inactive.length + data.followups.length + complaints.length +
+    (canPay ? rewards.length : 0) +
     (data.reconciliation?.unexplained ? 1 : 0);
 
   return (
@@ -189,6 +195,19 @@ export default function TodayPage() {
             />
           ))}
         </Group>
+
+        {canPay && (
+          <Group title="Referral rewards to give" count={rewards.length} tone="purple">
+            {rewards.map((r) => (
+              <Row
+                key={r.id}
+                main={<>{r.referrer?.name}: {r.months} month{r.months === 1 ? "" : "s"} free</>}
+                sub={<>A shop it referred paid on {dateStr(r.created_at)}</>}
+                actions={<Link href="/marketing"><Button variant="outline">Give or skip</Button></Link>}
+              />
+            ))}
+          </Group>
+        )}
 
         <Group title="Asking for more staff logins" count={staffAsks.length} tone="purple">
           {staffAsks.map((r) => (

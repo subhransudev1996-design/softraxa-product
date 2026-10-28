@@ -5,7 +5,7 @@
  */
 
 export type Area =
-  | "clients" | "payments" | "support" | "leads" | "catalog"
+  | "clients" | "payments" | "support" | "leads" | "marketing" | "catalog"
   | "plans" | "settings" | "website" | "system";
 
 export type TeamRole = "owner" | "sales" | "support" | "accounts" | "custom";
@@ -36,6 +36,7 @@ export const AREAS: { key: Area; label: string; hint: string }[] = [
   { key: "payments", label: "Payments & sales", hint: "Verify payments, renew, record sales and add-ons, Sales page" },
   { key: "support", label: "Support", hint: "Answer the shops' support requests" },
   { key: "leads", label: "Leads", hint: "Leads and follow-ups" },
+  { key: "marketing", label: "Marketing", hint: "Announcements, promo codes, referrals, campaigns and their costs" },
   { key: "catalog", label: "Master products", hint: "Master products and software" },
   { key: "plans", label: "Plans & prices", hint: "Plans, prices and the lowest price" },
   { key: "settings", label: "Settings", hint: "Payment details, contact numbers, receipts" },
@@ -64,6 +65,7 @@ export function areaFor(pathname: string): Area | "owner" | null {
       "/sales": "payments",
       "/support": "support",
       "/leads": "leads",
+      "/marketing": "marketing",
       "/catalog": "catalog",
       "/products": "catalog",
       "/plans": "plans",

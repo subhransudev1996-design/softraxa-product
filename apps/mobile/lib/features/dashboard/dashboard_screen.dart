@@ -13,6 +13,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import '../marketing/announcement_banners.dart';
 import '../shell/renewal_payment.dart';
 import 'dashboard_desktop.dart';
 
@@ -65,6 +66,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final list = RefreshIndicator(
       onRefresh: () async {
         ref.invalidate(dashboardStatsProvider);
+        ref.invalidate(announcementsProvider);
         ref.invalidate(recentInvoicesProvider);
         ref.invalidate(salesTrendProvider);
         ref.invalidate(topProductsProvider);
@@ -384,6 +386,8 @@ class _DesktopDashboard extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 16),
                   child: _ExpiryBanner(daysLeft: _daysLeft(appContext)!),
                 ),
+              // Dukania's announcements for this shop (migration 0101).
+              const AnnouncementBanners(padding: EdgeInsets.only(top: 16)),
 
               const SizedBox(height: 24),
 
@@ -720,6 +724,8 @@ class _MobileDashboard extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
             child: _ExpiryBanner(daysLeft: _daysLeft(appContext)!),
           ),
+        // Dukania's announcements for this shop (migration 0101).
+        const AnnouncementBanners(padding: EdgeInsets.fromLTRB(16, 14, 16, 0)),
 
         // ============ quick actions ============
         Padding(

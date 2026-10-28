@@ -11,6 +11,7 @@ import {
   Layers,
   LifeBuoy,
   ListChecks,
+  Megaphone,
   Menu,
   ScanSearch,
   ScrollText,
@@ -35,6 +36,7 @@ const daily = [
   { href: "/sales", label: "Sales", icon: TrendingUp },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/leads", label: "Leads", icon: Target },
+  { href: "/marketing", label: "Marketing", icon: Megaphone },
   { href: "/reconciliation", label: "Reconciliation", icon: ScanSearch },
 ];
 const setup = [

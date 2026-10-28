@@ -82,6 +82,10 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<any>(null);
+  // A promo code (migration 0101): checked for the plan, used on the payment.
+  const [promoCode, setPromoCode] = useState("");
+  const [promo, setPromo] = useState<any>(null);
+  const [promoNote, setPromoNote] = useState<string | null>(null);
 
   useEffect(() => {
     const db = createClient();
@@ -104,11 +108,19 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
   // The discount is on the plan; add-ons are charged at their price.
   const webTotal = plan ? Math.round(Number(plan.list_price) * (1 - discount / 100)) + addons : 0;
   const lowest = plan ? Number(plan.lowest_price) + addons : 0;
-  const shownAmount = amountTouched ? amount : plan ? String(webTotal) : "";
+  const promoOff = promo?.ok && promo.planId === planId ? Number(promo.discount) : 0;
+  const shownAmount = amountTouched ? amount : plan ? String(webTotal - promoOff) : "";
   const amountNum = Number(shownAmount || 0);
   const lifetime = plan?.billing === "lifetime";
   const renewing = target.status === "active" && target.expiry && target.expiry >= today();
   const until = lifetime ? null : plusYear(renewing ? (target.expiry as string) : today());
+
+  async function checkPromo() {
+    if (!plan || !promoCode.trim()) return;
+    const { data, error } = await createClient().rpc("admin_check_promo", { p_code: promoCode, p_plan: plan.id });
+    if (error) return setPromo({ ok: false, reason: error.message });
+    setPromo({ ...(data as any), planId: plan.id });
+  }
 
   async function submit() {
     setError(null);
@@ -131,6 +143,13 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
     setBusy(false);
     if (error) {
       return setError(error.message.includes("admin_record_sale") ? "Migration 0096 isn't applied to this database yet." : error.message);
+    }
+    // The promo code is used on this payment.
+    if (promoOff > 0 && (data as any)?.payment_id) {
+      const { error: promoError } = await createClient().rpc("admin_redeem_promo", {
+        p_code: promo.code, p_payment: (data as any).payment_id,
+      });
+      setPromoNote(promoError ? `The code ${promo.code} was not used: ${promoError.message}` : `Code ${promo.code} used (${inr(promoOff)} off).`);
     }
     setResult(data);
     onDone();
@@ -163,6 +182,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
           {result.below_lowest && (
             <p className="rounded-xl bg-amber-50 px-4 py-3 text-amber-800">Recorded below your lowest price.</p>
           )}
+          {promoNote && <p className="rounded-xl bg-violet-50 px-4 py-3 text-violet-800">{promoNote}</p>}
           <div className="flex flex-wrap gap-2">
             <a href={waLink(target.phone, msg)} target="_blank" rel="noreferrer"><Button>Send on WhatsApp</Button></a>
             {result.payment_id && (
@@ -227,6 +247,24 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
             <div><span className="block text-xs text-zinc-500">List</span><b className="tabular-nums">{inr(listTotal)}</b></div>
             <div><span className="block text-xs text-zinc-500">Website ({discount}% off)</span><b className="tabular-nums text-brand">{inr(webTotal)}</b></div>
             <div><span className="block text-xs text-zinc-500">Your lowest</span><b className="tabular-nums text-amber-700">{inr(lowest)}</b></div>
+          </div>
+        )}
+
+        {plan && (
+          <div>
+            <Label>Promo code (optional)</Label>
+            <div className="flex gap-2">
+              <Input value={promoCode} onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromo(null); }}
+                placeholder="e.g. DIWALI500" className="max-w-xs" />
+              <Button variant="outline" onClick={checkPromo} disabled={!promoCode.trim()}>Check</Button>
+            </div>
+            {promo && (promo.ok && promo.planId === planId ? (
+              <p className="mt-1 text-xs font-semibold text-emerald-700">
+                {inr(promo.discount)} off the website price — the amount below is {inr(webTotal - promoOff)}.
+              </p>
+            ) : (
+              <p className="mt-1 text-xs font-semibold text-red-600">{promo.ok ? "Check the code again for this plan." : promo.reason}</p>
+            ))}
           </div>
         )}
 

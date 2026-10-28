@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Instrument_Sans, Plus_Jakarta_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import Nav from "@/components/nav";
 import Footer from "@/components/footer";
+import CampaignCapture from "@/components/campaign-capture";
 import "./globals.css";
 
 const instrumentSans = Instrument_Sans({
@@ -57,6 +58,7 @@ export default function RootLayout({
           harmless dev-only hydration warning. Applies to this element's
           attributes only, not children. */}
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-bg text-paper">
+        <CampaignCapture />
         <Nav />
         <main className="flex-1">{children}</main>
         <Footer />
