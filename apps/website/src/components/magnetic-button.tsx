@@ -25,7 +25,7 @@ export default function MagneticButton({
     "inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-6 py-3 text-sm font-semibold transition-colors";
   const styles =
     variant === "primary"
-      ? "bg-paper text-bg hover:bg-paper/90 shadow-lg shadow-black/20"
+      ? "bg-brand text-white hover:bg-brand-2 shadow-lg shadow-black/20"
       : "glass text-paper hover:bg-paper/5";
 
   const inner = <span className={`${base} ${styles} ${className}`}>{children}</span>;

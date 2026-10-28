@@ -1,19 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #ffffff;
-  --surface: #f8fafc;
-  --elevated: #f1f5f9;
-  --paper: #070a14;
-  --dim: #4b5563;
+  /* Dukania: a warm cream page, deep shop-green, marigold for highlights. */
+  --bg: #fbf8f1;
+  --surface: #ffffff;
+  --elevated: #f3eee2;
+  --paper: #13241c;
+  --dim: #56635c;
 
-  --violet: #7c3aed;
-  --teal: #0f9d8f;
-  --sky: #0284c7;
+  --brand: #14532d;
+  --brand-2: #166534;
+  --brand-soft: #e7f2ea;
+  --marigold: #e8a317;
+
+  /* older names, kept so every page follows the new palette */
+  --violet: var(--brand);
+  --teal: #16a34a;
+  --sky: var(--brand-2);
   --amber: #b45309;
 
-  --hairline: rgba(7, 10, 20, 0.08);
-  --glass: rgba(7, 10, 20, 0.03);
+  --hairline: rgba(19, 36, 28, 0.1);
+  --glass: rgba(255, 255, 255, 0.7);
 
   --background: var(--bg);
   --foreground: var(--paper);
@@ -31,11 +38,16 @@
   --color-teal: var(--teal);
   --color-sky: var(--sky);
   --color-amber: var(--amber);
+  --color-brand: var(--brand);
+  --color-brand-2: var(--brand-2);
+  --color-brand-soft: var(--brand-soft);
+  --color-marigold: var(--marigold);
   --color-hairline: var(--hairline);
   --color-glass: var(--glass);
   --font-display: var(--font-instrument-sans);
   --font-sans: var(--font-jakarta);
   --font-mono: var(--font-jetbrains-mono);
+  --font-hand: var(--font-caveat);
 }
 
 body {
@@ -46,43 +58,9 @@ body {
   overflow-x: hidden;
 }
 
-/* ---------- site-wide background pattern ----------
-   A fixed layer behind all content on every page: a fine grid crossed with
-   a subtle dot at each intersection, plus faint corner glows so the dark
-   canvas never reads as flat. Sits below content (z -1); purely decorative. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    /* faint ambient glows */
-    radial-gradient(60rem 60rem at 12% -10%, rgba(124, 58, 237, 0.08), transparent 60%),
-    radial-gradient(55rem 55rem at 100% 8%, rgba(56, 189, 248, 0.06), transparent 60%),
-    /* dots at grid intersections */
-    radial-gradient(circle at 1px 1px, rgba(7, 10, 20, 0.05) 1px, transparent 0),
-    /* fine grid lines */
-    linear-gradient(to right, rgba(7, 10, 20, 0.02) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(7, 10, 20, 0.02) 1px, transparent 1px);
-  background-size:
-    100% 100%,
-    100% 100%,
-    44px 44px,
-    44px 44px,
-    44px 44px;
-}
-
-/* mask the pattern so it fades toward the centre, keeping text areas calm */
-@supports (mask-image: linear-gradient(#000, #000)) {
-  body::before {
-    mask-image: radial-gradient(120% 100% at 50% 0%, #000 0%, rgba(0, 0, 0, 0.55) 55%, rgba(0, 0, 0, 0.35) 100%);
-  }
-}
-
 ::selection {
-  background: var(--violet);
-  color: var(--paper);
+  background: var(--brand);
+  color: #fff;
 }
 
 :focus-visible {
@@ -100,12 +78,7 @@ body::before {
 }
 
 .gradient-text {
-  background: linear-gradient(100deg, var(--paper) 20%, var(--sky) 45%, var(--violet) 70%, var(--paper) 95%);
-  background-size: 200% auto;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shimmer 6s linear infinite;
+  color: var(--brand);
 }
 
 @keyframes shimmer {
@@ -224,4 +197,18 @@ body::before {
   .stamp-press {
     transition: none;
   }
+}
+
+/* ---------- Dukania site ---------- */
+.hand {
+  font-family: var(--font-caveat), cursive;
+  font-weight: 600;
+}
+
+.shadow-card {
+  box-shadow: 0 1px 2px rgba(19, 36, 28, 0.05), 0 8px 24px -12px rgba(19, 36, 28, 0.18);
+}
+
+.shadow-float {
+  box-shadow: 0 2px 6px rgba(19, 36, 28, 0.08), 0 24px 48px -20px rgba(19, 36, 28, 0.35);
 }

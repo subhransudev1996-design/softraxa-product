@@ -99,7 +99,7 @@ export default async function Footer() {
             </div>
             <Link
               href="/download"
-              className="stamp-press inline-flex min-h-11 items-center gap-2 rounded-lg bg-paper px-5 text-sm font-semibold text-bg hover:bg-paper/90"
+              className="stamp-press inline-flex min-h-11 items-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-2"
             >
               Get started <ArrowRight className="h-4 w-4" />
             </Link>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Instrument_Sans, Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google";
+import { Instrument_Sans, Plus_Jakarta_Sans, JetBrains_Mono, Caveat } from "next/font/google";
 import Nav from "@/components/nav";
 import Footer from "@/components/footer";
 import "./globals.css";
@@ -14,6 +14,13 @@ const jakarta = Plus_Jakarta_Sans({
   variable: "--font-jakarta",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
+});
+
+// Handwritten notes on the site ("No internet? No problem!").
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["600"],
 });
 
 const jetbrainsMono = JetBrains_Mono({
@@ -43,7 +50,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${jakarta.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} h-full antialiased`}
+      className={`${jakarta.variable} ${instrumentSans.variable} ${jetbrainsMono.variable} ${caveat.variable} h-full antialiased`}
     >
       {/* suppressHydrationWarning: browser extensions (password managers etc.)
           inject attributes into <body> before React hydrates, causing a

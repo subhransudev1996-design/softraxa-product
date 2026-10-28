@@ -1,57 +1,82 @@
 import type { Metadata } from "next";
+import Image from "next/image";
+import Link from "next/link";
 import * as LucideIcons from "lucide-react";
-import SectionHeading from "@/components/section-heading";
+import { ArrowRight, Check, X, PlayCircle, MessageCircle, Sparkles } from "lucide-react";
 import Reveal from "@/components/reveal";
-import Accordion from "@/components/accordion";
-import CtaBand from "@/components/cta-band";
-import AuroraBg from "@/components/aurora-bg";
 import ThreeWaysTabs from "@/components/three-ways-tabs";
-import ScreenshotTabs from "@/components/screenshot-tabs";
-import { DesktopShot, MobileShot } from "@/components/app-shot";
+import ProductTour from "@/components/home/product-tour";
+import FilmCard from "@/components/home/film-card";
+import FaqGrid from "@/components/home/faq-grid";
+import { LaptopFrame, PhoneFrame } from "@/components/device-frame";
+import AuthCodeRedirect from "@/components/auth-code-redirect";
 import { desktopShots, mobileShots } from "@/lib/shots";
-import MagneticButton from "@/components/magnetic-button";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
 import { getSiteInfo, whatsappLink, rupees } from "@/lib/site-info";
-import AuthCodeRedirect from "@/components/auth-code-redirect";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/");
   return buildPageMetadata(seo);
 }
 
+type Icon = keyof typeof LucideIcons;
+
 // Everything below is what the app does today — keep it that way: no
 // feature goes on this page before it ships.
-const FEATURES: { icon: keyof typeof LucideIcons; title: string; body: string }[] = [
-  { icon: "ReceiptText", title: "Fast billing", body: "GST bills, non-GST bills, cash memos and estimates. Keyboard shortcuts on Windows, one-tap add on the phone." },
-  { icon: "WifiOff", title: "Works without internet", body: "Bills are saved on the device and sync on their own when the connection is back." },
-  { icon: "ScanLine", title: "Barcode scanning", body: "Scan with the phone camera or a USB scanner. Weighing-scale labels for loose goods too." },
-  { icon: "Boxes", title: "Stock & low-stock alerts", body: "Live stock for every product and variant, low and out-of-stock lists, stock adjustments." },
-  { icon: "CalendarClock", title: "Expiry tracking", body: "Know which products expire soon before they turn into a loss." },
-  { icon: "Landmark", title: "GST filing made easy", body: "GSTR-1 file to upload on the GST portal, GSTR-3B with the cash to pay, purchase check against GSTR-2B, CMP-08 for composition shops." },
-  { icon: "Route", title: "E-way bills & reverse charge", body: "Make the e-way bill upload file from any bill. Rent and freight under reverse charge go into GSTR-3B by themselves." },
-  { icon: "Users", title: "Customers & khata", body: "Credit sales, part payments and dues for each customer — your udhaar book, digital." },
-  { icon: "Truck", title: "Purchases & suppliers", body: "Record purchases, track what you owe each supplier, and handle purchase returns." },
-  { icon: "FileScan", title: "Read supplier bills", body: "Pick the supplier's PDF or Excel bill and the purchase fills itself in — no typing it line by line." },
-  { icon: "Undo2", title: "Returns & exchanges", body: "Sale returns, credit notes and exchanges that keep stock and money right." },
-  { icon: "ShieldCheck", title: "Staff logins & approvals", body: "Each staff member sees only what you allow. Below-cost sales and big discounts wait for your OK." },
-  { icon: "Printer", title: "Print & share bills", body: "Bluetooth thermal printers from the phone, any printer from Windows, PDF bills on WhatsApp — with your logo, terms and closing line." },
-  { icon: "QrCode", title: "UPI QR at the counter", body: "Choose UPI and a scan-to-pay QR appears with the bill amount already filled in. The customer just scans and pays." },
-  { icon: "Wrench", title: "Job cards for repairs", body: "Take in devices or vehicles, give estimates, track repairs and bill parts and labour." },
-  { icon: "Wallet", title: "Cashbook & expenses", body: "Cash in the drawer, day closing, and every shop expense in one place." },
-  { icon: "BarChart3", title: "Reports", body: "Sales, profit, stock value, dues, purchases and expenses — on screen or exported." },
-  { icon: "PackageSearch", title: "Ready product list", body: "Pick common products from our shared list instead of typing every name and detail." },
-  { icon: "FileSpreadsheet", title: "Excel import & export", body: "Bring your products, customers and suppliers in from Excel — and take all your data out any time." },
-  { icon: "Languages", title: "In your language", body: "Use the app in English, Hindi, Marathi, Gujarati, Bengali, Punjabi, Tamil, Telugu, Kannada, Malayalam or Odia." },
+const FEATURES: { icon: Icon; title: string; tone: string }[] = [
+  { icon: "ReceiptText", title: "Fast billing", tone: "bg-red-50 text-red-600" },
+  { icon: "WifiOff", title: "Works without internet", tone: "bg-emerald-50 text-emerald-600" },
+  { icon: "ScanLine", title: "Barcode scanning", tone: "bg-indigo-50 text-indigo-600" },
+  { icon: "TriangleAlert", title: "Stock & low-stock alerts", tone: "bg-amber-50 text-amber-600" },
+  { icon: "CalendarClock", title: "Expiry tracking", tone: "bg-orange-50 text-orange-600" },
+  { icon: "Landmark", title: "GST filing made easy", tone: "bg-teal-50 text-teal-600" },
+  { icon: "Route", title: "E-way bills & reverse charge", tone: "bg-sky-50 text-sky-600" },
+  { icon: "Users", title: "Customers & khata", tone: "bg-blue-50 text-blue-600" },
+  { icon: "Truck", title: "Purchases & suppliers", tone: "bg-violet-50 text-violet-600" },
+  { icon: "FileScan", title: "Read supplier bills", tone: "bg-yellow-50 text-yellow-700" },
+  { icon: "Undo2", title: "Returns & exchanges", tone: "bg-cyan-50 text-cyan-600" },
+  { icon: "ShieldCheck", title: "Staff logins & approvals", tone: "bg-purple-50 text-purple-600" },
+  { icon: "Printer", title: "Print & share bills", tone: "bg-rose-50 text-rose-600" },
+  { icon: "QrCode", title: "UPI QR at the counter", tone: "bg-slate-100 text-slate-700" },
+  { icon: "Wrench", title: "Job cards for repairs", tone: "bg-emerald-50 text-emerald-700" },
+  { icon: "Wallet", title: "Cashbook & expenses", tone: "bg-orange-50 text-orange-600" },
+  { icon: "BarChart3", title: "Reports", tone: "bg-blue-50 text-blue-600" },
+  { icon: "PackageSearch", title: "Ready product list", tone: "bg-red-50 text-red-600" },
+  { icon: "FileSpreadsheet", title: "Excel import & export", tone: "bg-green-50 text-green-700" },
+  { icon: "Languages", title: "In your language", tone: "bg-lime-50 text-lime-700" },
+  { icon: "BadgePercent", title: "Discount & privilege cards", tone: "bg-amber-50 text-amber-600" },
+  { icon: "Gift", title: "Offers, coupons & scratch cards", tone: "bg-pink-50 text-pink-600" },
+  { icon: "Sparkles", title: "Run your shop from ChatGPT", tone: "bg-emerald-50 text-emerald-700" },
+  { icon: "BookOpen", title: "Book store billing", tone: "bg-yellow-50 text-yellow-700" },
 ];
 
-const SHOP_TYPES: { icon: keyof typeof LucideIcons; title: string; points: string[] }[] = [
-  { icon: "Smartphone", title: "Mobile & electronics", points: ["IMEI / serial number on every bill", "Variants like colour and storage", "Repair job cards"] },
-  { icon: "Hammer", title: "Hardware & electrical", points: ["Sell by metre, kg or piece", "Cut wire and pipe from the roll", "Big product lists with fast search"] },
-  { icon: "Shirt", title: "Garments & footwear", points: ["Sizes and colours as variants", "Barcode billing at the counter", "Exchanges without the paperwork"] },
-  { icon: "ShoppingBasket", title: "Grocery & kirana", points: ["Loose items by weight or ₹ amount", "Weighing-scale barcodes", "Customer khata and dues"] },
-  { icon: "Car", title: "Car & bike workshops", points: ["Vehicle job cards", "Parts and labour on one bill", "Estimates the customer approves"] },
-  { icon: "Store", title: "Any retail counter", points: ["GST billing from day one", "Stock that stays right", "Works on the phone you already have"] },
+const TRADES: { title: string; image: string; points: string[] }[] = [
+  { title: "Mobile & electronics", image: "/images/site/trade-mobile.jpg", points: ["IMEI on every bill", "Colour / storage variants", "Repair job cards"] },
+  { title: "Hardware & electrical", image: "/images/site/trade-hardware.jpg", points: ["Sell by metre, kg or piece", "Cut wire and pipe from the roll", "Big product lists"] },
+  { title: "Garments & footwear", image: "/images/site/trade-garments.jpg", points: ["Sizes and colours", "Barcode billing", "Exchanges without paperwork"] },
+  { title: "Grocery & kirana", image: "/images/site/trade-grocery.jpg", points: ["Loose items by weight", "Weighing-scale barcodes", "Khata for regular customers"] },
+  { title: "Car & bike workshops", image: "/images/site/trade-workshop.jpg", points: ["Vehicle job cards", "Parts and labour on one bill", "Estimates the customer approves"] },
+  { title: "Any retail counter", image: "/images/site/trade-retail.jpg", points: ["GST billing from day one", "Stock that stays right", "Works on the phone you have"] },
 ];
+
+const HERO_CHIPS: { icon: Icon; label: string }[] = [
+  { icon: "WifiOff", label: "Works offline" },
+  { icon: "FileCheck2", label: "GST ready" },
+  { icon: "Languages", label: "In your language" },
+  { icon: "MonitorSmartphone", label: "Phone & PC" },
+  { icon: "Sparkles", label: "AI assistant" },
+];
+
+function LucideIcon({ name, className }: { name: Icon; className?: string }) {
+  const C = LucideIcons[name] as LucideIcons.LucideIcon;
+  return <C className={className} aria-hidden="true" />;
+}
+
+const btnPrimary =
+  "stamp-press inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-6 text-sm font-semibold text-white shadow-card hover:bg-brand-2";
+const btnGhost =
+  "stamp-press inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-brand/80 bg-white px-6 text-sm font-semibold text-brand hover:bg-brand-soft";
+const eyebrow = "text-xs font-bold uppercase tracking-[0.16em] text-brand-2";
 
 export default async function HomePage() {
   const content = await getPageContentMap("dukania");
@@ -59,298 +84,325 @@ export default async function HomePage() {
   const info = await getSiteInfo();
 
   const hero = content.hero?.content || {};
-  const title: string = hero.title || "Inventory & billing\nthat puts you in control.";
+  const title: string = hero.title || "Your complete shop,\nnow smarter with AI.";
   const lead: string =
-    hero.lead || "Know exactly what's in stock, bill online or completely offline, and reorder before you run out — with Dukania.";
+    hero.lead ||
+    "Bill, manage stock, track khata and file GST — online or completely offline. And when you're busy, just ask Dukania AI.";
   const trial = info.trialDays ? `${info.trialDays}-day free trial` : "Free trial";
   const wa = whatsappLink(info, "Hi, I want to know more about Dukania for my shop.");
+  const demoHref = wa || "/contact";
 
   const compareItems: string[] = content.compare?.items || [
-    "Bill a customer with no internet",
+    "Bill with no internet",
     "Spot low stock instantly",
-    "Track expiry dates automatically",
+    "Track expiry automatically",
     "GST reports in one tap",
     "Staff logins with limited access",
-    "Sync across desktop and mobile",
+    "Sync desktop and mobile",
   ];
 
   const faqItems = content.faqs?.items || [
-    { q: "Is there a free trial?", a: "Yes. Sign up in the app and your shop starts on a free trial straight away — no card, no payment." },
-    { q: "Does it really work with no internet?", a: "Yes. Billing works fully offline and syncs automatically once the connection is back." },
-    { q: "Does it handle GST?", a: "Yes — GST bills with HSN codes and CGST/SGST/IGST. Dukania makes the GSTR-1 file you upload on the GST portal, shows GSTR-3B with the cash to pay, matches purchases with GSTR-2B, and makes e-way bill files." },
-    { q: "Can my customers pay by UPI?", a: "Yes. Add your UPI ID once in business settings. When you choose UPI at checkout, a QR with the bill amount appears for the customer to scan." },
-    { q: "Can I use it in Hindi or my own language?", a: "Yes — Dukania works in English and 10 Indian languages: Hindi, Marathi, Gujarati, Bengali, Punjabi, Tamil, Telugu, Kannada, Malayalam and Odia." },
+    { q: "Is the free trial really free?", a: "Yes. Sign up in the app and your shop starts on a free trial straight away — no card, no payment." },
+    { q: "Does it work without internet?", a: "Yes. Billing works fully offline and syncs automatically once the connection is back." },
+    { q: "Will it help with GST filing?", a: "Yes — GST bills with HSN codes and CGST/SGST/IGST. Dukania makes the GSTR-1 file you upload on the GST portal, shows GSTR-3B with the cash to pay, matches purchases with GSTR-2B, and makes e-way bill files." },
+    { q: "Can I accept UPI payments?", a: "Yes. Add your UPI ID once in business settings. When you choose UPI at checkout, a QR with the bill amount appears for the customer to scan." },
+    { q: "Is it available in my language?", a: "Yes — Dukania works in English and 10 Indian languages: Hindi, Marathi, Gujarati, Bengali, Punjabi, Tamil, Telugu, Kannada, Malayalam and Odia." },
+    { q: "Can AI really run my shop?", a: "With the AI add-on, you connect Dukania to ChatGPT or Claude and ask in plain words — make a bill, enter a supplier's bill from a photo, check who owes you. Nothing changes until you say yes." },
   ];
+
+  const [titleLine, ...titleRest] = title.split("\n");
 
   return (
     <>
       <AuthCodeRedirect />
       {seo.structured_data && Object.keys(seo.structured_data).length > 0 && (
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(seo.structured_data) }}
-        />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(seo.structured_data) }} />
       )}
 
-      {/* 1 — hero: the message on the left, the real app on the right, so
-          the product is on screen before any scrolling. */}
-      <section className="relative overflow-hidden border-b border-hairline">
-        <AuroraBg />
-        <div className="relative mx-auto grid max-w-7xl items-center gap-12 px-6 pb-20 pt-14 sm:pt-20 lg:grid-cols-[1fr_1.15fr] lg:gap-10 lg:pb-24">
+      {/* 1 — hero: the shop owner and the real app, phone and PC */}
+      <section className="relative overflow-hidden">
+        <Image
+          src="/images/site/hero-shopkeeper.jpg"
+          alt=""
+          fill
+          priority
+          sizes="100vw"
+          className="object-cover object-right opacity-90"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-bg via-bg/90 to-bg/0 lg:via-bg/80" />
+        <div className="relative mx-auto grid grid-cols-1 max-w-7xl items-center gap-10 px-6 pb-16 pt-10 sm:pt-14 lg:grid-cols-[1fr_1.05fr] lg:pb-20">
           <Reveal>
-            <p className="inline-flex items-center gap-2 rounded-full border border-hairline bg-paper/4 px-3 py-1 font-mono text-[11px] uppercase tracking-[0.15em] text-amber">
-              <span className="h-1.5 w-1.5 rounded-full bg-amber" /> Billing &amp; stock software<span className="hidden sm:inline">&nbsp;for Indian shops</span>
+            <p className="inline-flex rounded-full bg-marigold/20 px-3 py-1 text-xs font-semibold text-paper">
+              Billing &amp; stock software for Indian shops
             </p>
-            <h1 className="mt-6 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl xl:text-[3.6rem]">
-              {title.includes("\n") ? (
+            <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight sm:text-5xl xl:text-[3.6rem]">
+              {titleLine}
+              {titleRest.length > 0 && (
                 <>
-                  <span className="gradient-text">{title.split("\n")[0]}</span>
                   <br />
-                  {title.split("\n").slice(1).join("\n")}
+                  <span className="text-brand">{titleRest.join(" ")}</span>
                 </>
-              ) : (
-                <span className="gradient-text">{title}</span>
               )}
             </h1>
-            <p className="mt-6 max-w-xl text-lg text-dim">{lead}</p>
-            <div className="mt-8 flex flex-wrap gap-3">
-              <MagneticButton href="/download">Start free trial <LucideIcons.ArrowRight className="h-4 w-4" /></MagneticButton>
-              <MagneticButton href="/contact" variant="ghost">Book a free demo</MagneticButton>
+            <p className="mt-5 max-w-xl text-lg text-dim">{lead}</p>
+            <div className="mt-7 flex flex-wrap gap-3">
+              <Link href="/download" className={btnPrimary}>
+                Start free trial <ArrowRight className="h-4 w-4" />
+              </Link>
+              <a href={demoHref} target={wa ? "_blank" : undefined} rel="noreferrer" className={btnGhost}>
+                <MessageCircle className="h-4 w-4" /> Book a free demo
+              </a>
             </div>
-            <a href="#film" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-sky hover:text-paper">
-              <LucideIcons.PlayCircle className="h-5 w-5" aria-hidden="true" /> Watch the 2-minute film
+            <a href="#film" className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand hover:text-brand-2">
+              <PlayCircle className="h-6 w-6 fill-brand text-white" aria-hidden="true" /> Watch the 2-minute film
             </a>
-            <p className="mt-4 font-mono text-xs text-dim">
-              {trial} · No card, no payment{info.fromYearly ? ` · Plans from ${rupees(info.fromYearly)}/year` : ""}
-            </p>
-            <ul className="mt-8 grid max-w-lg grid-cols-2 gap-x-6 gap-y-3 text-sm text-paper">
-              {[
-                ["Smartphone", "Android app"],
-                ["Monitor", "Windows software"],
-                ["WifiOff", "Bills without internet"],
-                ["ReceiptText", "GST bills & returns"],
-              ].map(([icon, label]) => {
-                const Icon = LucideIcons[icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon;
-                return (
-                  <li key={label} className="flex items-center gap-2.5">
-                    <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-teal/12 text-teal">
-                      <Icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    {label}
-                  </li>
-                );
-              })}
+            <ul className="mt-9 grid max-w-xl grid-cols-5 gap-2">
+              {HERO_CHIPS.map((c) => (
+                <li key={c.label} className="flex flex-col items-center gap-2 text-center text-[11px] font-medium leading-tight text-dim sm:text-xs">
+                  <LucideIcon name={c.icon} className="h-6 w-6 text-paper" />
+                  {c.label}
+                </li>
+              ))}
             </ul>
           </Reveal>
 
-          {/* the real app: Windows billing, the phone home screen in front */}
           <Reveal delay={0.12}>
-            <div className="relative pb-10 lg:pb-0 lg:pr-10">
-              <div className="lg:-mr-24 xl:-mr-40">
-                <DesktopShot shot={desktopShots.newBill} label="Dukania · New Bill" priority />
+            <div className="relative mx-auto max-w-[620px] pt-16 lg:pt-28">
+              <p className="hand absolute -top-2 left-0 -rotate-6 text-2xl leading-tight text-paper/80 sm:left-6 sm:text-3xl lg:top-2">
+                Same Dukania,
+                <br />
+                now with AI inside!
+              </p>
+              <LaptopFrame className="w-[90%]">
+                <Image src={desktopShots.dashboard.src} width={desktopShots.dashboard.width} height={desktopShots.dashboard.height}
+                  alt={desktopShots.dashboard.alt} priority sizes="(max-width: 1024px) 85vw, 540px" className="h-auto w-full" />
+              </LaptopFrame>
+              <div className="absolute -bottom-8 right-0 w-[24%] min-w-[96px] max-w-[150px]">
+                <PhoneFrame>
+                  <Image src={mobileShots.dashboard.src} width={mobileShots.dashboard.width} height={mobileShots.dashboard.height}
+                    alt={mobileShots.dashboard.alt} priority sizes="150px" className="h-auto w-full" />
+                </PhoneFrame>
               </div>
-              <div className="absolute -bottom-2 right-0 w-[30%] min-w-[120px] max-w-[210px] sm:-bottom-6 lg:-bottom-12 lg:right-4">
-                <MobileShot shot={mobileShots.dashboard} priority />
-              </div>
-              <div className="absolute -left-3 top-[58%] hidden rounded-2xl border border-hairline bg-surface/95 px-4 py-3 shadow-xl backdrop-blur sm:block lg:-left-8">
-                <p className="flex items-center gap-2 text-sm font-semibold text-paper">
-                  <LucideIcons.RefreshCw className="h-4 w-4 text-teal" aria-hidden="true" /> Phone &amp; PC in sync
-                </p>
-                <p className="mt-0.5 text-xs text-dim">One account, every counter</p>
+              <div className="shadow-float absolute right-2 top-10 hidden rotate-3 rounded-xl bg-[#fff6d6] px-4 py-3 sm:block lg:top-20">
+                <p className="text-sm font-semibold text-paper">Phone &amp; PC in sync</p>
+                <p className="text-xs text-dim">One account, every counter</p>
               </div>
             </div>
           </Reveal>
         </div>
       </section>
 
-      {/* 1b — the film: a day at a real counter, start to close */}
-      <section id="film" className="mx-auto max-w-5xl scroll-mt-24 px-6 pt-20">
-        <SectionHeading eyebrow="Watch" title="Ek din, ek dukaan." align="center"
-          lead="A shop's day with Dukania, from opening to closing — billing, udhaar, stock and GST in two and a half minutes." />
-        <Reveal>
-          <div className="mt-10 overflow-hidden rounded-3xl border border-hairline bg-black shadow-2xl">
-            <video
-              className="aspect-video w-full"
-              controls
-              playsInline
-              preload="none"
-              poster="/videos/dukania-film-poster.jpg"
-            >
-              <source src="/videos/dukania-film.mp4" type="video/mp4" />
-              Your browser can&apos;t play this video.
-            </video>
+      {/* 2 — the film, and the AI assistant */}
+      <section className="mx-auto grid grid-cols-1 max-w-7xl gap-8 px-6 py-14 lg:grid-cols-2 lg:items-center">
+        <Reveal><FilmCard /></Reveal>
+        <Reveal delay={0.1}>
+          <div className="grid grid-cols-1 items-center gap-6 sm:grid-cols-[1fr_1fr]">
+            <div>
+              <p className={eyebrow}>AI assistant</p>
+              <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Run your shop with AI.</h2>
+              <p className="mt-3 text-dim">
+                Ask in simple words from ChatGPT or Claude. Dukania AI does the real work inside your shop — scan
+                supplier bills, make bills, check stock and dues — and nothing changes until you say yes.
+              </p>
+              <Link href="/ai" className={`${btnPrimary} mt-6`}>
+                See AI in action <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+            <div className="rounded-3xl border border-hairline bg-white p-4 shadow-card">
+              <p className="flex items-center gap-2 text-sm font-semibold">
+                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-brand text-white">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                Dukania AI
+              </p>
+              <p className="ml-auto mt-3 w-fit rounded-2xl rounded-br-sm bg-brand-soft px-3 py-2 text-xs font-medium text-brand">
+                Show me low stock items
+              </p>
+              <div className="mt-3 rounded-2xl rounded-bl-sm bg-elevated/70 p-3 text-xs">
+                <p className="text-dim">Here are your low stock items:</p>
+                {[["Wheat atta 5 kg", "3 left"], ["Glucose biscuits 100 g", "5 left"], ["Detergent powder 1 kg", "2 left"]].map(([n, q]) => (
+                  <p key={n} className="mt-2 flex justify-between gap-3 font-medium text-paper">
+                    {n} <span className="text-red-600">{q}</span>
+                  </p>
+                ))}
+                <p className="mt-3 w-fit rounded-lg border border-brand/40 px-2 py-1 font-semibold text-brand">Create purchase order</p>
+              </div>
+              <ul className="mt-3 space-y-1.5 text-[11px] text-dim">
+                <li>• Scan this bill and add the products</li>
+                <li>• Show today&apos;s sales report</li>
+                <li>• Who owes me money?</li>
+              </ul>
+            </div>
           </div>
         </Reveal>
       </section>
 
-      {/* 2 — real screens */}
-      <section id="tour" className="mx-auto max-w-7xl px-6 py-20">
-        <SectionHeading eyebrow="See it" title="The real app, screen by screen." align="center"
-          lead="Billing, invoices, stock and reports on Windows — and the same shop in your pocket on Android." />
-        <div className="mt-12">
-          <ScreenshotTabs />
-        </div>
+      {/* 3 — product tour */}
+      <section id="tour" className="bg-brand-soft/60 py-16">
+        <div className="mx-auto max-w-7xl px-6"><ProductTour /></div>
       </section>
 
-      {/* 3 — every feature */}
-      <section id="features" className="mx-auto max-w-7xl px-6 py-20">
-        <SectionHeading eyebrow="Everything included" title="The whole shop in one app."
-          lead="No add-ons to buy, no separate tools to wire together." align="center" />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((f, i) => {
-            const Icon = LucideIcons[f.icon] as LucideIcons.LucideIcon;
-            return (
-              <Reveal key={f.title} delay={(i % 4) * 0.05}>
-                <div className="glass h-full rounded-2xl p-5">
-                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-violet/25 to-sky/20 ring-1 ring-paper/10">
-                    <Icon className="h-5 w-5 text-sky" aria-hidden="true" />
-                  </div>
-                  <h3 className="mt-4 font-display text-base font-semibold">{f.title}</h3>
-                  <p className="mt-1.5 text-sm text-dim">{f.body}</p>
-                </div>
-              </Reveal>
-            );
-          })}
-        </div>
+      {/* 4 — features */}
+      <section id="features" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-16">
+        <p className={eyebrow}>Features</p>
+        <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Everything your shop needs, in one app.</h2>
+        <p className="mt-2 text-dim">{FEATURES.length} things Dukania does for you today.</p>
+        <ul className="mt-8 grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          {FEATURES.map((f) => (
+            <li key={f.title} className="flex flex-col items-center gap-2.5 rounded-2xl border border-hairline bg-white px-2 py-4 text-center shadow-card">
+              <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl ${f.tone}`}>
+                <LucideIcon name={f.icon} className="h-5 w-5" />
+              </span>
+              <span className="text-[12px] font-medium leading-tight text-paper">{f.title}</span>
+            </li>
+          ))}
+        </ul>
       </section>
 
-      {/* 4 — who it's for */}
-      <section id="shops" className="mx-auto max-w-7xl scroll-mt-24 px-6 py-20">
-        <SectionHeading eyebrow="Made for your shop" title="Set up for the way your trade works."
-          lead="Pick your type of shop when you sign up and Dukania switches on what you need." align="center" />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {SHOP_TYPES.map((t, i) => {
-            const Icon = LucideIcons[t.icon] as LucideIcons.LucideIcon;
-            return (
-              <Reveal key={t.title} delay={(i % 3) * 0.06}>
-                <div className="h-full rounded-2xl border border-hairline bg-paper/2 p-6">
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-amber/15 text-amber">
-                      <Icon className="h-5 w-5" aria-hidden="true" />
-                    </span>
-                    <h3 className="font-display text-lg font-semibold">{t.title}</h3>
-                  </div>
-                  <ul className="mt-4 space-y-2 text-sm">
+      {/* 5 — trades */}
+      <section id="shops" className="scroll-mt-24 bg-[#f6f0e2] py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <p className={eyebrow}>For every trade</p>
+          <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Set up for the way your trade works.</h2>
+          <p className="mt-2 text-dim">Pick your type of shop when you sign up and Dukania switches on what you need.</p>
+          <ul className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6">
+            {TRADES.map((t) => (
+              <li key={t.title} className="overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+                <Image src={t.image} alt={t.title} width={800} height={600} sizes="(max-width: 768px) 50vw, 16vw"
+                  className="aspect-[4/3] h-auto w-full object-cover" />
+                <div className="p-3">
+                  <h3 className="text-sm font-bold text-paper">{t.title}</h3>
+                  <ul className="mt-2 space-y-1">
                     {t.points.map((p) => (
-                      <li key={p} className="flex items-start gap-2 text-paper">
-                        <LucideIcons.Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" /> {p}
+                      <li key={p} className="flex items-start gap-1.5 text-[11px] leading-snug text-dim">
+                        <Check className="mt-0.5 h-3 w-3 shrink-0 text-brand-2" /> {p}
                       </li>
                     ))}
                   </ul>
                 </div>
-              </Reveal>
-            );
-          })}
+              </li>
+            ))}
+          </ul>
         </div>
       </section>
 
-      {/* 5 — three ways (interactive tabs) */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
-        <SectionHeading eyebrow="Faster days" title="Three ways to speed up work." align="center" />
-        <div className="mt-12">
-          <ThreeWaysTabs />
-        </div>
-      </section>
-
-      {/* 6 — offline-first */}
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid items-center gap-12 lg:grid-cols-2">
-          <Reveal className="flex justify-center lg:order-1">
-            <MobileShot shot={mobileShots.checkout} />
-          </Reveal>
-          <Reveal delay={0.12} className="lg:order-2">
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-sky">Offline-first</p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight">Keeps billing when the internet doesn&apos;t.</h2>
-            <p className="mt-4 text-dim">
-              Bill a customer with no signal. Dukania saves the bill on the device first and
-              syncs the moment you&apos;re back online — cash, UPI, card or credit.
-            </p>
-            <ul className="mt-6 space-y-3 text-sm">
-              {["Every bill saved on the device first", "Automatic background sync", "GST, discounts and round-off built in"].map((b) => (
-                <li key={b} className="flex items-center gap-2.5 text-paper"><LucideIcons.Check className="h-4 w-4 shrink-0 text-teal" /> {b}</li>
-              ))}
-            </ul>
-          </Reveal>
-        </div>
-      </section>
-
-      {/* 7 — comparison */}
-      <section className="mx-auto max-w-4xl px-6 py-20">
-        <SectionHeading eyebrow="The difference" title="By hand vs. with Dukania." align="center" />
-        <Reveal>
-          <div className="mt-12 overflow-hidden rounded-2xl border border-hairline">
-            <div className="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-hairline bg-paper/4 px-6 py-4 text-sm font-semibold">
-              <span className="text-dim">Task</span>
-              <span className="w-20 text-center text-dim">By hand</span>
-              <span className="w-20 text-center text-teal">Dukania</span>
+      {/* 6 — three ways + offline */}
+      <section className="mx-auto grid grid-cols-1 max-w-7xl gap-6 px-6 py-16 lg:grid-cols-[1.4fr_1fr]">
+        <Reveal><ThreeWaysTabs /></Reveal>
+        <Reveal delay={0.1}>
+          <div className="h-full overflow-hidden rounded-3xl border border-hairline bg-[#fff8e6] p-6 shadow-card sm:p-8">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-[1fr_auto] sm:items-end">
+              <div>
+                <p className={eyebrow}>Works offline</p>
+                <h2 className="mt-2 max-w-xs font-display text-2xl font-bold tracking-tight">Keeps billing when the internet doesn&apos;t.</h2>
+                <ul className="mt-5 space-y-3 text-sm text-paper">
+                  {["Every bill saved on the device first", "Automatic background sync", "GST, discounts and round-off built in"].map((b) => (
+                    <li key={b} className="flex items-center gap-2.5">
+                      <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-brand text-white"><Check className="h-3 w-3" /></span>
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="relative justify-self-end pt-14">
+                <p className="hand absolute right-0 top-0 -rotate-6 whitespace-nowrap text-2xl text-paper/80">No internet? No problem!</p>
+                <Image src="/images/site/offline-shopkeeper.jpg" alt="A shop owner billing on the phone with no internet" width={900} height={900}
+                  sizes="176px" className="h-44 w-44 rounded-2xl object-cover" />
+              </div>
             </div>
-            {compareItems.map((row, i) => (
-              <div key={row} className={`grid grid-cols-[1fr_auto_auto] items-center gap-4 px-6 py-4 text-sm ${i % 2 ? "bg-paper/2" : ""}`}>
-                <span className="text-paper">{row}</span>
-                <span className="flex w-20 justify-center"><LucideIcons.X className="h-5 w-5 text-red-400/70" /></span>
-                <span className="flex w-20 justify-center"><LucideIcons.Check className="h-5 w-5 text-teal" /></span>
+          </div>
+        </Reveal>
+      </section>
+
+      {/* 7 — by hand vs Dukania + pricing */}
+      <section id="pricing" className="mx-auto grid grid-cols-1 max-w-7xl scroll-mt-24 gap-8 px-6 pb-16 lg:grid-cols-[1fr_1.25fr]">
+        <Reveal>
+          <p className={eyebrow}>By hand vs Dukania</p>
+          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">A clear difference you&apos;ll feel every day.</h2>
+          <div className="mt-6 overflow-hidden rounded-2xl border border-hairline bg-white shadow-card">
+            <div className="grid grid-cols-[1fr_72px_72px] bg-elevated/70 px-4 py-3 text-xs font-bold">
+              <span />
+              <span className="text-center text-dim">By hand</span>
+              <span className="text-center text-brand">Dukania</span>
+            </div>
+            {compareItems.map((row) => (
+              <div key={row} className="grid grid-cols-[1fr_72px_72px] items-center border-t border-hairline px-4 py-3 text-sm">
+                <span>{row}</span>
+                <X className="mx-auto h-4 w-4 text-red-500" />
+                <Check className="mx-auto h-4 w-4 text-brand-2" />
               </div>
             ))}
           </div>
         </Reveal>
-      </section>
-
-      {/* 8 — pricing */}
-      <section id="pricing" className="mx-auto max-w-5xl px-6 py-20">
-        <SectionHeading eyebrow="Pricing" title="Simple yearly plans, priced for shop margins." align="center"
-          lead="Try everything free first. When you're happy, pick the plan that fits your shop." />
-        <Reveal>
-          <div className="mt-12 grid gap-6 md:grid-cols-2">
-            <div className="glass rounded-3xl p-8">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-teal">Start here</p>
-              <h3 className="mt-3 font-display text-2xl font-bold">{trial}</h3>
-              <p className="mt-2 text-dim">Every feature, your real shop, no card and no payment.</p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {["Bill real customers from day one", "Your data stays when you upgrade", "Help on WhatsApp while you set up"].map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-paper"><LucideIcons.Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" /> {p}</li>
+        <Reveal delay={0.1}>
+          <p className={eyebrow}>Pricing</p>
+          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">Simple and honest pricing.</h2>
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="rounded-2xl border border-brand/20 bg-brand-soft/70 p-6 shadow-card">
+              <h3 className="font-display text-2xl font-bold text-brand">{trial}</h3>
+              <ul className="mt-4 space-y-2 text-sm">
+                {["Every feature, no card", "Bill real customers from day one", "Data stays when you upgrade", "Help on WhatsApp"].map((p) => (
+                  <li key={p} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-2" /> {p}</li>
                 ))}
               </ul>
-              <div className="mt-8"><MagneticButton href="/download">Start free trial <LucideIcons.ArrowRight className="h-4 w-4" /></MagneticButton></div>
+              <Link href="/download" className={`${btnPrimary} mt-6 w-full justify-center`}>
+                Start free trial <ArrowRight className="h-4 w-4" />
+              </Link>
             </div>
-            <div className="relative rounded-3xl border-2 border-violet/40 bg-paper/4 p-8">
-              <p className="font-mono text-xs uppercase tracking-[0.2em] text-violet">Paid plans</p>
-              <h3 className="mt-3 font-display text-2xl font-bold">
-                {info.fromYearly ? <>From {rupees(info.fromYearly)}<span className="text-base font-semibold text-dim"> / year</span></> : "Yearly plans"}
+            <div className="rounded-2xl border border-marigold/40 bg-[#fff8e6] p-6 shadow-card">
+              <h3 className="font-display text-2xl font-bold text-amber">
+                {info.fromYearly ? <>From {rupees(info.fromYearly)} <span className="text-base font-semibold text-dim">/ year</span></> : "Yearly plans"}
               </h3>
-              <p className="mt-2 text-dim">
-                {info.fromMonthly ? `Or monthly from ${rupees(info.fromMonthly)}. ` : ""}Plans differ in staff logins and a few extras — we&apos;ll help you pick.
-              </p>
-              <ul className="mt-6 space-y-2.5 text-sm">
-                {["Billing, GST, stock, reports and printing on every plan", "Android and Windows on one account", "Updates and WhatsApp support included", "Pay by UPI, cash or bank transfer"].map((p) => (
-                  <li key={p} className="flex items-start gap-2 text-paper"><LucideIcons.Check className="mt-0.5 h-4 w-4 shrink-0 text-teal" /> {p}</li>
+              <ul className="mt-4 space-y-2 text-sm">
+                {["Billing, GST, stock, reports", "Printing on every plan", "Android + Windows on one account", "Updates and WhatsApp support", "Pay by UPI, cash or bank"].map((p) => (
+                  <li key={p} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-amber" /> {p}</li>
                 ))}
               </ul>
-              <div className="mt-8">
-                {wa ? (
-                  <a href={wa} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-2 rounded-lg bg-emerald-600 px-5 text-sm font-semibold text-white hover:bg-emerald-700">
-                    <LucideIcons.MessageCircle className="h-4 w-4" /> Ask for the right plan
-                  </a>
-                ) : (
-                  <MagneticButton href="/contact" variant="ghost">Ask for the right plan</MagneticButton>
-                )}
-              </div>
+              <a href={demoHref} target={wa ? "_blank" : undefined} rel="noreferrer"
+                className="stamp-press mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-amber/60 bg-white text-sm font-semibold text-amber hover:bg-[#fff2cc]">
+                Ask for your price
+              </a>
             </div>
           </div>
         </Reveal>
       </section>
 
-      {/* 9 — FAQ */}
-      <section id="faq" className="mx-auto max-w-3xl px-6 py-16">
-        <SectionHeading eyebrow="FAQ" title="Questions, answered." />
-        <div className="mt-10"><Accordion items={faqItems} /></div>
+      {/* 8 — FAQ */}
+      <section id="faq" className="mx-auto max-w-7xl scroll-mt-24 px-6 pb-16">
+        <p className={eyebrow}>FAQ</p>
+        <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">Common questions, simple answers.</h2>
+        <div className="mt-6"><FaqGrid items={faqItems} /></div>
       </section>
 
-      <CtaBand
-        title="Ready to run your shop on Dukania?"
-        lead={`Download the app and start your ${trial.toLowerCase()} — or book a walkthrough and we'll set it up with you.`}
-        cta="Start free trial"
-        href="/download"
-      />
+      {/* 9 — call to action + WhatsApp help */}
+      <section className="mx-auto mb-12 grid grid-cols-1 max-w-7xl gap-4 px-6 lg:grid-cols-[1.4fr_1fr]">
+        <div className="flex flex-col justify-center gap-5 rounded-3xl bg-brand px-8 py-10 text-white sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Ready to run your shop on Dukania?</h2>
+            <p className="mt-2 text-white/80">Start your {trial.toLowerCase()} today — we&apos;ll help you set it up.</p>
+          </div>
+          <Link href="/download" className="stamp-press inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-brand hover:bg-brand-soft">
+            Start free trial <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+        <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl border border-hairline bg-white p-5 shadow-card">
+          <Image src="/images/site/support-person.jpg" alt="Dukania support on WhatsApp" width={600} height={600} sizes="120px"
+            className="h-28 w-28 shrink-0 rounded-2xl object-cover" />
+          <div>
+            <p className={eyebrow}>WhatsApp help</p>
+            <p className="mt-1 font-semibold">Talk to us on WhatsApp.</p>
+            <p className="mt-1 text-sm text-dim">Questions? Get an honest answer and we&apos;ll help you start.</p>
+            {wa ? (
+              <a href={wa} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#25d366] px-4 text-sm font-semibold text-white">
+                <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
+              </a>
+            ) : (
+              <Link href="/contact" className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white">Contact us</Link>
+            )}
+          </div>
+          <p className="hand absolute right-4 top-3 hidden rotate-6 text-xl text-paper/70 sm:block">Real people.<br />Real support.</p>
+        </div>
+      </section>
     </>
   );
 }

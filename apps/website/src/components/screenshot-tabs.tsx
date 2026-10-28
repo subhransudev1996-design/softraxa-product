@@ -56,7 +56,7 @@ export default function ScreenshotTabs() {
             id={`tab-${id}`}
             onClick={() => switchTab(id)}
             className={`inline-flex min-h-11 items-center gap-2 rounded-lg px-5 text-sm font-semibold transition-colors ${
-              tab === id ? "bg-paper text-bg" : "text-dim hover:text-paper"
+              tab === id ? "bg-brand text-white" : "text-dim hover:text-paper"
             }`}
           >
             <Icon className="h-4 w-4" aria-hidden="true" />

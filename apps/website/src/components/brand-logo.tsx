@@ -13,7 +13,7 @@ export default function BrandLogo({ size = 36 }: { size?: number }) {
         style={{ width: size, height: size }}
         priority
       />
-      <span className="font-display text-xl font-bold tracking-tight text-paper">Dukania</span>
+      <span className="font-display text-2xl font-bold tracking-tight text-brand">Dukania</span>
     </span>
   );
 }

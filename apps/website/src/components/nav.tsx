@@ -20,23 +20,22 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-hairline bg-bg/70 backdrop-blur-xl">
+    <header className="sticky top-0 z-50 border-b border-hairline bg-bg/85 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
         <Link href="/" aria-label="Dukania home">
           <BrandLogo />
         </Link>
 
-        <nav className="hidden items-center gap-8 text-sm text-dim md:flex">
+        <nav className="hidden items-center gap-1 rounded-full border border-hairline bg-white/80 p-1 text-sm text-dim shadow-card md:flex">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
-              className={`relative transition-colors hover:text-paper ${pathname === l.href ? "text-paper" : ""}`}
+              className={`rounded-full px-3.5 py-2 transition-colors hover:text-paper ${
+                pathname === l.href ? "bg-brand-soft font-semibold text-brand" : ""
+              }`}
             >
               {l.label}
-              {pathname === l.href && (
-                <span className="absolute -bottom-1.5 left-0 h-px w-full bg-gradient-to-r from-violet to-sky" />
-              )}
             </Link>
           ))}
         </nav>
@@ -44,7 +43,7 @@ export default function Nav() {
         <div className="flex items-center gap-3">
           <Link
             href="/download"
-            className="stamp-press hidden rounded-lg bg-paper px-4 py-2 text-sm font-semibold text-bg hover:bg-paper/90 sm:inline-flex"
+            className="stamp-press hidden items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-2 sm:inline-flex"
           >
             Start free trial
           </Link>
@@ -76,7 +75,7 @@ export default function Nav() {
             <Link
               href="/download"
               onClick={() => setOpen(false)}
-              className="mt-4 inline-flex justify-center rounded-lg bg-paper px-4 py-3 text-sm font-semibold text-bg"
+              className="mt-4 inline-flex justify-center rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white"
             >
               Start free trial
             </Link>

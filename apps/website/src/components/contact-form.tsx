@@ -111,7 +111,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="stamp-press min-h-11 w-full rounded-lg bg-paper px-6 py-3 text-sm font-semibold text-bg hover:bg-paper/90 disabled:opacity-60 sm:w-auto"
+          className="stamp-press min-h-11 w-full rounded-lg bg-brand px-6 py-3 text-sm font-semibold text-white hover:bg-brand-2 disabled:opacity-60 sm:w-auto"
         >
           {status === "sending" ? "Sending…" : "Request a demo"}
         </button>

@@ -83,7 +83,7 @@ export default async function DownloadPage() {
                 ["3", "Start billing", "Add products (or pick them from our product list) and make your first bill."],
               ].map(([n, title, body]) => (
                 <li key={n} className="flex gap-4">
-                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-paper text-sm font-bold text-bg">{n}</span>
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">{n}</span>
                   <div>
                     <p className="font-semibold text-paper">{title}</p>
                     <p className="mt-1 text-sm text-dim">{body}</p>
@@ -145,7 +145,7 @@ function PlatformCard({
           <a
             href={url}
             download={file}
-            className="stamp-press inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-paper px-5 text-sm font-semibold text-bg hover:bg-paper/90"
+            className="stamp-press inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-brand px-5 text-sm font-semibold text-white hover:bg-brand-2"
           >
             <Download className="h-4 w-4" /> Download for {name.split(" ")[0]}
           </a>
