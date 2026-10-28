@@ -267,11 +267,11 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
  * for a lifetime shop (admin_add_addon, migration 0096).
  */
 export function AddonDialog({
-  target, plan, onClose, onDone,
-}: { target: SaleTarget; plan: any | null; onClose: () => void; onDone: (text: string) => void }) {
+  target, plan, initialQty = 1, onClose, onDone,
+}: { target: SaleTarget; plan: any | null; initialQty?: number; onClose: () => void; onDone: (text: string) => void }) {
   const hasAi = Array.isArray(plan?.included_features) && plan.included_features.includes("ai_assistant");
   const [kind, setKind] = useState<"staff" | "ai">("staff");
-  const [qty, setQty] = useState("1");
+  const [qty, setQty] = useState(String(initialQty));
   const [amount, setAmount] = useState("");
   const [touched, setTouched] = useState(false);
   const [mode, setMode] = useState("upi");

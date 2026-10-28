@@ -64,6 +64,7 @@ export default function TodayPage() {
   const [reason, setReason] = useState("");
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [refresh, setRefresh] = useState(0);
+  const [staffAsks, setStaffAsks] = useState<any[]>([]);
 
   useEffect(() => {
     supabase.rpc("get_admin_today").then(({ data, error }) => {
@@ -71,6 +72,10 @@ export default function TodayPage() {
       else setData(data as Today);
     });
     supabase.rpc("get_admin_dashboard").then(({ data }) => setStats(data));
+    // Shops asking for more staff logins (migration 0097).
+    supabase.from("support_tickets").select("id, business_id, requested_staff, created_at, businesses(name, phone, owner_name)")
+      .not("requested_staff", "is", null).neq("status", "resolved").order("created_at")
+      .then(({ data, error }) => setStaffAsks(error ? [] : data ?? []));
     supabase.from("platform_settings").select("payment_upi_id").maybeSingle()
       .then(({ data }) => setUpi(data?.payment_upi_id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -160,6 +165,26 @@ export default function TodayPage() {
               actions={<>
                 <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>
                 <a href={waLink(r.phone, reminder(r, false))} target="_blank" rel="noreferrer"><Button variant="outline">Remind</Button></a>
+              </>}
+            />
+          ))}
+        </Group>
+
+        <Group title="Asking for more staff logins" count={staffAsks.length} tone="purple">
+          {staffAsks.map((r) => (
+            <Row
+              key={r.id}
+              main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.businesses?.name}</Link>}
+              sub={<>Wants {r.requested_staff} more login{r.requested_staff > 1 ? "s" : ""} · asked {dateStr(r.created_at)}</>}
+              actions={<>
+                <Link href={`/clients/${r.business_id}?addon=${r.requested_staff}`}>
+                  <Button>Add {r.requested_staff} login{r.requested_staff > 1 ? "s" : ""}</Button>
+                </Link>
+                {r.businesses?.phone && (
+                  <a href={waLink(r.businesses.phone, `Namaste ${r.businesses.owner_name || ""}! We got your request for ${r.requested_staff} more staff login${r.requested_staff > 1 ? "s" : ""} for ${r.businesses.name}. `)} target="_blank" rel="noreferrer">
+                    <Button variant="outline">WhatsApp</Button>
+                  </a>
+                )}
               </>}
             />
           ))}

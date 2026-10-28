@@ -67,6 +67,7 @@ export default function ClientDetailPage() {
   const [saleOpen, setSaleOpen] = useState(false);
   const [addonOpen, setAddonOpen] = useState(false);
   const [addons, setAddons] = useState<any[]>([]);
+  const [addonQty, setAddonQty] = useState(1);
   const [correctOpen, setCorrectOpen] = useState(false);
   const [confirmSuspend, setConfirmSuspend] = useState(false);
 
@@ -136,6 +137,12 @@ export default function ClientDetailPage() {
       ai30: ai.error ? null : ai.count ?? 0,
     });
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // From the Today page: ?addon=2 opens the add-on dialog for 2 logins.
+  useEffect(() => {
+    const n = Number(new URLSearchParams(window.location.search).get("addon"));
+    if (n > 0) Promise.resolve().then(() => { setAddonQty(n); setAddonOpen(true); });
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -473,6 +480,7 @@ export default function ClientDetailPage() {
         <AddonDialog
           target={{ businessId: id, name: business.name, phone: business.phone, expiry: subscription?.expiry_date }}
           plan={plan}
+          initialQty={addonQty}
           onClose={() => setAddonOpen(false)}
           onDone={(text) => { setAddonOpen(false); setNotice({ ok: true, text }); load(); }}
         />
