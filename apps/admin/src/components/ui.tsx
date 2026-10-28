@@ -84,7 +84,7 @@ export function Button({
   );
 }
 
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+export function Input(props: React.ComponentProps<"input">) {
   return (
     <input
       {...props}

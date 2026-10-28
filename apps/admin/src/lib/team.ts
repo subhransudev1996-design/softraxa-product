@@ -63,6 +63,7 @@ export function areaFor(pathname: string): Area | "owner" | null {
     {
       "/payments": "payments",
       "/sales": "payments",
+      "/accounts": "payments",
       "/support": "support",
       "/leads": "leads",
       "/marketing": "marketing",

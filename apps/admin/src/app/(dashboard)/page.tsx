@@ -5,7 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, CardBody, Input, PageHeader, Spinner, StatCard } from "@/components/ui";
 import { Modal, Notice, RenewDialog, RenewTarget, waLink } from "@/components/ops";
-import { useCan } from "@/components/me";
+import { useCan, useMe } from "@/components/me";
 import { stageLabel } from "@/lib/leads";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 
@@ -70,6 +70,8 @@ export default function TodayPage() {
   const [complaints, setComplaints] = useState<any[]>([]);
   const [rewards, setRewards] = useState<any[]>([]);
   const [callsDue, setCallsDue] = useState<any[]>([]);
+  const [myTasks, setMyTasks] = useState<any[]>([]);
+  const me = useMe();
   const [atRisk, setAtRisk] = useState<any[]>([]);
   // Renewing and money are for the people with payments (0098).
   const canPay = useCan("payments");
@@ -98,6 +100,12 @@ export default function TodayPage() {
       .then(({ data, error }) => setCallsDue(error ? [] : data ?? []));
     supabase.rpc("admin_shop_health").then(({ data, error }) =>
       setAtRisk(error ? [] : ((data as any[]) ?? []).filter((s) => s.level === "risk" && ["active", "trial"].includes(s.status))));
+    // My tasks due today or overdue (migration 0103).
+    if (me) {
+      supabase.from("admin_tasks").select("id, title, due_date").eq("assigned_to", me.id).eq("done", false)
+        .lte("due_date", new Date().toISOString().slice(0, 10)).order("due_date")
+        .then(({ data, error }) => setMyTasks(error ? [] : data ?? []));
+    }
     supabase.from("platform_settings").select("payment_upi_id").maybeSingle()
       .then(({ data }) => setUpi(data?.payment_upi_id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -130,7 +138,7 @@ export default function TodayPage() {
 
   const total =
     data.claims.length + data.expiring.length + data.expired.length + data.tickets.length +
-    data.setup.length + data.inactive.length + data.followups.length + complaints.length + callsDue.length +
+    data.setup.length + data.inactive.length + data.followups.length + complaints.length + callsDue.length + myTasks.length +
     (canPay ? rewards.length : 0) +
     (data.reconciliation?.unexplained ? 1 : 0);
 
@@ -149,6 +157,17 @@ export default function TodayPage() {
       )}
 
       <div className="grid gap-4">
+        <Group title="Your tasks" count={myTasks.length} tone="blue">
+          {myTasks.map((t) => (
+            <Row
+              key={t.id}
+              main={t.title}
+              sub={<>Due {dateStr(t.due_date)}</>}
+              actions={<Link href="/tasks"><Button variant="outline">Open tasks</Button></Link>}
+            />
+          ))}
+        </Group>
+
         <Group title="Complaints not yet resolved" count={complaints.length} tone="red">
           {complaints.map((c) => (
             <Row

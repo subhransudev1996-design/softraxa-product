@@ -1,8 +1,8 @@
 "use client";
 
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Boxes,
   CalendarCheck,
@@ -10,6 +10,7 @@ import {
   HeartPulse,
   IndianRupee,
   Layers,
+  ListTodo,
   LifeBuoy,
   ListChecks,
   Megaphone,
@@ -21,10 +22,12 @@ import {
   Store,
   Target,
   UserCog,
+  Wallet,
   Users,
   X,
 } from "lucide-react";
 import { MeProvider } from "@/components/me";
+import { AlertsBell } from "@/components/alerts";
 import { Card, CardBody } from "@/components/ui";
 import { Me, areaFor, canUse, roleLabel } from "@/lib/team";
 import { LogoutButton } from "./logout-button";
@@ -32,9 +35,11 @@ import { LogoutButton } from "./logout-button";
 // Daily work first; setup pages below.
 const daily = [
   { href: "/", label: "Today", icon: CalendarCheck },
+  { href: "/tasks", label: "Tasks & calendar", icon: ListTodo },
   { href: "/clients", label: "Clients", icon: Store },
   { href: "/payments", label: "Payments", icon: IndianRupee },
   { href: "/sales", label: "Sales", icon: TrendingUp },
+  { href: "/accounts", label: "Accounts", icon: Wallet },
   { href: "/success", label: "Customer success", icon: HeartHandshake },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/leads", label: "Leads", icon: Target },
@@ -104,21 +109,22 @@ function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void })
           <p className="text-[15px] font-extrabold leading-5 tracking-tight text-white">Dukania</p>
           <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-sidebar-muted">Admin panel</p>
         </div>
+        <div className="ml-auto hidden lg:block"><AlertsBell /></div>
       </div>
       <div className="mx-4 h-px bg-white/[0.06]" />
-      {/* Find a client from anywhere: name, phone, email or GSTIN. */}
+      {/* Search everything from anywhere (also Ctrl+K). */}
       <form
         className="px-3 pt-3"
         onSubmit={(e) => {
           e.preventDefault();
           const q = String(new FormData(e.currentTarget).get("q") ?? "").trim();
-          if (q) window.location.href = `/clients?q=${encodeURIComponent(q)}`;
+          if (q) window.location.href = `/search?q=${encodeURIComponent(q)}`;
         }}
       >
         <input
           name="q"
-          placeholder="Find a client…"
-          aria-label="Find a client"
+          placeholder="Search everything…  Ctrl+K"
+          aria-label="Search everything"
           className="w-full rounded-xl bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-sidebar-muted focus:ring-2 focus:ring-brand"
         />
       </form>
@@ -145,6 +151,19 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const allowed = canUse(me, areaFor(pathname));
+  const router = useRouter();
+
+  // Ctrl+K (Cmd+K on a Mac): search everything.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        router.push("/search");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [router]);
   return (
     <div className="min-h-screen bg-canvas">
       <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col bg-sidebar lg:flex print:hidden">
@@ -156,6 +175,7 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
           <Menu size={22} />
         </button>
         <p className="font-extrabold text-white">Dukania admin</p>
+        <div className="ml-auto"><AlertsBell alignRight /></div>
       </header>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setOpen(false)}>
