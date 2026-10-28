@@ -20,6 +20,15 @@ final ticketsProvider = FutureProvider.autoDispose<List<Map<String, dynamic>>>((
   return List<Map<String, dynamic>>.from(rows);
 });
 
+/// What a request can be about (migration 0099); the team sees it first.
+const ticketKinds = <String, String>{
+  'question': 'Question',
+  'complaint': 'Complaint',
+  'bug': 'Problem in the app',
+  'suggestion': 'Suggestion',
+  'billing': 'Billing / plan',
+};
+
 /// Raise and track support issues (PRD 8.6, client side).
 class SupportScreen extends ConsumerWidget {
   const SupportScreen({super.key});
@@ -27,13 +36,34 @@ class SupportScreen extends ConsumerWidget {
   Future<void> _newTicket(BuildContext context, WidgetRef ref) async {
     final subject = TextEditingController();
     final message = TextEditingController();
+    var kind = 'question';
     final saved = await showDialog<bool>(
       context: context,
-      builder: (ctx) => AlertDialog(
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setLocal) => AlertDialog(
         title: Text(i18n.t('New support request')),
         content: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              i18n.t('What is this about?'),
+              style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                for (final e in ticketKinds.entries)
+                  ChoiceChip(
+                    label: Text(i18n.t(e.value)),
+                    selected: kind == e.key,
+                    onSelected: (_) => setLocal(() => kind = e.key),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 12),
             TextField(
               controller: subject,
               autofocus: true,
@@ -61,6 +91,7 @@ class SupportScreen extends ConsumerWidget {
           ),
         ],
       ),
+      ),
     );
     if (saved != true || subject.text.trim().isEmpty) return;
     try {
@@ -69,6 +100,7 @@ class SupportScreen extends ConsumerWidget {
         'business_id': businessId,
         'subject': subject.text.trim(),
         'message': message.text.trim(),
+        'kind': kind,
       });
       ref.invalidate(ticketsProvider);
       if (context.mounted) {
@@ -240,7 +272,7 @@ class SupportScreen extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              '${t['message'] ?? ''}\n${dateTimeStr(t['created_at'])}',
+                              '${i18n.t(ticketKinds[t['kind']] ?? 'Question')} · ${t['message'] ?? ''}\n${dateTimeStr(t['created_at'])}',
                               maxLines: 3,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(

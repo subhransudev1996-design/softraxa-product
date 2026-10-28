@@ -20,6 +20,18 @@ final ticketMessagesProvider = FutureProvider.autoDispose
       return List<Map<String, dynamic>>.from(rows);
     });
 
+/// The request as it is now (status and rating change after it was opened).
+final ticketProvider = FutureProvider.autoDispose
+    .family<Map<String, dynamic>, String>((ref, ticketId) async {
+      final row = await ref
+          .watch(supabaseProvider)
+          .from('support_tickets')
+          .select()
+          .eq('id', ticketId)
+          .single();
+      return Map<String, dynamic>.from(row);
+    });
+
 /// Support requests with an answer the shop hasn't opened yet.
 final supportUnreadProvider = FutureProvider.autoDispose<int>((ref) async {
   try {
@@ -80,6 +92,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
           .rpc('reply_to_ticket', params: {'p_ticket': _id, 'p_body': text});
       _reply.clear();
       ref.invalidate(ticketMessagesProvider(_id));
+      ref.invalidate(ticketProvider(_id));
       ref.invalidate(ticketsProvider);
     } catch (e) {
       if (mounted) showError(context, e);
@@ -142,8 +155,10 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
         children: [
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () async =>
-                  ref.invalidate(ticketMessagesProvider(_id)),
+              onRefresh: () async {
+                ref.invalidate(ticketMessagesProvider(_id));
+                ref.invalidate(ticketProvider(_id));
+              },
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -178,6 +193,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
                               ),
                           ],
                   ),
+                  _RateCard(ticketId: _id),
                 ],
               ),
             ),
@@ -209,6 +225,107 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// After Dukania resolves a request, the shop rates the help 1–5 (0099).
+class _RateCard extends ConsumerStatefulWidget {
+  const _RateCard({required this.ticketId});
+
+  final String ticketId;
+
+  @override
+  ConsumerState<_RateCard> createState() => _RateCardState();
+}
+
+class _RateCardState extends ConsumerState<_RateCard> {
+  int _stars = 0;
+  final _note = TextEditingController();
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _note.dispose();
+    super.dispose();
+  }
+
+  Future<void> _save() async {
+    setState(() => _saving = true);
+    try {
+      await ref.read(supabaseProvider).rpc(
+        'rate_ticket',
+        params: {
+          'p_ticket': widget.ticketId,
+          'p_rating': _stars,
+          'p_note': _note.text.trim(),
+        },
+      );
+      ref.invalidate(ticketProvider(widget.ticketId));
+      if (mounted) showSuccess(context, i18n.t('Thank you for rating us!'));
+    } catch (e) {
+      if (mounted) showError(context, e);
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final ticket = ref.watch(ticketProvider(widget.ticketId)).value;
+    if (ticket == null || ticket['status'] != 'resolved') {
+      return const SizedBox.shrink();
+    }
+    final rated = (ticket['rating'] as num?)?.toInt();
+    return Card(
+      margin: const EdgeInsets.only(top: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: rated != null
+            ? Text(
+                i18n.t('You rated this {v1} of 5. Thank you!', {'v1': rated}),
+                style: TextStyle(color: AppColors.inkSoft, fontSize: 13.5),
+              )
+            : Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    i18n.t('How did we do?'),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      for (var i = 1; i <= 5; i++)
+                        IconButton(
+                          onPressed: () => setState(() => _stars = i),
+                          icon: Icon(
+                            i <= _stars ? Icons.star : Icons.star_border,
+                            color: Colors.amber.shade700,
+                            size: 30,
+                          ),
+                        ),
+                    ],
+                  ),
+                  if (_stars > 0) ...[
+                    TextField(
+                      controller: _note,
+                      maxLines: 2,
+                      decoration: InputDecoration(
+                        hintText: i18n.t('Tell us more (optional)'),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    FilledButton(
+                      onPressed: _saving ? null : _save,
+                      child: Text(i18n.t('Send rating')),
+                    ),
+                  ],
+                ],
+              ),
       ),
     );
   }

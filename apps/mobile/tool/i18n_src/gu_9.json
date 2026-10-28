@@ -458,5 +458,16 @@
 "You asked for more staff logins — Dukania will contact you.": "તમે વધુ સ્ટાફ લોગિન માંગ્યા છે — Dukania સંપર્ક કરશે.",
 "Your plan's logins are all in use. Ask Dukania to add more — we'll confirm on WhatsApp.": "તમારા પ્લાનના બધા લોગિન વપરાશમાં છે. વધુ ઉમેરવા Dukania ને કહો — અમે WhatsApp પર પુષ્ટિ કરીશું.",
 "{v1} extra staff logins — until {v2}": "{v1} વધારાના સ્ટાફ લોગિન — {v2} સુધી",
-"AI assistant — until {v1}": "AI સહાયક — {v1} સુધી"
+"AI assistant — until {v1}": "AI સહાયક — {v1} સુધી",
+"What is this about?": "આ શેના વિશે છે?",
+"Question": "પ્રશ્ન",
+"Complaint": "ફરિયાદ",
+"Problem in the app": "એપમાં સમસ્યા",
+"Suggestion": "સૂચન",
+"Billing / plan": "બિલિંગ / પ્લાન",
+"How did we do?": "અમારી મદદ કેવી રહી?",
+"Tell us more (optional)": "વધુ જણાવો (વૈકલ્પિક)",
+"Send rating": "રેટિંગ મોકલો",
+"Thank you for rating us!": "રેટિંગ આપવા બદલ આભાર!",
+"You rated this {v1} of 5. Thank you!": "તમે આને 5 માંથી {v1} આપ્યા. આભાર!"
 }

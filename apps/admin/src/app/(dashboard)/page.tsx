@@ -66,6 +66,7 @@ export default function TodayPage() {
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [staffAsks, setStaffAsks] = useState<any[]>([]);
+  const [complaints, setComplaints] = useState<any[]>([]);
   // Renewing and money are for the people with payments (0098).
   const canPay = useCan("payments");
 
@@ -79,6 +80,10 @@ export default function TodayPage() {
     supabase.from("support_tickets").select("id, business_id, requested_staff, created_at, businesses(name, phone, owner_name)")
       .not("requested_staff", "is", null).neq("status", "resolved").order("created_at")
       .then(({ data, error }) => setStaffAsks(error ? [] : data ?? []));
+    // Complaints not yet resolved, first of all (migration 0099).
+    supabase.from("support_tickets").select("id, subject, priority, created_at, businesses(name)")
+      .eq("kind", "complaint").neq("status", "resolved").order("created_at")
+      .then(({ data, error }) => setComplaints(error ? [] : data ?? []));
     supabase.from("platform_settings").select("payment_upi_id").maybeSingle()
       .then(({ data }) => setUpi(data?.payment_upi_id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,7 +116,7 @@ export default function TodayPage() {
 
   const total =
     data.claims.length + data.expiring.length + data.expired.length + data.tickets.length +
-    data.setup.length + data.inactive.length + data.followups.length +
+    data.setup.length + data.inactive.length + data.followups.length + complaints.length +
     (data.reconciliation?.unexplained ? 1 : 0);
 
   return (
@@ -129,6 +134,17 @@ export default function TodayPage() {
       )}
 
       <div className="grid gap-4">
+        <Group title="Complaints not yet resolved" count={complaints.length} tone="red">
+          {complaints.map((c) => (
+            <Row
+              key={c.id}
+              main={<>{c.businesses?.name}: {c.subject}</>}
+              sub={<>Since {dateTimeStr(c.created_at)} · {c.priority} priority</>}
+              actions={<Link href="/support"><Button>Open Support</Button></Link>}
+            />
+          ))}
+        </Group>
+
         <Group title="Payments to verify" count={data.claims.length} tone="blue">
           {data.claims.map((c) => (
             <Row
