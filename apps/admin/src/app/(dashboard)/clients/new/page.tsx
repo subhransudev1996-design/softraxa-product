@@ -166,11 +166,12 @@ export default function NewClientPage() {
         converted_business_id: json.businessId,
         converted_at: new Date().toISOString(),
       }).eq("id", leadId);
+      // The stage change is logged by the database (0100); say which client.
       const { data: { user } } = await supabase.auth.getUser();
       await supabase.from("lead_activities").insert({
         lead_id: leadId,
-        activity_type: "status_change",
-        note: `Converted to client "${form.businessName}"`,
+        activity_type: "note",
+        note: `Client account created: "${form.businessName}"`,
         created_by: user?.id ?? null,
       });
     }

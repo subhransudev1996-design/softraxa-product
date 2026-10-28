@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, CardBody, Input, PageHeader, Spinner, StatCard } from "@/components/ui";
 import { Modal, Notice, RenewDialog, RenewTarget, waLink } from "@/components/ops";
 import { useCan } from "@/components/me";
+import { stageLabel } from "@/lib/leads";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -259,7 +260,7 @@ export default function TodayPage() {
             <Row
               key={l.id}
               main={<Link href={`/leads/${l.id}`} className="hover:underline">{l.shop_name}</Link>}
-              sub={<>{l.contact_name || "—"} · due {dateStr(l.follow_up_date)} · {l.status}</>}
+              sub={<>{l.contact_name || "—"} · due {dateStr(l.follow_up_date)} · {stageLabel(l.status)}</>}
               actions={<Link href={`/leads/${l.id}`}><Button variant="outline">Open lead</Button></Link>}
             />
           ))}
