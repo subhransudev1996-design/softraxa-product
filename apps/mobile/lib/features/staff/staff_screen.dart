@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/widgets.dart';
+import '../subscription/staff_request.dart';
 
 /// Every staff permission the database enforces (migration 0037 —
 /// has_permission / staff_permission_defaults). Staff management itself is
@@ -192,12 +193,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       icon: Icons.person_add,
       onPressed: () {
         if (ctx?.isStaffLimitReached ?? false) {
-          showError(
-            context,
-            t('Staff limit reached for your plan ({v1} allowed).', {
-              'v1': ctx?.userLimit,
-            }),
-          );
+          askForStaffLogins(context, ref);
         } else {
           _showAddStaffDialog();
         }
@@ -258,7 +254,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                           Text(
                             isLimitReached
                                 ? t(
-                                    'Plan limit reached. Upgrade plan to add more staff.',
+                                    'All your plan\'s logins are in use. Ask Dukania for more.',
                                   )
                                 : 'Store owners can create accounts and assign permissions.',
                             style: TextStyle(
@@ -271,6 +267,11 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                         ],
                       ),
                     ),
+                    if (isLimitReached && isOwner)
+                      TextButton(
+                        onPressed: () => askForStaffLogins(context, ref),
+                        child: Text(t('Ask for more')),
+                      ),
                   ],
                 ),
               ),

@@ -447,5 +447,16 @@
 "The discount every bill takes off these products by itself. The cashier can still change it on a bill.": "ஒவ்வொரு பில்லும் இந்தப் பொருட்களுக்கு இந்தத் தள்ளுபடியைத் தானாகவே தரும். காசாளர் பில்லில் மாற்றலாம்.",
 "The list of codes needs the internet.": "குறியீடுகளின் பட்டியலுக்கு இணையம் தேவை.",
 "{v1} digits ({v2})": "{v1} இலக்கங்கள் ({v2})",
-"{v1} products, now {v2}": "{v1} பொருட்கள், இப்போது {v2}"
+"{v1} products, now {v2}": "{v1} பொருட்கள், இப்போது {v2}",
+"All your plan's logins are in use. Ask Dukania for more.": "உங்கள் திட்டத்தின் எல்லா உள்நுழைவுகளும் பயன்பாட்டில் உள்ளன. மேலும் வேண்டுமெனில் Dukania-விடம் கேளுங்கள்.",
+"Ask for more": "மேலும் கேள்",
+"Ask for more staff logins": "மேலும் ஊழியர் உள்நுழைவு கேள்",
+"Lifetime — no renewal needed": "வாழ்நாள் — புதுப்பிக்கத் தேவையில்லை",
+"More staff logins": "மேலும் ஊழியர் உள்நுழைவுகள்",
+"Request sent — Dukania will contact you": "கோரிக்கை அனுப்பப்பட்டது — Dukania தொடர்பு கொள்ளும்",
+"Send request": "கோரிக்கை அனுப்பு",
+"You asked for more staff logins — Dukania will contact you.": "நீங்கள் மேலும் ஊழியர் உள்நுழைவுகள் கேட்டுள்ளீர்கள் — Dukania தொடர்பு கொள்ளும்.",
+"Your plan's logins are all in use. Ask Dukania to add more — we'll confirm on WhatsApp.": "உங்கள் திட்டத்தின் எல்லா உள்நுழைவுகளும் பயன்பாட்டில் உள்ளன. மேலும் சேர்க்க Dukania-விடம் கேளுங்கள் — WhatsApp-ல் உறுதிசெய்வோம்.",
+"{v1} extra staff logins — until {v2}": "{v1} கூடுதல் ஊழியர் உள்நுழைவுகள் — {v2} வரை",
+"AI assistant — until {v1}": "AI உதவியாளர் — {v1} வரை"
 }

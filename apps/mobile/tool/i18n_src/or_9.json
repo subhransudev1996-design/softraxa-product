@@ -447,5 +447,16 @@
 "The discount every bill takes off these products by itself. The cashier can still change it on a bill.": "ପ୍ରତି ବିଲ ଏହି ଜିନିଷଗୁଡ଼ିକରେ ଏହି ରିହାତି ନିଜେ ଦେବ। କ୍ୟାସିୟର ବିଲରେ ବଦଳାଇପାରିବେ।",
 "The list of codes needs the internet.": "କୋଡ୍ ତାଲିକା ପାଇଁ ଇଣ୍ଟରନେଟ୍ ଦରକାର।",
 "{v1} digits ({v2})": "{v1} ଅଙ୍କ ({v2})",
-"{v1} products, now {v2}": "{v1}ଟି ଜିନିଷ, ଏବେ {v2}"
+"{v1} products, now {v2}": "{v1}ଟି ଜିନିଷ, ଏବେ {v2}",
+"All your plan's logins are in use. Ask Dukania for more.": "ଆପଣଙ୍କ ପ୍ଲାନର ସବୁ ଲଗଇନ୍ ବ୍ୟବହାରରେ ଅଛି। ଅଧିକ ପାଇଁ Dukania କୁ କୁହନ୍ତୁ।",
+"Ask for more": "ଅଧିକ ମାଗନ୍ତୁ",
+"Ask for more staff logins": "ଅଧିକ ଷ୍ଟାଫ୍ ଲଗଇନ୍ ମାଗନ୍ତୁ",
+"Lifetime — no renewal needed": "ଲାଇଫଟାଇମ୍ — ନବୀକରଣ ଦରକାର ନାହିଁ",
+"More staff logins": "ଅଧିକ ଷ୍ଟାଫ୍ ଲଗଇନ୍",
+"Request sent — Dukania will contact you": "ଅନୁରୋଧ ପଠାଗଲା — Dukania ଯୋଗାଯୋଗ କରିବ",
+"Send request": "ଅନୁରୋଧ ପଠାନ୍ତୁ",
+"You asked for more staff logins — Dukania will contact you.": "ଆପଣ ଅଧିକ ଷ୍ଟାଫ୍ ଲଗଇନ୍ ମାଗିଛନ୍ତି — Dukania ଯୋଗାଯୋଗ କରିବ।",
+"Your plan's logins are all in use. Ask Dukania to add more — we'll confirm on WhatsApp.": "ଆପଣଙ୍କ ପ୍ଲାନର ସବୁ ଲଗଇନ୍ ବ୍ୟବହାରରେ ଅଛି। ଅଧିକ ଯୋଡ଼ିବାକୁ Dukania କୁ କୁହନ୍ତୁ — ଆମେ WhatsApp ରେ ନିଶ୍ଚିତ କରିବୁ।",
+"{v1} extra staff logins — until {v2}": "{v1}ଟି ଅତିରିକ୍ତ ଷ୍ଟାଫ୍ ଲଗଇନ୍ — {v2} ପର୍ଯ୍ୟନ୍ତ",
+"AI assistant — until {v1}": "AI ସହାୟକ — {v1} ପର୍ଯ୍ୟନ୍ତ"
 }

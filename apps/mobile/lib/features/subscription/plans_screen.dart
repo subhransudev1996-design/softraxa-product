@@ -7,6 +7,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import 'staff_request.dart';
 
 /// This shop's plan with its usage, and the plans it can ask for
 /// (get_plans_for_app, migration 0055). Prices never reach the app:
@@ -96,6 +97,12 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                         _CurrentPlanCard(
                           current: current,
                           state: appContext?.subscriptionState ?? 'active',
+                          addons: [
+                            for (final a in (d['addons'] as List? ?? const []))
+                              Map<String, dynamic>.from(a as Map),
+                          ],
+                          staffRequestOpen: d['staff_request_open'] == true,
+                          isOwner: appContext?.isOwner ?? false,
                         ),
                         if (others.isNotEmpty) ...[
                           const SizedBox(height: 24),
@@ -144,8 +151,21 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
 /// The shop's own plan: name, validity, how much of each limit is used and
 /// what is included.
 class _CurrentPlanCard extends StatelessWidget {
-  const _CurrentPlanCard({required this.current, required this.state});
+  const _CurrentPlanCard({
+    required this.current,
+    required this.state,
+    this.addons = const [],
+    this.staffRequestOpen = false,
+    this.isOwner = false,
+  });
   final Map<String, dynamic> current;
+
+  /// Paid add-ons in force (migration 0096): kind, quantity, valid_until.
+  final List<Map<String, dynamic>> addons;
+
+  /// The owner has asked for more staff logins (0097).
+  final bool staffRequestOpen;
+  final bool isOwner;
 
   /// active | trial | expired | suspended, with grace days applied.
   final String state;
@@ -235,7 +255,17 @@ class _CurrentPlanCard extends StatelessWidget {
                     ),
                   ),
                 ],
-                if (expiry != null) ...[
+                if (plan?['billing'] == 'lifetime') ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    t('Lifetime — no renewal needed'),
+                    style: const TextStyle(
+                      fontSize: 13.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ] else if (expiry != null) ...[
                   const SizedBox(height: 10),
                   Text(
                     state == 'expired'
@@ -274,6 +304,54 @@ class _CurrentPlanCard extends StatelessWidget {
                   used: (usage['bills_this_month'] as num?)?.toInt() ?? 0,
                   limit: (usage['invoice_limit'] as num?)?.toInt(),
                 ),
+                for (final a in addons)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Row(
+                      children: [
+                        Icon(
+                          a['kind'] == 'ai'
+                              ? Icons.auto_awesome
+                              : Icons.person_add_alt,
+                          size: 18,
+                          color: AppColors.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            a['kind'] == 'ai'
+                                ? t('AI assistant — until {v1}', {
+                                    'v1': dateStr(a['valid_until']),
+                                  })
+                                : t('{v1} extra staff logins — until {v2}', {
+                                    'v1': a['quantity'],
+                                    'v2': dateStr(a['valid_until']),
+                                  }),
+                            style: const TextStyle(fontSize: 13.5),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                if (staffRequestOpen)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 10),
+                    child: Text(
+                      t('You asked for more staff logins — Dukania will contact you.'),
+                      style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
+                    ),
+                  )
+                else if (isOwner && _atLimit(usage))
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Consumer(
+                      builder: (context, ref, _) => TextButton.icon(
+                        onPressed: () => askForStaffLogins(context, ref),
+                        icon: const Icon(Icons.person_add_alt, size: 18),
+                        label: Text(t('Ask for more staff logins')),
+                      ),
+                    ),
+                  ),
                 if (plan != null) ...[
                   const Divider(height: 24),
                   _PlanDetails(plan: plan),
@@ -285,6 +363,12 @@ class _CurrentPlanCard extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Every login the plan and its add-ons allow is in use.
+bool _atLimit(Map<String, dynamic> usage) {
+  final limit = (usage['user_limit'] as num?)?.toInt();
+  return limit != null && ((usage['users'] as num?)?.toInt() ?? 0) >= limit;
 }
 
 /// "Products — 120 of 500" with a bar; no bar when the limit is unlimited.
