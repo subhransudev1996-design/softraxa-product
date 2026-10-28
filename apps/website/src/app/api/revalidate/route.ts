@@ -27,8 +27,14 @@ export async function POST(req: Request) {
   const { data: { user } } = await supabase.auth.getUser(token);
   if (!user) return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") return NextResponse.json({ error: "Admin only" }, { status: 403 });
+  // An admin team member with the Website area (migration 0098); before 0098, any admin.
+  const { data: can, error: canError } = await supabase.rpc("admin_can", { p_area: "website" });
+  let allowed = can === true;
+  if (canError) {
+    const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+    allowed = profile?.role === "admin";
+  }
+  if (!allowed) return NextResponse.json({ error: "Admin only" }, { status: 403 });
 
   revalidatePath("/", "layout");
   return NextResponse.json({ revalidated: true });

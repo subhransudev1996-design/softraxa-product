@@ -11,7 +11,7 @@ import { createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/
  */
 export async function POST(req: Request) {
   const supabase = await createServerSupabase();
-  const admin = await requireAdmin(supabase);
+  const admin = await requireAdmin(supabase, "clients");
   if (!admin.ok) return NextResponse.json({ error: admin.error }, { status: admin.status });
 
   const { businessId } = await req.json();

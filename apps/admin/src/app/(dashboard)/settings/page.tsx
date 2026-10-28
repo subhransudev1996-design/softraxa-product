@@ -51,7 +51,6 @@ export default function SettingsPage() {
   // Download links arrived with migration 0059.
   const [needsWebsiteMigration, setNeedsWebsiteMigration] = useState(false);
   const [trial, setTrial] = useState<{ plan: string | null; days: number | null }>({ plan: null, days: null });
-  const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [qr, setQr] = useState<{ link: string; url: string } | null>(null);
@@ -71,7 +70,6 @@ export default function SettingsPage() {
       .then(({ data }) => setTrial((t) => ({ ...t, plan: data?.[0]?.name ?? null })));
     supabase.from("software_products").select("trial_days").eq("slug", "dukania").maybeSingle()
       .then(({ data }) => setTrial((t) => ({ ...t, days: data?.trial_days ?? null })));
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
@@ -274,7 +272,10 @@ export default function SettingsPage() {
         </p>
       </Section>
 
-      <PasswordCard email={email} />
+      <p className="text-sm text-zinc-500">
+        Your password and two-step login are on{" "}
+        <Link href="/account" className="font-semibold text-brand hover:underline">My login</Link>.
+      </p>
     </div>
   );
 }
@@ -290,47 +291,5 @@ function Section({ title, hint, children }: { title: string; hint: string; child
         {children}
       </CardBody>
     </Card>
-  );
-}
-
-/** Change the password of the admin account you are signed in with. */
-function PasswordCard({ email }: { email: string }) {
-  const [password, setPassword] = useState("");
-  const [again, setAgain] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
-
-  async function change(e: React.FormEvent) {
-    e.preventDefault();
-    setNotice(null);
-    if (password.length < 10) return setNotice({ ok: false, text: "Use at least 10 characters" });
-    if (password !== again) return setNotice({ ok: false, text: "The two passwords don't match" });
-    setBusy(true);
-    const { error } = await createClient().auth.updateUser({ password });
-    setBusy(false);
-    if (error) return setNotice({ ok: false, text: error.message });
-    setPassword("");
-    setAgain("");
-    setNotice({ ok: true, text: "Password changed. Use the new one the next time you sign in." });
-  }
-
-  return (
-    <Section title="Your login" hint="This account controls every shop's subscription. Use a long password that you use nowhere else.">
-      <p className="text-sm text-zinc-700">Signed in as <b>{email || "—"}</b></p>
-      <Notice notice={notice} />
-      <form onSubmit={change} className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <Label>New password</Label>
-          <Input type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />
-        </div>
-        <div>
-          <Label>New password again</Label>
-          <Input type="password" autoComplete="new-password" value={again} onChange={(e) => setAgain(e.target.value)} />
-        </div>
-        <div className="sm:col-span-2">
-          <Button type="submit" variant="outline" disabled={busy || !password}>{busy ? "Changing…" : "Change password"}</Button>
-        </div>
-      </form>
-    </Section>
   );
 }

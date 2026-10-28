@@ -9,6 +9,7 @@ import {
 } from "@/components/ui";
 import { dateStr, inr } from "@/lib/format";
 import { LEAD_SOURCES, LEAD_STATUSES, leadStatusBadge } from "@/lib/leads";
+import { memberName, useMe, useTeam } from "@/components/me";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default function LeadsPage() {
@@ -17,6 +18,10 @@ export default function LeadsPage() {
   const [plans, setPlans] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("open");
+  // Whose leads: everyone's, mine, nobody's, or one person's (0098).
+  const me = useMe();
+  const team = useTeam();
+  const [who, setWho] = useState<string>("all");
   const [showForm, setShowForm] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -86,6 +91,9 @@ export default function LeadsPage() {
     if (statusFilter === "open" && !["new", "contacted", "demo"].includes(r.status)) return false;
     if (statusFilter !== "all" && statusFilter !== "open" && r.status !== statusFilter) return false;
     if (statusFilter === "overdue" && !(r.follow_up_date && r.follow_up_date < today && ["new", "contacted", "demo"].includes(r.status))) return false;
+    if (who === "mine" && r.assigned_to !== me?.id) return false;
+    if (who === "nobody" && r.assigned_to) return false;
+    if (!["all", "mine", "nobody"].includes(who) && r.assigned_to !== who) return false;
     const q = search.trim().toLowerCase();
     if (q && ![r.shop_name, r.contact_name, r.phone, r.city].some((v) => (v ?? "").toLowerCase().includes(q))) return false;
     return true;
@@ -196,6 +204,14 @@ export default function LeadsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="max-w-sm"
         />
+        <Select value={who} onChange={(e) => setWho(e.target.value)} className="max-w-[12rem]" aria-label="Whose leads">
+          <option value="all">Everyone&apos;s leads</option>
+          <option value="mine">My leads</option>
+          <option value="nobody">Not assigned</option>
+          {team.filter((m) => m.active && m.id !== me?.id).map((m) => (
+            <option key={m.id} value={m.id}>{m.name || m.email}</option>
+          ))}
+        </Select>
         {["open", "all", ...LEAD_STATUSES, "overdue"].map((s) => (
           <button
             key={s}
@@ -210,7 +226,7 @@ export default function LeadsPage() {
       </div>
 
       <Card>
-        <Table headers={["Shop", "Contact", "Source", "Plan interest", "Expected ₹", "Follow-up", "Status", ""]}>
+        <Table headers={["Shop", "Contact", "Source", "Plan interest", "Expected ₹", "Follow-up", "Status", "With", ""]}>
           {filtered.map((l) => {
             const isOverdue = l.follow_up_date && l.follow_up_date < today && ["new", "contacted", "demo"].includes(l.status);
             return (
@@ -233,6 +249,7 @@ export default function LeadsPage() {
                 <td className="px-4 py-3">
                   <Badge color={leadStatusBadge(l.status)}>{l.status}</Badge>
                 </td>
+                <td className="px-4 py-3 text-xs">{memberName(team, l.assigned_to) ?? <span className="text-zinc-400">Nobody</span>}</td>
                 <td className="px-4 py-3 text-right">
                   <Link href={`/leads/${l.id}`} className="text-sm font-medium text-brand hover:underline">
                     Manage
@@ -242,7 +259,7 @@ export default function LeadsPage() {
             );
           })}
           {filtered.length === 0 && (
-            <tr><td colSpan={8} className="px-4 py-10 text-center text-zinc-500">No leads match.</td></tr>
+            <tr><td colSpan={9} className="px-4 py-10 text-center text-zinc-500">No leads match.</td></tr>
           )}
         </Table>
       </Card>

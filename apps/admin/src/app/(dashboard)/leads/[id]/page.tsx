@@ -10,6 +10,7 @@ import {
 } from "@/components/ui";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 import { ACTIVITY_TYPES, LEAD_SOURCES, LEAD_STATUSES, leadStatusBadge } from "@/lib/leads";
+import { useTeam } from "@/components/me";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export default function LeadDetailPage() {
@@ -23,6 +24,7 @@ export default function LeadDetailPage() {
   const [msg, setMsg] = useState<string | null>(null);
   const [lostReason, setLostReason] = useState("");
   const [askLostReason, setAskLostReason] = useState(false);
+  const team = useTeam();
 
   const load = useCallback(async () => {
     const [l, a, p] = await Promise.all([
@@ -50,6 +52,14 @@ export default function LeadDetailPage() {
 
   async function save(patch: Record<string, unknown>) {
     await supabase.from("leads").update(patch).eq("id", id);
+    await load();
+    flash("Saved");
+  }
+
+  /** Give the lead to a team member who has Leads (0098), or to nobody. */
+  async function assign(userId: string) {
+    const { error } = await supabase.rpc("admin_assign", { p_kind: "lead", p_id: id, p_user: userId || null });
+    if (error) return flash(error.message);
     await load();
     flash("Saved");
   }
@@ -203,6 +213,17 @@ export default function LeadDetailPage() {
                     {plans.map((p) => (
                       <option key={p.id} value={p.id}>{p.name}</option>
                     ))}
+                  </Select>
+                </div>
+                <div>
+                  <Label>With</Label>
+                  <Select value={lead.assigned_to ?? ""} onChange={(e) => assign(e.target.value)}>
+                    <option value="">Nobody</option>
+                    {team
+                      .filter((m) => (m.active && m.areas.includes("leads")) || m.id === lead.assigned_to)
+                      .map((m) => (
+                        <option key={m.id} value={m.id}>{m.name || m.email}</option>
+                      ))}
                   </Select>
                 </div>
                 <div>

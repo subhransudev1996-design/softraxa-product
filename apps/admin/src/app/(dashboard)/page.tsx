@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, CardBody, Input, PageHeader, Spinner, StatCard } from "@/components/ui";
 import { Modal, Notice, RenewDialog, RenewTarget, waLink } from "@/components/ops";
+import { useCan } from "@/components/me";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -65,6 +66,8 @@ export default function TodayPage() {
   const [notice, setNotice] = useState<{ ok: boolean; text: string } | null>(null);
   const [refresh, setRefresh] = useState(0);
   const [staffAsks, setStaffAsks] = useState<any[]>([]);
+  // Renewing and money are for the people with payments (0098).
+  const canPay = useCan("payments");
 
   useEffect(() => {
     supabase.rpc("get_admin_today").then(({ data, error }) => {
@@ -118,7 +121,7 @@ export default function TodayPage() {
         subtitle={total === 0 ? "Nothing needs you right now." : `${total} thing${total === 1 ? "" : "s"} need${total === 1 ? "s" : ""} you`}
       />
       <Notice notice={notice} />
-      {!upi && (
+      {!upi && canPay && (
         <p className="rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">
           Your UPI ID isn&apos;t set, so expired shops can&apos;t see how to pay you.{" "}
           <Link href="/settings" className="font-semibold underline">Set it in Settings</Link>.
@@ -149,7 +152,7 @@ export default function TodayPage() {
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>Expired {dateStr(r.expiry_date)} ({-daysFrom(data.today, r.expiry_date)} days ago) · {r.plan_name ?? "no plan"} · {r.phone || "no phone"}</>}
               actions={<>
-                <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>
+                {canPay && <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
                 <a href={waLink(r.phone, reminder(r, true))} target="_blank" rel="noreferrer"><Button variant="outline">WhatsApp</Button></a>
               </>}
             />
@@ -163,7 +166,7 @@ export default function TodayPage() {
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>{r.status === "trial" ? "Trial" : r.plan_name ?? "Plan"} ends {dateStr(r.expiry_date)} ({daysFrom(data.today, r.expiry_date) === 0 ? "today" : `in ${daysFrom(data.today, r.expiry_date)} days`})</>}
               actions={<>
-                <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>
+                {canPay && <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
                 <a href={waLink(r.phone, reminder(r, false))} target="_blank" rel="noreferrer"><Button variant="outline">Remind</Button></a>
               </>}
             />
@@ -177,9 +180,11 @@ export default function TodayPage() {
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.businesses?.name}</Link>}
               sub={<>Wants {r.requested_staff} more login{r.requested_staff > 1 ? "s" : ""} · asked {dateStr(r.created_at)}</>}
               actions={<>
-                <Link href={`/clients/${r.business_id}?addon=${r.requested_staff}`}>
-                  <Button>Add {r.requested_staff} login{r.requested_staff > 1 ? "s" : ""}</Button>
-                </Link>
+                {canPay && (
+                  <Link href={`/clients/${r.business_id}?addon=${r.requested_staff}`}>
+                    <Button>Add {r.requested_staff} login{r.requested_staff > 1 ? "s" : ""}</Button>
+                  </Link>
+                )}
                 {r.businesses?.phone && (
                   <a href={waLink(r.businesses.phone, `Namaste ${r.businesses.owner_name || ""}! We got your request for ${r.requested_staff} more staff login${r.requested_staff > 1 ? "s" : ""} for ${r.businesses.name}. `)} target="_blank" rel="noreferrer">
                     <Button variant="outline">WhatsApp</Button>
@@ -250,7 +255,11 @@ export default function TodayPage() {
           <StatCard label="Paying shops" value={stats.active_clients} />
           <StatCard label="On trial" value={stats.trial_clients} />
           <StatCard label="Expired" value={stats.expired_clients} hint={`${stats.suspended_clients} suspended`} />
-          <StatCard label="Collected this month" value={inr(stats.monthly_revenue)} hint={`${stats.new_clients_this_month} new shops`} />
+          {canPay ? (
+            <StatCard label="Collected this month" value={inr(stats.monthly_revenue)} hint={`${stats.new_clients_this_month} new shops`} />
+          ) : (
+            <StatCard label="New shops this month" value={stats.new_clients_this_month} />
+          )}
         </div>
       )}
 

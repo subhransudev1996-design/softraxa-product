@@ -93,3 +93,73 @@ export async function sendWelcomeEmail(params: WelcomeEmailParams): Promise<Emai
     return { sent: false, provider: "resend", error: err instanceof Error ? err.message : String(err) };
   }
 }
+
+export interface TeamInviteParams {
+  email: string;
+  name?: string;
+  roleLabel: string;
+  invitedBy?: string;
+  /** The admin panel's address, to sign in after setting the password. */
+  panelUrl: string;
+  /** One-time link to the website's set-password page. */
+  setPasswordUrl: string;
+}
+
+/** Invitation to the Dukania admin team (migration 0098): set a password, then sign in to the panel. */
+export async function sendTeamInviteEmail(params: TeamInviteParams): Promise<EmailResult> {
+  const resendApiKey = process.env.RESEND_API_KEY;
+  if (!resendApiKey) {
+    return { sent: false, provider: "none", error: "Email sending is not configured (RESEND_API_KEY is missing)." };
+  }
+
+  const name = escapeHtml(params.name?.trim() || "there");
+  const role = escapeHtml(params.roleLabel);
+  const by = params.invitedBy?.trim() ? ` by ${escapeHtml(params.invitedBy.trim())}` : "";
+  const link = escapeHtml(params.setPasswordUrl);
+  const panel = escapeHtml(params.panelUrl);
+  const subject = "You're on the Dukania admin team — set your password";
+
+  const html = `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>${escapeHtml(subject)}</title></head>
+<body style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:#f4f4f5;margin:0;padding:20px;color:#18181b;">
+  <div style="max-width:580px;margin:0 auto;background:#ffffff;border-radius:12px;overflow:hidden;">
+    <div style="background:#6d28d9;padding:28px 24px;text-align:center;color:#ffffff;">
+      <h1 style="margin:0;font-size:22px;">Dukania</h1>
+      <p style="margin:6px 0 0;font-size:14px;opacity:.9;">Admin panel</p>
+    </div>
+    <div style="padding:28px 24px;">
+      <p style="font-size:17px;font-weight:600;">Hello ${name},</p>
+      <p>You've been added to the Dukania admin team${by} as <strong>${role}</strong>.</p>
+      <p>First set your password:</p>
+      <p style="text-align:center;margin:22px 0;">
+        <a href="${link}" style="background:#6d28d9;color:#ffffff;text-decoration:none;padding:13px 26px;border-radius:8px;font-weight:600;">Set my password</a>
+      </p>
+      <p>Then sign in at <a href="${panel}" style="color:#6d28d9;font-weight:600;">${panel}</a> with this email and your new password.</p>
+      <p style="font-size:13px;color:#64748b;">The link can be used once and expires soon. If it has expired, ask the owner to send it again.</p>
+    </div>
+    <div style="background:#f1f5f9;padding:14px 24px;text-align:center;font-size:12px;color:#64748b;">
+      &copy; ${new Date().getFullYear()} Dukania · support@dukania.in
+    </div>
+  </div>
+</body>
+</html>`;
+
+  try {
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${resendApiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        from: process.env.EMAIL_FROM || "Dukania <noreply@dukania.in>",
+        to: [params.email],
+        subject,
+        html,
+      }),
+    });
+    if (res.ok) return { sent: true, provider: "resend" };
+    const errJson = (await res.json().catch(() => ({}))) as { message?: string };
+    return { sent: false, provider: "resend", error: errJson.message || `Email provider returned ${res.status}` };
+  } catch (err: unknown) {
+    return { sent: false, provider: "resend", error: err instanceof Error ? err.message : String(err) };
+  }
+}

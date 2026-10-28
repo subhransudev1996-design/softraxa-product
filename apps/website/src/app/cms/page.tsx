@@ -200,6 +200,10 @@ export default function CMSPage() {
 
   const verifyAdminRole = async (userId: string): Promise<boolean> => {
     try {
+      // An admin team member with the Website area (migration 0098).
+      const { data: can, error: canError } = await supabase.rpc("admin_can", { p_area: "website" });
+      if (!canError) return can === true;
+      // Before 0098 is on the database: any admin.
       const { data, error } = await supabase
         .from("profiles")
         .select("role")

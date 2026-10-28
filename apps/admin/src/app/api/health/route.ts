@@ -21,7 +21,7 @@ async function probe(url: string, init: RequestInit = {}): Promise<number | null
  */
 export async function GET() {
   const supabase = await createServerSupabase();
-  const admin = await requireAdmin(supabase);
+  const admin = await requireAdmin(supabase, "system");
   if (!admin.ok) return NextResponse.json({ error: admin.error }, { status: admin.status });
 
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";

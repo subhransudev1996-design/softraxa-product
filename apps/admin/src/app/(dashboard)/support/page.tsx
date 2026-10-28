@@ -3,7 +3,9 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Button, Card, Spinner } from "@/components/ui";
+import { Badge, Button, Card, Select, Spinner } from "@/components/ui";
+import { memberName, useMe, useTeam } from "@/components/me";
+import type { TeamMember } from "@/lib/team";
 import { Modal, Notice, waLink } from "@/components/ops";
 import { dateTimeStr } from "@/lib/format";
 
@@ -30,6 +32,10 @@ export default function SupportPage() {
   const [filter, setFilter] = useState<string>("needs");
   const [open, setOpen] = useState<any>(null);
   const [refresh, setRefresh] = useState(0);
+  // Whose requests: everyone's, mine, nobody's, or one person's (0098).
+  const me = useMe();
+  const team = useTeam();
+  const [who, setWho] = useState<string>("all");
 
   useEffect(() => {
     supabase
@@ -41,7 +47,12 @@ export default function SupportPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refresh]);
 
-  const shown = (rows ?? []).filter((t) =>
+  const mineOk = (t: any) =>
+    who === "all" ? true
+      : who === "mine" ? t.assigned_to === me?.id
+      : who === "nobody" ? !t.assigned_to
+      : t.assigned_to === who;
+  const shown = (rows ?? []).filter(mineOk).filter((t) =>
     filter === "all" ? true
       : filter === "needs" ? needsReply(t)
       : filter === "resolved" ? t.status === "resolved"
@@ -67,6 +78,14 @@ export default function SupportPage() {
             {label}{key === "needs" && needsCount > 0 ? ` (${needsCount})` : ""}
           </button>
         ))}
+        <Select value={who} onChange={(e) => setWho(e.target.value)} className="max-w-[12rem] py-1 text-xs" aria-label="Whose requests">
+          <option value="all">Everyone&apos;s</option>
+          <option value="mine">Mine</option>
+          <option value="nobody">Not assigned</option>
+          {team.filter((m) => m.active && m.id !== me?.id).map((m) => (
+            <option key={m.id} value={m.id}>{m.name || m.email}</option>
+          ))}
+        </Select>
       </div>
 
       {!rows ? (
@@ -84,6 +103,9 @@ export default function SupportPage() {
                     </span>
                   </span>
                   <span className="flex shrink-0 items-center gap-3">
+                    {memberName(team, t.assigned_to) && (
+                      <span className="text-xs font-medium text-zinc-600">{memberName(team, t.assigned_to)}</span>
+                    )}
                     <span className="text-xs text-zinc-500">{dateTimeStr(t.last_shop_message_at ?? t.created_at)}</span>
                     <Badge color={statusColor(t)}>{statusText(t)}</Badge>
                   </span>
@@ -98,6 +120,7 @@ export default function SupportPage() {
       {open && (
         <TicketDialog
           ticket={open}
+          team={team}
           onClose={() => setOpen(null)}
           onChanged={() => setRefresh((n) => n + 1)}
         />
@@ -107,11 +130,14 @@ export default function SupportPage() {
 }
 
 /** One ticket: the conversation, a reply box, status and private notes. */
-function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: () => void; onChanged: () => void }) {
+function TicketDialog({ ticket, team, onClose, onChanged }: {
+  ticket: any; team: TeamMember[]; onClose: () => void; onChanged: () => void;
+}) {
   const supabase = createClient();
   const [messages, setMessages] = useState<any[] | null>(null);
   const [notes, setNotes] = useState<any[]>([]);
   const [status, setStatus] = useState<string>(ticket.status);
+  const [assignee, setAssignee] = useState<string>(ticket.assigned_to ?? "");
   const [reply, setReply] = useState("");
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState(false);
@@ -156,6 +182,14 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
     onChanged();
   }
 
+  /** Give the request to a team member who has Support (0098), or to nobody. */
+  async function assign(userId: string) {
+    const { error } = await supabase.rpc("admin_assign", { p_kind: "ticket", p_id: ticket.id, p_user: userId || null });
+    if (error) return setNotice({ ok: false, text: error.message });
+    setAssignee(userId);
+    onChanged();
+  }
+
   async function addNote() {
     if (!note.trim()) return;
     const { data: { user } } = await supabase.auth.getUser();
@@ -175,7 +209,15 @@ function TicketDialog({ ticket, onClose, onChanged }: { ticket: any; onClose: ()
             <Link href={`/clients/${b.id}`} className="font-semibold text-brand hover:underline">{b.name}</Link>
             {b.owner_name ? ` · ${b.owner_name}` : ""} · opened {dateTimeStr(ticket.created_at)}
           </p>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={assignee} onChange={(e) => assign(e.target.value)} className="w-auto" aria-label="With">
+              <option value="">With nobody</option>
+              {team
+                .filter((m) => (m.active && m.areas.includes("support")) || m.id === assignee)
+                .map((m) => (
+                  <option key={m.id} value={m.id}>With {m.name || m.email}</option>
+                ))}
+            </Select>
             {b.phone && (
               <a href={waLink(b.phone, `Namaste! This is Dukania, about your support request "${ticket.subject}".`)} target="_blank" rel="noreferrer">
                 <Button variant="outline">WhatsApp</Button>

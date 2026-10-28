@@ -18,8 +18,13 @@ import {
   TrendingUp,
   Store,
   Target,
+  UserCog,
+  Users,
   X,
 } from "lucide-react";
+import { MeProvider } from "@/components/me";
+import { Card, CardBody } from "@/components/ui";
+import { Me, areaFor, canUse, roleLabel } from "@/lib/team";
 import { LogoutButton } from "./logout-button";
 
 // Daily work first; setup pages below.
@@ -39,10 +44,14 @@ const setup = [
   { href: "/settings", label: "Settings", icon: Settings },
   { href: "/health", label: "System health", icon: HeartPulse },
   { href: "/audit", label: "Audit logs", icon: ScrollText },
+  { href: "/team", label: "Team", icon: Users },
+  { href: "/account", label: "My login", icon: UserCog },
 ];
 
-export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   const pathname = usePathname();
+  // Only the pages this team member may use (migration 0098).
+  const allowed = (item: (typeof daily)[number]) => canUse(me, areaFor(item.href));
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
@@ -73,14 +82,14 @@ export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-      {daily.map(link)}
+      {daily.filter(allowed).map(link)}
       <p className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-sidebar-muted/70">Setup</p>
-      {setup.map(link)}
+      {setup.filter(allowed).map(link)}
     </nav>
   );
 }
 
-function SidebarContent({ email, onNavigate }: { email: string; onNavigate?: () => void }) {
+function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   return (
     <>
       <div className="flex items-center gap-3 px-5 py-5">
@@ -109,14 +118,17 @@ function SidebarContent({ email, onNavigate }: { email: string; onNavigate?: () 
           className="w-full rounded-xl bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-sidebar-muted focus:ring-2 focus:ring-brand"
         />
       </form>
-      <SidebarNav onNavigate={onNavigate} />
+      <SidebarNav me={me} onNavigate={onNavigate} />
       <div className="mx-4 h-px bg-white/[0.06]" />
       <div className="p-3">
         <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
           <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/[0.08] text-xs font-bold uppercase text-zinc-300">
-            {(email || "A").slice(0, 1)}
+            {(me.name || me.email || "A").slice(0, 1)}
           </span>
-          <p className="truncate text-xs font-medium text-sidebar-muted">{email}</p>
+          <div className="min-w-0">
+            <p className="truncate text-xs font-semibold text-zinc-200">{me.name || me.email}</p>
+            <p className="truncate text-[11px] font-medium text-sidebar-muted">{roleLabel(me.team_role)}</p>
+          </div>
         </div>
         <LogoutButton />
       </div>
@@ -125,12 +137,14 @@ function SidebarContent({ email, onNavigate }: { email: string; onNavigate?: () 
 }
 
 /** Sidebar on large screens; a top bar with a slide-in menu on phones. */
-export function AppShell({ email, children }: { email: string; children: ReactNode }) {
+export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   const [open, setOpen] = useState(false);
+  const pathname = usePathname();
+  const allowed = canUse(me, areaFor(pathname));
   return (
     <div className="min-h-screen bg-canvas">
       <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col bg-sidebar lg:flex print:hidden">
-        <SidebarContent email={email} />
+        <SidebarContent me={me} />
       </aside>
 
       <header className="sticky top-0 z-30 flex items-center gap-3 bg-sidebar px-4 py-3 lg:hidden print:hidden">
@@ -149,13 +163,26 @@ export function AppShell({ email, children }: { email: string; children: ReactNo
             <button onClick={() => setOpen(false)} className="absolute right-3 top-5 text-sidebar-muted" aria-label="Close menu">
               <X size={20} />
             </button>
-            <SidebarContent email={email} onNavigate={() => setOpen(false)} />
+            <SidebarContent me={me} onNavigate={() => setOpen(false)} />
           </aside>
         </div>
       )}
 
       <main className="p-4 sm:p-6 lg:ml-60 lg:p-8 print:m-0 print:p-0">
-        <div className="animate-rise mx-auto max-w-6xl">{children}</div>
+        <div className="animate-rise mx-auto max-w-6xl">
+          <MeProvider me={me}>
+            {allowed ? (
+              children
+            ) : (
+              <Card>
+                <CardBody>
+                  <p className="font-semibold text-ink">This page isn&apos;t part of your work.</p>
+                  <p className="mt-1 text-sm text-zinc-500">Ask the owner to give you access on the Team page.</p>
+                </CardBody>
+              </Card>
+            )}
+          </MeProvider>
+        </div>
       </main>
     </div>
   );

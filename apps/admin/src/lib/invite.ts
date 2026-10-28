@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import type { Area } from "@/lib/team";
 
 /** Service-role client for trusted server routes only. */
 export function createServiceClient(): SupabaseClient {
@@ -23,13 +24,20 @@ export async function createSetPasswordLink(service: SupabaseClient, email: stri
   return `${site}/auth/callback?token_hash=${encodeURIComponent(tokenHash)}&type=recovery`;
 }
 
-/** Admin check for API routes: the signed-in user must be a platform admin. */
+/**
+ * Admin check for API routes: the signed-in user must be an active member
+ * of the admin team with [area] (migration 0098); "owner" = the owner only.
+ */
 export async function requireAdmin(
-  supabase: SupabaseClient
+  supabase: SupabaseClient,
+  area: Area | "owner"
 ): Promise<{ ok: true; userId: string } | { ok: false; status: number; error: string }> {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { ok: false, status: 401, error: "Not authenticated" };
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
-  if (profile?.role !== "admin") return { ok: false, status: 403, error: "Admin only" };
+  const { data: allowed } =
+    area === "owner" ? await supabase.rpc("admin_is_owner") : await supabase.rpc("admin_can", { p_area: area });
+  if (allowed !== true) {
+    return { ok: false, status: 403, error: area === "owner" ? "Only the owner can do this" : `You don't have access to ${area}` };
+  }
   return { ok: true, userId: user.id };
 }
