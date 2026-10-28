@@ -314,8 +314,8 @@ export default async function HomePage() {
         </Reveal>
       </section>
 
-      {/* 7 — by hand vs Dukania + pricing */}
-      <section id="pricing" className="mx-auto grid grid-cols-1 max-w-7xl scroll-mt-24 gap-8 px-6 pb-16 lg:grid-cols-[1fr_1.25fr]">
+      {/* 7 — by hand vs Dukania, and the free trial */}
+      <section className="mx-auto grid grid-cols-1 max-w-7xl gap-8 px-6 pb-16 lg:grid-cols-[1.3fr_1fr] lg:items-end">
         <Reveal>
           <p className={eyebrow}>By hand vs Dukania</p>
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">A clear difference you&apos;ll feel every day.</h2>
@@ -335,10 +335,7 @@ export default async function HomePage() {
           </div>
         </Reveal>
         <Reveal delay={0.1}>
-          <p className={eyebrow}>Pricing</p>
-          <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">Simple and honest pricing.</h2>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-brand/20 bg-brand-soft/70 p-6 shadow-card">
+          <div className="rounded-2xl border border-brand/20 bg-brand-soft/70 p-6 shadow-card">
               <h3 className="font-display text-2xl font-bold text-brand">{trial}</h3>
               <ul className="mt-4 space-y-2 text-sm">
                 {["Every feature, no card", "Bill real customers from day one", "Data stays when you upgrade", "Help on WhatsApp"].map((p) => (
@@ -349,6 +346,66 @@ export default async function HomePage() {
                 Start free trial <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
+        </Reveal>
+      </section>
+
+      {/* 8 — pricing: the plans with their list and website prices */}
+      <section id="pricing" className="scroll-mt-24 bg-brand-soft/50 py-16">
+        <div className="mx-auto max-w-7xl px-6">
+          <p className={eyebrow}>Pricing</p>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <h2 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Simple and honest pricing.</h2>
+            {info.discountPct > 0 && info.plans.length > 0 && (
+              <p className="rounded-full bg-marigold/25 px-4 py-1.5 text-sm font-semibold text-paper">
+                Launch offer: {info.discountPct}% off every plan
+              </p>
+            )}
+          </div>
+          <p className="mt-2 text-dim">Every plan starts with a {trial.toLowerCase()}. Billing, GST, stock, reports and printing on all of them.</p>
+          {info.plans.length > 0 ? (
+            <ul className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
+              {info.plans.map((p) => (
+                <li key={p.name}
+                  className={`relative flex flex-col rounded-3xl bg-white p-6 shadow-card ${p.isRecommended ? "border-2 border-brand" : "border border-hairline"}`}>
+                  {p.isRecommended && (
+                    <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">Most popular</span>
+                  )}
+                  <h3 className="font-display text-xl font-bold">{p.name}</h3>
+                  {p.description && <p className="mt-1 text-sm text-dim">{p.description}</p>}
+                  <div className="mt-5 flex items-end gap-2">
+                    <span className="font-display text-4xl font-bold text-brand">{rupees(p.websitePrice)}</span>
+                    <span className="pb-1 text-sm font-semibold text-dim">{p.billing === "lifetime" ? "one time" : "/ year"}</span>
+                  </div>
+                  {p.listPrice > p.websitePrice && (
+                    <p className="mt-1 text-sm">
+                      <span className="text-dim line-through">{rupees(p.listPrice)}</span>{" "}
+                      <span className="font-semibold text-emerald-700">Save {rupees(p.listPrice - p.websitePrice)}</span>
+                    </p>
+                  )}
+                  <ul className="mt-5 flex-1 space-y-2 text-sm">
+                    {p.highlights.map((h) => (
+                      <li key={h} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-2" /> {h}</li>
+                    ))}
+                  </ul>
+                  <p className="mt-5 rounded-xl bg-elevated/60 px-3 py-2 text-xs text-dim">
+                    {p.users ? `${p.users} logins (owner + ${p.users - 1} staff)` : "Unlimited logins"}
+                    {p.extraStaffPrice > 0 ? ` · extra staff ${rupees(p.extraStaffPrice)} a year` : ""}
+                    {!p.includesAi && p.aiAddonPrice > 0 ? ` · AI assistant ${rupees(p.aiAddonPrice)} a year` : ""}
+                  </p>
+                  <div className="mt-5 grid grid-cols-1 gap-2">
+                    <Link href="/download" className={`${p.isRecommended ? btnPrimary : btnGhost} w-full justify-center`}>
+                      Start free trial <ArrowRight className="h-4 w-4" />
+                    </Link>
+                    <a href={demoHref} target={wa ? "_blank" : undefined} rel="noreferrer"
+                      className="py-1 text-center text-sm font-semibold text-brand hover:underline">
+                      Talk to us on WhatsApp
+                    </a>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="mt-8 max-w-md">
             <div className="rounded-2xl border border-marigold/40 bg-[#fff8e6] p-6 shadow-card">
               <h3 className="font-display text-2xl font-bold text-amber">
                 {info.fromYearly ? <>From {rupees(info.fromYearly)} <span className="text-base font-semibold text-dim">/ year</span></> : "Yearly plans"}
@@ -363,18 +420,20 @@ export default async function HomePage() {
                 Ask for your price
               </a>
             </div>
-          </div>
-        </Reveal>
+            </div>
+          )}
+          <p className="mt-6 text-sm text-dim">Pay by UPI, cash or bank transfer. Prices include updates and WhatsApp support.</p>
+        </div>
       </section>
 
-      {/* 8 — FAQ */}
+      {/* 9 — FAQ */}
       <section id="faq" className="mx-auto max-w-7xl scroll-mt-24 px-6 pb-16">
         <p className={eyebrow}>FAQ</p>
         <h2 className="mt-2 font-display text-2xl font-bold tracking-tight sm:text-3xl">Common questions, simple answers.</h2>
         <div className="mt-6"><FaqGrid items={faqItems} /></div>
       </section>
 
-      {/* 9 — call to action + WhatsApp help */}
+      {/* 10 — call to action + WhatsApp help */}
       <section className="mx-auto mb-12 grid grid-cols-1 max-w-7xl gap-4 px-6 lg:grid-cols-[1.4fr_1fr]">
         <div className="flex flex-col justify-center gap-5 rounded-3xl bg-brand px-8 py-10 text-white sm:flex-row sm:items-center sm:justify-between">
           <div>

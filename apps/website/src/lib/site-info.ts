@@ -18,12 +18,31 @@ export type SiteInfo = {
   fromYearly: number | null;
   fromMonthly: number | null;
   trialDays: number | null;
+  /** Discount on list prices shown on the website, in % (migration 0096). */
+  discountPct: number;
+  /** The plans with list and website prices; empty before migration 0096. */
+  plans: SitePlan[];
+};
+
+export type SitePlan = {
+  name: string;
+  description: string;
+  highlights: string[];
+  billing: "yearly" | "lifetime";
+  isRecommended: boolean;
+  includesAi: boolean;
+  users: number | null;
+  listPrice: number;
+  websitePrice: number;
+  extraStaffPrice: number;
+  aiAddonPrice: number;
 };
 
 const EMPTY: SiteInfo = {
   whatsapp: "", phone: "", email: "", address: "",
   androidUrl: "", windowsUrl: "",
   fromYearly: null, fromMonthly: null, trialDays: null,
+  discountPct: 0, plans: [],
 };
 
 const num = (v: unknown) => (typeof v === "number" && v > 0 ? v : typeof v === "string" && Number(v) > 0 ? Number(v) : null);
@@ -44,6 +63,22 @@ export async function getSiteInfo(): Promise<SiteInfo> {
       fromYearly: num(d.from_yearly),
       fromMonthly: num(d.from_monthly),
       trialDays: num(d.trial_days),
+      discountPct: num(d.website_discount_pct) ?? 0,
+      plans: Array.isArray(d.plans)
+        ? (d.plans as Record<string, unknown>[]).map((p) => ({
+            name: str(p.name),
+            description: str(p.description),
+            highlights: Array.isArray(p.highlights) ? p.highlights.map(String) : [],
+            billing: p.billing === "lifetime" ? "lifetime" : "yearly",
+            isRecommended: p.is_recommended === true,
+            includesAi: p.includes_ai === true,
+            users: num(p.users),
+            listPrice: num(p.list_price) ?? 0,
+            websitePrice: num(p.website_price) ?? 0,
+            extraStaffPrice: num(p.extra_staff_price) ?? 0,
+            aiAddonPrice: num(p.ai_addon_price) ?? 0,
+          }))
+        : [],
     };
   } catch {
     return EMPTY;
