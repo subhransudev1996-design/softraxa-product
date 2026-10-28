@@ -87,7 +87,7 @@ export default function ProductTour() {
           </button>
           <div className="min-w-0 flex-1">
             {mode === "desktop" ? (
-              <div className="shadow-float overflow-hidden rounded-2xl border-[6px] border-[#1d2a23] bg-white">
+              <div className="shadow-float overflow-hidden rounded-2xl border-[6px] border-[#211a33] bg-white">
                 <Image key={view.shot.src} src={view.shot.src} width={view.shot.width} height={view.shot.height}
                   alt={view.shot.alt} sizes="(max-width: 1024px) 100vw, 640px" className="h-auto w-full" />
               </div>

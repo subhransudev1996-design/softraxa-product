@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 export function PhoneFrame({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div className={`w-full max-w-[264px] ${className}`}>
-      <div className="shadow-float rounded-[2.2rem] bg-[#1d2a23] p-2 ring-1 ring-black/20">
+      <div className="shadow-float rounded-[2.2rem] bg-[#211a33] p-2 ring-1 ring-black/20">
         <div className="relative overflow-hidden rounded-[1.7rem] bg-white">{children}</div>
       </div>
     </div>
@@ -38,7 +38,7 @@ export function BrowserFrame({
 export function LaptopFrame({ children, className = "" }: { children: ReactNode; className?: string }) {
   return (
     <div className={`w-full ${className}`}>
-      <div className="rounded-t-2xl bg-[#1d2a23] p-2 pb-3 shadow-float">
+      <div className="rounded-t-2xl bg-[#211a33] p-2 pb-3 shadow-float">
         <div className="overflow-hidden rounded-md bg-white">{children}</div>
       </div>
       <div className="mx-auto h-3 w-[108%] -translate-x-[3.7%] rounded-b-2xl bg-gradient-to-b from-[#d9dcd8] to-[#b9bdb8]" />
