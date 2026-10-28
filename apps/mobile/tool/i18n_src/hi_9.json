@@ -478,5 +478,11 @@
 "I use Dukania for billing and stock in my shop. Try it free — enter my code {v1} in the app (Plan screen) when you join.": "मैं अपनी दुकान में बिलिंग और स्टॉक के लिए Dukania इस्तेमाल करता हूँ। मुफ़्त आज़माएँ — जुड़ते समय ऐप में (प्लान स्क्रीन) मेरा कोड {v1} डालें।",
 "{v1} shop(s) joined with your code · {v2} free month(s) so far": "आपके कोड से {v1} दुकान जुड़ी · अब तक {v2} महीना मुफ़्त",
 "You joined with the code of {v1}.": "आप {v1} के कोड से जुड़े।",
-"Did another shop tell you about Dukania? Enter its code.": "क्या किसी दूसरी दुकान ने आपको Dukania के बारे में बताया? उसका कोड डालें।"
+"Did another shop tell you about Dukania? Enter its code.": "क्या किसी दूसरी दुकान ने आपको Dukania के बारे में बताया? उसका कोड डालें।",
+"Not now": "अभी नहीं",
+"Thank you! It helps us make Dukania better.": "धन्यवाद! इससे हमें Dukania को बेहतर बनाने में मदद मिलती है।",
+"How likely are you to recommend Dukania to another shop owner?": "आप किसी दूसरे दुकानदार को Dukania की सलाह देने की कितनी संभावना रखते हैं?",
+"0 = not at all, 10 = surely": "0 = बिल्कुल नहीं, 10 = ज़रूर",
+"What should we fix? (optional)": "हमें क्या ठीक करना चाहिए? (वैकल्पिक)",
+"What do you like most? (optional)": "आपको सबसे ज़्यादा क्या पसंद है? (वैकल्पिक)"
 }

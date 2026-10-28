@@ -69,6 +69,8 @@ export default function TodayPage() {
   const [staffAsks, setStaffAsks] = useState<any[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
   const [rewards, setRewards] = useState<any[]>([]);
+  const [callsDue, setCallsDue] = useState<any[]>([]);
+  const [atRisk, setAtRisk] = useState<any[]>([]);
   // Renewing and money are for the people with payments (0098).
   const canPay = useCan("payments");
 
@@ -90,6 +92,12 @@ export default function TodayPage() {
     supabase.from("referral_rewards").select("id, months, created_at, referrer:businesses!referral_rewards_referrer_id_fkey(name)")
       .eq("status", "pending").order("created_at")
       .then(({ data, error }) => setRewards(error ? [] : data ?? []));
+    // Customer success (migration 0102): calls to make, paying or trial shops at risk.
+    supabase.from("client_contacts").select("id, business_id, note, follow_up_date, businesses(name, phone)")
+      .eq("follow_up_done", false).lte("follow_up_date", new Date().toISOString().slice(0, 10)).order("follow_up_date")
+      .then(({ data, error }) => setCallsDue(error ? [] : data ?? []));
+    supabase.rpc("admin_shop_health").then(({ data, error }) =>
+      setAtRisk(error ? [] : ((data as any[]) ?? []).filter((s) => s.level === "risk" && ["active", "trial"].includes(s.status))));
     supabase.from("platform_settings").select("payment_upi_id").maybeSingle()
       .then(({ data }) => setUpi(data?.payment_upi_id ?? ""));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -122,7 +130,7 @@ export default function TodayPage() {
 
   const total =
     data.claims.length + data.expiring.length + data.expired.length + data.tickets.length +
-    data.setup.length + data.inactive.length + data.followups.length + complaints.length +
+    data.setup.length + data.inactive.length + data.followups.length + complaints.length + callsDue.length +
     (canPay ? rewards.length : 0) +
     (data.reconciliation?.unexplained ? 1 : 0);
 
@@ -249,6 +257,30 @@ export default function TodayPage() {
               sub={<>Checked {dateTimeStr(data.reconciliation.finished_at)} · must be 0 before the pilot ends</>}
               actions={<Link href="/reconciliation"><Button variant="outline">Review</Button></Link>}
             />
+          </Group>
+        )}
+
+        <Group title="Calls to make" count={callsDue.length} tone="orange">
+          {callsDue.map((c) => (
+            <Row
+              key={c.id}
+              main={<Link href={`/clients/${c.business_id}`} className="hover:underline">{c.businesses?.name}</Link>}
+              sub={<>Follow up {dateStr(c.follow_up_date)}{c.note ? ` · ${c.note}` : ""}</>}
+              actions={c.businesses?.phone ? <a href={`tel:${c.businesses.phone}`}><Button variant="outline">Call</Button></a> : null}
+            />
+          ))}
+        </Group>
+
+        {atRisk.length > 0 && (
+          <Group title="Paying or trial shops at risk" count={atRisk.length} tone="red">
+            {atRisk.slice(0, 5).map((s) => (
+              <Row
+                key={s.id}
+                main={<Link href={`/clients/${s.id}`} className="hover:underline">{s.name} · health {s.score}</Link>}
+                sub={<>{s.reasons.join(" · ")}</>}
+                actions={<Link href="/success"><Button variant="outline">Customer success</Button></Link>}
+              />
+            ))}
           </Group>
         )}
 

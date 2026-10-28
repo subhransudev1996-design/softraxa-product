@@ -478,5 +478,11 @@
 "I use Dukania for billing and stock in my shop. Try it free — enter my code {v1} in the app (Plan screen) when you join.": "என் கடையில் பில்லிங் மற்றும் ஸ்டாக்கிற்கு Dukania பயன்படுத்துகிறேன். இலவசமாக முயற்சிக்கவும் — சேரும்போது ஆப்பில் (திட்டத் திரை) என் குறியீடு {v1} ஐ உள்ளிடவும்.",
 "{v1} shop(s) joined with your code · {v2} free month(s) so far": "உங்கள் குறியீட்டால் {v1} கடை சேர்ந்தது · இதுவரை {v2} மாதம் இலவசம்",
 "You joined with the code of {v1}.": "நீங்கள் {v1} இன் குறியீட்டுடன் சேர்ந்தீர்கள்.",
-"Did another shop tell you about Dukania? Enter its code.": "வேறு கடை உங்களுக்கு Dukania பற்றி சொன்னதா? அதன் குறியீட்டை உள்ளிடவும்."
+"Did another shop tell you about Dukania? Enter its code.": "வேறு கடை உங்களுக்கு Dukania பற்றி சொன்னதா? அதன் குறியீட்டை உள்ளிடவும்.",
+"Not now": "இப்போது வேண்டாம்",
+"Thank you! It helps us make Dukania better.": "நன்றி! இது Dukania-வை மேம்படுத்த உதவுகிறது.",
+"How likely are you to recommend Dukania to another shop owner?": "வேறு கடைக்காரருக்கு Dukania-வைப் பரிந்துரைக்க எவ்வளவு வாய்ப்பு?",
+"0 = not at all, 10 = surely": "0 = இல்லவே இல்லை, 10 = நிச்சயம்",
+"What should we fix? (optional)": "நாங்கள் எதைச் சரிசெய்ய வேண்டும்? (விருப்பம்)",
+"What do you like most? (optional)": "உங்களுக்கு மிகவும் பிடித்தது எது? (விருப்பம்)"
 }

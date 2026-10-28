@@ -14,6 +14,7 @@ import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
 import '../marketing/announcement_banners.dart';
+import '../marketing/recommend_card.dart';
 import '../shell/renewal_payment.dart';
 import 'dashboard_desktop.dart';
 
@@ -67,6 +68,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       onRefresh: () async {
         ref.invalidate(dashboardStatsProvider);
         ref.invalidate(announcementsProvider);
+        ref.invalidate(recommendDueProvider);
         ref.invalidate(recentInvoicesProvider);
         ref.invalidate(salesTrendProvider);
         ref.invalidate(topProductsProvider);
@@ -388,6 +390,8 @@ class _DesktopDashboard extends StatelessWidget {
                 ),
               // Dukania's announcements for this shop (migration 0101).
               const AnnouncementBanners(padding: EdgeInsets.only(top: 16)),
+              // "Would you recommend Dukania?" (migration 0102).
+              const RecommendCard(padding: EdgeInsets.only(top: 16)),
 
               const SizedBox(height: 24),
 
@@ -726,6 +730,8 @@ class _MobileDashboard extends StatelessWidget {
           ),
         // Dukania's announcements for this shop (migration 0101).
         const AnnouncementBanners(padding: EdgeInsets.fromLTRB(16, 14, 16, 0)),
+        // "Would you recommend Dukania?" (migration 0102).
+        const RecommendCard(padding: EdgeInsets.fromLTRB(16, 14, 16, 0)),
 
         // ============ quick actions ============
         Padding(

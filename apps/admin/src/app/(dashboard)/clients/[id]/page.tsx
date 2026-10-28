@@ -10,6 +10,7 @@ import {
 } from "@/components/ui";
 import { Modal, Notice, RenewDialog, waLink } from "@/components/ops";
 import { AddonDialog, SaleDialog } from "@/components/sale-dialogs";
+import { ShopSuccessCard } from "@/components/success";
 import { dateStr, dateTimeStr, inr } from "@/lib/format";
 
 // Plan features the app enforces (app_feature_keys, migration 0033).
@@ -265,6 +266,9 @@ export default function ClientDetailPage() {
           Verify it on the <Link href="/" className="font-semibold underline">Today</Link> page.
         </p>
       )}
+
+      {/* Health, getting started and the call log (migration 0102). */}
+      <ShopSuccessCard businessId={id} name={business.name} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>

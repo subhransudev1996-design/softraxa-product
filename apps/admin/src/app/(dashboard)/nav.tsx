@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Boxes,
   CalendarCheck,
+  HeartHandshake,
   HeartPulse,
   IndianRupee,
   Layers,
@@ -34,6 +35,7 @@ const daily = [
   { href: "/clients", label: "Clients", icon: Store },
   { href: "/payments", label: "Payments", icon: IndianRupee },
   { href: "/sales", label: "Sales", icon: TrendingUp },
+  { href: "/success", label: "Customer success", icon: HeartHandshake },
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/leads", label: "Leads", icon: Target },
   { href: "/marketing", label: "Marketing", icon: Megaphone },
