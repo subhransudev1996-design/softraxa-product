@@ -260,7 +260,7 @@ export function Partners() {
               <div>
                 <Label>Partner earns</Label>
                 <div className="flex gap-2">
-                  <Select value={editing.commission_kind} onChange={(e) => setEditing({ ...editing, commission_kind: e.target.value })} className="w-40">
+                  <Select value={editing.commission_kind} onChange={(e) => setEditing({ ...editing, commission_kind: e.target.value })} className="w-52 shrink-0">
                     <option value="percent">% of first payment</option>
                     <option value="amount">₹ per shop</option>
                   </Select>
@@ -404,7 +404,9 @@ function PartnerDetail({ partner, onClose, onCopy, onNewLink }: {
           </div>
         </div>
         {partner.phone && (
-          <a href={waLink(partner.phone, invite)} target="_blank" rel="noreferrer"><Button>Send link and code on WhatsApp</Button></a>
+          <div>
+            <a href={waLink(partner.phone, invite)} target="_blank" rel="noreferrer"><Button>Send link and code on WhatsApp</Button></a>
+          </div>
         )}
 
         <div>
@@ -421,8 +423,8 @@ function PartnerDetail({ partner, onClose, onCopy, onNewLink }: {
                       <Link href={`/clients/${c.business_id}`} className="font-semibold text-ink hover:underline">{c.businesses?.name ?? "—"}</Link>
                       {c.kind === "refund" && <span className="block text-xs text-red-600">Refund — taken back</span>}
                     </td>
-                    <td className="px-4 py-3 tabular-nums">{inr(c.paid_amount)}</td>
-                    <td className="px-4 py-3 tabular-nums">
+                    <td className="whitespace-nowrap px-4 py-3 tabular-nums">{inr(c.paid_amount)}</td>
+                    <td className="whitespace-nowrap px-4 py-3 tabular-nums">
                       {inr(c.amount)}
                       {c.kind === "sale" && <span className="block text-xs text-zinc-500">{c.rule} of {inr(c.base)}</span>}
                     </td>
