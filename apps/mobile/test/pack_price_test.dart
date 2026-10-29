@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/formatters.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
+import 'package:dukania/core/formatters.dart';
+import 'package:dukania/features/pos/cart.dart';
 
 /// Cigarettes: one piece ₹10, a Box of 10 at ₹95 (migration 0061).
 Map<String, dynamic> cigarette({double? packPrice = 95}) => {

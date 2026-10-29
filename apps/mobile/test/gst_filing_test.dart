@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/reports/gst_export.dart';
-import 'package:softraxa_inventory/features/reports/gst_filing.dart';
+import 'package:dukania/features/reports/gst_export.dart';
+import 'package:dukania/features/reports/gst_filing.dart';
 
 GstReturnData sample() => GstReturnData(
   gstr1: {

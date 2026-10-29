@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/app_version.dart';
+import 'package:dukania/core/app_version.dart';
 
 void main() {
   test('version shows with its build number', () {

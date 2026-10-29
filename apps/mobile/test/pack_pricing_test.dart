@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/products/pack_pricing.dart';
+import 'package:dukania/features/products/pack_pricing.dart';
 
 void main() {
   test('a 50 kg bag bought at 1600 costs 32 a kg', () {

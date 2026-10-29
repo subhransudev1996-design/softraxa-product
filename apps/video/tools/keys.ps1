@@ -7,7 +7,7 @@ Add-Type @"
 using System; using System.Runtime.InteropServices;
 public class KF { [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); }
 "@
-$p = Get-Process softraxa_inventory | Select-Object -First 1
+$p = Get-Process dukania | Select-Object -First 1
 [KF]::SetForegroundWindow($p.MainWindowHandle) | Out-Null
 Start-Sleep -Milliseconds 120
 if ($raw) { [System.Windows.Forms.SendKeys]::SendWait($text); exit }

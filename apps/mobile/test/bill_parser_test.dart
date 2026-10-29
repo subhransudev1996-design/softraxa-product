@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/purchases/bill_reader/bill_parser.dart';
+import 'package:dukania/features/purchases/bill_reader/bill_parser.dart';
 
 /// Lays out a bill as a PDF would: each entry is a row of (x, text) cells
 /// at 10 pt, words split on spaces 2.5 pt apart (a space), cells where

@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:softraxa_inventory/features/auth/forgot_password_screen.dart';
-import 'package:softraxa_inventory/features/auth/signup_screen.dart';
+import 'package:dukania/features/auth/forgot_password_screen.dart';
+import 'package:dukania/features/auth/signup_screen.dart';
 
 // As in the app, login opens these with go(), so nothing is behind them.
 GoRouter _router(String start) => GoRouter(

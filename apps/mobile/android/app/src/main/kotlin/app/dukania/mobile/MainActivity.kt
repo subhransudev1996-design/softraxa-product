@@ -1,4 +1,4 @@
-package com.softraxa.softraxa_inventory
+package app.dukania.mobile
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/i18n.dart';
+import 'package:dukania/core/i18n.dart';
 
 class _Bundle extends CachingAssetBundle {
   _Bundle(this.files);

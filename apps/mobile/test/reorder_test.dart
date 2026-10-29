@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/reports/reorder.dart';
+import 'package:dukania/features/reports/reorder.dart';
 
 void main() {
   final rows = [

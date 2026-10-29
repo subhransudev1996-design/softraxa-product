@@ -23,7 +23,7 @@ if (keystorePropertiesFile.exists()) {
 }
 
 android {
-    namespace = "com.softraxa.softraxa_inventory"
+    namespace = "app.dukania.mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         // The app's permanent ID on the Play Store: never change it after the first upload.
-        applicationId = "com.softraxa.softraxa_inventory"
+        applicationId = "in.dukania.app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

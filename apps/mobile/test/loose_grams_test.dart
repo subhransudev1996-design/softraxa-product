@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/loose_qty_sheet.dart';
+import 'package:dukania/features/pos/loose_qty_sheet.dart';
 
 void main() {
   test('kg and litre goods have a smaller unit', () {

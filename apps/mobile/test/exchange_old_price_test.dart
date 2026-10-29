@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/invoices/bill_layout.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/returns/exchange.dart';
+import 'package:dukania/features/invoices/bill_layout.dart';
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/returns/exchange.dart';
 
 const kurtaLine = ExchangeReturnLine(
   productId: 'kurta',

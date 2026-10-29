@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/reports/report_detail_screen.dart';
+import 'package:dukania/features/reports/report_detail_screen.dart';
 
 void main() {
   final rows = [

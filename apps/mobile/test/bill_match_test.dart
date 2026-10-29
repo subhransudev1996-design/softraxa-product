@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/purchases/bill_reader/bill_match.dart';
+import 'package:dukania/features/purchases/bill_reader/bill_match.dart';
 
 void main() {
   test('sizes are written one way', () {

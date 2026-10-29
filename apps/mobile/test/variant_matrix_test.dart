@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/products/variant_matrix.dart';
+import 'package:dukania/features/products/variant_matrix.dart';
 
 Map<String, dynamic> v(String id, Map<String, String> attrs) => {
   'id': id,

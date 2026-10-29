@@ -1,7 +1,7 @@
 ; Inno Setup script for Dukania (Windows desktop build).
 ; Build the app first, then the installer (from apps\mobile):
 ;   flutter build windows --release
-;   ISCC windows\installer\softraxa_inventory.iss
+;   ISCC windows\installer\dukania.iss
 ; The version comes from pubspec.yaml unless passed: ISCC /DMyAppVersion=1.2.0 ...
 ; Output: build\installer_output\Dukania-Setup-<version>.exe
 
@@ -9,9 +9,9 @@
 #ifndef MyAppVersion
   #define MyAppVersion "1.0.0"
 #endif
-#define MyAppPublisher "SOFTRAXA"
-#define MyAppURL "https://www.softraxa.in"
-#define MyAppExeName "softraxa_inventory.exe"
+#define MyAppPublisher "Dukania"
+#define MyAppURL "https://www.dukania.in"
+#define MyAppExeName "dukania.exe"
 #define ReleaseDir "..\..\build\windows\x64\runner\Release"
 
 [Setup]
@@ -60,6 +60,10 @@ Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription:
 [Files]
 ; Build leftovers (.lib/.exp) are not needed to run.
 Source: "{#ReleaseDir}\*"; DestDir: "{app}"; Excludes: "*.lib,*.exp,*.pdb"; Flags: ignoreversion recursesubdirs createallsubdirs
+
+[InstallDelete]
+; 1.0.15 renamed the program from softraxa_inventory.exe; remove the old one on upgrade.
+Type: files; Name: "{app}\softraxa_inventory.exe"
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

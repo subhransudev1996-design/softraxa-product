@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/dashboard/day_summary.dart';
+import 'package:dukania/features/dashboard/day_summary.dart';
 
 void main() {
   final s = summarizeDay(

@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/pos/pos_providers.dart';
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/pos/pos_providers.dart';
 
 /// Spec D15 example: retail 100, wholesale 90 from 10 units, customer 95.
 Map<String, dynamic> cable() => {

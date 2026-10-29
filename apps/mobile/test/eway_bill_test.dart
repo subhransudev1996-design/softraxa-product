@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/invoices/eway_bill.dart';
+import 'package:dukania/features/invoices/eway_bill.dart';
 
 /// A made-up tax invoice shaped like invoiceDetailProvider's row.
 Map<String, dynamic> invoice({

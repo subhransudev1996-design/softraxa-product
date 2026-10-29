@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/products/variant_builder.dart';
-import 'package:softraxa_inventory/features/products/variant_grid.dart';
-import 'package:softraxa_inventory/features/products/variant_matrix.dart';
-import 'package:softraxa_inventory/features/products/variant_sheet.dart';
+import 'package:dukania/features/products/variant_builder.dart';
+import 'package:dukania/features/products/variant_grid.dart';
+import 'package:dukania/features/products/variant_matrix.dart';
+import 'package:dukania/features/products/variant_sheet.dart';
 
 void main() {
   testWidgets('tap sizes and colours: every combination at once', (

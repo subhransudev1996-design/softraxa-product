@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:softraxa_inventory/features/app_lock/app_lock.dart';
-import 'package:softraxa_inventory/features/app_lock/app_lock_settings.dart';
+import 'package:dukania/features/app_lock/app_lock.dart';
+import 'package:dukania/features/app_lock/app_lock_settings.dart';
 
 void main() {
   testWidgets('PC: set a PIN from settings, then a wrong current PIN is told', (

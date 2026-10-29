@@ -2,8 +2,8 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image/image.dart' as img;
-import 'package:softraxa_inventory/core/imagekit.dart';
-import 'package:softraxa_inventory/features/products/product_photo.dart';
+import 'package:dukania/core/imagekit.dart';
+import 'package:dukania/features/products/product_photo.dart';
 
 Uint8List _photo(int w, int h, {int orientation = 1}) {
   final image = img.Image(width: w, height: h);

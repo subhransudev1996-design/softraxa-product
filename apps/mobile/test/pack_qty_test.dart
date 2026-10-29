@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/stock/pack_qty_input.dart';
+import 'package:dukania/features/stock/pack_qty_input.dart';
 
 void main() {
   test('full packs times pack size plus loose units', () {

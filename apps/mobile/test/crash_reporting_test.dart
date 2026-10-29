@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/crash_reporting.dart';
+import 'package:dukania/core/crash_reporting.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 void main() {

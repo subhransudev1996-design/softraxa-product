@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/route_permissions.dart';
-import 'package:softraxa_inventory/core/supabase_providers.dart';
-import 'package:softraxa_inventory/features/cashbook/cashbook_screen.dart';
+import 'package:dukania/core/route_permissions.dart';
+import 'package:dukania/core/supabase_providers.dart';
+import 'package:dukania/features/cashbook/cashbook_screen.dart';
 
 AppContext _ctx(String role, [Map<String, dynamic>? permissions]) => AppContext(
   profile: {'role': role},

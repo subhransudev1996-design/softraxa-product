@@ -3,8 +3,8 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:softraxa_inventory/features/purchases/bill_reader/bill_parser.dart';
-import 'package:softraxa_inventory/features/purchases/bill_reader/pdf_words.dart';
+import 'package:dukania/features/purchases/bill_reader/bill_parser.dart';
+import 'package:dukania/features/purchases/bill_reader/pdf_words.dart';
 
 void main() {
   test('a real PDF bill is read word by word and parsed', () async {

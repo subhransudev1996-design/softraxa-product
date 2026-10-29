@@ -19,6 +19,7 @@ import 'core/router.dart';
 import 'core/supabase_providers.dart';
 import 'core/theme.dart';
 import 'core/theme_mode.dart';
+import 'core/windows_data_move.dart';
 import 'features/app_lock/app_lock.dart';
 import 'features/app_lock/lock_screen.dart';
 import 'features/auth/forgot_password_screen.dart';
@@ -27,6 +28,8 @@ import 'features/pos/pos_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 1.0.15 renamed the Windows program's company; bring its data along.
+  await moveOldWindowsData();
   await dotenv.load(fileName: '.env');
   // Everything after .env loads runs inside Sentry (when SENTRY_DSN is
   // set) so start-up failures are reported too.

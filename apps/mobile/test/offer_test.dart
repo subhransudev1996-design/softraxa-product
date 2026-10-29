@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/offers/offer.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/pos/pos_providers.dart';
+import 'package:dukania/features/offers/offer.dart';
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/pos/pos_providers.dart';
 
 Map<String, dynamic> _product(double price) => {
   'id': 'p$price',

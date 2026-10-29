@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/variant_presets.dart';
+import 'package:dukania/core/variant_presets.dart';
 
 String? label(String name, [String category = '']) =>
     suggestVariantPreset(name: name, category: category)?.label;

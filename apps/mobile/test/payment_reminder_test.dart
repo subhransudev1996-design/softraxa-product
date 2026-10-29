@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/whatsapp_helper.dart';
-import 'package:softraxa_inventory/features/customers/payment_reminder.dart';
+import 'package:dukania/core/whatsapp_helper.dart';
+import 'package:dukania/features/customers/payment_reminder.dart';
 
 void main() {
   test('reminder names the customer, the amount, UPI and the shop', () {

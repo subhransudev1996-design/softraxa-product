@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:excel/excel.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/excel_read.dart';
+import 'package:dukania/core/excel_read.dart';
 
 /// An .xlsx whose workbook links its sheets as "/xl/worksheets/…", the way
 /// Python's openpyxl and some billing software write it.

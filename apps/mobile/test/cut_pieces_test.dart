@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/stock/pieces_card.dart';
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/stock/pieces_card.dart';
 
 Map<String, dynamic> rod({double charge = 0}) => {
   'id': 'r1',

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/jobcards/job_estimates.dart';
+import 'package:dukania/features/jobcards/job_estimates.dart';
 
 void main() {
   test('a part costs its selling price with GST, not GST twice', () {

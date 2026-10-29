@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/returns/return_slip.dart';
+import 'package:dukania/features/returns/return_slip.dart';
 
 /// A sale-return row as saleReturnDetailProvider loads it: [lines] are
 /// (name, qty, bill price with GST, value back).

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/returns/return_lines.dart';
+import 'package:dukania/features/returns/return_lines.dart';
 
 // One bill: 1 Box of 10 at ₹95 (₹9.50 a piece) + 3 loose at ₹10.
 final box = <String, dynamic>{

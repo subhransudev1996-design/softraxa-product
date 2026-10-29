@@ -102,18 +102,18 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
   }
 
   Widget _bubble({
-    required bool softraxa,
+    required bool fromDukania,
     required String body,
     required Object? at,
   }) {
     return Align(
-      alignment: softraxa ? Alignment.centerLeft : Alignment.centerRight,
+      alignment: fromDukania ? Alignment.centerLeft : Alignment.centerRight,
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 4),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         constraints: const BoxConstraints(maxWidth: 480),
         decoration: BoxDecoration(
-          color: softraxa
+          color: fromDukania
               ? AppColors.indigo.withValues(alpha: 0.10)
               : AppColors.primary.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(12),
@@ -122,11 +122,11 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              softraxa ? 'Dukania' : 'You',
+              fromDukania ? 'Dukania' : 'You',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: softraxa ? AppColors.indigo : AppColors.inkSoft,
+                color: fromDukania ? AppColors.indigo : AppColors.inkSoft,
               ),
             ),
             Text(body, style: const TextStyle(fontSize: 14)),
@@ -162,7 +162,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
-                  _bubble(softraxa: false, body: first, at: t['created_at']),
+                  _bubble(fromDukania: false, body: first, at: t['created_at']),
                   ...messages.when(
                     loading: () => const [
                       Padding(
@@ -187,7 +187,7 @@ class _TicketThreadScreenState extends ConsumerState<TicketThreadScreen> {
                         : [
                             for (final m in rows)
                               _bubble(
-                                softraxa: m['from_softraxa'] == true,
+                                fromDukania: m['from_softraxa'] == true,
                                 body: m['body'] as String,
                                 at: m['created_at'],
                               ),

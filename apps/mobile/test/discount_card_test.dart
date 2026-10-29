@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/discount_cards/discount_card.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/pos/pos_providers.dart';
+import 'package:dukania/features/discount_cards/discount_card.dart';
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/pos/pos_providers.dart';
 
 const _books = 'cat-books';
 const _stationery = 'cat-stationery';

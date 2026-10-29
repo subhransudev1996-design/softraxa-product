@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/calculator/calc_engine.dart';
+import 'package:dukania/features/calculator/calc_engine.dart';
 
 CalcState type(String keys, [CalcState s = const CalcState()]) {
   for (final c in keys.split('')) {

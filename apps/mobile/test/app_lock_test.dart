@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:softraxa_inventory/core/supabase_providers.dart';
-import 'package:softraxa_inventory/features/app_lock/app_lock.dart';
-import 'package:softraxa_inventory/features/app_lock/lock_screen.dart';
+import 'package:dukania/core/supabase_providers.dart';
+import 'package:dukania/features/app_lock/app_lock.dart';
+import 'package:dukania/features/app_lock/lock_screen.dart';
 
 class _NoShop extends AppContextNotifier {
   @override

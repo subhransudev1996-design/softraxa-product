@@ -1,7 +1,7 @@
 import 'package:excel/excel.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/purchases/purchase_export.dart';
-import 'package:softraxa_inventory/features/purchases/purchase_providers.dart';
+import 'package:dukania/features/purchases/purchase_export.dart';
+import 'package:dukania/features/purchases/purchase_providers.dart';
 
 void main() {
   final purchases = [

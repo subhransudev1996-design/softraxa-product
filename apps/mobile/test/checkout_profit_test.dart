@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
+import 'package:dukania/features/pos/cart.dart';
 
 void main() {
   test('Non-GST bill keeps the whole amount; GST bill takes the tax off', () {

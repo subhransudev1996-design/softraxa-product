@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:softraxa_inventory/features/shell/home_shell.dart';
+import 'package:dukania/features/shell/home_shell.dart';
 
 /// The phone shell with five plain tabs, as router.dart builds it.
 GoRouter _router() => GoRouter(

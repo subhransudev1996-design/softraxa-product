@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/customers/customer_statement.dart';
+import 'package:dukania/features/customers/customer_statement.dart';
 
 Map<String, dynamic> bill(String no, String date, num total, num paid,
         {bool cancelled = false}) =>

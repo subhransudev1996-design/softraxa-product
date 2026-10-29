@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/widgets.dart';
+import 'package:dukania/core/widgets.dart';
 
 void main() {
   testWidgets('an error raised inside a dialog shows above it', (t) async {

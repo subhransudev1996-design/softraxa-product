@@ -1,6 +1,6 @@
 import 'package:excel/excel.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/reports/gst_export.dart';
+import 'package:dukania/features/reports/gst_export.dart';
 
 /// Shaped like get_gstr1 / get_gstr3b / get_purchase_register (0040) for the
 /// staging example in supabase/tests/r1_gst_returns.sql.

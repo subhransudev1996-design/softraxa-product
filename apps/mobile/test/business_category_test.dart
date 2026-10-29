@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/business_category.dart';
+import 'package:dukania/core/business_category.dart';
 
 void main() {
   test('categories match the business_type values in the database', () {

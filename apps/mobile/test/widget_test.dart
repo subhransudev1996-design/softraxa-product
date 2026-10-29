@@ -1,16 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
-import 'package:softraxa_inventory/features/products/product_providers.dart'
+import 'package:dukania/features/pos/cart.dart';
+import 'package:dukania/features/products/product_providers.dart'
     show parseWeightedBarcode;
-import 'package:softraxa_inventory/features/reports/report_detail_screen.dart'
+import 'package:dukania/features/reports/report_detail_screen.dart'
     show purchasesByDay, gstByRate, topN;
-import 'package:softraxa_inventory/features/reports/report_charts.dart'
+import 'package:dukania/features/reports/report_charts.dart'
     show ChartPoint;
-import 'package:softraxa_inventory/features/import/excel_import_screen.dart'
+import 'package:dukania/features/import/excel_import_screen.dart'
     show parseImportNum, normalizeImportHeader, gstRateError;
-import 'package:softraxa_inventory/features/expenses/expenses_screen.dart'
+import 'package:dukania/features/expenses/expenses_screen.dart'
     show expensePresetRange;
-import 'package:softraxa_inventory/core/notifications.dart' show expiryBuckets;
+import 'package:dukania/core/notifications.dart' show expiryBuckets;
 
 void main() {
   group('Cart totals', () {

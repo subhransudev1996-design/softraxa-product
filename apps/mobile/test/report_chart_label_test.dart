@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/reports/report_charts.dart';
+import 'package:dukania/features/reports/report_charts.dart';
 
 void main() {
   test('a full date shrinks to day and month so labels never collide', () {

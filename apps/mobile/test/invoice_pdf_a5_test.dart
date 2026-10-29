@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pdf/pdf.dart';
-import 'package:softraxa_inventory/features/invoices/invoice_pdf.dart';
+import 'package:dukania/features/invoices/invoice_pdf.dart';
 
 Map<String, dynamic> _line(int i) => {
   'product_name': 'Handloom Saree design $i with a long descriptive name',

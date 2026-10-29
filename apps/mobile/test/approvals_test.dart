@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/approvals.dart';
-import 'package:softraxa_inventory/core/widgets.dart';
-import 'package:softraxa_inventory/features/approvals/approvals_screen.dart';
+import 'package:dukania/core/approvals.dart';
+import 'package:dukania/core/widgets.dart';
+import 'package:dukania/features/approvals/approvals_screen.dart';
 
 /// What PostgREST hands the app for a refused sale (migration 0044).
 Exception refused(String json) => Exception(

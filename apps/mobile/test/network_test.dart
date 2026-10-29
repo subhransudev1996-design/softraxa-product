@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' show PostgrestClient;
-import 'package:softraxa_inventory/core/network.dart';
+import 'package:dukania/core/network.dart';
 
 void main() {
   final reach = Reachability.instance;

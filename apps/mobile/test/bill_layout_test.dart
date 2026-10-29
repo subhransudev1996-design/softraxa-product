@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/invoices/bill_layout.dart';
+import 'package:dukania/features/invoices/bill_layout.dart';
 
 void main() {
   test('amount in words, Indian system', () {

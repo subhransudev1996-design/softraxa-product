@@ -6,6 +6,6 @@ public class WW { [DllImport("user32.dll")] public static extern bool SetProcess
  [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr h); }
 "@
 [WW]::SetProcessDPIAware() | Out-Null
-$p = Get-Process softraxa_inventory | Select-Object -First 1
+$p = Get-Process dukania | Select-Object -First 1
 [WW]::ShowWindow($p.MainWindowHandle, 3) | Out-Null
 [WW]::SetForegroundWindow($p.MainWindowHandle) | Out-Null

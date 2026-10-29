@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/gst.dart';
-import 'package:softraxa_inventory/features/pos/cart.dart';
+import 'package:dukania/core/gst.dart';
+import 'package:dukania/features/pos/cart.dart';
 
 void main() {
   group('Bill discount and GST at checkout', () {

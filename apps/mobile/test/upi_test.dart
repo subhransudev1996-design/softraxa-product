@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/upi.dart';
+import 'package:dukania/core/upi.dart';
 
 void main() {
   test('the UPI link carries the payee and the exact amount', () {

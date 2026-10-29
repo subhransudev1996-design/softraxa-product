@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/file_export.dart';
+import 'package:dukania/core/file_export.dart';
 
 void main() {
   test('safeFileName removes characters Windows rejects', () {

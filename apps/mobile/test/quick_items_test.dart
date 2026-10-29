@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/pos/quick_items.dart';
+import 'package:dukania/features/pos/quick_items.dart';
 
 void main() {
   test('most often billed first; blanks ignored; capped', () {

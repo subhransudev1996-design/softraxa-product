@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/products/suggested_products_screen.dart';
+import 'package:dukania/features/products/suggested_products_screen.dart';
 
 void main() {
   test('every ticked product needs a selling price above zero', () {

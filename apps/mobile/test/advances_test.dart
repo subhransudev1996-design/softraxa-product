@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/customers/customer_providers.dart';
-import 'package:softraxa_inventory/features/customers/receive_payment_dialog.dart';
+import 'package:dukania/features/customers/customer_providers.dart';
+import 'package:dukania/features/customers/receive_payment_dialog.dart';
 
 void main() {
   group('Receive payment request', () {

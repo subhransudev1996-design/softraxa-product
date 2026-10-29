@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/core/formatters.dart';
+import 'package:dukania/core/formatters.dart';
 
 void main() {
   test('small weights and volumes read in g / ml', () {

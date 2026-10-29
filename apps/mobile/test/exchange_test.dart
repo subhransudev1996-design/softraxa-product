@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:softraxa_inventory/features/returns/exchange.dart';
-import 'package:softraxa_inventory/features/returns/held_goods_screen.dart';
+import 'package:dukania/features/returns/exchange.dart';
+import 'package:dukania/features/returns/held_goods_screen.dart';
 
 void main() {
   group('Exchange credit (D29 examples)', () {
