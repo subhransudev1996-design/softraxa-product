@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Smartphone, Monitor, Download, MessageCircle, Check, ShieldAlert } from "lucide-react";
 import PageHero from "@/components/page-hero";
 import Reveal from "@/components/reveal";
+import { PartnerCodeNote } from "@/components/partner-visit";
 import { getSiteInfo, whatsappLink, type SiteInfo } from "@/lib/site-info";
 
 export const metadata: Metadata = {
@@ -26,6 +27,9 @@ export default async function DownloadPage() {
         title="Get Dukania on your phone or PC."
         lead={`${trial} on every new shop — no card, no payment. The same account works on Android and Windows.`}
       />
+
+      {/* the code to enter, for a visitor who came through a partner's link (0104) */}
+      <div className="px-4 sm:px-6"><PartnerCodeNote /></div>
 
       <section className="mx-auto grid max-w-5xl gap-6 px-6 py-14 md:grid-cols-2">
         <Reveal>

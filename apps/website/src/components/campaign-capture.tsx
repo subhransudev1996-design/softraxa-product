@@ -38,3 +38,31 @@ export function readCampaign(): { source: string; campaign: string } | null {
     return null;
   }
 }
+
+const PARTNER_KEY = "dk_partner";
+
+/**
+ * A visitor who opened an influencer partner's link (dukania.in/r/CODE,
+ * migration 0104). Unlike other campaign links the partner's link wins, so
+ * the code they last followed is the one the contact form and the download
+ * page show.
+ */
+export function rememberPartner(code: string) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ source: "partner", campaign: code, at: Date.now() }));
+    localStorage.setItem(PARTNER_KEY, JSON.stringify({ code, at: Date.now() }));
+  } catch {
+    // Storage blocked: the page still shows the code to type in.
+  }
+}
+
+/** The partner code remembered from a link, if it is less than 30 days old. */
+export function readPartnerCode(): string | null {
+  try {
+    const v = JSON.parse(localStorage.getItem(PARTNER_KEY) ?? "null");
+    if (!v || Date.now() - Number(v.at) > DAYS * 86400000) return null;
+    return /^[A-Z0-9_-]{3,20}$/.test(String(v.code)) ? String(v.code) : null;
+  } catch {
+    return null;
+  }
+}

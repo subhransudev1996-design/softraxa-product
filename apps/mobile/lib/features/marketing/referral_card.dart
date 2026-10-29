@@ -21,7 +21,8 @@ final referralProvider = FutureProvider.autoDispose<Map<String, dynamic>?>((
 });
 
 /// "Refer a shop": the owner shares the code; a friend who joins with it
-/// and pays earns free months. A new shop can also enter a friend's code.
+/// and pays earns free months. A new shop can also enter a friend's code
+/// or an influencer partner's code (migration 0104).
 /// No prices are shown.
 class ReferralCard extends ConsumerStatefulWidget {
   const ReferralCard({super.key});
@@ -159,7 +160,9 @@ class _ReferralCardState extends ConsumerState<ReferralCard> {
             ] else if (r['can_enter'] == true) ...[
               const Divider(height: 28),
               Text(
-                t('Did another shop tell you about Dukania? Enter its code.'),
+                t(
+                  'Got a code from a shop or someone you follow? Enter it here.',
+                ),
                 style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
               ),
               const SizedBox(height: 8),
@@ -169,7 +172,9 @@ class _ReferralCardState extends ConsumerState<ReferralCard> {
                     child: TextField(
                       controller: _code,
                       textCapitalization: TextCapitalization.characters,
-                      decoration: const InputDecoration(hintText: 'DK…'),
+                      decoration: const InputDecoration(
+                        hintText: 'DKAB2CD / RAHUL10',
+                      ),
                     ),
                   ),
                   const SizedBox(width: 10),

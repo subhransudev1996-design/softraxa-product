@@ -86,6 +86,9 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
   const [promoCode, setPromoCode] = useState("");
   const [promo, setPromo] = useState<any>(null);
   const [promoNote, setPromoNote] = useState<string | null>(null);
+  // A shop that came through an influencer partner (0104): their code is
+  // filled in on its first paid payment.
+  const [partner, setPartner] = useState<any>(null);
 
   useEffect(() => {
     const db = createClient();
@@ -96,6 +99,16 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
       });
     db.from("platform_settings").select("website_discount_pct").eq("id", 1).maybeSingle()
       .then(({ data }) => data && setDiscount(Number(data.website_discount_pct)));
+    db.from("businesses").select("partners(name, code, buyer_off_pct, active)").eq("id", target.businessId).maybeSingle()
+      .then(async ({ data }) => {
+        const p = (data as any)?.partners;
+        if (!p?.active || !(Number(p.buyer_off_pct) > 0)) return;
+        const { count } = await db.from("subscription_payments").select("id", { count: "exact", head: true })
+          .eq("business_id", target.businessId).gt("amount", 0);
+        if (count) return;
+        setPartner(p);
+        setPromoCode(p.code);
+      });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -114,6 +127,11 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
   const lifetime = plan?.billing === "lifetime";
   const renewing = target.status === "active" && target.expiry && target.expiry >= today();
   const until = lifetime ? null : plusYear(renewing ? (target.expiry as string) : today());
+
+  useEffect(() => {
+    if (partner && plan && promoCode === partner.code) checkPromo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partner, planId, plans.length]);
 
   async function checkPromo() {
     if (!plan || !promoCode.trim()) return;
@@ -253,6 +271,9 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
         {plan && (
           <div>
             <Label>Promo code (optional)</Label>
+            {partner && (
+              <p className="mb-1 text-xs text-violet-700">Came through {partner.name} — their code is filled in.</p>
+            )}
             <div className="flex gap-2">
               <Input value={promoCode} onChange={(e) => { setPromoCode(e.target.value.toUpperCase()); setPromo(null); }}
                 placeholder="e.g. DIWALI500" className="max-w-xs" />
