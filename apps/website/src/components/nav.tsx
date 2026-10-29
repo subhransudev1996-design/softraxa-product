@@ -7,11 +7,12 @@ import { Menu, X } from "lucide-react";
 import BrandLogo from "@/components/brand-logo";
 
 const LINKS = [
-  { href: "/", label: "Home" },
-  { href: "/#features", label: "Features" },
-  { href: "/#pricing", label: "Pricing" },
-  { href: "/download", label: "Download" },
-  { href: "/ai", label: "ChatGPT & Claude" },
+  { href: "/features", label: "Features" },
+  { href: "/shops", label: "For your shop" },
+  { href: "/gst", label: "GST" },
+  { href: "/pricing", label: "Pricing" },
+  { href: "/ai", label: "AI" },
+  { href: "/help", label: "Help" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -26,13 +27,13 @@ export default function Nav() {
           <BrandLogo />
         </Link>
 
-        <nav className="hidden items-center gap-1 rounded-full border border-hairline bg-white/80 p-1 text-sm text-dim shadow-card md:flex">
+        <nav className="hidden items-center gap-1 rounded-full border border-hairline bg-white/80 p-1 text-sm text-dim shadow-card lg:flex">
           {LINKS.map((l) => (
             <Link
               key={l.href}
               href={l.href}
               className={`rounded-full px-3.5 py-2 transition-colors hover:text-paper ${
-                pathname === l.href ? "bg-brand-soft font-semibold text-brand" : ""
+                pathname === l.href || pathname.startsWith(`${l.href}/`) ? "bg-brand-soft font-semibold text-brand" : ""
               }`}
             >
               {l.label}
@@ -50,7 +51,7 @@ export default function Nav() {
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-hairline text-paper md:hidden"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-hairline text-paper lg:hidden"
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
           >
@@ -60,7 +61,7 @@ export default function Nav() {
       </div>
 
       {open && (
-        <div className="border-t border-hairline bg-surface/95 backdrop-blur-xl md:hidden">
+        <div className="border-t border-hairline bg-surface/95 backdrop-blur-xl lg:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col px-6 py-4">
             {LINKS.map((l) => (
               <Link

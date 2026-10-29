@@ -7,16 +7,19 @@ const COLS = [
   {
     title: "Product",
     links: [
-      { href: "/#features", label: "Features" },
-      { href: "/#pricing", label: "Pricing" },
-      { href: "/download", label: "Download" },
+      { href: "/features", label: "Features" },
+      { href: "/pricing", label: "Pricing" },
+      { href: "/gst", label: "GST billing & returns" },
       { href: "/ai", label: "ChatGPT & Claude" },
-      { href: "/#faq", label: "FAQ" },
+      { href: "/download", label: "Download" },
+      { href: "/refer", label: "Refer a shop" },
     ],
   },
   {
-    title: "Help",
+    title: "Company",
     links: [
+      { href: "/about", label: "About" },
+      { href: "/help", label: "Help" },
       { href: "/contact", label: "Contact" },
       { href: "/privacy", label: "Privacy" },
       { href: "/terms", label: "Terms" },
@@ -26,10 +29,12 @@ const COLS = [
   {
     title: "Built for",
     links: [
-      { href: "/#shops", label: "Grocery & kirana" },
-      { href: "/#shops", label: "Mobile & electronics" },
-      { href: "/#shops", label: "Hardware & building" },
-      { href: "/#shops", label: "Repair & service shops" },
+      { href: "/shops/grocery", label: "Grocery & kirana" },
+      { href: "/shops/mobile", label: "Mobile & electronics" },
+      { href: "/shops/hardware", label: "Hardware & electrical" },
+      { href: "/shops/garments", label: "Garments & footwear" },
+      { href: "/shops/workshops", label: "Car & bike workshops" },
+      { href: "/shops/book-stores", label: "Book & stationery" },
     ],
   },
 ];

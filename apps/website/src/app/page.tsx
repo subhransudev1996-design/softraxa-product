@@ -12,7 +12,10 @@ import { LaptopFrame, PhoneFrame } from "@/components/device-frame";
 import AuthCodeRedirect from "@/components/auth-code-redirect";
 import { desktopShots, mobileShots } from "@/lib/shots";
 import { getPageContentMap, getPageSeo, buildPageMetadata } from "@/lib/cms";
-import { getSiteInfo, whatsappLink, rupees } from "@/lib/site-info";
+import { getSiteInfo, whatsappLink } from "@/lib/site-info";
+import PlanCards from "@/components/site/plan-cards";
+import ClosingCta from "@/components/site/closing-cta";
+import { btnGhost, btnPrimary, eyebrow } from "@/lib/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSeo("/");
@@ -72,11 +75,6 @@ function LucideIcon({ name, className }: { name: Icon; className?: string }) {
   return <C className={className} aria-hidden="true" />;
 }
 
-const btnPrimary =
-  "stamp-press inline-flex min-h-12 items-center gap-2 rounded-xl bg-brand px-6 text-sm font-semibold text-white shadow-card hover:bg-brand-2";
-const btnGhost =
-  "stamp-press inline-flex min-h-12 items-center gap-2 rounded-xl border-2 border-brand/80 bg-white px-6 text-sm font-semibold text-brand hover:bg-brand-soft";
-const eyebrow = "text-xs font-bold uppercase tracking-[0.16em] text-brand-2";
 
 export default async function HomePage() {
   const content = await getPageContentMap("dukania");
@@ -362,66 +360,7 @@ export default async function HomePage() {
             )}
           </div>
           <p className="mt-2 text-dim">Every plan starts with a {trial.toLowerCase()}. Billing, GST, stock, reports and printing on all of them.</p>
-          {info.plans.length > 0 ? (
-            <ul className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-3">
-              {info.plans.map((p) => (
-                <li key={p.name}
-                  className={`relative flex flex-col rounded-3xl bg-white p-6 shadow-card ${p.isRecommended ? "border-2 border-brand" : "border border-hairline"}`}>
-                  {p.isRecommended && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-brand px-3 py-1 text-xs font-bold text-white">Most popular</span>
-                  )}
-                  <h3 className="font-display text-xl font-bold">{p.name}</h3>
-                  {p.description && <p className="mt-1 text-sm text-dim">{p.description}</p>}
-                  <div className="mt-5 flex items-end gap-2">
-                    <span className="font-display text-4xl font-bold text-brand">{rupees(p.websitePrice)}</span>
-                    <span className="pb-1 text-sm font-semibold text-dim">{p.billing === "lifetime" ? "one time" : "/ year"}</span>
-                  </div>
-                  {p.listPrice > p.websitePrice && (
-                    <p className="mt-1 text-sm">
-                      <span className="text-dim line-through">{rupees(p.listPrice)}</span>{" "}
-                      <span className="font-semibold text-emerald-700">Save {rupees(p.listPrice - p.websitePrice)}</span>
-                    </p>
-                  )}
-                  <ul className="mt-5 flex-1 space-y-2 text-sm">
-                    {p.highlights.map((h) => (
-                      <li key={h} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-2" /> {h}</li>
-                    ))}
-                  </ul>
-                  <p className="mt-5 rounded-xl bg-elevated/60 px-3 py-2 text-xs text-dim">
-                    {p.users ? `${p.users} logins (owner + ${p.users - 1} staff)` : "Unlimited logins"}
-                    {p.extraStaffPrice > 0 ? ` · extra staff ${rupees(p.extraStaffPrice)} a year` : ""}
-                    {!p.includesAi && p.aiAddonPrice > 0 ? ` · AI assistant ${rupees(p.aiAddonPrice)} a year` : ""}
-                  </p>
-                  <div className="mt-5 grid grid-cols-1 gap-2">
-                    <Link href="/download" className={`${p.isRecommended ? btnPrimary : btnGhost} w-full justify-center`}>
-                      Start free trial <ArrowRight className="h-4 w-4" />
-                    </Link>
-                    <a href={demoHref} target={wa ? "_blank" : undefined} rel="noreferrer"
-                      className="py-1 text-center text-sm font-semibold text-brand hover:underline">
-                      Talk to us on WhatsApp
-                    </a>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="mt-8 max-w-md">
-            <div className="rounded-2xl border border-marigold/40 bg-[#fff8e6] p-6 shadow-card">
-              <h3 className="font-display text-2xl font-bold text-amber">
-                {info.fromYearly ? <>From {rupees(info.fromYearly)} <span className="text-base font-semibold text-dim">/ year</span></> : "Yearly plans"}
-              </h3>
-              <ul className="mt-4 space-y-2 text-sm">
-                {["Billing, GST, stock, reports", "Printing on every plan", "Android + Windows on one account", "Updates and WhatsApp support", "Pay by UPI, cash or bank"].map((p) => (
-                  <li key={p} className="flex items-start gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-amber" /> {p}</li>
-                ))}
-              </ul>
-              <a href={demoHref} target={wa ? "_blank" : undefined} rel="noreferrer"
-                className="stamp-press mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl border-2 border-amber/60 bg-white text-sm font-semibold text-amber hover:bg-[#fff2cc]">
-                Ask for your price
-              </a>
-            </div>
-            </div>
-          )}
+          <PlanCards info={info} />
           <p className="mt-6 text-sm text-dim">Pay by UPI, cash or bank transfer. Prices include updates and WhatsApp support.</p>
         </div>
       </section>
@@ -434,34 +373,7 @@ export default async function HomePage() {
       </section>
 
       {/* 10 — call to action + WhatsApp help */}
-      <section className="mx-auto mb-12 grid grid-cols-1 max-w-7xl gap-4 px-6 lg:grid-cols-[1.4fr_1fr]">
-        <div className="flex flex-col justify-center gap-5 rounded-3xl bg-brand px-8 py-10 text-white sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="font-display text-2xl font-bold tracking-tight sm:text-3xl">Ready to run your shop on Dukania?</h2>
-            <p className="mt-2 text-white/80">Start your {trial.toLowerCase()} today — we&apos;ll help you set it up.</p>
-          </div>
-          <Link href="/download" className="stamp-press inline-flex min-h-12 shrink-0 items-center gap-2 rounded-xl bg-white px-6 text-sm font-semibold text-brand hover:bg-brand-soft">
-            Start free trial <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <div className="relative flex items-center gap-4 overflow-hidden rounded-3xl border border-hairline bg-white p-5 shadow-card">
-          <Image src="/images/site/support-person.jpg" alt="Dukania support on WhatsApp" width={1536} height={1024} sizes="120px"
-            className="h-28 w-28 shrink-0 rounded-2xl object-cover object-[50%_25%]" />
-          <div>
-            <p className={eyebrow}>WhatsApp help</p>
-            <p className="mt-1 font-semibold">Talk to us on WhatsApp.</p>
-            <p className="mt-1 text-sm text-dim">Questions? Get an honest answer and we&apos;ll help you start.</p>
-            {wa ? (
-              <a href={wa} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-10 items-center gap-2 rounded-xl bg-[#25d366] px-4 text-sm font-semibold text-white">
-                <MessageCircle className="h-4 w-4" /> Chat on WhatsApp
-              </a>
-            ) : (
-              <Link href="/contact" className="mt-3 inline-flex min-h-10 items-center rounded-xl bg-brand px-4 text-sm font-semibold text-white">Contact us</Link>
-            )}
-          </div>
-          <p className="hand absolute right-4 top-3 hidden rotate-6 text-xl text-paper/70 sm:block">Real people.<br />Real support.</p>
-        </div>
-      </section>
+      <ClosingCta info={info} />
     </>
   );
 }

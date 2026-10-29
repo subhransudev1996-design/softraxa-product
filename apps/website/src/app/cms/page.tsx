@@ -60,6 +60,13 @@ const PAGES_LIST: PageSelector[] = [
   { id: "contact", path: "/contact", label: "Contact Page" },
   { id: "", path: "/download", label: "Download Page" },
   { id: "", path: "/ai", label: "ChatGPT & Claude Page" },
+  { id: "", path: "/features", label: "Features Page" },
+  { id: "", path: "/pricing", label: "Pricing Page" },
+  { id: "", path: "/shops", label: "Shops Page" },
+  { id: "", path: "/gst", label: "GST Page" },
+  { id: "", path: "/about", label: "About Page" },
+  { id: "", path: "/refer", label: "Refer a Shop Page" },
+  { id: "", path: "/help", label: "Help Page" },
 ];
 
 const PAGE_DEFAULTS: Record<string, Record<string, CmsJson>> = {

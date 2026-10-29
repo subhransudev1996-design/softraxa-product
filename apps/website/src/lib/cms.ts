@@ -53,6 +53,51 @@ const SEO_DEFAULTS: Record<string, { title: string; description: string; keyword
     title: "Contact — Dukania",
     description: "Talk to Dukania. Book a free demo, or ask anything about billing, stock and GST for your shop.",
     keywords: ["dukania demo", "billing software demo", "gst billing help"]
+  },
+  "/features": {
+    title: "Features — Dukania billing, stock & GST software",
+    description: "Everything Dukania does for your shop: fast billing, barcode, offline mode, stock and expiry, GST returns, khata, staff logins, repairs, offers and an AI assistant.",
+    keywords: ["billing software features", "pos features india", "gst billing features", "inventory software features"]
+  },
+  "/pricing": {
+    title: "Pricing — Dukania plans for shops",
+    description: "Simple yearly and lifetime plans for Dukania billing and stock software. Free trial first, pay by UPI, cash or bank.",
+    keywords: ["billing software price", "gst software price", "pos software cost india", "dukania price"]
+  },
+  "/shops": {
+    title: "Billing software for your type of shop — Dukania",
+    description: "Dukania is set up for grocery, mobile, hardware, garments, workshops, book stores and every retail counter in India.",
+    keywords: ["billing software for shops", "retail billing software", "shop software india"]
+  },
+  "/gst": {
+    title: "GST billing and GST returns for shops — Dukania",
+    description: "GST bills with HSN, CGST/SGST/IGST, GSTR-1 JSON for the portal, GSTR-3B, GSTR-2B matching, composition and e-way bill files — from your shop's billing.",
+    keywords: ["gst billing software", "gstr-1 json", "gstr-3b", "gstr-2b reconciliation", "composition scheme billing"]
+  },
+  "/ai": {
+    title: "Run your shop from ChatGPT or Claude — Dukania AI",
+    description: "Connect your Dukania shop to ChatGPT or Claude. Ask in plain words, enter supplier bills from a photo, make bills — nothing is saved until you say yes.",
+    keywords: ["ai billing software", "chatgpt billing", "claude shop assistant", "ai for shops india"]
+  },
+  "/about": {
+    title: "About Dukania",
+    description: "Dukania is billing, stock and GST software made for Indian shop owners — honest pricing, works offline, real people on WhatsApp.",
+    keywords: ["about dukania", "indian billing software company"]
+  },
+  "/refer": {
+    title: "Refer a shop — earn free months of Dukania",
+    description: "Share your Dukania code with another shop owner. When they join and take a plan, you get free months on yours.",
+    keywords: ["dukania referral", "refer a shop"]
+  },
+  "/help": {
+    title: "Help — Dukania questions answered",
+    description: "Answers about starting with Dukania, billing and printing, stock, GST, staff, plans and payment, and your data.",
+    keywords: ["dukania help", "billing app help", "gst billing faq"]
+  },
+  "/download": {
+    title: "Download Dukania — Android app & Windows software",
+    description: "Download Dukania billing and inventory software for Android phones and Windows PCs. Start with a free trial — no card, no payment.",
+    keywords: ["download billing app", "billing software for windows", "billing app android"]
   }
 };
 
