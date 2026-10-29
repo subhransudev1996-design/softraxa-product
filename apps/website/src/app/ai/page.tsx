@@ -14,8 +14,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return buildPageMetadata(await getPageSeo("/ai"));
 }
 
-const CONNECTOR_URL = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/shop-mcp`;
-
 const ASKS: [string, string][] = [
   ["How is my shop doing today?", "Today's sales, profit and bills."],
   ["Who owes me money?", "Customers with dues, biggest first."],
@@ -128,9 +126,8 @@ export default async function AiPage() {
         <p className={eyebrow}>Set it up</p>
         <h2 className="mt-2 font-display text-3xl font-bold tracking-tight">Connect in two minutes.</h2>
         <p className="mt-3 text-dim">
-          In the Dukania app open <b className="text-paper">More → ChatGPT &amp; Claude</b> and press <b className="text-paper">Copy link</b>. It is the same for every shop:
+          In the Dukania app open <b className="text-paper">More → ChatGPT &amp; Claude</b> and press <b className="text-paper">Copy link</b>. Then paste it in ChatGPT or Claude:
         </p>
-        <p className="mt-3 break-all rounded-xl border border-hairline bg-white px-4 py-3 font-mono text-sm text-paper shadow-card">{CONNECTOR_URL}</p>
 
         <div className="mt-8 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div className="rounded-2xl border border-hairline bg-white p-5 shadow-card">
