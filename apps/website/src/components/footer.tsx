@@ -91,14 +91,14 @@ export default async function Footer() {
       {/* promo / trial row */}
       <div className="border-t border-hairline">
         <div className="mx-auto flex max-w-7xl flex-col gap-6 px-6 py-8 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <BrandMark />
+          <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+            <div className="shrink-0"><BrandMark /></div>
             <p className="text-sm text-dim">
               {"Dukania keeps your shop billing even when the internet doesn't."}
             </p>
           </div>
-          <div className="flex items-center gap-5">
-            <div className="text-right">
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+            <div className="sm:text-right">
               <p className="text-sm font-semibold text-paper">Try Dukania free</p>
               <p className="text-xs text-dim">No card, no payment to start.</p>
             </div>
