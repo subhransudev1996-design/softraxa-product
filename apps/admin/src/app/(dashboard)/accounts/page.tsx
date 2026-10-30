@@ -33,7 +33,7 @@ export default function AccountsPage() {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -194,7 +194,7 @@ function Invoices() {
   return (
     <div className="space-y-6">
       {!gstin && (
-        <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Add Dukania&apos;s GSTIN in <Link href="/settings" className="font-semibold underline">Settings</Link> and every
           payment gets a GST tax invoice by itself. Until then, payments get receipts only.
         </p>

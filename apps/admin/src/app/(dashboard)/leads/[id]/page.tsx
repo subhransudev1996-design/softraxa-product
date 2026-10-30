@@ -144,7 +144,7 @@ export default function LeadDetailPage() {
       </div>
 
       {dupes && (
-        <div className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <b>Same phone number as:</b>{" "}
           {[
             ...dupes.leads.map((l) => (

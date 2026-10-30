@@ -86,14 +86,14 @@ export function QuoteCalculator({
             </label>
           )}
         </div>
-        <div className={`mt-4 grid ${showLowest ? "grid-cols-3" : "grid-cols-2"} gap-2 rounded-md bg-zinc-50 p-3 text-center text-sm`}>
+        <div className={`mt-4 grid ${showLowest ? "grid-cols-3" : "grid-cols-2"} gap-2 rounded-lg bg-zinc-50 p-3 text-center text-sm`}>
           <div><span className="block text-xs text-zinc-500">List</span><b className="tabular-nums">{inr(list)}</b></div>
           <div><span className="block text-xs text-zinc-500">Website ({discount}% off)</span><b className="tabular-nums text-brand">{inr(web)}</b></div>
           {showLowest && (
             <div><span className="block text-xs text-zinc-500">Your lowest</span><b className="tabular-nums text-amber-700">{inr(lowest)}</b></div>
           )}
         </div>
-        <p className="mt-3 rounded-md border border-zinc-200 px-4 py-3 text-sm text-zinc-700">{text}</p>
+        <p className="mt-3 rounded-lg border border-zinc-200 px-4 py-3 text-sm text-zinc-700">{text}</p>
         <div className="mt-3 flex flex-wrap justify-end gap-2">
           <Button variant="outline" onClick={copy}>{copied ? "Copied" : "Copy quote"}</Button>
           {phone && (

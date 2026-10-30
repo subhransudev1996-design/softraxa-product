@@ -1,9 +1,10 @@
 "use client";
 
-import { ReactNode, useEffect, useState } from "react";
+import { Children, ReactNode, useEffect, useState } from "react";
 import Link from "next/link";
+import { AlertTriangle, BadgeCheck, CheckCircle2, Clock, IndianRupee, Inbox, Moon, Sparkles, Store, UserRoundPlus, Users } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { Badge, Button, Card, CardBody, Input, PageHeader, Spinner, StatCard } from "@/components/ui";
+import { Button, Card, Input, Spinner, StatCard } from "@/components/ui";
 import { Modal, Notice, RenewDialog, RenewTarget, waLink } from "@/components/ops";
 import { useCan, useMe } from "@/components/me";
 import { stageLabel } from "@/lib/leads";
@@ -28,17 +29,35 @@ const daysFrom = (today: string, date: string) =>
   Math.round((new Date(`${date}T00:00:00`).getTime() - new Date(`${today}T00:00:00`).getTime()) / 86400000);
 
 /** One group of things to do; hidden when empty. */
+const TONES: Record<string, { band: string; icon: ReactNode }> = {
+  red: { band: "bg-red-50 text-red-700", icon: <AlertTriangle size={15} /> },
+  orange: { band: "bg-amber-50 text-amber-700", icon: <Clock size={15} /> },
+  blue: { band: "bg-blue-50 text-blue-700", icon: <BadgeCheck size={15} /> },
+  purple: { band: "bg-brand-tint text-brand-deep", icon: <Sparkles size={15} /> },
+  zinc: { band: "bg-zinc-100 text-zinc-600", icon: <Moon size={15} /> },
+};
+
+const FIRST_ROWS = 5;
+
+/** One group of things to do, longest lists folded; hidden when empty. */
 function Group({ title, count, tone = "zinc", children }: { title: string; count: number; tone?: string; children: ReactNode }) {
+  const [all, setAll] = useState(false);
   if (count === 0) return null;
+  const rows = Children.toArray(children);
+  const { band, icon } = TONES[tone] ?? TONES.zinc;
   return (
-    <Card>
-      <CardBody className="space-y-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-bold text-ink">{title}</h2>
-          <Badge color={tone}>{count}</Badge>
-        </div>
-        <ul className="divide-y divide-zinc-100">{children}</ul>
-      </CardBody>
+    <Card className="overflow-hidden">
+      <div className="flex items-center gap-2.5 border-b border-zinc-100 px-5 py-3">
+        <span className={`grid h-7 w-7 shrink-0 place-items-center rounded-lg ${band}`}>{icon}</span>
+        <h2 className="text-sm font-bold text-ink">{title}</h2>
+        <span className="ml-auto text-sm font-semibold tabular-nums text-zinc-500">{count}</span>
+      </div>
+      <ul className="divide-y divide-zinc-100 px-5">{all ? rows : rows.slice(0, FIRST_ROWS)}</ul>
+      {rows.length > FIRST_ROWS && (
+        <button onClick={() => setAll(!all)} className="w-full cursor-pointer border-t border-zinc-100 py-2.5 text-sm font-semibold text-brand transition-colors hover:bg-zinc-50">
+          {all ? "Show fewer" : `Show all ${rows.length}`}
+        </button>
+      )}
     </Card>
   );
 }
@@ -142,15 +161,38 @@ export default function TodayPage() {
     (canPay ? rewards.length : 0) +
     (data.reconciliation?.unexplained ? 1 : 0);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const firstName = (me?.name ?? "").trim().split(/\s+/)[0];
+
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Today"
-        subtitle={total === 0 ? "Nothing needs you right now." : `${total} thing${total === 1 ? "" : "s"} need${total === 1 ? "s" : ""} you`}
-      />
+      <section className="dot-grid overflow-hidden rounded-xl bg-sidebar px-6 py-6 sm:px-8">
+        <p className="text-sm font-medium text-sidebar-muted">{dateStr(data.today)}</p>
+        <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-[28px]">
+          {greeting}{firstName ? `, ${firstName}` : ""}
+        </h1>
+        <p className="mt-1 flex items-center gap-2 text-sm text-sidebar-muted">
+          {total === 0
+            ? <><CheckCircle2 size={16} className="text-emerald-400" /> Nothing needs you right now.</>
+            : <><span className="rounded-full bg-marigold px-2 py-0.5 text-xs font-bold tabular-nums text-sidebar">{total}</span> thing{total === 1 ? "" : "s"} need{total === 1 ? "s" : ""} you today</>}
+        </p>
+      </section>
+      {stats && (
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          <StatCard label="Paying shops" value={stats.active_clients} icon={<Store size={17} />} />
+          <StatCard label="On trial" value={stats.trial_clients} icon={<UserRoundPlus size={17} />} />
+          <StatCard label="Expired" value={stats.expired_clients} hint={`${stats.suspended_clients} suspended`} icon={<Inbox size={17} />} />
+          {canPay ? (
+            <StatCard label="Collected this month" value={inr(stats.monthly_revenue)} hint={`${stats.new_clients_this_month} new shops`} icon={<IndianRupee size={17} />} />
+          ) : (
+            <StatCard label="New shops this month" value={stats.new_clients_this_month} icon={<Users size={17} />} />
+          )}
+        </div>
+      )}
       <Notice notice={notice} />
       {!upi && canPay && (
-        <p className="rounded-md bg-orange-50 px-4 py-3 text-sm text-orange-800">
+        <p className="rounded-lg bg-orange-50 px-4 py-3 text-sm text-orange-800">
           Your UPI ID isn&apos;t set, so expired shops can&apos;t see how to pay you.{" "}
           <Link href="/settings" className="font-semibold underline">Set it in Settings</Link>.
         </p>
@@ -186,7 +228,7 @@ export default function TodayPage() {
               main={<>{c.name} · {inr(c.amount)}</>}
               sub={<>UTR <span className="font-mono">{c.reference}</span> · {dateTimeStr(c.created_at)}{c.note ? ` · ${c.note}` : ""}</>}
               actions={<>
-                <Button onClick={() => setRenew({ businessId: c.business_id, name: c.name, phone: c.phone, planId: c.plan_id, expiry: c.expiry_date, claim: { id: c.id, amount: Number(c.amount), reference: c.reference } })}>
+                <Button variant="soft" onClick={() => setRenew({ businessId: c.business_id, name: c.name, phone: c.phone, planId: c.plan_id, expiry: c.expiry_date, claim: { id: c.id, amount: Number(c.amount), reference: c.reference } })}>
                   Verified — renew
                 </Button>
                 <Button variant="outline" onClick={() => setReject(c)}>Not received</Button>
@@ -202,7 +244,7 @@ export default function TodayPage() {
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>Expired {dateStr(r.expiry_date)} ({-daysFrom(data.today, r.expiry_date)} days ago) · {r.plan_name ?? "no plan"} · {r.phone || "no phone"}</>}
               actions={<>
-                {canPay && <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
+                {canPay && <Button variant="soft" onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
                 <a href={waLink(r.phone, reminder(r, true))} target="_blank" rel="noreferrer"><Button variant="outline">WhatsApp</Button></a>
               </>}
             />
@@ -216,7 +258,7 @@ export default function TodayPage() {
               main={<Link href={`/clients/${r.business_id}`} className="hover:underline">{r.name}</Link>}
               sub={<>{r.status === "trial" ? "Trial" : r.plan_name ?? "Plan"} ends {dateStr(r.expiry_date)} ({daysFrom(data.today, r.expiry_date) === 0 ? "today" : `in ${daysFrom(data.today, r.expiry_date)} days`})</>}
               actions={<>
-                {canPay && <Button onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
+                {canPay && <Button variant="soft" onClick={() => setRenew({ businessId: r.business_id, name: r.name, phone: r.phone, planId: r.plan_id, expiry: r.expiry_date })}>Renew</Button>}
                 <a href={waLink(r.phone, reminder(r, false))} target="_blank" rel="noreferrer"><Button variant="outline">Remind</Button></a>
               </>}
             />
@@ -336,19 +378,6 @@ export default function TodayPage() {
           ))}
         </Group>
       </div>
-
-      {stats && (
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard label="Paying shops" value={stats.active_clients} />
-          <StatCard label="On trial" value={stats.trial_clients} />
-          <StatCard label="Expired" value={stats.expired_clients} hint={`${stats.suspended_clients} suspended`} />
-          {canPay ? (
-            <StatCard label="Collected this month" value={inr(stats.monthly_revenue)} hint={`${stats.new_clients_this_month} new shops`} />
-          ) : (
-            <StatCard label="New shops this month" value={stats.new_clients_this_month} />
-          )}
-        </div>
-      )}
 
       {renew && (
         <RenewDialog

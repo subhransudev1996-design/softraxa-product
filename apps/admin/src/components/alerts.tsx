@@ -59,7 +59,7 @@ export function AlertsBell({ alignRight = false }: { alignRight?: boolean }) {
   return (
     <div ref={box} className="relative">
       <button onClick={toggle} aria-label={`Alerts${fresh ? ` (${fresh} new)` : ""}`}
-        className="relative grid h-9 w-9 cursor-pointer place-items-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-ink">
+        className="relative grid h-9 w-9 cursor-pointer place-items-center rounded-lg text-sidebar-muted transition-colors hover:bg-white/10 hover:text-white">
         <Bell size={18} />
         {fresh > 0 && (
           <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">

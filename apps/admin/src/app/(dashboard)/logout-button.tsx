@@ -13,7 +13,7 @@ export function LogoutButton() {
         router.push("/login");
         router.refresh();
       }}
-      className="flex w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 py-1.5 text-left text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-red-700"
+      className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-sm font-medium text-sidebar-muted transition-colors hover:bg-white/10 hover:text-white"
     >
       <LogOut size={16} />
       Log out

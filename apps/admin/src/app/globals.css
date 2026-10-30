@@ -2,13 +2,14 @@
 
 :root {
   /* Dukania brand tokens — same family as the Flutter app's design system */
-  --brand: #6d28d9;
-  --brand-deep: #5b21b6;
-  --brand-tint: #f5f3ff;
-  --ink: #18181b;
-  --canvas: #f7f7f8;
-  --sidebar: #ffffff;
-  --sidebar-muted: #52525b;
+  --brand: #5b3df5;
+  --brand-deep: #4729d6;
+  --brand-tint: #efecff;
+  --marigold: #f7b32b;
+  --ink: #17132b;
+  --canvas: #f5f4fa;
+  --sidebar: #17122e;
+  --sidebar-muted: #aaa4c9;
   --teal: #0f9d8f;
 
   --background: var(--canvas);
@@ -25,16 +26,16 @@
   --color-canvas: var(--canvas);
   --color-sidebar: var(--sidebar);
   --color-sidebar-muted: var(--sidebar-muted);
-  --font-sans: var(--font-inter);
+  --color-marigold: var(--marigold);
+  --font-sans: var(--font-jakarta);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
   font-size: 14px;
-  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
 
@@ -89,4 +90,28 @@ body {
 }
 ::-webkit-scrollbar-track {
   background: transparent;
+}
+
+/* each stat card in a row takes the next colour of the family */
+.stat-card { --stat: #5b3df5; }
+.stat-card:nth-child(4n + 2) { --stat: #0d9488; }
+.stat-card:nth-child(4n + 3) { --stat: #d97706; }
+.stat-card:nth-child(4n + 4) { --stat: #db2777; }
+.stat-dot { background: var(--stat); }
+.stat-tile {
+  color: var(--stat);
+  background: color-mix(in srgb, var(--stat) 12%, white);
+}
+
+/* the sidebar's own thin scrollbar */
+.sidebar-scroll::-webkit-scrollbar { width: 6px; }
+.sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border: 0;
+}
+
+/* faint dots on the dark brand panels */
+.dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.09) 1px, transparent 1px);
+  background-size: 20px 20px;
 }

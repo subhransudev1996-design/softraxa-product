@@ -208,7 +208,7 @@ export default function SalesPage() {
                 <span className="tabular-nums">{stats.trial}</span>
               </li>
             </ul>
-            <p className="mt-4 rounded-md bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+            <p className="mt-4 rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
               Last 90 days: <b>{stats.fresh}</b> new shop{stats.fresh === 1 ? "" : "s"}, <b>{stats.converted}</b> paid
               {stats.fresh > 0 ? ` (${Math.round((stats.converted / stats.fresh) * 100)}%)` : ""}.
             </p>

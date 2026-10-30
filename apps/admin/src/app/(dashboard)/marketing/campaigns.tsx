@@ -158,7 +158,7 @@ export function Campaigns() {
             </div>
             {url && (
               <>
-                <p className="break-all rounded-md bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{url}</p>
+                <p className="break-all rounded-lg bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{url}</p>
                 <Button variant="outline" onClick={async () => {
                   try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); }
                   catch { window.prompt("Copy this link:", url); }

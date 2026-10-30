@@ -113,7 +113,7 @@ export default function InfluencerPage() {
               ["Trial ended", funnel?.trial_ended ?? "—", "Didn't buy yet"],
               ["Paid", paidShops, `${pct(paidShops, signups)} of joined`],
             ].map(([label, value, hint]) => (
-              <div key={label as string} className="rounded-md bg-zinc-50 p-3">
+              <div key={label as string} className="rounded-lg bg-zinc-50 p-3">
                 <p className="text-xs text-zinc-500">{label}</p>
                 <p className="text-xl font-semibold tabular-nums text-ink">{value}</p>
                 {hint && <p className="text-xs text-zinc-500">{hint}</p>}
@@ -187,12 +187,12 @@ export default function InfluencerPage() {
         <CardBody className="space-y-3 text-sm">
           <h2 className="font-semibold text-zinc-700">Their link, stats page and login</h2>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <div className="rounded-md bg-zinc-50 p-3">
+            <div className="rounded-lg bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Their link (for posts and bio)</p>
               <p className="break-all font-mono font-semibold">{linkOf(partner)}</p>
               <Button variant="outline" className="mt-2" onClick={() => copy(linkOf(partner), "Link")}>Copy</Button>
             </div>
-            <div className="rounded-md bg-zinc-50 p-3">
+            <div className="rounded-lg bg-zinc-50 p-3">
               <p className="text-xs text-zinc-500">Their private stats page</p>
               <p className="break-all font-mono text-xs">{statsOf(partner)}</p>
               <div className="mt-2 flex gap-2">

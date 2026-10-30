@@ -86,14 +86,32 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-canvas p-6">
-      <section className="w-full max-w-sm">
-        <div className="mb-6 flex items-center gap-2.5">
-          <span className="grid h-8 w-8 place-items-center rounded-md bg-brand text-sm font-semibold text-white">D</span>
-          <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
+    <main className="flex min-h-screen">
+      <aside className="dot-grid relative hidden w-[44%] flex-col justify-between bg-sidebar p-12 lg:flex">
+        <div className="flex items-center gap-3">
+          <span className="grid h-10 w-10 place-items-center rounded-lg bg-marigold text-lg font-extrabold text-sidebar">D</span>
+          <p className="text-lg font-bold text-white">Dukania <span className="font-medium text-sidebar-muted">Admin</span></p>
         </div>
-        <div className="rounded-lg border border-zinc-200 bg-white p-6">
-          <h1 className="text-lg font-semibold tracking-tight text-ink">
+        <div>
+          <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight text-white">
+            Every shop, every rupee, <span className="text-marigold">one workspace.</span>
+          </h2>
+          <ul className="mt-8 space-y-3 text-sm text-sidebar-muted">
+            <li>Clients, renewals and support</li>
+            <li>Leads, marketing and influencers</li>
+            <li>Payments, sales and accounts</li>
+          </ul>
+        </div>
+        <p className="text-xs text-sidebar-muted">© {new Date().getFullYear()} Dukania</p>
+      </aside>
+      <section className="flex flex-1 items-center justify-center bg-canvas p-6">
+        <div className="w-full max-w-sm">
+        <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+          <span className="grid h-8 w-8 place-items-center rounded-lg bg-marigold text-sm font-extrabold text-sidebar">D</span>
+          <p className="text-sm font-bold text-ink">Dukania <span className="font-medium text-zinc-500">Admin</span></p>
+        </div>
+        <div className="rounded-xl border border-zinc-200/80 bg-white p-7 shadow-[0_1px_2px_rgba(23,19,43,0.05)]">
+          <h1 className="text-2xl font-bold tracking-tight text-ink">
             {step === "code" ? "Enter your code" : "Sign in"}
           </h1>
           <p className="mb-5 mt-1 text-sm text-zinc-500">
@@ -117,7 +135,7 @@ export default function LoginPage() {
                 />
               </div>
               {error && (
-                <p className="rounded-md bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">{error}</p>
+                <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">{error}</p>
               )}
               <Button type="submit" disabled={busy || code.length !== 6} className="w-full justify-center py-2.5">
                 {busy ? "Checking…" : "Continue"}
@@ -149,7 +167,7 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <p className="rounded-md bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
+              <p className="rounded-lg bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
                 {error}
               </p>
             )}
@@ -159,7 +177,7 @@ export default function LoginPage() {
           </form>
           )}
         </div>
-        <p className="mt-4 text-center text-xs text-zinc-500">© {new Date().getFullYear()} Dukania</p>
+        </div>
       </section>
     </main>
   );

@@ -261,7 +261,7 @@ export default function ClientDetailPage() {
       <Notice notice={notice} />
 
       {claims.length > 0 && (
-        <p className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        <p className="rounded-lg bg-blue-50 px-4 py-3 text-sm text-blue-800">
           This shop reported a payment of {inr(claims[0].amount)} (UTR <span className="font-mono">{claims[0].reference}</span>).
           Verify it on the <Link href="/" className="font-semibold underline">Today</Link> page.
         </p>
@@ -303,7 +303,7 @@ export default function ClientDetailPage() {
               </div>
             </dl>
             {addons.length > 0 && (
-              <ul className="mt-3 space-y-1.5 rounded-md bg-zinc-50 p-3 text-sm">
+              <ul className="mt-3 space-y-1.5 rounded-lg bg-zinc-50 p-3 text-sm">
                 {addons.map((a) => (
                   <li key={a.id} className="flex items-center justify-between gap-2">
                     <span>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { Handshake, IndianRupee, MousePointerClick, TrendingUp } from "lucide-react";
 import { Badge, Button, Card, CardBody, Input, Label, Select, Spinner, StatCard, Table } from "@/components/ui";
 import { Notice } from "@/components/ops";
 import { useCan } from "@/components/me";
@@ -94,10 +95,10 @@ export function Partners() {
     <div className="space-y-6">
       <Notice notice={notice} />
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard label="Partners" value={rows.filter((p) => p.active).length} hint={`${rows.length} in all`} />
-        <StatCard label="Link clicks, 30 days" value={rows.reduce((s, p) => s + Number(p.clicks_30), 0)} />
-        <StatCard label="You made, all partners" value={inr(rows.reduce((s, p) => s + Number(p.net), 0))} hint="First payments less commission and fees" />
-        <StatCard label="Commission to pay now" value={inr(owed)} hint={`${inr(rows.reduce((s, p) => s + Number(p.held), 0))} still in the hold`} />
+        <StatCard label="Partners" value={rows.filter((p) => p.active).length} hint={`${rows.length} in all`} icon={<Handshake size={17} />} />
+        <StatCard label="Link clicks, 30 days" value={rows.reduce((s, p) => s + Number(p.clicks_30), 0)} icon={<MousePointerClick size={17} />} />
+        <StatCard label="You made, all partners" value={inr(rows.reduce((s, p) => s + Number(p.net), 0))} hint="First payments less commission and fees" icon={<TrendingUp size={17} />} />
+        <StatCard label="Commission to pay now" value={inr(owed)} hint={`${inr(rows.reduce((s, p) => s + Number(p.held), 0))} still in the hold`} icon={<IndianRupee size={17} />} />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">

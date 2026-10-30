@@ -88,7 +88,7 @@ export function LogContactDialog({ shop, onClose, onSaved }: {
           <Label>What was said</Label>
           <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder="e.g. Showed how to print on A5; wants barcode labels"
-            className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
+            className="w-full rounded-lg border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
         </div>
         <div className="max-w-xs">
           <Label>Follow up on (optional)</Label>

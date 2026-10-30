@@ -83,24 +83,25 @@ export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void
         href={item.href}
         onClick={onNavigate}
         aria-current={active ? "page" : undefined}
-        className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
-          active ? "bg-brand-tint text-brand-deep" : "text-zinc-600 hover:bg-zinc-100 hover:text-ink"
+        className={`relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-colors ${
+          active ? "bg-white/10 text-white" : "text-sidebar-muted hover:bg-white/5 hover:text-white"
         }`}
       >
-        <Icon size={16} className={active ? "text-brand" : "text-zinc-400"} />
+        {active && <span className="absolute -left-3 top-1.5 bottom-1.5 w-[3px] rounded-r-full bg-marigold" />}
+        <Icon size={16} className={active ? "text-marigold" : ""} />
         {item.label}
       </Link>
     );
   };
 
   return (
-    <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-3">
+    <nav className="sidebar-scroll flex-1 space-y-4 overflow-y-auto px-3 py-3">
       {groups.map((group) => {
         const items = group.items.filter(allowed);
         if (items.length === 0) return null;
         return (
           <div key={group.title ?? "main"} className="space-y-0.5">
-            {group.title && <p className="px-2.5 pb-1 text-xs font-medium text-zinc-400">{group.title}</p>}
+            {group.title && <p className="px-2.5 pb-1 text-xs font-medium text-sidebar-muted/70">{group.title}</p>}
             {items.map(link)}
           </div>
         );
@@ -112,9 +113,9 @@ export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void
 function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   return (
     <>
-      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-zinc-200 px-4">
-        <span className="grid h-7 w-7 place-items-center rounded-md bg-brand text-sm font-semibold text-white">D</span>
-        <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
+        <span className="grid h-8 w-8 place-items-center rounded-lg bg-marigold text-sm font-extrabold text-sidebar">D</span>
+        <p className="text-sm font-bold text-white">Dukania <span className="font-medium text-sidebar-muted">Admin</span></p>
         <div className="ml-auto hidden lg:block"><AlertsBell /></div>
       </div>
       {/* Search everything from anywhere (also Ctrl+K). */}
@@ -130,18 +131,18 @@ function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void })
           name="q"
           placeholder="Search…  Ctrl+K"
           aria-label="Search everything"
-          className="min-h-9 w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
+          className="min-h-9 w-full rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-white outline-none placeholder:text-sidebar-muted focus:border-marigold/60 focus:ring-2 focus:ring-marigold/20"
         />
       </form>
       <SidebarNav me={me} onNavigate={onNavigate} />
-      <div className="border-t border-zinc-200 p-3">
+      <div className="border-t border-white/10 p-3">
         <div className="flex items-center gap-2.5 px-2.5 py-1.5">
-          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-zinc-100 text-xs font-semibold uppercase text-zinc-600">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-brand text-xs font-bold uppercase text-white">
             {(me.name || me.email || "A").slice(0, 1)}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-[13px] font-medium text-ink">{me.name || me.email}</p>
-            <p className="truncate text-xs text-zinc-500">{roleLabel(me.team_role)}</p>
+            <p className="truncate text-[13px] font-semibold text-white">{me.name || me.email}</p>
+            <p className="truncate text-xs text-sidebar-muted">{roleLabel(me.team_role)}</p>
           </div>
         </div>
         <LogoutButton />
@@ -170,15 +171,15 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   }, [router]);
   return (
     <div className="min-h-screen bg-canvas">
-      <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col border-r border-zinc-200 bg-sidebar lg:flex print:hidden">
+      <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col bg-sidebar lg:flex print:hidden">
         <SidebarContent me={me} />
       </aside>
 
-      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-sidebar px-4 lg:hidden print:hidden">
-        <button onClick={() => setOpen(true)} className="grid h-9 w-9 cursor-pointer place-items-center rounded-md text-zinc-600 hover:bg-zinc-100" aria-label="Open menu">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 bg-sidebar px-4 lg:hidden print:hidden">
+        <button onClick={() => setOpen(true)} className="grid h-9 w-9 cursor-pointer place-items-center rounded-lg text-white hover:bg-white/10" aria-label="Open menu">
           <Menu size={22} />
         </button>
-        <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
+        <p className="text-sm font-bold text-white">Dukania <span className="font-medium text-sidebar-muted">Admin</span></p>
         <div className="ml-auto"><AlertsBell alignRight /></div>
       </header>
       {open && (
@@ -188,7 +189,7 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
             className="absolute inset-y-0 left-0 flex w-64 flex-col bg-sidebar"
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setOpen(false)} className="absolute right-3 top-3 z-10 grid h-9 w-9 cursor-pointer place-items-center rounded-md bg-white text-zinc-500 hover:bg-zinc-100" aria-label="Close menu">
+            <button onClick={() => setOpen(false)} className="absolute right-3 top-3 z-10 grid h-9 w-9 cursor-pointer place-items-center rounded-lg text-sidebar-muted hover:bg-white/10 hover:text-white" aria-label="Close menu">
               <X size={20} />
             </button>
             <SidebarContent me={me} onNavigate={() => setOpen(false)} />

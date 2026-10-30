@@ -3,7 +3,7 @@
 import { ReactNode } from "react";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return <div className={`rounded-lg border border-zinc-200 bg-white ${className}`}>{children}</div>;
+  return <div className={`rounded-xl border border-zinc-200/80 bg-white shadow-[0_1px_2px_rgba(23,19,43,0.05)] ${className}`}>{children}</div>;
 }
 
 export function CardBody({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -22,13 +22,16 @@ export function StatCard({
   icon?: ReactNode;
 }) {
   return (
-    <Card>
+    <Card className="stat-card">
       <CardBody className="!p-4">
-        <div className="flex items-start justify-between gap-2">
-          <p className="text-[13px] font-medium text-zinc-500">{label}</p>
-          {icon && <span className="shrink-0 text-zinc-400">{icon}</span>}
+        <div className="flex items-start justify-between gap-3">
+          <p className="flex items-center gap-2 text-[13px] font-medium text-zinc-500">
+            {!icon && <span className="stat-dot h-2 w-2 shrink-0 rounded-full" />}
+            {label}
+          </p>
+          {icon && <span className="stat-tile grid h-9 w-9 shrink-0 place-items-center rounded-lg">{icon}</span>}
         </div>
-        <p className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">{value}</p>
+        <p className="mt-1 text-[26px] font-bold leading-8 tracking-tight text-ink tabular-nums">{value}</p>
         {hint && <p className="mt-0.5 text-xs text-zinc-500">{hint}</p>}
       </CardBody>
     </Card>
@@ -46,12 +49,13 @@ export function Button({
   children: ReactNode;
   onClick?: () => void;
   type?: "button" | "submit";
-  variant?: "primary" | "outline" | "danger" | "ghost";
+  variant?: "primary" | "soft" | "outline" | "danger" | "ghost";
   disabled?: boolean;
   className?: string;
 }) {
   const styles = {
-    primary: "bg-brand text-white hover:bg-brand-deep focus-visible:ring-brand",
+    primary: "bg-brand text-white shadow-[0_1px_2px_rgba(23,19,43,0.2)] hover:bg-brand-deep focus-visible:ring-brand",
+    soft: "bg-brand-tint text-brand-deep hover:bg-brand hover:text-white focus-visible:ring-brand",
     outline: "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 focus-visible:ring-zinc-400",
     danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
     ghost: "text-zinc-600 hover:bg-zinc-100 hover:text-ink focus-visible:ring-zinc-400",
@@ -61,7 +65,7 @@ export function Button({
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
+      className={`inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
     >
       {children}
     </button>
@@ -72,7 +76,7 @@ export function Input(props: React.ComponentProps<"input">) {
   return (
     <input
       {...props}
-      className={`min-h-9 w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-50 disabled:text-zinc-500 ${props.className ?? ""}`}
+      className={`min-h-9 w-full rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-50 disabled:text-zinc-500 ${props.className ?? ""}`}
     />
   );
 }
@@ -81,7 +85,7 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className={`min-h-9 w-full cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20 ${props.className ?? ""}`}
+      className={`min-h-9 w-full cursor-pointer rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20 ${props.className ?? ""}`}
     />
   );
 }
@@ -103,7 +107,7 @@ export function Badge({ children, color = "zinc" }: { children: ReactNode; color
   };
   return (
     <span
-      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${colors[color] ?? colors.zinc}`}
+      className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${colors[color] ?? colors.zinc}`}
     >
       {children}
     </span>
@@ -153,7 +157,7 @@ export function Toggle({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="flex w-full cursor-pointer items-center justify-between rounded-md px-1.5 py-2 text-sm transition-colors hover:bg-zinc-50"
+      className="flex w-full cursor-pointer items-center justify-between rounded-lg px-1.5 py-2 text-sm transition-colors hover:bg-zinc-50"
     >
       <span className="font-medium text-zinc-700">{label}</span>
       <span
@@ -180,7 +184,7 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-xl font-semibold tracking-tight text-ink">{title}</h1>
+        <h1 className="text-[22px] font-bold tracking-tight text-ink">{title}</h1>
         {subtitle && <p className="mt-0.5 text-sm text-zinc-500">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

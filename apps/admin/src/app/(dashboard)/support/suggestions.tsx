@@ -103,7 +103,7 @@ export function SuggestionsBoard() {
                 className="w-full text-left"
               >
                 <CardBody className="flex items-start gap-4">
-                  <div className="grid w-14 shrink-0 place-items-center rounded-md bg-violet-50 py-2 text-violet-700">
+                  <div className="grid w-14 shrink-0 place-items-center rounded-lg bg-violet-50 py-2 text-violet-700">
                     <span className="text-xl font-semibold leading-6">{shops.length}</span>
                     <span className="text-[10px] font-semibold uppercase">shop{shops.length === 1 ? "" : "s"}</span>
                   </div>
@@ -141,7 +141,7 @@ export function SuggestionsBoard() {
                 rows={3}
                 value={editing.details}
                 onChange={(e) => setEditing({ ...editing, details: e.target.value })}
-                className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                className="w-full rounded-lg border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
               />
             </div>
             <div>
@@ -159,7 +159,7 @@ export function SuggestionsBoard() {
                   placeholder="e.g. Turn it on in Settings → Display."
                 />
                 {editing.was !== "done" && editing.shops.length > 0 && (
-                  <p className="mt-2 rounded-md bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+                  <p className="mt-2 rounded-lg bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
                     On save, {editing.shops.length} shop{editing.shops.length === 1 ? "" : "s"} ({editing.shops.join(", ")}) get
                     &quot;your suggestion is now in Dukania&quot; in their request, and it&apos;s marked resolved.
                   </p>

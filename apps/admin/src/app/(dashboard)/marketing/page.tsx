@@ -28,7 +28,7 @@ export default function MarketingPage() {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>

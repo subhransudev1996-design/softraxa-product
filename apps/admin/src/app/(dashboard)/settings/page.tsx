@@ -163,7 +163,7 @@ export default function SettingsPage() {
                 <p className="mt-1 text-xs text-zinc-500">Shown under the QR in the app. The UPI app itself shows the name on your bank account.</p>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2 rounded-md bg-zinc-50 p-4 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-lg bg-zinc-50 p-4 text-center">
               {upiValid && qr?.link === link ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={qr.url} alt="UPI QR code for your UPI ID" width={176} height={176} className="rounded-lg bg-white p-1" />

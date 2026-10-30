@@ -115,7 +115,7 @@ export default function LeadsPage() {
             key={key}
             onClick={() => setView(key)}
             aria-pressed={view === key}
-            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${view === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-lg px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${view === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -230,7 +230,7 @@ function Board({ rows, team, today, onMove }: {
                       key={l.id}
                       draggable
                       onDragStart={(e) => e.dataTransfer.setData("text/plain", l.id)}
-                      className="cursor-grab rounded-md bg-white p-3 shadow-sm ring-1 ring-zinc-200 active:cursor-grabbing"
+                      className="cursor-grab rounded-lg bg-white p-3 shadow-sm ring-1 ring-zinc-200 active:cursor-grabbing"
                     >
                       <Link href={`/leads/${l.id}`} className="block">
                         <div className="flex items-start gap-2">
@@ -395,7 +395,7 @@ function NewLead({ plans, onClose, onSaved }: { plans: any[]; onClose: () => voi
           <Input name="city" />
         </div>
         {dupes && (
-          <div className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:col-span-2">
+          <div className="rounded-lg bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:col-span-2">
             <p className="font-semibold">This phone number is already known:</p>
             <ul className="mt-1 list-disc pl-5">
               {dupes.leads.map((l) => (

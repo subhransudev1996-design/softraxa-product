@@ -117,7 +117,7 @@ export default function TeamPage() {
         <Card>
           <CardBody className="space-y-2">
             <p className="text-sm font-semibold text-ink">One-time set-password link</p>
-            <p className="break-all rounded-md bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{link}</p>
+            <p className="break-all rounded-lg bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{link}</p>
             <Button variant="outline" onClick={() => navigator.clipboard.writeText(link)}>Copy link</Button>
           </CardBody>
         </Card>
@@ -195,7 +195,7 @@ export default function TeamPage() {
                 <Label>What they can use</Label>
                 <div className="space-y-1.5">
                   {AREAS.map((a) => (
-                    <label key={a.key} className="flex cursor-pointer items-start gap-2.5 rounded-md px-2 py-1.5 hover:bg-zinc-50">
+                    <label key={a.key} className="flex cursor-pointer items-start gap-2.5 rounded-lg px-2 py-1.5 hover:bg-zinc-50">
                       <input
                         type="checkbox"
                         className="mt-0.5 h-4 w-4 accent-[var(--brand)]"
@@ -219,7 +219,7 @@ export default function TeamPage() {
               </div>
             )}
             {editing.role === "owner" && editing.member?.id !== me?.id && (
-              <p className="rounded-md bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800">
+              <p className="rounded-lg bg-amber-50 px-3.5 py-2.5 text-sm text-amber-800">
                 An owner can do everything, including changing the team and prices.
               </p>
             )}

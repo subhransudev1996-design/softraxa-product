@@ -198,9 +198,9 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
             {Number(result.discount) > 0 ? ` · discount ${inr(result.discount)}` : ""}
           </p>
           {result.below_lowest && (
-            <p className="rounded-md bg-amber-50 px-4 py-3 text-amber-800">Recorded below your lowest price.</p>
+            <p className="rounded-lg bg-amber-50 px-4 py-3 text-amber-800">Recorded below your lowest price.</p>
           )}
-          {promoNote && <p className="rounded-md bg-violet-50 px-4 py-3 text-violet-800">{promoNote}</p>}
+          {promoNote && <p className="rounded-lg bg-violet-50 px-4 py-3 text-violet-800">{promoNote}</p>}
           <div className="flex flex-wrap gap-2">
             <a href={waLink(target.phone, msg)} target="_blank" rel="noreferrer"><Button>Send on WhatsApp</Button></a>
             {result.payment_id && (
@@ -224,7 +224,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             {plans.map((p) => (
               <button key={p.id} type="button" onClick={() => { setPlanId(p.id); setAi(false); }}
-                className={`rounded-md border p-3 text-left ${p.id === planId ? "border-brand bg-brand-tint" : "border-zinc-200 hover:bg-zinc-50"}`}>
+                className={`rounded-lg border p-3 text-left ${p.id === planId ? "border-brand bg-brand-tint" : "border-zinc-200 hover:bg-zinc-50"}`}>
                 <span className="block font-semibold text-ink">{p.name}</span>
                 <span className="block text-xs text-zinc-500">
                   {inr(p.list_price)} {p.billing === "lifetime" ? "once" : "a year"} · {p.user_limit ?? "∞"} logins
@@ -245,7 +245,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
               </p>
             </div>
             {aiOffered ? (
-              <label className="flex items-start gap-2.5 rounded-md border border-zinc-200 p-3 text-sm">
+              <label className="flex items-start gap-2.5 rounded-lg border border-zinc-200 p-3 text-sm">
                 <input type="checkbox" checked={ai} onChange={(e) => setAi(e.target.checked)} className="mt-1" />
                 <span>
                   <span className="font-semibold text-ink">AI assistant add-on</span>
@@ -253,7 +253,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
                 </span>
               </label>
             ) : (
-              <p className="rounded-md bg-zinc-50 p-3 text-xs text-zinc-500">
+              <p className="rounded-lg bg-zinc-50 p-3 text-xs text-zinc-500">
                 {hasAi ? "AI assistant is included in this plan." : "This plan has no AI add-on."}
               </p>
             )}
@@ -261,7 +261,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
         )}
 
         {plan && (
-          <div className="grid grid-cols-3 gap-2 rounded-md bg-zinc-50 p-3 text-center text-sm">
+          <div className="grid grid-cols-3 gap-2 rounded-lg bg-zinc-50 p-3 text-center text-sm">
             <div><span className="block text-xs text-zinc-500">List</span><b className="tabular-nums">{inr(listTotal)}</b></div>
             <div><span className="block text-xs text-zinc-500">Website ({discount}% off)</span><b className="tabular-nums text-brand">{inr(webTotal)}</b></div>
             <div><span className="block text-xs text-zinc-500">Your lowest</span><b className="tabular-nums text-amber-700">{inr(lowest)}</b></div>
@@ -301,7 +301,7 @@ export function SaleDialog({ target, onClose, onDone }: { target: SaleTarget; on
           payDate={payDate} setPayDate={setPayDate} note={note} setNote={setNote} />
 
         {plan && (
-          <div className="rounded-md bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+          <div className="rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
             {lifetime ? (
               <>Plan <b>for life</b>{(nStaff > 0 || ai) ? <>; add-ons until <b>{dateStr(plusYear(today()))}</b></> : null}.</>
             ) : (
@@ -370,12 +370,12 @@ export function AddonDialog({
       <div className="space-y-4">
         <div className="flex gap-2">
           <button type="button" onClick={() => setKind("staff")}
-            className={`rounded-md border px-4 py-2 text-sm font-semibold ${kind === "staff" ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}>
+            className={`rounded-lg border px-4 py-2 text-sm font-semibold ${kind === "staff" ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}>
             Extra staff login
           </button>
           {!hasAi && (
             <button type="button" onClick={() => setKind("ai")}
-              className={`rounded-md border px-4 py-2 text-sm font-semibold ${kind === "ai" ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}>
+              className={`rounded-lg border px-4 py-2 text-sm font-semibold ${kind === "ai" ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}>
               AI assistant
             </button>
           )}
@@ -395,7 +395,7 @@ export function AddonDialog({
         </div>
         <PayFields mode={mode} setMode={setMode} reference={reference} setReference={setReference}
           payDate={payDate} setPayDate={setPayDate} note={note} setNote={setNote} />
-        <p className="rounded-md bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+        <p className="rounded-lg bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
           Valid until <b>{dateStr(until)}</b>{lifetime ? " (one year)" : " (with the plan)"}.
         </p>
         {error && <p className="text-sm font-medium text-red-600">{error}</p>}

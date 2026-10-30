@@ -125,7 +125,7 @@ function TwoStepCard() {
             <li>Type the 6-digit code the app shows.</li>
           </ol>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={enrolling.qr} alt="QR code for the authenticator app" className="h-44 w-44 rounded-md border border-zinc-200 bg-white p-2" />
+          <img src={enrolling.qr} alt="QR code for the authenticator app" className="h-44 w-44 rounded-lg border border-zinc-200 bg-white p-2" />
           <p className="text-xs text-zinc-500">
             Can&apos;t scan? Type this key in the app: <code className="break-all font-mono text-zinc-700">{enrolling.secret}</code>
           </p>

@@ -196,7 +196,7 @@ export default function NewClientPage() {
   if (createdResult) {
     return (
       <div className="max-w-2xl space-y-6">
-        <div className="rounded-md border border-green-200 bg-green-50 p-6">
+        <div className="rounded-lg border border-green-200 bg-green-50 p-6">
           <div className="flex items-center gap-3 text-green-800">
             <span className="text-2xl">✓</span>
             <div>

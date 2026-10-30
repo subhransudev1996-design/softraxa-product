@@ -109,7 +109,7 @@ export function LeadImport({ onDone }: { onDone: () => void }) {
               type="file"
               accept=".csv,text/csv"
               onChange={(e) => e.target.files?.[0] && read(e.target.files[0])}
-              className="text-sm file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
+              className="text-sm file:mr-3 file:rounded-lg file:border-0 file:bg-brand file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white"
             />
             <a
               href={`data:text/csv;charset=utf-8,${encodeURIComponent(TEMPLATE)}`}
