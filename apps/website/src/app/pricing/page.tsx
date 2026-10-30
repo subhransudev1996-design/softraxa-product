@@ -8,6 +8,7 @@ import ClosingCta from "@/components/site/closing-cta";
 import PlanCards from "@/components/site/plan-cards";
 import { getPageSeo, buildPageMetadata } from "@/lib/cms";
 import { getSiteInfo, rupees } from "@/lib/site-info";
+import { supabase } from "@/lib/supabase-client";
 import { eyebrow } from "@/lib/ui";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,10 +33,14 @@ export default async function PricingPage() {
   const info = await getSiteInfo();
   const trial = info.trialDays ? `${info.trialDays}-day free trial` : "Free trial";
   const plans = info.plans;
+  // Online payment on dukania.in/pay (migration 0105), once switched on.
+  const { data: payOnline } = await supabase.rpc("online_payments_on");
 
   const faqs = [
     { q: "Do I pay anything to try it?", a: `No. Sign up in the app and your shop starts on a ${trial.toLowerCase()} with every feature — no card, no payment.` },
-    { q: "How do I pay?", a: "By UPI, cash or bank transfer. Tap \"I've paid\" in the app or send us the payment screenshot on WhatsApp, and your plan is extended once we see it." },
+    { q: "How do I pay?", a: payOnline
+      ? "Online on dukania.in/pay by UPI, card or netbanking — your plan turns on straight away. In the app, tap Pay online on the Plan screen. You can also pay by UPI or bank transfer and send us the screenshot on WhatsApp."
+      : "By UPI, cash or bank transfer. Tap \"I've paid\" in the app or send us the payment screenshot on WhatsApp, and your plan is extended once we see it." },
     { q: "What happens when my plan ends?", a: "You can still open the app, see your records and export them. To make new bills, renew the plan." },
     { q: "Can I add more staff later?", a: "Yes. Ask from the Staff screen in the app and we add the extra logins to your plan." },
     { q: "Do I get a bill for my payment?", a: "Yes — a receipt for every payment, sent on WhatsApp. Need a GST invoice for your books? Ask us when you pay." },
@@ -59,6 +64,11 @@ export default async function PricingPage() {
           )}
           <PlanCards info={info} />
           <p className="mt-6 text-sm text-dim">Prices include updates and WhatsApp support. Nothing extra to pay later.</p>
+          {payOnline === true && (
+            <Link href="/pay" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-brand hover:underline">
+              Already using Dukania? Pay or renew online <ArrowRight className="h-4 w-4" />
+            </Link>
+          )}
         </div>
       </section>
 

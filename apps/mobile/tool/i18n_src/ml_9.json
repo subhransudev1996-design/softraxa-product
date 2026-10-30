@@ -484,5 +484,8 @@
 "How likely are you to recommend Dukania to another shop owner?": "മറ്റൊരു കടക്കാരന് Dukania ശുപാർശ ചെയ്യാൻ എത്രത്തോളം സാധ്യതയുണ്ട്?",
 "0 = not at all, 10 = surely": "0 = ഒട്ടും ഇല്ല, 10 = തീർച്ചയായും",
 "What should we fix? (optional)": "ഞങ്ങൾ എന്ത് ശരിയാക്കണം? (ഐച്ഛികം)",
-"What do you like most? (optional)": "നിങ്ങൾക്ക് ഏറ്റവും ഇഷ്ടപ്പെട്ടത് എന്താണ്? (ഐച്ഛികം)"
+"What do you like most? (optional)": "നിങ്ങൾക്ക് ഏറ്റവും ഇഷ്ടപ്പെട്ടത് എന്താണ്? (ഐച്ഛികം)",
+"Pay online": "ഓൺലൈനായി പണമടയ്ക്കുക",
+"Renew, change plan or add logins by UPI, card or netbanking. Your plan turns on as soon as you pay.": "UPI, കാർഡ് അല്ലെങ്കിൽ നെറ്റ്ബാങ്കിംഗ് വഴി പുതുക്കുക, പ്ലാൻ മാറ്റുക അല്ലെങ്കിൽ ലോഗിനുകൾ ചേർക്കുക. പണമടച്ചാലുടൻ നിങ്ങളുടെ പ്ലാൻ ആരംഭിക്കും.",
+"Could not open the browser": "ബ്രൗസർ തുറക്കാനായില്ല"
 }

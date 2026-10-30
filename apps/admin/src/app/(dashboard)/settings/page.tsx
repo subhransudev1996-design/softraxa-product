@@ -8,6 +8,7 @@ import { Button, Card, CardBody, Input, Label, Spinner } from "@/components/ui";
 import { Notice } from "@/components/ops";
 import { dateTimeStr } from "@/lib/format";
 import { GstCard } from "./gst-card";
+import { OnlinePayCard } from "./online-pay-card";
 
 const UPI_PATTERN = /^[A-Za-z0-9._-]{2,255}@[A-Za-z][A-Za-z0-9]{1,63}$/;
 const GSTIN_PATTERN = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][0-9A-Z]Z[0-9A-Z]$/;
@@ -260,6 +261,7 @@ export default function SettingsPage() {
         </div>
       </form>
 
+      <OnlinePayCard />
       <GstCard />
 
       <Section title="New shops" hint="Set in other places; shown here so you know what a new signup gets.">

@@ -9,6 +9,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import '../subscription/online_payment.dart';
 
 /// Dukania's UPI details, this shop's plan name and any payment still
 /// being checked (get_payment_info, migrations 0053 and 0055). Works while
@@ -68,7 +69,9 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 controller: utr,
                 decoration: InputDecoration(
                   labelText: t('UPI reference (UTR) *'),
-                  helperText: t('12-digit number in your UPI app\'s payment details'),
+                  helperText: t(
+                    '12-digit number in your UPI app\'s payment details',
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -120,7 +123,8 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
   Widget build(BuildContext context) {
     final appContext = ref.watch(appContextProvider).value;
     if (!(appContext?.isOwner ?? false)) {
-      return Text(t('Ask the shop owner to renew the subscription.'),
+      return Text(
+        t('Ask the shop owner to renew the subscription.'),
         textAlign: TextAlign.center,
         style: TextStyle(color: AppColors.inkSoft),
       );
@@ -147,9 +151,13 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(t('Renew your subscription'),
+                Text(
+                  t('Renew your subscription'),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                 ),
+                // Pay on dukania.in (migration 0105), when switched on.
+                const SizedBox(height: 12),
+                const PayOnlineButton(),
                 if (pending != null) ...[
                   const SizedBox(height: 10),
                   Container(
@@ -183,7 +191,8 @@ class _RenewalPaymentCardState extends ConsumerState<RenewalPaymentCard> {
                 ],
                 const SizedBox(height: 12),
                 if (upi.isEmpty)
-                  Text(t('Contact Dukania on WhatsApp to renew.'),
+                  Text(
+                    t('Contact Dukania on WhatsApp to renew.'),
                     textAlign: TextAlign.center,
                     style: TextStyle(color: AppColors.inkSoft),
                   )

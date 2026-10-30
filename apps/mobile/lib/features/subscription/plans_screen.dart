@@ -7,6 +7,7 @@ import '../../core/supabase_providers.dart';
 import '../../core/theme.dart';
 import '../../core/whatsapp_helper.dart';
 import '../../core/widgets.dart';
+import 'online_payment.dart';
 import 'staff_request.dart';
 import '../marketing/referral_card.dart';
 
@@ -42,7 +43,9 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
       if (mounted) {
         showSuccess(
           context,
-          t('Request sent — Dukania will contact you about the {v1} plan', {'v1': plan['name']}),
+          t('Request sent — Dukania will contact you about the {v1} plan', {
+            'v1': plan['name'],
+          }),
         );
       }
     } catch (e) {
@@ -105,6 +108,9 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                           staffRequestOpen: d['staff_request_open'] == true,
                           isOwner: appContext?.isOwner ?? false,
                         ),
+                        // Pay on dukania.in (migration 0105), when switched on.
+                        const SizedBox(height: 12),
+                        const PayOnlineButton(),
                         // Refer a shop (migration 0101), for the owner.
                         if (appContext?.isOwner ?? false) ...[
                           const SizedBox(height: 16),
@@ -112,7 +118,8 @@ class _PlansScreenState extends ConsumerState<PlansScreen> {
                         ],
                         if (others.isNotEmpty) ...[
                           const SizedBox(height: 24),
-                          Text(t('Other plans'),
+                          Text(
+                            t('Other plans'),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
@@ -343,7 +350,9 @@ class _CurrentPlanCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(top: 10),
                     child: Text(
-                      t('You asked for more staff logins — Dukania will contact you.'),
+                      t(
+                        'You asked for more staff logins — Dukania will contact you.',
+                      ),
                       style: TextStyle(fontSize: 13, color: AppColors.inkSoft),
                     ),
                   )
@@ -497,7 +506,8 @@ class _PlanCard extends StatelessWidget {
                     color: AppColors.primarySoft,
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(t('RECOMMENDED'),
+                  child: Text(
+                    t('RECOMMENDED'),
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,

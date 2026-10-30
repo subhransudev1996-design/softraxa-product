@@ -484,5 +484,8 @@
 "How likely are you to recommend Dukania to another shop owner?": "অন্য কোনো দোকানদারকে Dukania সুপারিশ করার সম্ভাবনা কতটা?",
 "0 = not at all, 10 = surely": "0 = একদমই না, 10 = অবশ্যই",
 "What should we fix? (optional)": "আমাদের কী ঠিক করা উচিত? (ঐচ্ছিক)",
-"What do you like most? (optional)": "আপনার সবচেয়ে কী ভালো লাগে? (ঐচ্ছিক)"
+"What do you like most? (optional)": "আপনার সবচেয়ে কী ভালো লাগে? (ঐচ্ছিক)",
+"Pay online": "অনলাইনে পেমেন্ট করুন",
+"Renew, change plan or add logins by UPI, card or netbanking. Your plan turns on as soon as you pay.": "UPI, কার্ড বা নেটব্যাংকিং দিয়ে রিনিউ করুন, প্ল্যান বদলান বা লগইন যোগ করুন। পেমেন্ট হলেই আপনার প্ল্যান চালু হয়ে যায়।",
+"Could not open the browser": "ব্রাউজার খোলা গেল না"
 }

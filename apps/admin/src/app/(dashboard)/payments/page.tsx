@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button, Card, Input, Spinner, StatCard, Table } from "@/components/ui";
 import { dateStr, inr } from "@/lib/format";
+import { OnlineOrders } from "./online-orders";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -58,7 +59,7 @@ export default function PaymentsPage() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Subscription payments</h1>
-          <p className="text-sm text-zinc-500">Recorded with Renew. Opens in Excel with Export.</p>
+          <p className="text-sm text-zinc-500">Recorded by you, or paid online on dukania.in. Opens in Excel with Export.</p>
         </div>
         <div className="flex items-end gap-2">
           <Input type="month" value={month} onChange={(e) => e.target.value && setMonth(e.target.value)} className="w-44" />
@@ -104,6 +105,7 @@ export default function PaymentsPage() {
               )}
             </Table>
           </Card>
+          <OnlineOrders />
         </>
       )}
     </div>

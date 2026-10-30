@@ -484,5 +484,8 @@
 "How likely are you to recommend Dukania to another shop owner?": "दुसऱ्या दुकानदाराला Dukania सुचवण्याची शक्यता किती आहे?",
 "0 = not at all, 10 = surely": "0 = अजिबात नाही, 10 = नक्की",
 "What should we fix? (optional)": "आम्ही काय सुधारावे? (ऐच्छिक)",
-"What do you like most? (optional)": "तुम्हाला सर्वात जास्त काय आवडते? (ऐच्छिक)"
+"What do you like most? (optional)": "तुम्हाला सर्वात जास्त काय आवडते? (ऐच्छिक)",
+"Pay online": "ऑनलाइन पैसे भरा",
+"Renew, change plan or add logins by UPI, card or netbanking. Your plan turns on as soon as you pay.": "UPI, कार्ड किंवा नेटबँकिंगने नूतनीकरण करा, प्लॅन बदला किंवा लॉगिन जोडा. पैसे भरताच तुमचा प्लॅन सुरू होतो.",
+"Could not open the browser": "ब्राउझर उघडता आला नाही"
 }
