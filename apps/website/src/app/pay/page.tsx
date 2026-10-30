@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { Lock } from "lucide-react";
 import PayLoader from "@/components/pay/pay-loader";
 import { getSiteInfo } from "@/lib/site-info";
-import { eyebrow } from "@/lib/ui";
 
 // Personal to each shop: never cached.
 export const dynamic = "force-dynamic";
@@ -18,13 +18,14 @@ export default async function PayPage({ searchParams }: { searchParams: Promise<
   const info = await getSiteInfo();
   const token = typeof t === "string" && /^[0-9a-f]{32}$/.test(t) ? t : null;
   return (
-    <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <p className={eyebrow}>Dukania plans</p>
-      <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Pay for your plan</h1>
-      <p className="mt-2 max-w-xl text-dim">Your plan turns on as soon as you pay — in the app too.</p>
-      <div className="mt-8">
-        <PayLoader initialToken={token} whatsapp={info.whatsapp} />
+    <section className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 lg:pb-20">
+      <div className="mb-8 flex flex-wrap items-end justify-between gap-3">
+        <h1 className="font-display text-3xl font-bold tracking-tight text-paper">Checkout</h1>
+        <p className="inline-flex items-center gap-1.5 font-mono text-xs uppercase tracking-wider text-dim">
+          <Lock className="h-3.5 w-3.5" /> Secure payment · dukania.in
+        </p>
       </div>
+      <PayLoader initialToken={token} whatsapp={info.whatsapp} />
     </section>
   );
 }

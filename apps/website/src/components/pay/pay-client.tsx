@@ -1,11 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Loader2, Lock, MessageCircle, ShieldCheck, Ticket } from "lucide-react";
+import { Check, Eye, EyeOff, Loader2, Lock, MessageCircle, Minus, Plus, ShieldCheck, Smartphone, Sparkles, X, Zap } from "lucide-react";
 import { readPartnerCode } from "@/components/campaign-capture";
 import { supabase } from "@/lib/supabase-client";
 import { rupees } from "@/lib/site-info";
-import { btnGhost, btnPrimary, eyebrow } from "@/lib/ui";
+import { btnGhost, btnPrimary } from "@/lib/ui";
 
 /* The pay page (migration 0105): the shop is known by a pay link token
    from the app (?t=…) or from signing in here. Prices come from the
@@ -21,8 +21,9 @@ type Ctx = {
   current: null | { plan: string; billing: string; is_trial: boolean; includes_ai: boolean; expiry: string; active: boolean;
     extra_staff_price: number; ai_addon_price: number };
 };
-type Quote = { lines: { label: string; amount: number }[]; amount: number; until: string | null; code_ok: boolean | null; code_reason: string | null };
-type Done = { ok: boolean; kind: string; plan?: string; addon?: string; until?: string; receipt_no?: string; error?: string };
+type Quote = { lines: { label: string; amount: number }[]; amount: number; from: string | null; until: string | null;
+  code: string | null; code_ok: boolean | null; code_reason: string | null };
+type Done = { ok: boolean; kind: string; plan?: string; addon?: string; until?: string; receipt_no?: string; amount?: number; error?: string };
 
 const FN = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/razorpay`;
 const KEY = "dk_pay_token";
@@ -40,6 +41,7 @@ async function call(action: string, token: string, extra: Record<string, unknown
 
 const day = (d?: string | null) =>
   d ? new Date(`${d}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
+const todayIso = () => new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
 
 function loadCheckout(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -92,21 +94,25 @@ export default function PayClient({ initialToken, whatsapp }: { initialToken: st
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent("Hi, I want to pay for my Dukania plan.")}` : "";
 
   if (!token) return <SignIn note={ctx?.error} onToken={setToken} />;
-  if (!ctx || ctx.token !== token) return <Waiting text="Loading your shop…" />;
+  if (!ctx || ctx.token !== token) return <Loading />;
   if (ctx.error || !ctx.data) {
     return (
-      <Panel>
-        <p className="font-semibold text-paper">{ctx.error}</p>
-        {wa && <a href={wa} target="_blank" rel="noreferrer" className={`${btnGhost} mt-5`}><MessageCircle className="h-4 w-4" /> Pay on WhatsApp</a>}
-      </Panel>
+      <div className="mx-auto max-w-lg rounded-2xl border border-hairline bg-white p-8 text-center shadow-card">
+        <p className="font-display text-xl font-bold text-paper">Online payment isn&apos;t open right now</p>
+        <p className="mt-2 text-sm text-dim">{ctx.error}</p>
+        {wa && <a href={wa} target="_blank" rel="noreferrer" className={`${btnGhost} mt-6`}><MessageCircle className="h-4 w-4" /> Pay on WhatsApp</a>}
+      </div>
     );
   }
   return <Checkout token={token} ctx={ctx.data} wa={wa} />;
 }
 
+/* ---------- Sign in ---------- */
+
 function SignIn({ note, onToken }: { note?: string; onToken: (t: string) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,7 +123,7 @@ function SignIn({ note, onToken }: { note?: string; onToken: (t: string) => void
     const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     if (authError) {
       setBusy(false);
-      return setError(authError.message.includes("Invalid") ? "Wrong email or password" : authError.message);
+      return setError(authError.message.includes("Invalid") ? "That email and password don't match a Dukania account." : authError.message);
     }
     const { data, error: linkError } = await supabase.rpc("create_pay_link");
     setBusy(false);
@@ -126,27 +132,71 @@ function SignIn({ note, onToken }: { note?: string; onToken: (t: string) => void
     onToken(String(data));
   }
 
+  const field = "mt-1.5 w-full rounded-xl border border-hairline bg-bg/60 px-4 py-3 text-[15px] text-paper outline-none transition focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10";
+
   return (
-    <Panel>
-      <p className={eyebrow}>Sign in to pay</p>
-      <h2 className="mt-2 font-display text-2xl font-bold">Your Dukania account</h2>
-      <p className="mt-2 text-sm text-dim">
-        The shop owner&apos;s email and password — the same as in the app. Or open the app and tap <b className="text-paper">Pay online</b> on the Plan screen.
-      </p>
-      {note && <p className="mt-3 rounded-xl bg-[#fff8e6] px-4 py-3 text-sm text-paper">{note}</p>}
-      <form onSubmit={submit} className="mt-5 space-y-3">
-        <input required type="email" autoComplete="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)}
-          className="w-full rounded-xl border border-hairline bg-white px-4 py-3 text-sm outline-none focus:border-brand" />
-        <input required type="password" autoComplete="current-password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)}
-          className="w-full rounded-xl border border-hairline bg-white px-4 py-3 text-sm outline-none focus:border-brand" />
-        {error && <p className="text-sm font-medium text-red-700">{error}</p>}
-        <button type="submit" disabled={busy} className={`${btnPrimary} w-full justify-center disabled:opacity-60`}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Continue
+    <div className="grid overflow-hidden rounded-3xl border border-hairline bg-white shadow-card lg:grid-cols-[1fr_1.1fr]">
+      <div className="relative hidden flex-col justify-between bg-paper p-10 text-white lg:flex">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-marigold">Dukania · Plans</p>
+          <h2 className="mt-4 font-display text-3xl font-bold leading-tight">Renew in a minute.<br />Keep billing without a break.</h2>
+        </div>
+        <ul className="mt-10 space-y-5 text-sm text-white/80">
+          {[
+            [Zap, "Your plan turns on the moment you pay — on every phone and PC."],
+            [ShieldCheck, "Paid through Razorpay. Dukania never sees your card or UPI PIN."],
+            [Check, "GST included, with a receipt for your books."],
+          ].map(([Icon, text], i) => {
+            const I = Icon as typeof Zap;
+            return (
+              <li key={i} className="flex gap-3">
+                <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10"><I className="h-4 w-4 text-marigold" /></span>
+                <span>{text as string}</span>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-10 text-xs text-white/50">Paying for a shop? The owner signs in with the email used in the app.</p>
+      </div>
+
+      <form onSubmit={submit} className="p-7 sm:p-10">
+        <h2 className="font-display text-2xl font-bold text-paper">Sign in to your shop</h2>
+        <p className="mt-1.5 text-sm text-dim">Use the owner&apos;s email and password from the Dukania app.</p>
+
+        {note && <p className="mt-5 rounded-xl border border-marigold/40 bg-[#fff8e6] px-4 py-3 text-sm text-paper">{note}</p>}
+
+        <label className="mt-6 block text-sm font-semibold text-paper">
+          Email
+          <input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
+        </label>
+        <label className="mt-4 block text-sm font-semibold text-paper">
+          Password
+          <span className="relative block">
+            <input required type={show ? "text" : "password"} autoComplete="current-password" value={password}
+              onChange={(e) => setPassword(e.target.value)} className={`${field} pr-12`} />
+            <button type="button" onClick={() => setShow(!show)} aria-label={show ? "Hide password" : "Show password"}
+              className="absolute right-2 top-1/2 mt-[3px] -translate-y-1/2 rounded-lg p-2 text-dim hover:text-paper">
+              {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </span>
+        </label>
+
+        {error && <p className="mt-4 text-sm font-medium text-red-700">{error}</p>}
+
+        <button type="submit" disabled={busy} className={`${btnPrimary} mt-6 w-full justify-center disabled:opacity-60`}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Continue to payment
         </button>
+
+        <div className="mt-6 flex items-start gap-3 rounded-xl bg-elevated/60 px-4 py-3 text-xs text-dim">
+          <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
+          <span>No password needed from the app: open <b className="text-paper">Plan</b> and tap <b className="text-paper">Pay online</b>. Forgot it? Reset it on the app&apos;s sign-in screen.</span>
+        </div>
       </form>
-    </Panel>
+    </div>
   );
 }
+
+/* ---------- Checkout ---------- */
 
 function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
   const cur = ctx.current;
@@ -154,11 +204,13 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
   const canAddon = Boolean(cur?.active && !cur.is_trial);
   const [mode, setMode] = useState<"plan" | "addon">(onLifetime ? "addon" : "plan");
   const firstPlan = ctx.plans.find((p) => p.name === cur?.plan && p.billing !== "lifetime")
-    ?? ctx.plans.find((p) => p.is_recommended) ?? ctx.plans[0];
+    ?? ctx.plans.find((p) => p.billing !== "lifetime") ?? ctx.plans[0];
   const [planId, setPlanId] = useState(firstPlan?.id ?? "");
   const [staff, setStaff] = useState(0);
   const [ai, setAi] = useState(false);
   const [code, setCode] = useState(() => ctx.partner_code ?? readPartnerCode() ?? "");
+  const [codeOpen, setCodeOpen] = useState(false);
+  const [codeDraft, setCodeDraft] = useState("");
   const [addon, setAddon] = useState<"staff" | "ai">("staff");
   const [qty, setQty] = useState(1);
   const [quote, setQuote] = useState<{ key: string; data?: Quote; error?: string } | null>(null);
@@ -179,11 +231,12 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
       call("quote", token, { item })
         .then((data) => live && setQuote({ key, data }))
         .catch((e) => live && setQuote({ key, error: e.message }));
-    }, 300);
+    }, 250);
     return () => { live = false; clearTimeout(t); };
   }, [token, item, key]);
 
   const q = quote?.key === key ? quote : null;
+  const lastQuote = q?.data ?? quote?.data ?? null;
 
   async function waitForPlan(orderId: string) {
     for (let i = 0; i < 10; i++) {
@@ -228,187 +281,358 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
     }
   }
 
-  if (done) return <Result done={done} wa={wa} />;
+  if (done) return <Result done={done} shop={ctx.shop} wa={wa} />;
+
+  const trialEnded = cur ? cur.expiry < todayIso() : false;
+  const status = !cur ? "No plan yet"
+    : cur.is_trial ? (trialEnded ? `Free trial ended ${day(cur.expiry)}` : `Free trial until ${day(cur.expiry)}`)
+    : cur.billing === "lifetime" && cur.active ? `${cur.plan} · for life`
+    : cur.active ? `${cur.plan} · until ${day(cur.expiry)}` : `${cur.plan} · ended ${day(cur.expiry)}`;
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.4fr_1fr]">
-      <div className="space-y-6">
-        <Panel>
-          <p className="text-sm text-dim">Paying for</p>
-          <p className="font-display text-2xl font-bold">{ctx.shop}</p>
-          {cur && (
-            <p className="mt-1 text-sm text-dim">
-              Now on <b className="text-paper">{cur.plan}</b>
-              {cur.billing === "lifetime" && cur.active ? " for life" : cur.active ? `, until ${day(cur.expiry)}` : `, ended ${day(cur.expiry)}`}
-            </p>
-          )}
+    <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[1fr_400px]">
+      <div>
+        {/* Shop */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-hairline pb-5">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-brand-soft font-display text-lg font-bold text-brand">
+              {ctx.shop.trim().charAt(0).toUpperCase()}
+            </span>
+            <div>
+              <p className="font-semibold text-paper">{ctx.shop}</p>
+              <p className="text-sm text-dim">{status}</p>
+            </div>
+          </div>
           {canAddon && !onLifetime && (
-            <div className="mt-4 flex gap-2">
+            <div className="inline-flex rounded-xl bg-elevated p-1 text-sm font-semibold">
               {(["plan", "addon"] as const).map((m) => (
                 <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${mode === m ? "bg-brand text-white" : "border border-hairline bg-white text-paper"}`}>
-                  {m === "plan" ? "Renew or change plan" : "Add logins or AI"}
+                  className={`rounded-lg px-3.5 py-1.5 transition ${mode === m ? "bg-white text-paper shadow-sm" : "text-dim hover:text-paper"}`}>
+                  {m === "plan" ? "Renew or change plan" : "Add to my plan"}
                 </button>
               ))}
             </div>
           )}
-        </Panel>
+        </div>
 
         {mode === "plan" ? (
-          <Panel>
-            <p className={eyebrow}>Choose your plan</p>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-              {ctx.plans.map((p) => (
-                <button key={p.id} onClick={() => { setPlanId(p.id); setAi(false); }} aria-pressed={p.id === planId}
-                  className={`rounded-2xl border-2 p-4 text-left transition ${p.id === planId ? "border-brand bg-brand-soft/60" : "border-hairline bg-white hover:border-brand/40"}`}>
-                  <span className="block font-bold text-paper">{p.name}</span>
-                  <span className="mt-1 block font-display text-2xl font-bold text-brand">{rupees(p.website_price)}</span>
-                  <span className="block text-xs text-dim">
-                    {p.billing === "lifetime" ? "one time" : "a year"}
-                    {p.list_price > p.website_price && <> · <s>{rupees(p.list_price)}</s></>}
-                  </span>
-                  {p.users && <span className="mt-2 block text-xs text-dim">{p.users} logins{p.includes_ai ? " · AI included" : ""}</span>}
-                </button>
-              ))}
-            </div>
-            {plan && (
-              <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <label className="rounded-2xl border border-hairline bg-white p-4 text-sm">
-                  <span className="font-semibold text-paper">Extra staff logins</span>
-                  <span className="block text-xs text-dim">{rupees(plan.extra_staff_price)} each a year · plan has {plan.users ?? "unlimited"}</span>
-                  <input type="number" min={0} max={50} value={staff}
-                    onChange={(e) => setStaff(Math.max(0, Math.min(50, Math.floor(Number(e.target.value) || 0))))}
-                    className="mt-2 w-24 rounded-lg border border-hairline px-3 py-2" />
-                </label>
-                {aiOffered && (
-                  <label className="flex items-start gap-3 rounded-2xl border border-hairline bg-white p-4 text-sm">
-                    <input type="checkbox" checked={ai} onChange={(e) => setAi(e.target.checked)} className="mt-1" />
-                    <span>
-                      <span className="font-semibold text-paper">AI assistant</span>
-                      <span className="block text-xs text-dim">{rupees(plan.ai_addon_price)} a year · ChatGPT &amp; Claude</span>
+          <>
+            <Step n={1} title="Choose your plan" />
+            <div role="radiogroup" className="mt-4 space-y-3">
+              {ctx.plans.map((p) => {
+                const on = p.id === planId;
+                const save = p.list_price - p.website_price;
+                return (
+                  <button key={p.id} role="radio" aria-checked={on} onClick={() => { setPlanId(p.id); setAi(false); }}
+                    className={`relative flex w-full items-start gap-4 rounded-2xl border bg-white p-5 text-left transition ${on ? "border-brand ring-4 ring-brand/10" : "border-hairline hover:border-brand/40"}`}>
+                    <span className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-brand bg-brand" : "border-hairline"}`}>
+                      {on && <span className="h-2 w-2 rounded-full bg-white" />}
                     </span>
-                  </label>
-                )}
-              </div>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-display text-lg font-bold text-paper">{p.name}</span>
+                        {p.is_recommended && <span className="rounded-full bg-brand px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-white">Most chosen</span>}
+                        {p.billing === "lifetime" && <span className="rounded-full bg-marigold/25 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber">Pay once</span>}
+                      </span>
+                      {p.description && <span className="mt-1 block text-sm text-dim">{p.description}</span>}
+                      <span className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-dim">
+                        {p.users && <span>{p.users} logins</span>}
+                        <span>{p.includes_ai ? "AI assistant included" : "AI as an add-on"}</span>
+                        <span>{p.billing === "lifetime" ? "Updates for life" : "Renews yearly"}</span>
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      <span className="block font-display text-2xl font-bold tabular-nums text-paper">{rupees(p.website_price)}</span>
+                      <span className="block text-xs text-dim">{p.billing === "lifetime" ? "one time" : "per year"}</span>
+                      {save > 0 && <span className="mt-1 inline-block rounded-md bg-emerald-50 px-1.5 py-0.5 text-[11px] font-bold text-emerald-700">Save {rupees(save)}</span>}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {plan && (
+              <>
+                <Step n={2} title="Extras" hint="Optional" />
+                <div className="mt-4 divide-y divide-hairline rounded-2xl border border-hairline bg-white">
+                  <div className="flex items-center justify-between gap-4 p-5">
+                    <div>
+                      <p className="font-semibold text-paper">Extra staff logins</p>
+                      <p className="text-sm text-dim">{plan.users ? `${plan.users} included · ` : ""}{rupees(plan.extra_staff_price)} each {plan.billing === "lifetime" ? "for a year" : "a year"}</p>
+                    </div>
+                    <Stepper value={staff} min={0} max={50} onChange={setStaff} />
+                  </div>
+                  {aiOffered && (
+                    <label className="flex cursor-pointer items-center justify-between gap-4 p-5">
+                      <span>
+                        <span className="flex items-center gap-1.5 font-semibold text-paper"><Sparkles className="h-4 w-4 text-brand" /> AI assistant</span>
+                        <span className="block text-sm text-dim">Run the shop from ChatGPT or Claude · {rupees(plan.ai_addon_price)} a year</span>
+                      </span>
+                      <Switch checked={ai} onChange={setAi} />
+                    </label>
+                  )}
+                </div>
+              </>
             )}
-            <label className="mt-5 block text-sm">
-              <span className="flex items-center gap-1.5 font-semibold text-paper"><Ticket className="h-4 w-4 text-brand" /> Discount code</span>
-              <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="Optional"
-                className="mt-2 w-full max-w-xs rounded-lg border border-hairline px-3 py-2 font-mono" />
-            </label>
-          </Panel>
+          </>
         ) : (
-          <Panel>
-            <p className={eyebrow}>Add to your plan</p>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <button onClick={() => setAddon("staff")} aria-pressed={addon === "staff"}
-                className={`rounded-2xl border-2 p-4 text-left ${addon === "staff" ? "border-brand bg-brand-soft/60" : "border-hairline bg-white"}`}>
-                <span className="block font-bold text-paper">Extra staff logins</span>
-                <span className="block text-xs text-dim">{rupees(cur?.extra_staff_price ?? 0)} each a year</span>
-              </button>
-              {!cur?.includes_ai && (cur?.ai_addon_price ?? 0) > 0 && (
-                <button onClick={() => setAddon("ai")} aria-pressed={addon === "ai"}
-                  className={`rounded-2xl border-2 p-4 text-left ${addon === "ai" ? "border-brand bg-brand-soft/60" : "border-hairline bg-white"}`}>
-                  <span className="block font-bold text-paper">AI assistant</span>
-                  <span className="block text-xs text-dim">{rupees(cur?.ai_addon_price ?? 0)} a year</span>
-                </button>
-              )}
+          <>
+            <Step n={1} title="What would you like to add?" />
+            <div role="radiogroup" className="mt-4 space-y-3">
+              {[
+                { k: "staff" as const, name: "Extra staff logins", price: cur?.extra_staff_price ?? 0, show: true },
+                { k: "ai" as const, name: "AI assistant", price: cur?.ai_addon_price ?? 0, show: !cur?.includes_ai && (cur?.ai_addon_price ?? 0) > 0 },
+              ].filter((x) => x.show).map((x) => {
+                const on = addon === x.k;
+                return (
+                  <button key={x.k} role="radio" aria-checked={on} onClick={() => setAddon(x.k)}
+                    className={`flex w-full items-center gap-4 rounded-2xl border bg-white p-5 text-left transition ${on ? "border-brand ring-4 ring-brand/10" : "border-hairline hover:border-brand/40"}`}>
+                    <span className={`inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-brand bg-brand" : "border-hairline"}`}>
+                      {on && <span className="h-2 w-2 rounded-full bg-white" />}
+                    </span>
+                    <span className="flex-1 font-semibold text-paper">{x.name}</span>
+                    <span className="text-sm text-dim">{rupees(x.price)} a year</span>
+                  </button>
+                );
+              })}
             </div>
             {addon === "staff" && (
-              <label className="mt-4 block text-sm">
-                <span className="font-semibold text-paper">How many?</span>
-                <input type="number" min={1} max={50} value={qty}
-                  onChange={(e) => setQty(Math.max(1, Math.min(50, Math.floor(Number(e.target.value) || 1))))}
-                  className="ml-3 w-24 rounded-lg border border-hairline px-3 py-2" />
-              </label>
+              <div className="mt-3 flex items-center justify-between rounded-2xl border border-hairline bg-white p-5">
+                <p className="font-semibold text-paper">How many logins?</p>
+                <Stepper value={qty} min={1} max={50} onChange={setQty} />
+              </div>
             )}
-            <p className="mt-4 text-xs text-dim">
-              {cur?.billing === "lifetime" ? "Runs for one year." : "Runs until your plan renews — you pay only for the days left."}
+            <p className="mt-3 text-sm text-dim">
+              {cur?.billing === "lifetime" ? "Runs for one year from today." : `Runs until your plan renews on ${day(cur?.expiry)} — you pay only for the days left.`}
             </p>
-          </Panel>
+          </>
         )}
       </div>
 
-      <div>
-        <div className="sticky top-24">
-          <Panel>
-            <p className={eyebrow}>To pay</p>
-            {!q ? (
-              <p className="mt-4 flex items-center gap-2 text-sm text-dim"><Loader2 className="h-4 w-4 animate-spin" /> Working out your price…</p>
-            ) : q.error ? (
-              <p className="mt-4 text-sm font-medium text-red-700">{q.error}</p>
-            ) : q.data && (
-              <>
-                <ul className="mt-4 space-y-2 text-sm">
-                  {q.data.lines.map((l) => (
-                    <li key={l.label} className="flex justify-between gap-3">
-                      <span className="text-dim">{l.label}</span>
-                      <span className={`tabular-nums ${l.amount < 0 ? "text-emerald-700" : "text-paper"}`}>
-                        {l.amount < 0 ? `−${rupees(-l.amount)}` : rupees(l.amount)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                {q.data.code_ok === false && <p className="mt-2 text-xs font-medium text-red-700">Code: {q.data.code_reason}</p>}
-                <div className="mt-4 flex items-end justify-between border-t border-hairline pt-4">
-                  <span className="text-sm font-semibold text-paper">Total</span>
-                  <span className="font-display text-3xl font-bold text-brand">{rupees(q.data.amount)}</span>
-                </div>
-                <p className="mt-1 text-xs text-dim">
-                  GST included.{" "}
-                  {q.data.until ? `Active until ${day(q.data.until)}.` : mode === "plan" ? "Yours for life." : ""}
+      {/* The bill */}
+      <aside className="lg:sticky lg:top-24">
+        <div className="rounded-t-2xl border border-b-0 border-hairline bg-white px-6 pb-6 pt-6 shadow-card">
+          <div className="text-center">
+            <p className="font-mono text-sm font-bold tracking-[0.3em] text-paper">DUKANIA</p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-dim">{ctx.shop}</p>
+          </div>
+          <Rule />
+          {!lastQuote && !q?.error ? (
+            <p className="flex items-center justify-center gap-2 py-6 font-mono text-xs text-dim"><Loader2 className="h-4 w-4 animate-spin" /> Adding up…</p>
+          ) : q?.error ? (
+            <p className="py-4 text-sm font-medium text-red-700">{q.error}</p>
+          ) : lastQuote && (
+            <div className={`transition-opacity ${q ? "opacity-100" : "opacity-50"}`}>
+              <ul className="space-y-2.5 font-mono text-[13px]">
+                {lastQuote.lines.map((l) => (
+                  <li key={l.label} className="flex justify-between gap-4">
+                    <span className={l.amount < 0 ? "text-emerald-700" : "text-paper"}>{l.label}</span>
+                    <span className={`tabular-nums ${l.amount < 0 ? "text-emerald-700" : "text-paper"}`}>
+                      {l.amount < 0 ? `−${rupees(-l.amount)}` : rupees(l.amount)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <Rule />
+              <div className="flex items-baseline justify-between">
+                <span className="font-mono text-sm font-bold tracking-widest text-paper">TOTAL</span>
+                <span className="font-display text-3xl font-bold tabular-nums text-paper">{rupees(lastQuote.amount)}</span>
+              </div>
+              <p className="mt-1 text-right font-mono text-[11px] text-dim">GST included</p>
+              {(lastQuote.until || (mode === "plan" && plan?.billing === "lifetime")) && (
+                <p className="mt-4 rounded-lg bg-elevated/70 px-3 py-2 text-center font-mono text-[11px] text-paper">
+                  {lastQuote.until ? `ACTIVE ${day(lastQuote.from && lastQuote.from > todayIso() ? lastQuote.from : todayIso())} → ${day(lastQuote.until)}` : "YOURS FOR LIFE"}
                 </p>
-              </>
-            )}
-            {error && <p className="mt-4 text-sm font-medium text-red-700">{error}</p>}
-            <button onClick={pay} disabled={busy || !q?.data} className={`${btnPrimary} mt-5 w-full justify-center disabled:opacity-60`}>
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
-              {q?.data ? `Pay ${rupees(q.data.amount)}` : "Pay"}
-            </button>
-            <p className="mt-3 flex items-center gap-1.5 text-xs text-dim">
-              <ShieldCheck className="h-4 w-4 text-emerald-700" /> UPI, cards, netbanking and wallets, through Razorpay.
-            </p>
-          </Panel>
+              )}
+            </div>
+          )}
+
+          {mode === "plan" && (
+            <div className="mt-5">
+              {code && lastQuote?.code_ok !== false ? (
+                <div className="flex items-center justify-between rounded-lg border border-dashed border-emerald-600/40 bg-emerald-50 px-3 py-2 text-sm">
+                  <span className="font-mono font-semibold text-emerald-800">{code} applied</span>
+                  <button onClick={() => setCode("")} aria-label="Remove code" className="rounded p-1 text-emerald-800 hover:bg-emerald-100"><X className="h-4 w-4" /></button>
+                </div>
+              ) : codeOpen ? (
+                <form onSubmit={(e) => { e.preventDefault(); setCode(codeDraft.trim()); }} className="flex gap-2">
+                  <input autoFocus value={codeDraft} onChange={(e) => setCodeDraft(e.target.value.toUpperCase())} placeholder="CODE"
+                    className="min-w-0 flex-1 rounded-lg border border-hairline px-3 py-2 font-mono text-sm outline-none focus:border-brand" />
+                  <button type="submit" className="rounded-lg border border-hairline px-3 text-sm font-semibold text-paper hover:border-brand">Apply</button>
+                </form>
+              ) : (
+                <button onClick={() => { setCodeOpen(true); setCodeDraft(code); }} className="text-sm font-semibold text-brand hover:underline">Have a discount code?</button>
+              )}
+              {code && lastQuote?.code_ok === false && (
+                <p className="mt-2 text-xs font-medium text-red-700">{code}: {lastQuote.code_reason}</p>
+              )}
+            </div>
+          )}
+
+          {error && <p className="mt-4 text-sm font-medium text-red-700">{error}</p>}
+          <button onClick={pay} disabled={busy || !q?.data} className={`${btnPrimary} mt-5 w-full justify-center text-base disabled:opacity-60`}>
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />}
+            {q?.data ? `Pay ${rupees(q.data.amount)}` : "Pay"}
+          </button>
+          <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+            {["UPI", "Cards", "Netbanking", "Wallets"].map((m) => (
+              <span key={m} className="rounded-md border border-hairline px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide text-dim">{m}</span>
+            ))}
+          </div>
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-xs text-dim">
+            <ShieldCheck className="h-3.5 w-3.5 text-emerald-700" /> Secured by Razorpay
+          </p>
         </div>
+        <Tear />
+      </aside>
+
+      {/* On a phone the bill is below the plans: keep the total and Pay in reach. */}
+      <div className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-between gap-3 border-t border-hairline bg-white/95 px-4 py-3 backdrop-blur lg:hidden">
+        <span>
+          <span className="block font-mono text-[10px] uppercase tracking-wider text-dim">Total · GST incl.</span>
+          <span className="font-display text-xl font-bold tabular-nums text-paper">{lastQuote ? rupees(lastQuote.amount) : "…"}</span>
+        </span>
+        <button onClick={pay} disabled={busy || !q?.data} className={`${btnPrimary} min-h-11 px-5 disabled:opacity-60`}>
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Pay
+        </button>
       </div>
     </div>
   );
 }
 
-function Result({ done, wa }: { done: Done; wa: string }) {
+/* ---------- Result ---------- */
+
+function Result({ done, shop, wa }: { done: Done; shop: string; wa: string }) {
   if (!done.ok) {
     return (
-      <Panel>
-        <p className="font-display text-2xl font-bold">We&apos;re checking your payment</p>
+      <div className="mx-auto max-w-lg rounded-2xl border border-hairline bg-white p-8 shadow-card">
+        <Loader2 className="h-6 w-6 animate-spin text-brand" />
+        <p className="mt-4 font-display text-2xl font-bold text-paper">We&apos;re confirming your payment</p>
         <p className="mt-2 text-sm text-dim">
-          {done.error ? `${done.error}. ` : ""}If money was taken, your plan turns on within a few minutes — you don&apos;t need to pay again.
-          If it doesn&apos;t, message us with your payment details.
+          {done.error ? `${done.error}. ` : ""}If money was taken, your plan turns on within a few minutes — please don&apos;t pay again.
+          If it hasn&apos;t after 10 minutes, message us with your payment details.
         </p>
-        {wa && <a href={wa} target="_blank" rel="noreferrer" className={`${btnGhost} mt-5`}><MessageCircle className="h-4 w-4" /> WhatsApp Dukania</a>}
-      </Panel>
+        {wa && <a href={wa} target="_blank" rel="noreferrer" className={`${btnGhost} mt-6`}><MessageCircle className="h-4 w-4" /> WhatsApp Dukania</a>}
+      </div>
     );
   }
-  const what = done.kind === "plan" ? done.plan : done.addon === "ai" ? "The AI assistant" : "Your extra staff logins";
+  const what = done.kind === "plan" ? done.plan : done.addon === "ai" ? "AI assistant" : "Extra staff logins";
   const lifetime = done.kind === "plan" && (!done.until || done.until >= "2099-01-01");
+  const rows: [string, string][] = [
+    ["Item", what ?? ""],
+    ["Valid", lifetime ? "For life" : `Until ${day(done.until)}`],
+    ...(done.receipt_no ? [["Receipt", done.receipt_no] as [string, string]] : []),
+    ["Date", day(todayIso())],
+  ];
+
   return (
-    <Panel>
-      <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white"><Check className="h-6 w-6" /></span>
-      <p className="mt-4 font-display text-2xl font-bold">Payment received — thank you!</p>
-      <p className="mt-2 text-dim">
-        <b className="text-paper">{what}</b> {lifetime ? "is yours for life." : <>is active until <b className="text-paper">{day(done.until)}</b>.</>}
-        {done.receipt_no && <> Receipt {done.receipt_no}.</>}
-      </p>
-      <p className="mt-4 rounded-xl bg-brand-soft/60 px-4 py-3 text-sm text-paper">
-        Go back to the Dukania app — it updates by itself in a few seconds. If it doesn&apos;t, pull down on the Plan screen to refresh.
-      </p>
-    </Panel>
+    <div className="mx-auto grid max-w-4xl grid-cols-1 items-center gap-10 lg:grid-cols-[1fr_380px]">
+      <div>
+        <span className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-600 text-white"><Check className="h-6 w-6" strokeWidth={3} /></span>
+        <h2 className="mt-5 font-display text-4xl font-bold tracking-tight text-paper">You&apos;re all set.</h2>
+        <p className="mt-3 max-w-md text-lg text-dim">
+          {lifetime ? <>Dukania is yours for life.</> : <>{what} is active until <b className="text-paper">{day(done.until)}</b>.</>} Thank you for your payment.
+        </p>
+        <ol className="mt-8 space-y-4">
+          {[
+            ["Open the Dukania app", "on your phone or PC — the plan updates by itself in a few seconds."],
+            ["Not showing yet?", "Pull down on the Plan screen to refresh."],
+            ["Need a GST invoice?", "Ask us on WhatsApp with your receipt number."],
+          ].map(([t, d], i) => (
+            <li key={t} className="flex gap-4">
+              <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-brand-soft font-mono text-xs font-bold text-brand">{i + 1}</span>
+              <p className="text-sm text-dim"><b className="text-paper">{t}</b> {d}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="relative">
+        <div className="rounded-t-2xl border border-b-0 border-hairline bg-white px-6 pb-6 pt-6 shadow-card">
+          <div className="text-center">
+            <p className="font-mono text-sm font-bold tracking-[0.3em] text-paper">DUKANIA</p>
+            <p className="mt-1 font-mono text-[11px] uppercase tracking-wider text-dim">{shop}</p>
+          </div>
+          <Rule />
+          <dl className="space-y-2.5 font-mono text-[13px]">
+            {rows.map(([k, v]) => (
+              <div key={k} className="flex justify-between gap-4"><dt className="text-dim">{k}</dt><dd className="text-right text-paper">{v}</dd></div>
+            ))}
+          </dl>
+          <Rule />
+          <div className="flex items-baseline justify-between">
+            <span className="font-mono text-sm font-bold tracking-widest text-paper">PAID</span>
+            <span className="font-display text-3xl font-bold tabular-nums text-paper">{done.amount ? rupees(Number(done.amount)) : ""}</span>
+          </div>
+          <p className="mt-1 text-right font-mono text-[11px] text-dim">GST included · via Razorpay</p>
+        </div>
+        <Tear />
+        <span aria-hidden className="pointer-events-none absolute -right-3 -top-4 rotate-12 rounded-lg border-[3px] border-emerald-600/80 bg-white/80 px-3 py-0.5 font-mono text-xl font-bold tracking-[0.2em] text-emerald-600/80">
+          PAID
+        </span>
+      </div>
+    </div>
   );
 }
 
-function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-3xl border border-hairline bg-white p-6 shadow-card">{children}</div>;
+/* ---------- Small pieces ---------- */
+
+function Step({ n, title, hint }: { n: number; title: string; hint?: string }) {
+  return (
+    <div className="mt-8 flex items-center gap-3">
+      <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-paper font-mono text-xs font-bold text-white">{n}</span>
+      <h2 className="font-display text-xl font-bold text-paper">{title}</h2>
+      {hint && <span className="text-sm text-dim">{hint}</span>}
+    </div>
+  );
 }
 
-function Waiting({ text }: { text: string }) {
-  return <Panel><p className="flex items-center gap-2 text-sm text-dim"><Loader2 className="h-4 w-4 animate-spin" /> {text}</p></Panel>;
+function Stepper({ value, min, max, onChange }: { value: number; min: number; max: number; onChange: (v: number) => void }) {
+  const btn = "inline-flex h-9 w-9 items-center justify-center rounded-lg text-paper transition hover:bg-elevated disabled:opacity-30";
+  return (
+    <div className="inline-flex items-center rounded-xl border border-hairline bg-white p-1">
+      <button type="button" aria-label="Fewer" className={btn} disabled={value <= min} onClick={() => onChange(Math.max(min, value - 1))}><Minus className="h-4 w-4" /></button>
+      <span className="w-9 text-center font-mono text-sm font-bold tabular-nums text-paper">{value}</span>
+      <button type="button" aria-label="More" className={btn} disabled={value >= max} onClick={() => onChange(Math.min(max, value + 1))}><Plus className="h-4 w-4" /></button>
+    </div>
+  );
+}
+
+function Switch({ checked, onChange }: { checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={checked} onClick={(e) => { e.preventDefault(); onChange(!checked); }}
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition ${checked ? "bg-brand" : "bg-hairline"}`}>
+      <span className={`inline-block h-5 w-5 rounded-full bg-white shadow transition ${checked ? "translate-x-5" : "translate-x-0.5"}`} />
+    </button>
+  );
+}
+
+/** A dashed line like a printed bill. */
+function Rule() {
+  return <div className="my-5 border-t-2 border-dashed border-hairline" />;
+}
+
+/** The torn bottom edge of the bill. */
+function Tear() {
+  return (
+    <div aria-hidden className="h-3 w-full"
+      style={{
+        background:
+          "linear-gradient(135deg, #fff 6px, transparent 0) 0 0 / 12px 12px repeat-x, linear-gradient(225deg, #fff 6px, transparent 0) 0 0 / 12px 12px repeat-x",
+        filter: "drop-shadow(0 2px 1px rgba(28,21,48,0.08))",
+      }}
+    />
+  );
+}
+
+function Loading() {
+  return (
+    <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_400px]">
+      <div className="space-y-3">
+        <div className="h-14 animate-pulse rounded-2xl bg-elevated" />
+        {[0, 1, 2].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-white" />)}
+      </div>
+      <div className="h-96 animate-pulse rounded-2xl bg-white" />
+    </div>
+  );
 }
