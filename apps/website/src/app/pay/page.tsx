@@ -13,8 +13,8 @@ export const metadata: Metadata = {
 };
 
 /** Online payment (migration 0105): the app opens this with ?t=<pay link>. */
-export default async function PayPage({ searchParams }: { searchParams: Promise<{ t?: string }> }) {
-  const { t } = await searchParams;
+export default async function PayPage({ searchParams }: { searchParams: Promise<{ t?: string; do?: string }> }) {
+  const { t, do: what } = await searchParams;
   const info = await getSiteInfo();
   const token = typeof t === "string" && /^[0-9a-f]{32}$/.test(t) ? t : null;
   return (
@@ -25,7 +25,7 @@ export default async function PayPage({ searchParams }: { searchParams: Promise<
           <Lock className="h-3.5 w-3.5" /> Secure payment · dukania.in
         </p>
       </div>
-      <PayLoader initialToken={token} whatsapp={info.whatsapp} />
+      <PayLoader initialToken={token} initialDo={typeof what === "string" && /^(renew|staff|ai|upgrade(:[0-9a-f-]{36})?)$/.test(what) ? what : null} whatsapp={info.whatsapp} />
     </section>
   );
 }

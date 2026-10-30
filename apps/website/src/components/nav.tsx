@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Menu, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { LogOut, Menu, UserRound, X } from "lucide-react";
 import BrandLogo from "@/components/brand-logo";
+import { signOut, useSignedIn } from "@/lib/shop-session";
 
 const LINKS = [
   { href: "/features", label: "Features" },
@@ -19,6 +20,14 @@ const LINKS = [
 export default function Nav() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  // A shop owner signed in on this browser (0106) sees their account, not the trial.
+  const signedIn = useSignedIn();
+  const router = useRouter();
+  async function logout() {
+    setOpen(false);
+    await signOut();
+    router.push("/login");
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-hairline bg-bg/85 backdrop-blur-xl">
@@ -42,12 +51,31 @@ export default function Nav() {
         </nav>
 
         <div className="flex items-center gap-3">
-          <Link
-            href="/download"
-            className="stamp-press hidden items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-2 sm:inline-flex"
-          >
-            Start free trial
-          </Link>
+          {signedIn ? (
+            <>
+              <button type="button" onClick={logout} className="hidden items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-dim hover:text-paper sm:inline-flex">
+                <LogOut className="h-4 w-4" /> Log out
+              </button>
+              <Link
+                href="/account"
+                className="stamp-press hidden items-center gap-2 rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-2 sm:inline-flex"
+              >
+                <UserRound className="h-4 w-4" /> My account
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hidden rounded-xl px-3 py-2.5 text-sm font-semibold text-dim hover:text-paper sm:inline-flex">
+                Log in
+              </Link>
+              <Link
+                href="/download"
+                className="stamp-press hidden items-center rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-2 sm:inline-flex"
+              >
+                Start free trial
+              </Link>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
@@ -73,13 +101,37 @@ export default function Nav() {
                 {l.label}
               </Link>
             ))}
-            <Link
-              href="/download"
-              onClick={() => setOpen(false)}
-              className="mt-4 inline-flex justify-center rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white"
-            >
-              Start free trial
-            </Link>
+            {signedIn ? (
+              <>
+                <Link
+                  href="/account"
+                  onClick={() => setOpen(false)}
+                  className="mt-4 inline-flex items-center justify-center gap-2 rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white"
+                >
+                  <UserRound className="h-4 w-4" /> My account
+                </Link>
+                <button type="button" onClick={logout} className="mt-2 inline-flex items-center justify-center gap-2 rounded-xl border border-hairline px-4 py-3 text-sm font-semibold text-paper">
+                  <LogOut className="h-4 w-4" /> Log out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/download"
+                  onClick={() => setOpen(false)}
+                  className="mt-4 inline-flex justify-center rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white"
+                >
+                  Start free trial
+                </Link>
+                <Link
+                  href="/login"
+                  onClick={() => setOpen(false)}
+                  className="mt-2 inline-flex justify-center rounded-xl border border-hairline px-4 py-3 text-sm font-semibold text-paper"
+                >
+                  Log in to your shop
+                </Link>
+              </>
+            )}
           </nav>
         </div>
       )}

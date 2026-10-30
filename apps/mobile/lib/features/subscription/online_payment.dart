@@ -21,20 +21,25 @@ final onlinePaymentsOnProvider = FutureProvider.autoDispose<bool>((ref) async {
   }
 });
 
-const _payPage = 'https://www.dukania.in/pay';
+const _site = 'https://www.dukania.in';
 
-/// Opens dukania.in/pay for this shop in the browser with a 2-hour pay link
-/// (create_pay_link), so the owner doesn't sign in again. When the owner
-/// comes back to the app the plan is fetched again, so a paid plan shows
-/// straight away (the server turns it on as soon as Razorpay confirms).
-Future<void> openOnlinePayment(BuildContext context, WidgetRef ref) async {
+/// Opens dukania.in/pay (or /account, migration 0106) for this shop in the
+/// browser with a 2-hour pay link (create_pay_link), so the owner doesn't
+/// sign in again. When the owner comes back to the app the plan is fetched
+/// again, so a paid plan shows straight away (the server turns it on as
+/// soon as Razorpay confirms).
+Future<void> openOnlinePayment(
+  BuildContext context,
+  WidgetRef ref, {
+  String page = 'pay',
+}) async {
   // Outlives this screen: the owner may come back to another one.
   final container = ProviderScope.containerOf(context, listen: false);
   try {
     final token =
         await ref.read(supabaseProvider).rpc('create_pay_link') as String;
     final ok = await launchUrl(
-      Uri.parse('$_payPage?t=$token'),
+      Uri.parse('$_site/$page?t=$token'),
       mode: LaunchMode.externalApplication,
     );
     if (!ok) throw Exception(t('Could not open the browser'));
@@ -69,7 +74,13 @@ class PayOnlineButton extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final on = ref.watch(onlinePaymentsOnProvider).value ?? false;
     final isOwner = ref.watch(appContextProvider).value?.isOwner ?? false;
-    if (!on || !isOwner) return const SizedBox.shrink();
+    if (!isOwner) return const SizedBox.shrink();
+    final manage = TextButton.icon(
+      onPressed: () => openOnlinePayment(context, ref, page: 'account'),
+      icon: const Icon(Icons.open_in_new, size: 18),
+      label: Text(t('Manage my plan on dukania.in')),
+    );
+    if (!on) return manage;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -86,6 +97,7 @@ class PayOnlineButton extends ConsumerWidget {
           textAlign: TextAlign.center,
           style: const TextStyle(fontSize: 12.5),
         ),
+        manage,
       ],
     );
   }

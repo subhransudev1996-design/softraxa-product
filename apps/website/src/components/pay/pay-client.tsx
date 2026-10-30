@@ -1,15 +1,18 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Check, Eye, EyeOff, Loader2, Lock, MessageCircle, Minus, Plus, ShieldCheck, Smartphone, Sparkles, X, Zap } from "lucide-react";
+import Link from "next/link";
+import { ArrowUpRight, Check, Loader2, Lock, MessageCircle, Minus, Plus, ShieldCheck, Sparkles, X } from "lucide-react";
+import SignInForm from "@/components/account/sign-in-form";
 import { readPartnerCode } from "@/components/campaign-capture";
-import { supabase } from "@/lib/supabase-client";
+import { callFn, saveToken, savedToken, tokenFromSession, type FnError } from "@/lib/shop-session";
 import { rupees } from "@/lib/site-info";
 import { btnGhost, btnPrimary } from "@/lib/ui";
 
-/* The pay page (migration 0105): the shop is known by a pay link token
-   from the app (?t=…) or from signing in here. Prices come from the
-   razorpay function; the browser only says what the owner picked. */
+/* The pay page (migrations 0105, 0106): the shop is known by a pay link
+   token from the app (?t=…), from the signed-in session, or from signing
+   in here. Prices come from the razorpay function; the browser only says
+   what the owner picked. ?do=renew|staff|ai|upgrade:<plan id> preselects. */
 
 type Plan = {
   id: string; name: string; description: string; billing: "yearly" | "lifetime"; is_recommended: boolean;
@@ -21,23 +24,11 @@ type Ctx = {
   current: null | { plan: string; billing: string; is_trial: boolean; includes_ai: boolean; expiry: string; active: boolean;
     extra_staff_price: number; ai_addon_price: number };
 };
-type Quote = { lines: { label: string; amount: number }[]; amount: number; from: string | null; until: string | null;
+type Quote = { kind?: string; lines: { label: string; amount: number }[]; amount: number; from: string | null; until: string | null;
   code: string | null; code_ok: boolean | null; code_reason: string | null };
 type Done = { ok: boolean; kind: string; plan?: string; addon?: string; until?: string; receipt_no?: string; amount?: number; error?: string };
 
-const FN = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/razorpay`;
-const KEY = "dk_pay_token";
-
-async function call(action: string, token: string, extra: Record<string, unknown> = {}) {
-  const res = await fetch(FN, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "" },
-    body: JSON.stringify({ action, token, ...extra }),
-  });
-  const data = await res.json().catch(() => ({ error: "Something went wrong — try again" }));
-  if (!res.ok) throw Object.assign(new Error(data.error ?? "Something went wrong"), data);
-  return data;
-}
+const call = callFn;
 
 const day = (d?: string | null) =>
   d ? new Date(`${d}T00:00:00`).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" }) : "";
@@ -55,35 +46,40 @@ function loadCheckout(): Promise<void> {
 }
 
 function startToken(initial: string | null) {
-  try {
-    if (initial) {
-      sessionStorage.setItem(KEY, initial);
-      return initial;
-    }
-    return sessionStorage.getItem(KEY);
-  } catch {
+  if (initial) {
+    saveToken(initial);
     return initial;
   }
+  return savedToken();
 }
 
-export default function PayClient({ initialToken, whatsapp }: { initialToken: string | null; whatsapp: string }) {
-  const [token, setToken] = useState<string | null>(() => startToken(initialToken));
+export default function PayClient({ initialToken, initialDo, whatsapp }: { initialToken: string | null; initialDo: string | null; whatsapp: string }) {
+  // undefined: still looking for a signed-in session.
+  const [token, setToken] = useState<string | null | undefined>(() => startToken(initialToken) ?? undefined);
   const [ctx, setCtx] = useState<{ token: string; data?: Ctx; error?: string } | null>(null);
 
   // Keep the token out of the address bar and history (after the first render).
   useEffect(() => {
-    if (initialToken) window.history.replaceState(null, "", "/pay");
-  }, [initialToken]);
+    if (initialToken) window.history.replaceState(null, "", initialDo ? `/pay?do=${encodeURIComponent(initialDo)}` : "/pay");
+  }, [initialToken, initialDo]);
+
+  // Signed in on this browser already? Then no sign-in form.
+  useEffect(() => {
+    if (token !== undefined) return;
+    let live = true;
+    tokenFromSession().then((t) => live && setToken(t)).catch(() => live && setToken(null));
+    return () => { live = false; };
+  }, [token]);
 
   useEffect(() => {
     if (!token) return;
     let live = true;
     call("context", token)
       .then((data) => live && setCtx({ token, data }))
-      .catch((e) => {
+      .catch((e: FnError) => {
         if (!live) return;
         if (e.expired) {
-          try { sessionStorage.removeItem(KEY); } catch {}
+          saveToken(null);
           setToken(null);
         }
         setCtx({ token, error: e.message });
@@ -93,7 +89,8 @@ export default function PayClient({ initialToken, whatsapp }: { initialToken: st
 
   const wa = whatsapp ? `https://wa.me/${whatsapp}?text=${encodeURIComponent("Hi, I want to pay for my Dukania plan.")}` : "";
 
-  if (!token) return <SignIn note={ctx?.error} onToken={setToken} />;
+  if (token === undefined) return <Loading />;
+  if (!token) return <SignInForm note={ctx?.error} button="Continue to payment" onDone={setToken} />;
   if (!ctx || ctx.token !== token) return <Loading />;
   if (ctx.error || !ctx.data) {
     return (
@@ -104,105 +101,28 @@ export default function PayClient({ initialToken, whatsapp }: { initialToken: st
       </div>
     );
   }
-  return <Checkout token={token} ctx={ctx.data} wa={wa} />;
-}
-
-/* ---------- Sign in ---------- */
-
-function SignIn({ note, onToken }: { note?: string; onToken: (t: string) => void }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [show, setShow] = useState(false);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function submit(e: React.FormEvent) {
-    e.preventDefault();
-    setBusy(true);
-    setError(null);
-    const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-    if (authError) {
-      setBusy(false);
-      return setError(authError.message.includes("Invalid") ? "That email and password don't match a Dukania account." : authError.message);
-    }
-    const { data, error: linkError } = await supabase.rpc("create_pay_link");
-    setBusy(false);
-    if (linkError) return setError(linkError.message);
-    try { sessionStorage.setItem(KEY, String(data)); } catch {}
-    onToken(String(data));
-  }
-
-  const field = "mt-1.5 w-full rounded-xl border border-hairline bg-bg/60 px-4 py-3 text-[15px] text-paper outline-none transition focus:border-brand focus:bg-white focus:ring-4 focus:ring-brand/10";
-
-  return (
-    <div className="grid overflow-hidden rounded-3xl border border-hairline bg-white shadow-card lg:grid-cols-[1fr_1.1fr]">
-      <div className="relative hidden flex-col justify-between bg-paper p-10 text-white lg:flex">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-marigold">Dukania · Plans</p>
-          <h2 className="mt-4 font-display text-3xl font-bold leading-tight">Renew in a minute.<br />Keep billing without a break.</h2>
-        </div>
-        <ul className="mt-10 space-y-5 text-sm text-white/80">
-          {[
-            [Zap, "Your plan turns on the moment you pay — on every phone and PC."],
-            [ShieldCheck, "Paid through Razorpay. Dukania never sees your card or UPI PIN."],
-            [Check, "GST included, with a receipt for your books."],
-          ].map(([Icon, text], i) => {
-            const I = Icon as typeof Zap;
-            return (
-              <li key={i} className="flex gap-3">
-                <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10"><I className="h-4 w-4 text-marigold" /></span>
-                <span>{text as string}</span>
-              </li>
-            );
-          })}
-        </ul>
-        <p className="mt-10 text-xs text-white/50">Paying for a shop? The owner signs in with the email used in the app.</p>
-      </div>
-
-      <form onSubmit={submit} className="p-7 sm:p-10">
-        <h2 className="font-display text-2xl font-bold text-paper">Sign in to your shop</h2>
-        <p className="mt-1.5 text-sm text-dim">Use the owner&apos;s email and password from the Dukania app.</p>
-
-        {note && <p className="mt-5 rounded-xl border border-marigold/40 bg-[#fff8e6] px-4 py-3 text-sm text-paper">{note}</p>}
-
-        <label className="mt-6 block text-sm font-semibold text-paper">
-          Email
-          <input required type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} className={field} />
-        </label>
-        <label className="mt-4 block text-sm font-semibold text-paper">
-          Password
-          <span className="relative block">
-            <input required type={show ? "text" : "password"} autoComplete="current-password" value={password}
-              onChange={(e) => setPassword(e.target.value)} className={`${field} pr-12`} />
-            <button type="button" onClick={() => setShow(!show)} aria-label={show ? "Hide password" : "Show password"}
-              className="absolute right-2 top-1/2 mt-[3px] -translate-y-1/2 rounded-lg p-2 text-dim hover:text-paper">
-              {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </span>
-        </label>
-
-        {error && <p className="mt-4 text-sm font-medium text-red-700">{error}</p>}
-
-        <button type="submit" disabled={busy} className={`${btnPrimary} mt-6 w-full justify-center disabled:opacity-60`}>
-          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Lock className="h-4 w-4" />} Continue to payment
-        </button>
-
-        <div className="mt-6 flex items-start gap-3 rounded-xl bg-elevated/60 px-4 py-3 text-xs text-dim">
-          <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-          <span>No password needed from the app: open <b className="text-paper">Plan</b> and tap <b className="text-paper">Pay online</b>. Forgot it? Reset it on the app&apos;s sign-in screen.</span>
-        </div>
-      </form>
-    </div>
-  );
+  return <Checkout token={token} ctx={ctx.data} initialDo={initialDo} wa={wa} />;
 }
 
 /* ---------- Checkout ---------- */
 
-function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
+type Mode = "plan" | "upgrade" | "addon";
+
+function Checkout({ token, ctx, initialDo, wa }: { token: string; ctx: Ctx; initialDo: string | null; wa: string }) {
   const cur = ctx.current;
   const onLifetime = Boolean(cur?.active && cur.billing === "lifetime");
   const canAddon = Boolean(cur?.active && !cur.is_trial);
-  const [mode, setMode] = useState<"plan" | "addon">(onLifetime ? "addon" : "plan");
+  // Upgrades (0106): from a running yearly plan to a dearer one or to Lifetime.
+  const curPlan = ctx.plans.find((p) => p.name === cur?.plan);
+  const upgrades = canAddon && !onLifetime && curPlan
+    ? ctx.plans.filter((p) => p.id !== curPlan.id && (p.billing === "lifetime" || p.website_price > curPlan.website_price))
+    : [];
+  const modes: Mode[] = [...(onLifetime ? [] : ["plan" as Mode]), ...(upgrades.length ? ["upgrade" as Mode] : []), ...(canAddon ? ["addon" as Mode] : [])];
+  const asked = initialDo ?? "";
+  const startMode: Mode = asked.startsWith("upgrade") && upgrades.length ? "upgrade"
+    : (asked === "staff" || asked === "ai") && canAddon ? "addon" : onLifetime ? "addon" : "plan";
+  const [mode, setMode] = useState<Mode>(startMode);
+  const [upId, setUpId] = useState(() => upgrades.find((u) => asked === `upgrade:${u.id}`)?.id ?? upgrades[0]?.id ?? "");
   const firstPlan = ctx.plans.find((p) => p.name === cur?.plan && p.billing !== "lifetime")
     ?? ctx.plans.find((p) => p.billing !== "lifetime") ?? ctx.plans[0];
   const [planId, setPlanId] = useState(firstPlan?.id ?? "");
@@ -211,7 +131,7 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
   const [code, setCode] = useState(() => ctx.partner_code ?? readPartnerCode() ?? "");
   const [codeOpen, setCodeOpen] = useState(false);
   const [codeDraft, setCodeDraft] = useState("");
-  const [addon, setAddon] = useState<"staff" | "ai">("staff");
+  const [addon, setAddon] = useState<"staff" | "ai">(asked === "ai" ? "ai" : "staff");
   const [qty, setQty] = useState(1);
   const [quote, setQuote] = useState<{ key: string; data?: Quote; error?: string } | null>(null);
   const [busy, setBusy] = useState(false);
@@ -222,7 +142,8 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
   const aiOffered = Boolean(plan && !plan.includes_ai && plan.ai_addon_price > 0);
   const item = useMemo(() => mode === "plan"
     ? { kind: "plan", plan_id: planId, extra_staff: staff, ai_addon: ai && aiOffered, code: code.trim() }
-    : { kind: "addon", addon, quantity: addon === "ai" ? 1 : qty }, [mode, planId, staff, ai, aiOffered, code, addon, qty]);
+    : mode === "upgrade" ? { kind: "upgrade", plan_id: upId }
+    : { kind: "addon", addon, quantity: addon === "ai" ? 1 : qty }, [mode, planId, staff, ai, aiOffered, code, upId, addon, qty]);
   const key = JSON.stringify(item);
 
   useEffect(() => {
@@ -303,21 +224,60 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
               <p className="text-sm text-dim">{status}</p>
             </div>
           </div>
-          {canAddon && !onLifetime && (
-            <div className="inline-flex rounded-xl bg-elevated p-1 text-sm font-semibold">
-              {(["plan", "addon"] as const).map((m) => (
+          {modes.length > 1 && (
+            <div className="inline-flex flex-wrap rounded-xl bg-elevated p-1 text-sm font-semibold">
+              {modes.map((m) => (
                 <button key={m} onClick={() => setMode(m)} aria-pressed={mode === m}
                   className={`rounded-lg px-3.5 py-1.5 transition ${mode === m ? "bg-white text-paper shadow-sm" : "text-dim hover:text-paper"}`}>
-                  {m === "plan" ? "Renew or change plan" : "Add to my plan"}
+                  {m === "plan" ? (canAddon ? "Renew" : "Choose a plan") : m === "upgrade" ? "Upgrade" : "Add logins or AI"}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {mode === "plan" ? (
+        {mode === "upgrade" ? (
           <>
-            <Step n={1} title="Choose your plan" />
+            <Step n={1} title="Upgrade your plan" />
+            <p className="mt-2 text-sm text-dim">
+              Starts today. You pay only the difference for the {Math.max(0, Math.round((new Date(`${cur?.expiry}T00:00:00`).getTime() - new Date(`${todayIso()}T00:00:00`).getTime()) / 86400000))} days
+              left on {cur?.plan} — your renewal date stays {day(cur?.expiry)}. Lifetime counts the unused days off its price.
+            </p>
+            <div role="radiogroup" className="mt-4 space-y-3">
+              {upgrades.map((p) => {
+                const on = p.id === upId;
+                return (
+                  <button key={p.id} role="radio" aria-checked={on} onClick={() => setUpId(p.id)}
+                    className={`flex w-full items-start gap-4 rounded-2xl border bg-white p-5 text-left transition ${on ? "border-brand ring-4 ring-brand/10" : "border-hairline hover:border-brand/40"}`}>
+                    <span className={`mt-1 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${on ? "border-brand bg-brand" : "border-hairline"}`}>
+                      {on && <span className="h-2 w-2 rounded-full bg-white" />}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="font-display text-lg font-bold text-paper">{cur?.plan} → {p.name}</span>
+                        {p.billing === "lifetime" && <span className="rounded-full bg-marigold/25 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-amber">Pay once</span>}
+                      </span>
+                      <span className="mt-1 block text-sm text-dim">
+                        {p.includes_ai && !cur?.includes_ai ? "Adds the AI assistant (ChatGPT & Claude). " : ""}
+                        {p.billing === "lifetime" ? "No more yearly renewals." : `Then ${rupees(p.website_price)} a year from ${day(cur?.expiry)}.`}
+                      </span>
+                    </span>
+                    <span className="shrink-0 text-right">
+                      {on && q?.data ? (
+                        <span className="block font-display text-2xl font-bold tabular-nums text-paper">{rupees(q.data.amount)}</span>
+                      ) : (
+                        <ArrowUpRight className="h-5 w-5 text-brand" />
+                      )}
+                      {on && <span className="block text-xs text-dim">to pay now</span>}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </>
+        ) : mode === "plan" ? (
+          <>
+            <Step n={1} title={canAddon ? "Renew your plan" : "Choose your plan"} />
             <div role="radiogroup" className="mt-4 space-y-3">
               {ctx.plans.map((p) => {
                 const on = p.id === planId;
@@ -439,7 +399,7 @@ function Checkout({ token, ctx, wa }: { token: string; ctx: Ctx; wa: string }) {
                 <span className="font-display text-3xl font-bold tabular-nums text-paper">{rupees(lastQuote.amount)}</span>
               </div>
               <p className="mt-1 text-right font-mono text-[11px] text-dim">GST included</p>
-              {(lastQuote.until || (mode === "plan" && plan?.billing === "lifetime")) && (
+              {(lastQuote.until || (mode === "plan" && plan?.billing === "lifetime") || (mode === "upgrade" && !lastQuote.until)) && (
                 <p className="mt-4 rounded-lg bg-elevated/70 px-3 py-2 text-center font-mono text-[11px] text-paper">
                   {lastQuote.until ? `ACTIVE ${day(lastQuote.from && lastQuote.from > todayIso() ? lastQuote.from : todayIso())} → ${day(lastQuote.until)}` : "YOURS FOR LIFE"}
                 </p>
@@ -516,8 +476,8 @@ function Result({ done, shop, wa }: { done: Done; shop: string; wa: string }) {
       </div>
     );
   }
-  const what = done.kind === "plan" ? done.plan : done.addon === "ai" ? "AI assistant" : "Extra staff logins";
-  const lifetime = done.kind === "plan" && (!done.until || done.until >= "2099-01-01");
+  const what = done.kind === "plan" || done.kind === "upgrade" ? done.plan : done.addon === "ai" ? "AI assistant" : "Extra staff logins";
+  const lifetime = (done.kind === "plan" || done.kind === "upgrade") && (!done.until || done.until >= "2099-01-01");
   const rows: [string, string][] = [
     ["Item", what ?? ""],
     ["Valid", lifetime ? "For life" : `Until ${day(done.until)}`],
@@ -537,6 +497,7 @@ function Result({ done, shop, wa }: { done: Done; shop: string; wa: string }) {
           {[
             ["Open the Dukania app", "on your phone or PC — the plan updates by itself in a few seconds."],
             ["Not showing yet?", "Pull down on the Plan screen to refresh."],
+            ["Your account", "shows your plan, days left and every payment."],
             ["Need a GST invoice?", "Ask us on WhatsApp with your receipt number."],
           ].map(([t, d], i) => (
             <li key={t} className="flex gap-4">
@@ -545,6 +506,7 @@ function Result({ done, shop, wa }: { done: Done; shop: string; wa: string }) {
             </li>
           ))}
         </ol>
+        <Link href="/account" className={`${btnGhost} mt-8`}>Go to my account <ArrowUpRight className="h-4 w-4" /></Link>
       </div>
 
       <div className="relative">

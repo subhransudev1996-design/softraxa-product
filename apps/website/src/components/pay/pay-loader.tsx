@@ -9,6 +9,6 @@ const PayClient = dynamic(() => import("./pay-client"), {
   loading: () => <div className="h-40 animate-pulse rounded-3xl bg-white/60" />,
 });
 
-export default function PayLoader(props: { initialToken: string | null; whatsapp: string }) {
+export default function PayLoader(props: { initialToken: string | null; initialDo: string | null; whatsapp: string }) {
   return <PayClient {...props} />;
 }

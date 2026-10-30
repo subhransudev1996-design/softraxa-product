@@ -2,6 +2,8 @@
 // (migration 0105). Every call carries the shop's pay link token
 // (create_pay_link, from the app or after signing in on the website).
 //
+//   POST { action: "account", token }                     the shop's plan, payments, upgrades
+//                                                         (works with online payments off too)
 //   POST { action: "context", token }                     the shop and what it can buy
 //   POST { action: "quote",   token, item }               the exact amount
 //   POST { action: "order",   token, item }               a Razorpay order for the checkout
@@ -42,6 +44,15 @@ Deno.serve(async (req) => {
   if (!/^[0-9a-f]{32}$/.test(token)) return json({ error: "This payment link isn't valid — open it again" }, 401);
 
   const db = serviceDb();
+
+  // The account page only reads: it works with online payments off.
+  if (body.action === "account") {
+    const { data, error } = await db.rpc("online_account", { p_token: token });
+    if (error) return json({ error: error.message }, 500);
+    if (!data) return json({ error: "Please sign in again", expired: true }, 401);
+    return json(data);
+  }
+
   const { data: on } = await db.rpc("online_payments_on");
   if (!on || !keyId()) return json({ error: "Online payment is not available yet — contact Dukania", off: true }, 503);
 
@@ -66,7 +77,9 @@ Deno.serve(async (req) => {
         const { data: quote, error } = await db.rpc("online_quote", { p_business: businessId, p: item });
         if (error) return json({ error: error.message }, 400);
         const paise = Math.round(Number(quote.amount) * 100);
-        const what = quote.kind === "plan" ? `${quote.plan}` : quote.addon === "ai" ? "AI assistant" : "Extra staff logins";
+        const what = quote.kind === "plan" ? `${quote.plan}`
+          : quote.kind === "upgrade" ? `Upgrade to ${quote.plan}`
+          : quote.addon === "ai" ? "AI assistant" : "Extra staff logins";
         const order = await rzp("/orders", {
           method: "POST",
           body: {
