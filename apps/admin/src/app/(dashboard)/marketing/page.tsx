@@ -6,19 +6,17 @@ import { ShopGroups } from "./shops";
 import { Announcements } from "./announcements";
 import { PromoCodes } from "./promos";
 import { Referrals } from "./referrals";
-import { Partners } from "./partners";
 import { Campaigns } from "./campaigns";
 
 const TABS = [
   ["shops", "Shops & messages"],
   ["announcements", "Announcements"],
   ["promos", "Promo codes"],
-  ["partners", "Influencers"],
   ["referrals", "Referrals"],
   ["campaigns", "Campaigns"],
 ] as const;
 
-/** Marketing (migrations 0101, 0104): reach groups of shops, offers, influencers, referrals and what campaigns brought. */
+/** Marketing (migration 0101): reach groups of shops, offers, referrals and what campaigns brought. */
 export default function MarketingPage() {
   const [tab, setTab] = useState<string>("shops");
   return (
@@ -39,7 +37,6 @@ export default function MarketingPage() {
       {tab === "shops" && <ShopGroups />}
       {tab === "announcements" && <Announcements />}
       {tab === "promos" && <PromoCodes />}
-      {tab === "partners" && <Partners />}
       {tab === "referrals" && <Referrals />}
       {tab === "campaigns" && <Campaigns />}
     </div>

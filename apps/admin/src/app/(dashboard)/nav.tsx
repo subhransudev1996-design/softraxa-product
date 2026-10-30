@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Boxes,
   CalendarCheck,
+  Handshake,
   HeartHandshake,
   HeartPulse,
   IndianRupee,
@@ -44,6 +45,7 @@ const daily = [
   { href: "/support", label: "Support", icon: LifeBuoy },
   { href: "/leads", label: "Leads", icon: Target },
   { href: "/marketing", label: "Marketing", icon: Megaphone },
+  { href: "/influencers", label: "Influencers", icon: Handshake },
   { href: "/reconciliation", label: "Reconciliation", icon: ScanSearch },
 ];
 const setup = [
