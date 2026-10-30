@@ -73,6 +73,12 @@ export async function signIn(email: string, password: string) {
   try {
     return await tokenFromSession();
   } catch (e) {
+    // An influencer partner on the shop login: their page is elsewhere (0107).
+    const { data: partner } = await supabase.rpc("my_partner");
+    if (partner) {
+      window.location.assign("/partner/me");
+      return null;
+    }
     await supabase.auth.signOut();
     throw e;
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Check, Eye, EyeOff, Loader2, Lock, ShieldCheck, Smartphone, Zap } from "lucide-react";
 import { signIn } from "@/lib/shop-session";
 import { btnPrimary } from "@/lib/ui";
@@ -85,7 +86,7 @@ export default function SignInForm({ note, button = "Sign in", onDone }: {
 
         <div className="mt-6 flex items-start gap-3 rounded-xl bg-elevated/60 px-4 py-3 text-xs text-dim">
           <Smartphone className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
-          <span>Forgot your password? Reset it on the app&apos;s sign-in screen. New to Dukania? <a href="/download" className="font-semibold text-brand hover:underline">Start a free trial</a>.</span>
+          <span>Forgot your password? Reset it on the app&apos;s sign-in screen. New to Dukania? <a href="/download" className="font-semibold text-brand hover:underline">Start a free trial</a>. Influencer partner? <Link href="/partner/login" className="font-semibold text-brand hover:underline">Sign in here</Link>.</span>
         </div>
       </form>
     </div>

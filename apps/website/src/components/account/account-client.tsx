@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowUpRight, CalendarClock, Crown, LogOut, MessageCircle, Plus, Receipt, Sparkles, Users } from "lucide-react";
 import { callWithSession, saveToken, signOut, type FnError } from "@/lib/shop-session";
 import { rupees } from "@/lib/site-info";
+import { supabase } from "@/lib/supabase-client";
 import { btnGhost, btnPrimary } from "@/lib/ui";
 
 /* dukania.in/account (migration 0106): the shop's plan and days left,
@@ -46,8 +47,13 @@ export default function AccountClient({ initialToken, whatsapp }: { initialToken
       .then((data) => live && setState({ data }))
       .catch((e: FnError) => {
         if (!live) return;
-        if (e.expired) router.replace("/login?next=/account");
-        else setState({ error: e.message });
+        if (e.expired) return router.replace("/login?next=/account");
+        // A partner has no shop: their page is /partner/me (0107).
+        supabase.rpc("my_partner").then(({ data }) => {
+          if (!live) return;
+          if (data) router.replace("/partner/me");
+          else setState({ error: e.message });
+        });
       });
     return () => { live = false; };
   }, [initialToken, router]);

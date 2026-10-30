@@ -367,6 +367,91 @@ const STATUS: Record<string, [string, string]> = {
   cancelled: ["Cancelled", "zinc"],
 };
 
+/**
+ * The partner's login (migration 0107): an email and a generated password,
+ * shown once to send on WhatsApp. Also switches the old private link off.
+ */
+function PartnerLogin({ partner, canEdit }: { partner: any; canEdit: boolean }) {
+  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState<string>(partner.login_email || (partner.user_id ? "—" : ""));
+  const [fresh, setFresh] = useState<{ email: string; password: string } | null>(null);
+  const [linkOn, setLinkOn] = useState<boolean>(partner.stats_link_on !== false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function act(action: string) {
+    if (action === "remove" && !window.confirm(`Remove ${partner.name}'s login? They can't sign in after this.`)) return;
+    setBusy(true);
+    setError(null);
+    const res = await fetch("/api/partner-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ partnerId: partner.id, action, email }),
+    });
+    const data = await res.json().catch(() => ({}));
+    setBusy(false);
+    if (!res.ok) return setError(data.error ?? "That didn't work");
+    if (action === "remove") {
+      setLogin("");
+      setFresh(null);
+    } else {
+      setLogin(data.email);
+      setFresh(data);
+      setEmail("");
+    }
+  }
+
+  async function changeLink(on: boolean) {
+    const { error: e } = await createClient().rpc("admin_set_partner_link", { p_partner: partner.id, p_on: on });
+    if (e) return setError(e.message);
+    setLinkOn(on);
+  }
+
+  const message = fresh
+    ? `Namaste ${partner.name}! Your Dukania partner login: ${SITE}/partner/login — email ${fresh.email}, password ${fresh.password} . ` +
+      `You can change the password after signing in. Your link for posts: ${linkOf(partner)} , your code ${partner.code}. Dukania`
+    : "";
+
+  return (
+    <div className="rounded-xl bg-zinc-50 p-3">
+      <p className="text-xs text-zinc-500">Their login ({SITE.replace("https://www.", "")}/partner/login)</p>
+      {error && <p className="mt-1 text-xs font-medium text-red-600">{error}</p>}
+      {fresh && (
+        <div className="mt-2 rounded-lg bg-violet-50 p-3 text-violet-900">
+          <p className="font-semibold">Send this now — the password won&apos;t show again.</p>
+          <p className="mt-1 font-mono text-xs">{fresh.email}<br />{fresh.password}</p>
+          {partner.phone && (
+            <a href={waLink(partner.phone, message)} target="_blank" rel="noreferrer"><Button className="mt-2">Send login on WhatsApp</Button></a>
+          )}
+        </div>
+      )}
+      {login ? (
+        <div className="mt-2 flex flex-wrap items-center gap-2">
+          <span className="font-mono text-xs font-semibold">{login}</span>
+          {canEdit && (
+            <>
+              <Button variant="outline" disabled={busy} onClick={() => act("reset")}>New password</Button>
+              <Button variant="ghost" disabled={busy} onClick={() => act("remove")}>Remove login</Button>
+            </>
+          )}
+        </div>
+      ) : canEdit ? (
+        <form className="mt-2 flex flex-wrap gap-2" onSubmit={(e) => { e.preventDefault(); act("create"); }}>
+          <Input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Their email" className="max-w-xs" />
+          <Button type="submit" disabled={busy || !email.trim()}>Create login</Button>
+        </form>
+      ) : (
+        <p className="mt-1 text-zinc-500">No login yet.</p>
+      )}
+      {canEdit && (
+        <div className="mt-3 border-t border-zinc-200 pt-3">
+          <Toggle checked={linkOn} onChange={changeLink} label={linkOn ? "Private stats link: on" : "Private stats link: off (login only)"} />
+        </div>
+      )}
+    </div>
+  );
+}
+
 function PartnerDetail({ partner, onClose, onCopy, onNewLink }: {
   partner: any; onClose: () => void; onCopy: (text: string, what: string) => void; onNewLink?: () => void;
 }) {
@@ -403,6 +488,7 @@ function PartnerDetail({ partner, onClose, onCopy, onNewLink }: {
             </div>
           </div>
         </div>
+        <PartnerLogin partner={partner} canEdit={Boolean(onNewLink)} />
         {partner.phone && (
           <div>
             <a href={waLink(partner.phone, invite)} target="_blank" rel="noreferrer"><Button>Send link and code on WhatsApp</Button></a>
