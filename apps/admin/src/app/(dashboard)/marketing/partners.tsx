@@ -31,7 +31,7 @@ const statsOf = (p: any) => `${SITE}/partner/${p.stats_token}`;
 export function Partners() {
   const [rows, setRows] = useState<any[] | null>(null);
   const [shops, setShops] = useState<any[]>([]);
-  const [defaults, setDefaults] = useState({ buyer_off_pct: "10", commission_pct: "20", hold_days: "15" });
+  const [defaults, setDefaults] = useState({ buyer_off_pct: "10", commission_pct: "20", hold_days: "15", min_payout: "500" });
   const [editing, setEditing] = useState<Editing | null>(null);
   const [paying, setPaying] = useState<any>(null);
   const [viewing, setViewing] = useState<any>(null);
@@ -51,11 +51,12 @@ export function Partners() {
       setRows((data as any[]) ?? []);
     });
     db.from("businesses").select("id, name, partner_id, referred_by").order("name").then(({ data }) => setShops(data ?? []));
-    db.from("platform_settings").select("partner_buyer_off_pct, partner_commission_pct, partner_hold_days").eq("id", 1).maybeSingle()
+    db.from("platform_settings").select("partner_buyer_off_pct, partner_commission_pct, partner_hold_days, partner_min_payout").eq("id", 1).maybeSingle()
       .then(({ data }) => data && setDefaults({
         buyer_off_pct: String(Number(data.partner_buyer_off_pct)),
         commission_pct: String(Number(data.partner_commission_pct)),
         hold_days: String(data.partner_hold_days),
+        min_payout: String(Number(data.partner_min_payout ?? 500)),
       }));
   }, [refresh]);
 
@@ -73,7 +74,7 @@ export function Partners() {
 
   async function saveDefaults() {
     const { error } = await createClient().rpc("admin_set_partner_defaults", {
-      p: { buyer_off_pct: Number(defaults.buyer_off_pct), commission_pct: Number(defaults.commission_pct), hold_days: Number(defaults.hold_days) },
+      p: { buyer_off_pct: Number(defaults.buyer_off_pct), commission_pct: Number(defaults.commission_pct), hold_days: Number(defaults.hold_days), min_payout: Number(defaults.min_payout) },
     });
     setNotice(error ? { ok: false, text: error.message } : { ok: true, text: "Saved. New partners start with these; change any partner's deal on Edit." });
   }
@@ -159,6 +160,7 @@ export function Partners() {
                 <td className="px-4 py-3 tabular-nums">
                   <b className={payable < 0 ? "text-red-600" : "text-ink"}>{inr(payable)}</b>
                   {Number(p.held) > 0 && <span className="block text-xs text-zinc-500">+ {inr(p.held)} held</span>}
+                  {p.payout_request && <span className="mt-1 block"><Badge color="orange">Payout requested</Badge></span>}
                 </td>
                 <td className="px-4 py-3 tabular-nums">
                   {inr(p.paid)}
@@ -185,7 +187,7 @@ export function Partners() {
           <Card>
             <CardBody className="space-y-3">
               <h2 className="text-sm font-semibold text-zinc-700">Deal for new partners</h2>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 <div>
                   <Label>Shop gets % off</Label>
                   <Input type="number" min={0} max={50} value={defaults.buyer_off_pct} onChange={(e) => setDefaults({ ...defaults, buyer_off_pct: e.target.value })} />
@@ -197,6 +199,10 @@ export function Partners() {
                 <div>
                   <Label>Hold (days)</Label>
                   <Input type="number" min={0} max={90} value={defaults.hold_days} onChange={(e) => setDefaults({ ...defaults, hold_days: e.target.value })} />
+                </div>
+                <div>
+                  <Label>Minimum payout ₹</Label>
+                  <Input type="number" min={0} value={defaults.min_payout} onChange={(e) => setDefaults({ ...defaults, min_payout: e.target.value })} />
                 </div>
               </div>
               <div className="flex items-center justify-between gap-3">

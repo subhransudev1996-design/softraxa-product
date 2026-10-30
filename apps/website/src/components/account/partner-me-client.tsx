@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, Copy, Loader2, LogOut } from "lucide-react";
+import { Banknote, Check, Copy, Loader2, LogOut } from "lucide-react";
 import { signOut } from "@/lib/shop-session";
 import { rupees } from "@/lib/site-info";
 import { supabase } from "@/lib/supabase-client";
-import { btnGhost, eyebrow } from "@/lib/ui";
+import { btnGhost, btnPrimary, eyebrow } from "@/lib/ui";
 
 /* dukania.in/partner/me (migration 0107): the signed-in partner's numbers,
    their UPI ID for payouts and their password. Counts and money only. */
@@ -14,7 +14,9 @@ import { btnGhost, eyebrow } from "@/lib/ui";
 type Stats = {
   name: string; code: string; active: boolean; buyer_off_pct: number; rule: string; hold_days: number;
   clicks: number; signups: number; paid_shops: number; earned: number; held: number; payable: number; paid: number;
-  upi_id: string; email: string;
+  upi_id: string; email: string; on_trial: number; trial_ended: number; code_uses: number; min_payout: number;
+  payout_request: { amount: number; upi_id: string; at: string } | null;
+  purchases: { day: string; kind: string; plan: string; paid: number; commission: number; payable_on: string; status: string }[];
   months: { month: string; clicks: number; signups: number; paid_shops: number; earned: number }[];
   payouts: { paid_on: string; amount: number; reference: string }[];
 };
@@ -30,6 +32,8 @@ export default function PartnerMeClient() {
   const [pass, setPass] = useState("");
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [asking, setAsking] = useState(false);
+  const [payoutError, setPayoutError] = useState<string | null>(null);
 
   useEffect(() => {
     let live = true;
@@ -48,7 +52,17 @@ export default function PartnerMeClient() {
   async function saveUpi(e: React.FormEvent) {
     e.preventDefault();
     const { error } = await supabase.rpc("my_partner_set_upi", { p_upi: upi });
+    if (!error && s) setS({ ...s, upi_id: upi.trim() });
     setNote(error ? { ok: false, text: error.message } : { ok: true, text: "UPI ID saved. Your next payment goes here." });
+  }
+
+  async function requestPayout() {
+    setAsking(true);
+    setPayoutError(null);
+    const { data, error } = await supabase.rpc("my_partner_request_payout");
+    setAsking(false);
+    if (error) return setPayoutError(error.message);
+    if (s) setS({ ...s, payout_request: { ...(data as { amount: number; upi_id: string }), at: new Date().toISOString() } });
   }
 
   async function savePassword(e: React.FormEvent) {
@@ -81,6 +95,16 @@ export default function PartnerMeClient() {
     ["To be paid", money(Number(s.payable)), Number(s.held) > 0 ? `+ ${money(Number(s.held))} after the ${s.hold_days}-day wait` : undefined],
     ["Paid to you", money(Number(s.paid))],
   ];
+  const payable = Number(s.payable);
+  const minPayout = Number(s.min_payout ?? 500);
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Kolkata" });
+  const funnel: [string, number, string][] = [
+    ["Clicks", s.clicks, "on your link"],
+    ["Joined", s.signups, "with your link or code"],
+    ["On trial now", s.on_trial, "may still buy"],
+    ["Purchased", s.paid_shops, "took a plan"],
+    ["Trial ended", s.trial_ended, "didn't buy yet"],
+  ];
   const field = "min-w-0 flex-1 rounded-xl border border-hairline bg-bg/60 px-4 py-2.5 text-sm text-paper outline-none focus:border-brand focus:bg-white";
 
   return (
@@ -90,7 +114,7 @@ export default function PartnerMeClient() {
           <p className={eyebrow}>Dukania partner</p>
           <h1 className="mt-2 font-display text-3xl font-bold tracking-tight sm:text-4xl">Namaste, {s.name}.</h1>
         </div>
-        <button onClick={logout} className={btnGhost}><LogOut className="h-4 w-4" /> Log out</button>
+        <button onClick={logout} className={`${btnGhost} sm:hidden`}><LogOut className="h-4 w-4" /> Log out</button>
       </div>
       <p className="mt-3 text-dim">
         Your code <b className="font-mono text-paper">{s.code}</b>
@@ -111,6 +135,64 @@ export default function PartnerMeClient() {
           </li>
         ))}
       </ul>
+
+      {/* Asking to be paid */}
+      <div className="mt-6 rounded-2xl border border-hairline bg-white p-5 shadow-card">
+        {s.payout_request ? (
+          <p className="flex items-start gap-3 text-sm text-paper">
+            <Check className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
+            <span><b>Payout requested: {money(Number(s.payout_request.amount))}</b> to <span className="font-mono">{s.payout_request.upi_id}</span>. Dukania will pay you soon, and it will show under Payments to you.</span>
+          </p>
+        ) : (
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-paper">{payable >= minPayout && payable > 0 ? `${money(payable)} is ready for you` : "Payout"}</p>
+              <p className="text-sm text-dim">
+                {!s.upi_id ? "Add your UPI ID below first." : payable >= minPayout && payable > 0 ? `We'll pay it to ${s.upi_id}.` : `You can ask once ${rupees(minPayout)} or more is ready to be paid.`}
+              </p>
+              {payoutError && <p className="mt-1 text-sm font-medium text-red-700">{payoutError}</p>}
+            </div>
+            <button onClick={requestPayout} disabled={asking || !s.upi_id || payable <= 0 || payable < minPayout}
+              className={`${btnPrimary} disabled:cursor-not-allowed disabled:opacity-50`}>
+              {asking ? <Loader2 className="h-4 w-4 animate-spin" /> : <Banknote className="h-4 w-4" />} Request payout
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* The funnel */}
+      <h2 className="mt-12 font-display text-xl font-bold">From click to sale</h2>
+      <ol className="mt-4 grid grid-cols-2 gap-px overflow-hidden rounded-2xl border border-hairline bg-hairline shadow-card sm:grid-cols-3 lg:grid-cols-5">
+        {funnel.map(([label, value, hint]) => (
+          <li key={label} className="bg-white p-4 last:col-span-2 lg:last:col-span-1">
+            <p className="font-display text-2xl font-bold tabular-nums text-paper">{value}</p>
+            <p className="text-sm font-semibold text-paper">{label}</p>
+            <p className="text-xs text-dim">{hint}</p>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-2 text-xs text-dim">Your code was used on {s.code_uses} payment{Number(s.code_uses) === 1 ? "" : "s"}. Clicks count one person once a day.</p>
+
+      {/* Each sale */}
+      <h2 className="mt-12 font-display text-xl font-bold">Your sales</h2>
+      {s.purchases.length === 0 ? (
+        <p className="mt-3 text-sm text-dim">No sales yet. They show here as soon as a shop pays.</p>
+      ) : (
+        <ul className="mt-4 divide-y divide-hairline rounded-2xl border border-hairline bg-white shadow-card">
+          {s.purchases.map((c, i) => {
+            const label = c.status === "paid" ? "Paid to you" : c.status === "cancelled" ? "Refunded" : c.payable_on > today ? `Payable from ${dayName(c.payable_on)}` : "Ready to pay";
+            return (
+              <li key={i} className="flex items-start justify-between gap-4 px-4 py-3 text-sm">
+                <span>
+                  <span className="block font-medium text-paper">{c.kind === "refund" ? `Refund · ${c.plan}` : c.plan || "Plan"}</span>
+                  <span className="block text-xs text-dim">{dayName(c.day)} · shop paid {money(Number(c.paid))} · {label}</span>
+                </span>
+                <b className={`tabular-nums ${Number(c.commission) < 0 || c.status === "cancelled" ? "text-red-700" : "text-paper"}`}>{money(Number(c.commission))}</b>
+              </li>
+            );
+          })}
+        </ul>
+      )}
 
       <h2 className="mt-12 font-display text-xl font-bold">Last 6 months</h2>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-hairline bg-white shadow-card">
