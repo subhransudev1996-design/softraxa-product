@@ -92,7 +92,7 @@ export function Pipeline() {
         {STAGES.map(([stage, label]) => {
           const cards = rows.filter((x) => x.stage === stage);
           return (
-            <section key={stage} className="rounded-2xl bg-zinc-100/70 p-3">
+            <section key={stage} className="rounded-lg bg-zinc-100/70 p-3">
               <h2 className="mb-3 flex items-center justify-between px-1 text-sm font-semibold text-zinc-700">
                 {label} <span className="tabular-nums text-zinc-500">{cards.length}</span>
               </h2>

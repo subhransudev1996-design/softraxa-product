@@ -86,7 +86,7 @@ export function Campaigns() {
                   <tr key={r.campaign}>
                     <td className="px-4 py-2.5 font-medium">
                       {r.campaign}
-                      {r.first_spend && <span className="block text-xs text-zinc-400">since {dateStr(r.first_spend)}</span>}
+                      {r.first_spend && <span className="block text-xs text-zinc-500">since {dateStr(r.first_spend)}</span>}
                     </td>
                     <td className="px-4 py-2.5 tabular-nums">{s ? inr(s) : "—"}</td>
                     <td className="px-4 py-2.5 tabular-nums">{r.leads}</td>
@@ -158,7 +158,7 @@ export function Campaigns() {
             </div>
             {url && (
               <>
-                <p className="break-all rounded-xl bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{url}</p>
+                <p className="break-all rounded-md bg-zinc-50 p-3 font-mono text-xs text-zinc-700">{url}</p>
                 <Button variant="outline" onClick={async () => {
                   try { await navigator.clipboard.writeText(url); setCopied(true); setTimeout(() => setCopied(false), 1500); }
                   catch { window.prompt("Copy this link:", url); }

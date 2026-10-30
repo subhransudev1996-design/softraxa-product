@@ -225,7 +225,7 @@ function AnnounceDialog({ shops, audience, onClose }: { shops: any[]; audience: 
         <div>
           <Label>Message</Label>
           <textarea rows={3} maxLength={1000} value={body} onChange={(e) => setBody(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
+            className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
         </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
@@ -272,10 +272,10 @@ function WhatsAppList({ shops, onClose }: { shops: any[]; onClose: () => void })
         <div>
           <Label>Message — {"{owner}"} and {"{shop}"} are filled in for each shop</Label>
           <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)}
-            className="w-full rounded-xl border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
+            className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
         </div>
         <p className="text-xs text-zinc-500">{sent.size} of {withPhone.length} opened. {shops.length - withPhone.length > 0 ? `${shops.length - withPhone.length} without a phone number are left out.` : ""}</p>
-        <ul className="max-h-[50dvh] divide-y divide-zinc-100 overflow-y-auto rounded-xl border border-zinc-200">
+        <ul className="max-h-[50dvh] divide-y divide-zinc-100 overflow-y-auto rounded-md border border-zinc-200">
           {withPhone.map((s) => (
             <li key={s.id} className="flex items-center justify-between gap-3 px-4 py-2.5">
               <div className="min-w-0">

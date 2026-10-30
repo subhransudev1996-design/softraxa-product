@@ -100,10 +100,10 @@ export default function ReceiptPage() {
 
       <div className="print:hidden"><Notice notice={notice} /></div>
 
-      <article className="mx-auto max-w-2xl rounded-2xl border border-zinc-200 bg-white p-8 text-sm text-ink print:max-w-none print:rounded-none print:border-0 print:p-0">
+      <article className="mx-auto max-w-2xl rounded-lg border border-zinc-200 bg-white p-8 text-sm text-ink print:max-w-none print:rounded-none print:border-0 print:p-0">
         <header className="flex items-start justify-between border-b border-zinc-200 pb-4">
           <div>
-            <p className="text-xl font-extrabold">{seller}</p>
+            <p className="text-xl font-semibold">{seller}</p>
             <p className="text-xs text-zinc-500">Dukania — billing and stock software</p>
             {us.business_address && <p className="mt-1 max-w-xs text-xs text-zinc-600">{us.business_address}</p>}
             {(us.business_phone || us.business_email) && (
@@ -150,19 +150,19 @@ export default function ReceiptPage() {
                 )}
               </>
             )}
-            <tr className="border-t border-zinc-200"><td className="py-3 font-bold">{tax ? "Total (GST included), received" : "Amount received"}</td><td className="py-3 text-right text-lg font-extrabold">{inr(p.amount)}</td></tr>
+            <tr className="border-t border-zinc-200"><td className="py-3 font-bold">{tax ? "Total (GST included), received" : "Amount received"}</td><td className="py-3 text-right text-lg font-semibold">{inr(p.amount)}</td></tr>
           </tbody>
         </table>
         <p className="pt-2 text-xs text-zinc-600">Rupees {inWords(Number(p.amount))} only</p>
         {p.note && <p className="pt-2 text-xs text-zinc-500">Note: {p.note}</p>}
         {us.receipt_footer && <p className="pt-6 text-xs text-zinc-600">{us.receipt_footer}</p>}
         {!tax && (
-          <p className={`${us.receipt_footer ? "pt-2" : "pt-8"} text-xs text-zinc-400`}>This is a payment receipt, not a tax invoice.</p>
+          <p className={`${us.receipt_footer ? "pt-2" : "pt-8"} text-xs text-zinc-500`}>This is a payment receipt, not a tax invoice.</p>
         )}
       </article>
 
       {refunds.length > 0 && (
-        <section className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-red-50/40 p-5 text-sm print:hidden">
+        <section className="mx-auto max-w-2xl rounded-lg border border-red-200 bg-red-50/40 p-5 text-sm print:hidden">
           <p className="mb-2 font-bold text-ink">Refunded {inr(refunded)} of {inr(p.amount)}</p>
           <ul className="space-y-1.5">
             {refunds.map((r) => (

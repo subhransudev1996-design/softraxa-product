@@ -127,7 +127,7 @@ export function Partners() {
                   </span>
                   {isQuiet(p) && <span className="mt-1 block"><Badge color="orange">No clicks in 30 days</Badge></span>}
                 </td>
-                <td className="px-4 py-3 text-xs">
+                <td className="whitespace-nowrap px-4 py-3 text-xs">
                   {p.commission_kind === "amount" ? inr(p.commission_value) : `${Number(p.commission_value)}%`} to them
                   <span className="block text-zinc-500">{Number(p.buyer_off_pct)}% off for shops · {p.hold_days}-day hold</span>
                 </td>

@@ -150,7 +150,7 @@ export default function TodayPage() {
       />
       <Notice notice={notice} />
       {!upi && canPay && (
-        <p className="rounded-xl bg-orange-50 px-4 py-3 text-sm text-orange-800">
+        <p className="rounded-md bg-orange-50 px-4 py-3 text-sm text-orange-800">
           Your UPI ID isn&apos;t set, so expired shops can&apos;t see how to pay you.{" "}
           <Link href="/settings" className="font-semibold underline">Set it in Settings</Link>.
         </p>

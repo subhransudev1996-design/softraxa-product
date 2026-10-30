@@ -44,7 +44,7 @@ export default function SuccessPage() {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${tab === key ? "bg-brand text-white" : "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -212,7 +212,7 @@ function Calls({ shops, onChanged }: { shops: any[]; onChanged: () => void }) {
               <li key={c.id} className="py-2.5">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <Link href={`/clients/${c.business_id}`} className="font-semibold text-ink hover:underline">{c.businesses?.name}</Link>
-                  <span className="text-xs text-zinc-400">
+                  <span className="text-xs text-zinc-500">
                     {dateTimeStr(c.created_at)}{memberName(team, c.created_by) ? ` · ${memberName(team, c.created_by)}` : ""}
                   </span>
                 </div>
@@ -222,7 +222,7 @@ function Calls({ shops, onChanged }: { shops: any[]; onChanged: () => void }) {
                   {c.note ? ` — ${c.note}` : ""}
                 </p>
                 {byId.get(c.business_id) && (
-                  <p className="text-xs text-zinc-400">Health now {byId.get(c.business_id).score} ({levelOf(byId.get(c.business_id).level).label})</p>
+                  <p className="text-xs text-zinc-500">Health now {byId.get(c.business_id).score} ({levelOf(byId.get(c.business_id).level).label})</p>
                 )}
               </li>
             ))}
@@ -273,7 +273,7 @@ function Satisfaction() {
                 </span>
                 <div className="min-w-0">
                   <Link href={`/clients/${r.business_id}`} className="font-semibold text-ink hover:underline">{r.name}</Link>
-                  <span className="ml-2 text-xs text-zinc-400">{dateStr(r.created_at)}</span>
+                  <span className="ml-2 text-xs text-zinc-500">{dateStr(r.created_at)}</span>
                   {r.comment && <p className="text-zinc-700">&quot;{r.comment}&quot;</p>}
                 </div>
               </li>

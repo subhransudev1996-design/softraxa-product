@@ -144,7 +144,7 @@ export default function LeadDetailPage() {
       </div>
 
       {dupes && (
-        <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <div className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
           <b>Same phone number as:</b>{" "}
           {[
             ...dupes.leads.map((l) => (
@@ -191,7 +191,7 @@ export default function LeadDetailPage() {
               </button>
             ))}
             {lead.stage_changed_at && (
-              <span className="text-xs text-zinc-400">In this stage since {dateStr(lead.stage_changed_at)}</span>
+              <span className="text-xs text-zinc-500">In this stage since {dateStr(lead.stage_changed_at)}</span>
             )}
           </div>
           {lead.status === "lost" && lead.lost_reason && (
@@ -272,7 +272,7 @@ export default function LeadDetailPage() {
                   <Input defaultValue={lead.notes} onBlur={(e) => e.target.value !== lead.notes && save({ notes: e.target.value })} />
                 </div>
               </div>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-zinc-500">
                 Added {dateStr(lead.created_at)}
                 {lead.expected_value ? ` • worth ${inr(lead.expected_value)}/yr` : ""}
                 {lead.converted_at ? ` • won ${dateStr(lead.converted_at)}` : ""}
@@ -303,7 +303,7 @@ export default function LeadDetailPage() {
                         ? "stage"
                         : ACTIVITY_TYPES.find(([v]) => v === a.activity_type)?.[1] ?? a.activity_type.replace("_", " ")}
                     </Badge>
-                    <span className="text-xs text-zinc-400">
+                    <span className="text-xs text-zinc-500">
                       {memberName(team, a.created_by) ? `${memberName(team, a.created_by)} · ` : ""}{dateTimeStr(a.created_at)}
                     </span>
                   </div>

@@ -163,7 +163,7 @@ export default function SettingsPage() {
                 <p className="mt-1 text-xs text-zinc-500">Shown under the QR in the app. The UPI app itself shows the name on your bank account.</p>
               </div>
             </div>
-            <div className="flex flex-col items-center gap-2 rounded-xl bg-zinc-50 p-4 text-center">
+            <div className="flex flex-col items-center gap-2 rounded-md bg-zinc-50 p-4 text-center">
               {upiValid && qr?.link === link ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={qr.url} alt="UPI QR code for your UPI ID" width={176} height={176} className="rounded-lg bg-white p-1" />
@@ -252,7 +252,7 @@ export default function SettingsPage() {
           </div>
         </Section>
 
-        <div className="sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-2xl border border-zinc-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
+        <div className="sticky bottom-3 z-10 flex items-center justify-between gap-3 rounded-lg border border-zinc-200 bg-white/95 px-4 py-3 shadow-lg backdrop-blur">
           <p className="text-sm text-zinc-600">{dirty ? "You have changes that aren't saved." : "Everything is saved."}</p>
           <div className="flex gap-2">
             {dirty && <Button variant="ghost" onClick={() => setForm(saved)}>Undo</Button>}

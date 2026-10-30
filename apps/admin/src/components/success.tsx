@@ -88,7 +88,7 @@ export function LogContactDialog({ shop, onClose, onSaved }: {
           <Label>What was said</Label>
           <textarea rows={3} value={note} onChange={(e) => setNote(e.target.value)}
             placeholder="e.g. Showed how to print on A5; wants barcode labels"
-            className="w-full rounded-xl border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
+            className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10" />
         </div>
         <div className="max-w-xs">
           <Label>Follow up on (optional)</Label>
@@ -146,7 +146,7 @@ export function ShopSuccessCard({ businessId, name }: { businessId: string; name
         {health && (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Why</p>
+              <p className="mb-1 text-[13px] font-medium text-zinc-500">Why</p>
               {health.reasons.length === 0 ? (
                 <p className="text-sm text-emerald-700">Nothing to worry about.</p>
               ) : (
@@ -160,7 +160,7 @@ export function ShopSuccessCard({ businessId, name }: { businessId: string; name
               </p>
             </div>
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Getting started ({done}/{steps.length})</p>
+              <p className="mb-1 text-[13px] font-medium text-zinc-500">Getting started ({done}/{steps.length})</p>
               <ul className="space-y-0.5 text-sm">
                 {steps.map((s) => (
                   <li key={s.key} className={s.done ? "text-zinc-500" : "font-medium text-ink"}>
@@ -170,14 +170,14 @@ export function ShopSuccessCard({ businessId, name }: { businessId: string; name
               </ul>
             </div>
             <div>
-              <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-zinc-500">Calls and visits</p>
+              <p className="mb-1 text-[13px] font-medium text-zinc-500">Calls and visits</p>
               {contacts.length === 0 ? (
                 <p className="text-sm text-zinc-500">None logged yet.</p>
               ) : (
                 <ul className="space-y-2 text-sm">
                   {contacts.slice(0, 5).map((c) => (
                     <li key={c.id}>
-                      <span className="text-xs text-zinc-400">
+                      <span className="text-xs text-zinc-500">
                         {dateTimeStr(c.created_at)}{memberName(team, c.created_by) ? ` · ${memberName(team, c.created_by)}` : ""}
                       </span>
                       <span className="block text-zinc-700">

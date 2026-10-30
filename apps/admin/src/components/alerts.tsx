@@ -59,7 +59,7 @@ export function AlertsBell({ alignRight = false }: { alignRight?: boolean }) {
   return (
     <div ref={box} className="relative">
       <button onClick={toggle} aria-label={`Alerts${fresh ? ` (${fresh} new)` : ""}`}
-        className="relative grid h-9 w-9 place-items-center rounded-xl text-sidebar-muted transition hover:bg-white/[0.06] hover:text-white">
+        className="relative grid h-9 w-9 cursor-pointer place-items-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-ink">
         <Bell size={18} />
         {fresh > 0 && (
           <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
@@ -68,8 +68,8 @@ export function AlertsBell({ alignRight = false }: { alignRight?: boolean }) {
         )}
       </button>
       {open && (
-        <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-11 z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-zinc-200`}>
-          <p className="border-b border-zinc-100 px-4 py-3 text-sm font-bold text-ink">Last 7 days</p>
+        <div className={`absolute ${alignRight ? "right-0" : "left-0"} top-11 z-50 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg bg-white shadow-lg ring-1 ring-zinc-200`}>
+          <p className="border-b border-zinc-100 px-4 py-3 text-sm font-semibold text-ink">Last 7 days</p>
           <ul className="max-h-96 divide-y divide-zinc-100 overflow-y-auto">
             {items.map((i, n) => (
               <li key={n}>
@@ -77,7 +77,7 @@ export function AlertsBell({ alignRight = false }: { alignRight?: boolean }) {
                   <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${KIND_DOT[i.kind] ?? "bg-zinc-400"}`} />
                   <span className="min-w-0">
                     <span className="block text-sm text-ink">{i.title}</span>
-                    <span className="text-xs text-zinc-400">{dateTimeStr(i.at)}</span>
+                    <span className="text-xs text-zinc-500">{dateTimeStr(i.at)}</span>
                   </span>
                 </Link>
               </li>

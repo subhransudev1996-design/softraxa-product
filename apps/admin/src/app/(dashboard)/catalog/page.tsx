@@ -305,7 +305,7 @@ export default function CatalogPage() {
                 key={label}
                 onClick={() => auto !== on && setAutoPublish(on)}
                 aria-pressed={auto === on}
-                className={`rounded-xl border px-4 py-2 text-sm font-semibold ${auto === on ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}
+                className={`rounded-md border px-4 py-2 text-sm font-semibold ${auto === on ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}
               >
                 {label}
               </button>
@@ -409,7 +409,7 @@ export default function CatalogPage() {
                     m.business_type && businessTypeLabel(m.business_type),
                   ].filter(Boolean).join(" · ")}
                 </p>
-                <p className="text-xs text-zinc-400">
+                <p className="text-xs text-zinc-500">
                   {m.source === "softraxa" ? "Added by you" : `Added by ${m.source_shop ?? "a shop"}`}
                   {" · "}
                   {Number(m.shops) === 0 ? "no shop has it" : `in ${m.shops} shop${Number(m.shops) === 1 ? "" : "s"}`}
@@ -459,7 +459,7 @@ export default function CatalogPage() {
       {form && (
         <Modal title={form.id ? `Edit — ${form.name}` : "Add a product to the list"} onClose={() => setForm(null)} wide>
           <form onSubmit={save} className="space-y-4">
-            <p className="rounded-xl bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
+            <p className="rounded-md bg-zinc-50 px-4 py-3 text-xs text-zinc-600">
               No prices here: each shop enters its own. What you save is marked as checked, and shops can no longer change it.
             </p>
             <div>
@@ -631,7 +631,7 @@ function PhotoCell({ product, onSaved, onError }: {
         onDragLeave={() => setOver(false)}
         onDrop={(e) => { e.preventDefault(); setOver(false); upload(e.dataTransfer.files?.[0]); }}
         disabled={busy}
-        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border ${over ? "border-brand bg-brand/10" : url ? "border-zinc-200" : "border-dashed border-zinc-300 bg-zinc-50"} text-[10px] font-medium text-zinc-400 hover:border-brand`}
+        className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-md border ${over ? "border-brand bg-brand/10" : url ? "border-zinc-200" : "border-dashed border-zinc-300 bg-zinc-50"} text-[10px] font-medium text-zinc-400 hover:border-brand`}
       >
         {busy ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" /> : url
           // eslint-disable-next-line @next/next/no-img-element
@@ -679,7 +679,7 @@ function MergeDialog({ from, onClose, onDone }: { from: any; onClose: () => void
         </form>
         {error && <p className="font-medium text-red-600">{error}</p>}
         {!rows ? <Spinner /> : (
-          <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200">
+          <ul className="divide-y divide-zinc-100 rounded-md border border-zinc-200">
             {rows.map((r) => (
               <li key={r.id}>
                 <button disabled={busy} onClick={() => merge(r)} className="flex w-full flex-col px-4 py-3 text-left hover:bg-zinc-50 disabled:opacity-50">
@@ -752,12 +752,12 @@ function ImportDialog({ onClose, onDone }: { onClose: () => void; onDone: (text:
           onChange={(e) => setText(e.target.value)}
           rows={10}
           placeholder={SHEET_COLUMNS.join(",")}
-          className="w-full rounded-xl border border-zinc-200 p-3 font-mono text-xs"
+          className="w-full rounded-md border border-zinc-200 p-3 font-mono text-xs"
         />
         <p className="text-xs text-zinc-500">{rows.length === 0 ? "Nothing read yet." : `${rows.length} product${rows.length === 1 ? "" : "s"} read.`}</p>
         {error && <p className="font-medium text-red-600">{error}</p>}
         {problems.length > 0 && (
-          <ul className="max-h-40 overflow-auto rounded-xl border border-zinc-200 p-3 text-xs text-zinc-600">
+          <ul className="max-h-40 overflow-auto rounded-md border border-zinc-200 p-3 text-xs text-zinc-600">
             {problems.map((p) => <li key={p.row}>Row {p.row} — {p.name || "no name"}: {p.message}</li>)}
           </ul>
         )}

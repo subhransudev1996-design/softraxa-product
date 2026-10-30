@@ -2,13 +2,13 @@
 
 :root {
   /* Dukania brand tokens — same family as the Flutter app's design system */
-  --brand: #7c3aed;
-  --brand-deep: #6d28d9;
-  --brand-tint: #f3e8fd;
-  --ink: #17223b;
-  --canvas: #f3f5fa;
-  --sidebar: #14162b;
-  --sidebar-muted: #9a9fc0;
+  --brand: #6d28d9;
+  --brand-deep: #5b21b6;
+  --brand-tint: #f5f3ff;
+  --ink: #18181b;
+  --canvas: #f7f7f8;
+  --sidebar: #ffffff;
+  --sidebar-muted: #52525b;
   --teal: #0f9d8f;
 
   --background: var(--canvas);
@@ -25,14 +25,16 @@
   --color-canvas: var(--canvas);
   --color-sidebar: var(--sidebar);
   --color-sidebar-muted: var(--sidebar-muted);
-  --font-sans: var(--font-manrope);
+  --font-sans: var(--font-inter);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  font-feature-settings: "cv11", "ss01";
   -webkit-font-smoothing: antialiased;
 }
 
@@ -40,18 +42,16 @@ body {
 @keyframes rise {
   from {
     opacity: 0;
-    transform: translateY(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 /* "backwards", not "both": once finished, no transform may remain on the
    element — a transformed ancestor traps position:fixed children (dialogs). */
 .animate-rise {
-  animation: rise 0.35s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+  animation: rise 0.15s ease-out backwards;
 }
 
 /* stagger direct children of a .stagger-rise container (first 8) */

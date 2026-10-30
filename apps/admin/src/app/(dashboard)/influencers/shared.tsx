@@ -183,7 +183,7 @@ export function PayDialog({ partner, onClose, onDone }: { partner: any; onClose:
           {partner.upi_id ? <> to <span className="font-mono">{partner.upi_id}</span></> : " (no UPI ID saved)"}
         </p>
         {overTds && (
-          <p className="rounded-xl bg-amber-50 px-4 py-3 text-amber-800">
+          <p className="rounded-md bg-amber-50 px-4 py-3 text-amber-800">
             Commission to {partner.name} this financial year goes over {inr(TDS_LIMIT)}. TDS may apply (section 194H), possibly on earlier payouts this year too — check with your CA before paying.{" "}
             <button type="button" onClick={() => setTds(String(suggested))} className="font-semibold underline">Use {inr(suggested)} ({pan ? "2%, PAN on file" : "20%, no PAN"})</button>
           </p>
@@ -279,7 +279,7 @@ export function PartnerLogin({ partner, canEdit }: { partner: any; canEdit: bool
     : "";
 
   return (
-    <div className="rounded-xl bg-zinc-50 p-3">
+    <div className="rounded-md bg-zinc-50 p-3">
       <p className="text-xs text-zinc-500">Their login ({SITE.replace("https://www.", "")}/partner/login)</p>
       {error && <p className="mt-1 text-xs font-medium text-red-600">{error}</p>}
       {fresh && (

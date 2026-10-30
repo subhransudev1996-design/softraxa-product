@@ -108,7 +108,7 @@ export default function ProductsPage() {
               {/* App-defined feature list — read only. Features come FROM the
                   app (what it actually enforces), not invented here. Plans pick
                   which of these to include. */}
-              <div className="rounded-xl border border-zinc-200 bg-zinc-50/50 p-4">
+              <div className="rounded-md border border-zinc-200 bg-zinc-50/50 p-4">
                 <Label>Features (defined by the app — not editable)</Label>
                 <p className="mb-3 mt-1 text-xs text-zinc-500">
                   These are the capabilities the app actually supports for this product.

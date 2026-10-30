@@ -33,40 +33,48 @@ import { Card, CardBody } from "@/components/ui";
 import { Me, areaFor, canUse, roleLabel } from "@/lib/team";
 import { LogoutButton } from "./logout-button";
 
-// Daily work first; setup pages below.
-const daily = [
-  { href: "/", label: "Today", icon: CalendarCheck },
-  { href: "/tasks", label: "Tasks & calendar", icon: ListTodo },
-  { href: "/clients", label: "Clients", icon: Store },
-  { href: "/payments", label: "Payments", icon: IndianRupee },
-  { href: "/sales", label: "Sales", icon: TrendingUp },
-  { href: "/accounts", label: "Accounts", icon: Wallet },
-  { href: "/success", label: "Customer success", icon: HeartHandshake },
-  { href: "/support", label: "Support", icon: LifeBuoy },
-  { href: "/leads", label: "Leads", icon: Target },
-  { href: "/marketing", label: "Marketing", icon: Megaphone },
-  { href: "/influencers", label: "Influencers", icon: Handshake },
-  { href: "/reconciliation", label: "Reconciliation", icon: ScanSearch },
-];
-const setup = [
-  { href: "/plans", label: "Plans", icon: Layers },
-  { href: "/catalog", label: "Master products", icon: ListChecks },
-  { href: "/products", label: "Software", icon: Boxes },
-  { href: "/settings", label: "Settings", icon: Settings },
-  { href: "/health", label: "System health", icon: HeartPulse },
-  { href: "/audit", label: "Audit logs", icon: ScrollText },
-  { href: "/team", label: "Team", icon: Users },
-  { href: "/account", label: "My login", icon: UserCog },
+// Grouped by the work, so a team member finds their part quickly.
+const groups: { title?: string; items: { href: string; label: string; icon: typeof Store }[] }[] = [
+  { items: [
+    { href: "/", label: "Today", icon: CalendarCheck },
+    { href: "/tasks", label: "Tasks & calendar", icon: ListTodo },
+  ] },
+  { title: "Customers", items: [
+    { href: "/clients", label: "Clients", icon: Store },
+    { href: "/success", label: "Customer success", icon: HeartHandshake },
+    { href: "/support", label: "Support", icon: LifeBuoy },
+  ] },
+  { title: "Growth", items: [
+    { href: "/leads", label: "Leads", icon: Target },
+    { href: "/marketing", label: "Marketing", icon: Megaphone },
+    { href: "/influencers", label: "Influencers", icon: Handshake },
+  ] },
+  { title: "Money", items: [
+    { href: "/payments", label: "Payments", icon: IndianRupee },
+    { href: "/sales", label: "Sales", icon: TrendingUp },
+    { href: "/accounts", label: "Accounts", icon: Wallet },
+    { href: "/reconciliation", label: "Reconciliation", icon: ScanSearch },
+  ] },
+  { title: "Setup", items: [
+    { href: "/plans", label: "Plans", icon: Layers },
+    { href: "/catalog", label: "Master products", icon: ListChecks },
+    { href: "/products", label: "Software", icon: Boxes },
+    { href: "/settings", label: "Settings", icon: Settings },
+    { href: "/team", label: "Team", icon: Users },
+    { href: "/health", label: "System health", icon: HeartPulse },
+    { href: "/audit", label: "Audit logs", icon: ScrollText },
+    { href: "/account", label: "My login", icon: UserCog },
+  ] },
 ];
 
 export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   const pathname = usePathname();
   // Only the pages this team member may use (migration 0098).
-  const allowed = (item: (typeof daily)[number]) => canUse(me, areaFor(item.href));
+  const allowed = (item: { href: string }) => canUse(me, areaFor(item.href));
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 
-  const link = (item: (typeof daily)[number]) => {
+  const link = (item: (typeof groups)[number]["items"][number]) => {
     const active = isActive(item.href);
     const Icon = item.icon;
     return (
@@ -74,28 +82,29 @@ export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void
         key={item.href}
         href={item.href}
         onClick={onNavigate}
-        className={`group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors duration-150 ${
-          active ? "bg-white/[0.07] text-white" : "text-sidebar-muted hover:bg-white/[0.04] hover:text-zinc-200"
+        aria-current={active ? "page" : undefined}
+        className={`flex items-center gap-2.5 rounded-md px-2.5 py-1.5 text-sm font-medium transition-colors ${
+          active ? "bg-brand-tint text-brand-deep" : "text-zinc-600 hover:bg-zinc-100 hover:text-ink"
         }`}
       >
-        {active && (
-          <span className="absolute left-0 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gradient-to-b from-brand to-[#a78bfa]" />
-        )}
-        <Icon
-          size={17}
-          strokeWidth={2.2}
-          className={active ? "text-[#a78bfa]" : "text-sidebar-muted transition-colors group-hover:text-zinc-300"}
-        />
+        <Icon size={16} className={active ? "text-brand" : "text-zinc-400"} />
         {item.label}
       </Link>
     );
   };
 
   return (
-    <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-      {daily.filter(allowed).map(link)}
-      <p className="px-3 pb-1 pt-4 text-[10px] font-bold uppercase tracking-[0.14em] text-sidebar-muted/70">Setup</p>
-      {setup.filter(allowed).map(link)}
+    <nav className="flex-1 space-y-4 overflow-y-auto px-3 py-3">
+      {groups.map((group) => {
+        const items = group.items.filter(allowed);
+        if (items.length === 0) return null;
+        return (
+          <div key={group.title ?? "main"} className="space-y-0.5">
+            {group.title && <p className="px-2.5 pb-1 text-xs font-medium text-zinc-400">{group.title}</p>}
+            {items.map(link)}
+          </div>
+        );
+      })}
     </nav>
   );
 }
@@ -103,17 +112,11 @@ export function SidebarNav({ me, onNavigate }: { me: Me; onNavigate?: () => void
 function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void }) {
   return (
     <>
-      <div className="flex items-center gap-3 px-5 py-5">
-        <span className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-base font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
-          D
-        </span>
-        <div>
-          <p className="text-[15px] font-extrabold leading-5 tracking-tight text-white">Dukania</p>
-          <p className="text-[11px] font-medium uppercase tracking-[0.14em] text-sidebar-muted">Admin panel</p>
-        </div>
+      <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-zinc-200 px-4">
+        <span className="grid h-7 w-7 place-items-center rounded-md bg-brand text-sm font-semibold text-white">D</span>
+        <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
         <div className="ml-auto hidden lg:block"><AlertsBell /></div>
       </div>
-      <div className="mx-4 h-px bg-white/[0.06]" />
       {/* Search everything from anywhere (also Ctrl+K). */}
       <form
         className="px-3 pt-3"
@@ -125,21 +128,20 @@ function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void })
       >
         <input
           name="q"
-          placeholder="Search everything…  Ctrl+K"
+          placeholder="Search…  Ctrl+K"
           aria-label="Search everything"
-          className="w-full rounded-xl bg-white/[0.06] px-3 py-2 text-sm text-white outline-none placeholder:text-sidebar-muted focus:ring-2 focus:ring-brand"
+          className="min-h-9 w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/20"
         />
       </form>
       <SidebarNav me={me} onNavigate={onNavigate} />
-      <div className="mx-4 h-px bg-white/[0.06]" />
-      <div className="p-3">
-        <div className="flex items-center gap-2.5 rounded-xl px-2 py-2">
-          <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/[0.08] text-xs font-bold uppercase text-zinc-300">
+      <div className="border-t border-zinc-200 p-3">
+        <div className="flex items-center gap-2.5 px-2.5 py-1.5">
+          <span className="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-zinc-100 text-xs font-semibold uppercase text-zinc-600">
             {(me.name || me.email || "A").slice(0, 1)}
           </span>
           <div className="min-w-0">
-            <p className="truncate text-xs font-semibold text-zinc-200">{me.name || me.email}</p>
-            <p className="truncate text-[11px] font-medium text-sidebar-muted">{roleLabel(me.team_role)}</p>
+            <p className="truncate text-[13px] font-medium text-ink">{me.name || me.email}</p>
+            <p className="truncate text-xs text-zinc-500">{roleLabel(me.team_role)}</p>
           </div>
         </div>
         <LogoutButton />
@@ -168,25 +170,25 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
   }, [router]);
   return (
     <div className="min-h-screen bg-canvas">
-      <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col bg-sidebar lg:flex print:hidden">
+      <aside className="fixed inset-y-0 z-20 hidden w-60 flex-col border-r border-zinc-200 bg-sidebar lg:flex print:hidden">
         <SidebarContent me={me} />
       </aside>
 
-      <header className="sticky top-0 z-30 flex items-center gap-3 bg-sidebar px-4 py-3 lg:hidden print:hidden">
-        <button onClick={() => setOpen(true)} className="rounded-lg p-1 text-white" aria-label="Open menu">
+      <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-sidebar px-4 lg:hidden print:hidden">
+        <button onClick={() => setOpen(true)} className="grid h-9 w-9 cursor-pointer place-items-center rounded-md text-zinc-600 hover:bg-zinc-100" aria-label="Open menu">
           <Menu size={22} />
         </button>
-        <p className="font-extrabold text-white">Dukania admin</p>
+        <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
         <div className="ml-auto"><AlertsBell alignRight /></div>
       </header>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" onClick={() => setOpen(false)}>
-          <div className="absolute inset-0 bg-black/50" />
+          <div className="absolute inset-0 bg-black/40" />
           <aside
             className="absolute inset-y-0 left-0 flex w-64 flex-col bg-sidebar"
             onClick={(e) => e.stopPropagation()}
           >
-            <button onClick={() => setOpen(false)} className="absolute right-3 top-5 text-sidebar-muted" aria-label="Close menu">
+            <button onClick={() => setOpen(false)} className="absolute right-3 top-3 z-10 grid h-9 w-9 cursor-pointer place-items-center rounded-md bg-white text-zinc-500 hover:bg-zinc-100" aria-label="Close menu">
               <X size={20} />
             </button>
             <SidebarContent me={me} onNavigate={() => setOpen(false)} />
@@ -194,8 +196,8 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
         </div>
       )}
 
-      <main className="p-4 sm:p-6 lg:ml-60 lg:p-8 print:m-0 print:p-0">
-        <div className="animate-rise mx-auto max-w-6xl">
+      <main className="p-4 sm:p-6 lg:ml-60 print:m-0 print:p-0">
+        <div className="animate-rise mx-auto max-w-7xl">
           <MeProvider me={me}>
             {allowed ? (
               children

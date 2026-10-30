@@ -2,6 +2,8 @@ export const inr = (v: number | string | null | undefined) =>
   new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
+    // Whole rupees without ".00"; paise only when there are some.
+    minimumFractionDigits: Number.isInteger(Number(v ?? 0)) ? 0 : 2,
     maximumFractionDigits: 2,
   }).format(Number(v ?? 0));
 

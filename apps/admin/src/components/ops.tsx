@@ -46,23 +46,23 @@ export function Modal({
   if (typeof document === "undefined") return null;
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/50 backdrop-blur-[2px] sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center sm:p-6"
       onMouseDown={(e) => e.target === e.currentTarget && onClose()}
     >
       <div
         role="dialog"
         aria-modal="true"
         aria-label={title}
-        className={`flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[88dvh] sm:rounded-2xl ${wide ? "sm:max-w-2xl" : "sm:max-w-lg"}`}
+        className={`flex max-h-[92dvh] w-full flex-col overflow-hidden rounded-t-lg bg-white shadow-xl sm:max-h-[88dvh] sm:rounded-lg ${wide ? "sm:max-w-2xl" : "sm:max-w-lg"}`}
       >
         <div className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-100 px-5 py-4">
-          <h2 className="min-w-0 truncate text-lg font-bold text-ink">{title}</h2>
+          <h2 className="min-w-0 truncate text-base font-semibold text-ink">{title}</h2>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-zinc-100 text-zinc-600 transition hover:bg-zinc-200 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            className="grid h-9 w-9 shrink-0 cursor-pointer place-items-center rounded-md text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
           >
-            <X size={18} strokeWidth={2.4} />
+            <X size={18} />
           </button>
         </div>
         <div className="overflow-y-auto px-5 py-4">{children}</div>
@@ -78,7 +78,7 @@ export function Notice({ notice }: { notice: { ok: boolean; text: string } | nul
   return (
     <div
       role="status"
-      className={`rounded-xl px-4 py-3 text-sm font-medium ${notice.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700"}`}
+      className={`rounded-md px-4 py-3 text-sm font-medium ${notice.ok ? "bg-emerald-50 text-emerald-800" : "bg-red-50 text-red-700"}`}
     >
       {notice.text}
     </div>
@@ -207,7 +207,7 @@ export function RenewDialog({
             {result.previous_expiry ? ` (was ${dateStr(result.previous_expiry)})` : ""}.
           </p>
           {result.still_suspended && (
-            <p className="rounded-xl bg-orange-50 px-4 py-3 text-orange-800">
+            <p className="rounded-md bg-orange-50 px-4 py-3 text-orange-800">
               This shop is still <b>suspended</b>. Activate it from the client page if they should use the app again.
             </p>
           )}
@@ -231,7 +231,7 @@ export function RenewDialog({
     <Modal title={`Renew — ${target.name}`} onClose={onClose}>
       <div className="space-y-4">
         {target.claim && (
-          <p className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <p className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800">
             The shop says it paid <b>{inr(target.claim.amount)}</b> with UPI reference <b className="font-mono">{target.claim.reference}</b>.
             Check your UPI app for this payment before renewing.
           </p>
@@ -256,7 +256,7 @@ export function RenewDialog({
                 type="button"
                 onClick={() => setPeriod(p)}
                 aria-pressed={period === p}
-                className={`rounded-xl border px-4 py-2 text-sm font-semibold ${period === p ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}
+                className={`rounded-md border px-4 py-2 text-sm font-semibold ${period === p ? "border-brand bg-brand-tint text-brand" : "border-zinc-200 text-zinc-600"}`}
               >
                 {p === "month" ? "1 month" : p === "year" ? "1 year" : "Choose date"}
               </button>
@@ -303,7 +303,7 @@ export function RenewDialog({
           <Label>Note (optional)</Label>
           <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. paid by owner's son" />
         </div>
-        <div className="rounded-xl bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
+        <div className="rounded-md bg-zinc-50 px-4 py-3 text-sm text-zinc-700">
           Now expires <b>{dateStr(target.expiry)}</b> → will expire <b>{newExpiry ? dateStr(newExpiry) : "—"}</b>
           {amountNum === 0 && <span className="block text-xs text-zinc-500">No payment will be recorded (free extension).</span>}
         </div>

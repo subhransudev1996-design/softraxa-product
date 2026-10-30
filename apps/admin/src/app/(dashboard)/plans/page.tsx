@@ -323,7 +323,7 @@ export default function PlansPage() {
                   onChange={(e) => set("highlights", e.target.value)}
                   rows={3}
                   placeholder={"e.g. Works on phone and computer\nWhatsApp support"}
-                  className="w-full rounded-xl border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+                  className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
                 />
               </div>
             </Section>
@@ -451,9 +451,9 @@ export default function PlansPage() {
               </div>
             </Section>
 
-            <div className="rounded-xl bg-zinc-50 p-4">
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-zinc-500">How shops see it in the app</p>
-              <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="rounded-md bg-zinc-50 p-4">
+              <p className="mb-2 text-[13px] font-medium text-zinc-500">How shops see it in the app</p>
+              <div className="rounded-md border border-zinc-200 bg-white p-4">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-base font-bold text-ink">{form.name.trim() || "Plan name"}</span>
                   {form.is_recommended && <Badge color="purple">recommended</Badge>}
@@ -500,7 +500,7 @@ export default function PlansPage() {
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-3">
-      <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">{title}</p>
+      <p className="text-[13px] font-medium text-zinc-500">{title}</p>
       {children}
     </div>
   );

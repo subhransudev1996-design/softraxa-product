@@ -33,7 +33,7 @@ export default function AccountsPage() {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${tab === key ? "bg-brand text-white" : "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -194,7 +194,7 @@ function Invoices() {
   return (
     <div className="space-y-6">
       {!gstin && (
-        <p className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Add Dukania&apos;s GSTIN in <Link href="/settings" className="font-semibold underline">Settings</Link> and every
           payment gets a GST tax invoice by itself. Until then, payments get receipts only.
         </p>
@@ -208,7 +208,7 @@ function Invoices() {
                 <td className="px-4 py-2.5">{dateStr(p.payment_date)}</td>
                 <td className="px-4 py-2.5">{p.businesses?.name}</td>
                 <td className="px-4 py-2.5"><Link href={`/payments/${p.id}`} className="font-mono text-brand hover:underline">{p.receipt_no ?? "open"}</Link></td>
-                <td className="px-4 py-2.5 font-mono">{p.invoice_no ?? <span className="font-sans text-xs text-zinc-400">none</span>}</td>
+                <td className="px-4 py-2.5 font-mono">{p.invoice_no ?? <span className="font-sans text-xs text-zinc-500">none</span>}</td>
                 <td className="px-4 py-2.5 tabular-nums">{p.invoice_no ? inr(gst) : "—"}</td>
                 <td className="px-4 py-2.5 font-semibold tabular-nums">{inr(p.amount)}</td>
               </tr>

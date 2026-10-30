@@ -46,7 +46,7 @@ export default function SupportPage() {
             key={key}
             onClick={() => setTab(key)}
             aria-pressed={tab === key}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${tab === key ? "bg-brand text-white" : "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -370,22 +370,22 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
 
         <Notice notice={notice} />
         {ticket.requested_plan_id && status !== "resolved" && (
-          <p className="rounded-xl bg-blue-50 px-4 py-3 text-blue-800">
+          <p className="rounded-md bg-blue-50 px-4 py-3 text-blue-800">
             This shop is asking for a plan change. Agree the price with them, then open{" "}
             <Link href={`/clients/${b.id}`} className="font-semibold underline">the client</Link> and press Renew with
             the new plan — this request then answers and closes itself.
           </p>
         )}
         {ticket.rating && (
-          <p className="rounded-xl bg-amber-50 px-4 py-3 text-amber-900">
+          <p className="rounded-md bg-amber-50 px-4 py-3 text-amber-900">
             The shop rated this <b>{"★".repeat(ticket.rating)}{"☆".repeat(5 - ticket.rating)}</b>
             {ticket.rating_note ? ` — "${ticket.rating_note}"` : ""}
           </p>
         )}
 
         {kind === "suggestion" && (
-          <div className="space-y-2 rounded-xl bg-violet-50 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-violet-700">On the suggestions board</p>
+          <div className="space-y-2 rounded-md bg-violet-50 p-3">
+            <p className="text-[13px] font-medium text-violet-700">On the suggestions board</p>
             <div className="flex flex-col gap-2 sm:flex-row">
               <Select value={suggestionId} onChange={(e) => linkSuggestion(e.target.value)} aria-label="Suggestion">
                 <option value="">Not on the board yet</option>
@@ -398,7 +398,7 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
                   value={newIdea}
                   onChange={(e) => setNewIdea(e.target.value)}
                   placeholder="Or a new suggestion, e.g. Dark mode"
-                  className="w-full rounded-xl border border-zinc-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand"
+                  className="w-full rounded-md border border-zinc-200 bg-white px-3 py-1.5 text-sm outline-none focus:border-brand"
                 />
                 <Button variant="outline" onClick={() => linkSuggestion("", newIdea.trim())} disabled={!newIdea.trim()}>Add</Button>
               </div>
@@ -406,7 +406,7 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
           </div>
         )}
 
-        <div ref={thread} className="max-h-[36dvh] min-h-24 space-y-2 overflow-y-auto rounded-xl bg-zinc-50 p-3">
+        <div ref={thread} className="max-h-[36dvh] min-h-24 space-y-2 overflow-y-auto rounded-md bg-zinc-50 p-3">
           <Bubble mine={false} body={ticket.message || ticket.subject} at={ticket.created_at} />
           {messages === null ? <Spinner /> : messages.map((m) => (
             <Bubble key={m.id} mine={m.from_softraxa} body={m.body} at={m.created_at} />
@@ -433,7 +433,7 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
             onChange={(e) => setReply(e.target.value)}
             rows={3}
             placeholder="Write your reply — the shop reads it in the app"
-            className="w-full rounded-xl border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
+            className="w-full rounded-md border border-zinc-200 px-3.5 py-2 text-sm outline-none focus:border-brand focus:ring-4 focus:ring-brand/10"
           />
           <div className="mt-2 flex flex-wrap justify-end gap-2">
             <Button variant="outline" onClick={() => send(true)} disabled={busy || !reply.trim()}>Reply &amp; resolve</Button>
@@ -441,11 +441,11 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
           </div>
         </div>
 
-        <div className="space-y-2 rounded-xl border border-dashed border-zinc-300 p-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Private notes — only the team sees these</p>
+        <div className="space-y-2 rounded-md border border-dashed border-zinc-300 p-3">
+            <p className="text-[13px] font-medium text-zinc-500">Private notes — only the team sees these</p>
             {notes.map((n) => (
               <p key={n.id} className="text-sm">
-                <span className="text-xs text-zinc-400">{dateTimeStr(n.created_at)}{memberName(team, n.created_by) ? ` · ${memberName(team, n.created_by)}` : ""}</span> · {n.note}
+                <span className="text-xs text-zinc-500">{dateTimeStr(n.created_at)}{memberName(team, n.created_by) ? ` · ${memberName(team, n.created_by)}` : ""}</span> · {n.note}
               </p>
             ))}
             <div className="flex gap-2">
@@ -454,7 +454,7 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
                 onChange={(e) => setNote(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && addNote()}
                 placeholder="Add a note…"
-                className="w-full rounded-xl border border-zinc-200 px-3 py-1.5 text-sm outline-none focus:border-brand"
+                className="w-full rounded-md border border-zinc-200 px-3 py-1.5 text-sm outline-none focus:border-brand"
               />
               <Button variant="outline" onClick={addNote} disabled={!note.trim()}>Add</Button>
             </div>
@@ -467,7 +467,7 @@ function TicketDialog({ ticket, team, onClose, onChanged }: {
 function Bubble({ mine, body, at }: { mine: boolean; body: string; at: string }) {
   return (
     <div className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-      <div className={`max-w-[85%] rounded-2xl px-3.5 py-2 ${mine ? "bg-brand text-white" : "bg-white text-ink ring-1 ring-zinc-200"}`}>
+      <div className={`max-w-[85%] rounded-lg px-3.5 py-2 ${mine ? "bg-brand text-white" : "bg-white text-ink ring-1 ring-zinc-200"}`}>
         <p className="whitespace-pre-wrap break-words">{body}</p>
         <p className={`mt-1 text-[10px] ${mine ? "text-white/70" : "text-zinc-400"}`}>{mine ? "Dukania" : "Shop"} · {dateTimeStr(at)}</p>
       </div>

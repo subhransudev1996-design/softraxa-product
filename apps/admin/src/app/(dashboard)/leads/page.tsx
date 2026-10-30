@@ -115,7 +115,7 @@ export default function LeadsPage() {
             key={key}
             onClick={() => setView(key)}
             aria-pressed={view === key}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${view === key ? "bg-brand text-white" : "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50"}`}
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${view === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}
           >
             {label}
           </button>
@@ -212,7 +212,7 @@ function Board({ rows, team, today, onMove }: {
                 const lead = rows.find((r) => r.id === e.dataTransfer.getData("text/plain"));
                 if (lead) onMove(lead, stage.key);
               }}
-              className={`w-64 shrink-0 rounded-2xl p-2 transition ${over === stage.key ? "bg-violet-100" : "bg-zinc-100/70"}`}
+              className={`w-64 shrink-0 rounded-lg p-2 transition ${over === stage.key ? "bg-violet-100" : "bg-zinc-100/70"}`}
             >
               <div className="flex items-center justify-between px-2 pb-2 pt-1">
                 <div className="flex items-center gap-2">
@@ -230,7 +230,7 @@ function Board({ rows, team, today, onMove }: {
                       key={l.id}
                       draggable
                       onDragStart={(e) => e.dataTransfer.setData("text/plain", l.id)}
-                      className="cursor-grab rounded-xl bg-white p-3 shadow-sm ring-1 ring-zinc-200 active:cursor-grabbing"
+                      className="cursor-grab rounded-md bg-white p-3 shadow-sm ring-1 ring-zinc-200 active:cursor-grabbing"
                     >
                       <Link href={`/leads/${l.id}`} className="block">
                         <div className="flex items-start gap-2">
@@ -263,7 +263,7 @@ function Board({ rows, team, today, onMove }: {
                     </div>
                   );
                 })}
-                {cards.length === 0 && <p className="px-2 py-4 text-center text-xs text-zinc-400">Drop a lead here</p>}
+                {cards.length === 0 && <p className="px-2 py-4 text-center text-xs text-zinc-500">Drop a lead here</p>}
               </div>
             </div>
           );
@@ -395,7 +395,7 @@ function NewLead({ plans, onClose, onSaved }: { plans: any[]; onClose: () => voi
           <Input name="city" />
         </div>
         {dupes && (
-          <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:col-span-2">
+          <div className="rounded-md bg-amber-50 px-4 py-3 text-sm text-amber-900 sm:col-span-2">
             <p className="font-semibold">This phone number is already known:</p>
             <ul className="mt-1 list-disc pl-5">
               {dupes.leads.map((l) => (

@@ -90,7 +90,7 @@ function Group({ title, rows, render }: { title: string; rows: any[] | undefined
   return (
     <Card>
       <CardBody>
-        <h2 className="mb-1 text-xs font-bold uppercase tracking-wide text-zinc-500">{title}</h2>
+        <h2 className="mb-1 text-[13px] font-medium text-zinc-500">{title}</h2>
         <ul className="divide-y divide-zinc-100">{rows.map((r) => <li key={r.id}>{render(r)}</li>)}</ul>
       </CardBody>
     </Card>

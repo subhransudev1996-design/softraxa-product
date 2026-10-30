@@ -28,7 +28,7 @@ export default function TasksPage() {
       <div className="flex flex-wrap gap-2">
         {([["tasks", "Tasks"], ["calendar", "Calendar"]] as const).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} aria-pressed={tab === key}
-            className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${tab === key ? "bg-brand text-white" : "bg-white text-zinc-600 ring-1 ring-inset ring-zinc-200 hover:bg-zinc-50"}`}>
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium ring-1 ring-inset transition-colors ${tab === key ? "bg-brand-tint text-brand-deep ring-brand/30" : "bg-white text-zinc-600 ring-zinc-200 hover:bg-zinc-50"}`}>
             {label}
           </button>
         ))}
@@ -204,7 +204,7 @@ function Calendar() {
       </div>
       {!events ? <Spinner /> : (
         <Card>
-          <div className="grid grid-cols-7 border-b border-zinc-100 text-center text-[11px] font-semibold uppercase text-zinc-500">
+          <div className="grid grid-cols-7 border-b border-zinc-100 text-center text-xs font-medium text-zinc-500">
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d) => <div key={d} className="py-2">{d}</div>)}
           </div>
           <div className="grid grid-cols-7">

@@ -261,7 +261,7 @@ export default function ClientDetailPage() {
       <Notice notice={notice} />
 
       {claims.length > 0 && (
-        <p className="rounded-xl bg-blue-50 px-4 py-3 text-sm text-blue-800">
+        <p className="rounded-md bg-blue-50 px-4 py-3 text-sm text-blue-800">
           This shop reported a payment of {inr(claims[0].amount)} (UTR <span className="font-mono">{claims[0].reference}</span>).
           Verify it on the <Link href="/" className="font-semibold underline">Today</Link> page.
         </p>
@@ -303,7 +303,7 @@ export default function ClientDetailPage() {
               </div>
             </dl>
             {addons.length > 0 && (
-              <ul className="mt-3 space-y-1.5 rounded-xl bg-zinc-50 p-3 text-sm">
+              <ul className="mt-3 space-y-1.5 rounded-md bg-zinc-50 p-3 text-sm">
                 {addons.map((a) => (
                   <li key={a.id} className="flex items-center justify-between gap-2">
                     <span>
@@ -385,7 +385,7 @@ export default function ClientDetailPage() {
             </div>
             <ul className="space-y-2 text-sm">
               {notes.map((n) => (
-                <li key={n.id}><span className="text-xs text-zinc-400">{dateStr(n.created_at)}</span> · {n.note}</li>
+                <li key={n.id}><span className="text-xs text-zinc-500">{dateStr(n.created_at)}</span> · {n.note}</li>
               ))}
               {notes.length === 0 && <li className="text-zinc-500">No notes yet.</li>}
             </ul>

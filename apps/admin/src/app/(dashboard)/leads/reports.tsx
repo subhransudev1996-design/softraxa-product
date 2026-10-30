@@ -111,8 +111,8 @@ export function LeadReports({ rows, team }: { rows: any[]; team: TeamMember[] })
           <h2 className="mb-3 text-sm font-semibold text-zinc-700">Where they are now</h2>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
             {STAGES.map((s) => (
-              <div key={s.key} className="rounded-xl bg-zinc-50 p-3 text-center">
-                <p className="text-xl font-extrabold tabular-nums text-ink">{inPeriod.filter((r) => r.status === s.key).length}</p>
+              <div key={s.key} className="rounded-md bg-zinc-50 p-3 text-center">
+                <p className="text-xl font-semibold tabular-nums text-ink">{inPeriod.filter((r) => r.status === s.key).length}</p>
                 <p className="text-xs text-zinc-500">{s.label}</p>
               </div>
             ))}

@@ -196,7 +196,7 @@ export default function NewClientPage() {
   if (createdResult) {
     return (
       <div className="max-w-2xl space-y-6">
-        <div className="rounded-xl border border-green-200 bg-green-50 p-6">
+        <div className="rounded-md border border-green-200 bg-green-50 p-6">
           <div className="flex items-center gap-3 text-green-800">
             <span className="text-2xl">✓</span>
             <div>
@@ -213,7 +213,7 @@ export default function NewClientPage() {
             <h2 className="text-base font-semibold text-zinc-900">Owner login</h2>
             <div className="rounded-lg bg-zinc-50 p-4 border border-zinc-200 font-mono text-sm flex items-center justify-between">
               <div>
-                <span className="text-xs font-semibold text-zinc-500 block uppercase">Email</span>
+                <span className="text-[13px] font-medium text-zinc-500 block">Email</span>
                 <span className="font-bold text-zinc-900">{createdResult.email}</span>
               </div>
               <Button variant="outline" onClick={() => copyToClipboard(createdResult.email)}>

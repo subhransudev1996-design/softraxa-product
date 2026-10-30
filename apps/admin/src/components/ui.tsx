@@ -3,13 +3,7 @@
 import { ReactNode } from "react";
 
 export function Card({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div
-      className={`rounded-2xl border border-zinc-200/70 bg-white shadow-[0_1px_2px_rgba(23,34,59,0.04),0_8px_24px_-12px_rgba(23,34,59,0.12)] transition-shadow duration-200 hover:shadow-[0_1px_2px_rgba(23,34,59,0.04),0_12px_32px_-12px_rgba(23,34,59,0.18)] ${className}`}
-    >
-      {children}
-    </div>
-  );
+  return <div className={`rounded-lg border border-zinc-200 bg-white ${className}`}>{children}</div>;
 }
 
 export function CardBody({ children, className = "" }: { children: ReactNode; className?: string }) {
@@ -29,20 +23,13 @@ export function StatCard({
 }) {
   return (
     <Card>
-      <CardBody className="relative overflow-hidden">
-        <span className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-brand via-[#a78bfa] to-transparent opacity-70" />
+      <CardBody className="!p-4">
         <div className="flex items-start justify-between gap-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-zinc-400">{label}</p>
-          {icon && (
-            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-lg bg-brand-tint text-brand">
-              {icon}
-            </span>
-          )}
+          <p className="text-[13px] font-medium text-zinc-500">{label}</p>
+          {icon && <span className="shrink-0 text-zinc-400">{icon}</span>}
         </div>
-        <p className="mt-1.5 text-[28px] font-extrabold leading-8 tracking-tight text-ink tabular-nums">
-          {value}
-        </p>
-        {hint && <p className="mt-1 text-xs font-medium text-zinc-400">{hint}</p>}
+        <p className="mt-1 text-2xl font-semibold tracking-tight text-ink tabular-nums">{value}</p>
+        {hint && <p className="mt-0.5 text-xs text-zinc-500">{hint}</p>}
       </CardBody>
     </Card>
   );
@@ -64,20 +51,17 @@ export function Button({
   className?: string;
 }) {
   const styles = {
-    primary:
-      "bg-brand text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.5)] hover:bg-brand-deep focus-visible:ring-brand",
-    outline:
-      "border border-zinc-300 bg-white text-zinc-700 hover:border-zinc-400 hover:bg-zinc-50 focus-visible:ring-zinc-400",
-    danger:
-      "bg-red-600 text-white shadow-[0_4px_14px_-4px_rgba(220,38,38,0.5)] hover:bg-red-700 focus-visible:ring-red-500",
-    ghost: "text-zinc-600 hover:bg-zinc-100 focus-visible:ring-zinc-400",
+    primary: "bg-brand text-white hover:bg-brand-deep focus-visible:ring-brand",
+    outline: "border border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-50 focus-visible:ring-zinc-400",
+    danger: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-500",
+    ghost: "text-zinc-600 hover:bg-zinc-100 hover:text-ink focus-visible:ring-zinc-400",
   }[variant];
   return (
     <button
       type={type}
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
+      className={`inline-flex min-h-9 cursor-pointer items-center gap-2 rounded-md px-3.5 py-1.5 text-sm font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${styles} ${className}`}
     >
       {children}
     </button>
@@ -88,7 +72,7 @@ export function Input(props: React.ComponentProps<"input">) {
   return (
     <input
       {...props}
-      className={`w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-ink shadow-[inset_0_1px_2px_rgba(23,34,59,0.03)] outline-none transition placeholder:text-zinc-400 focus:border-brand focus:ring-4 focus:ring-brand/10 ${props.className ?? ""}`}
+      className={`min-h-9 w-full rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors placeholder:text-zinc-400 focus:border-brand focus:ring-2 focus:ring-brand/20 disabled:bg-zinc-50 disabled:text-zinc-500 ${props.className ?? ""}`}
     />
   );
 }
@@ -97,14 +81,14 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return (
     <select
       {...props}
-      className={`w-full rounded-xl border border-zinc-200 bg-white px-3.5 py-2 text-sm text-ink outline-none transition focus:border-brand focus:ring-4 focus:ring-brand/10 ${props.className ?? ""}`}
+      className={`min-h-9 w-full cursor-pointer rounded-md border border-zinc-300 bg-white px-3 py-1.5 text-sm text-ink outline-none transition-colors focus:border-brand focus:ring-2 focus:ring-brand/20 ${props.className ?? ""}`}
     />
   );
 }
 
 export function Label({ children }: { children: ReactNode }) {
   return (
-    <label className="mb-1.5 block text-xs font-semibold text-zinc-500">{children}</label>
+    <label className="mb-1 block text-[13px] font-medium text-zinc-700">{children}</label>
   );
 }
 
@@ -119,7 +103,7 @@ export function Badge({ children, color = "zinc" }: { children: ReactNode; color
   };
   return (
     <span
-      className={`inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ring-1 ring-inset ${colors[color] ?? colors.zinc}`}
+      className={`inline-block rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${colors[color] ?? colors.zinc}`}
     >
       {children}
     </span>
@@ -132,11 +116,11 @@ export const subscriptionBadge = (status?: string) =>
 export function Table({ headers, children }: { headers: string[]; children: ReactNode }) {
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-left text-sm text-zinc-700">
+      <table className="w-full text-left text-sm text-zinc-700 [&_tbody_tr]:transition-colors [&_tbody_tr:hover]:bg-zinc-50">
         <thead>
-          <tr className="border-b border-zinc-200/80 bg-zinc-50/50 text-[11px] uppercase tracking-[0.1em] text-zinc-400">
+          <tr className="border-b border-zinc-200 bg-zinc-50 text-xs text-zinc-500">
             {headers.map((h, i) => (
-              <th key={`${h}-${i}`} className="px-4 py-3 font-semibold first:rounded-tl-2xl last:rounded-tr-2xl">
+              <th key={`${h}-${i}`} className="whitespace-nowrap px-4 py-2.5 font-medium">
                 {h}
               </th>
             ))}
@@ -151,7 +135,7 @@ export function Table({ headers, children }: { headers: string[]; children: Reac
 export function Spinner() {
   return (
     <div className="flex justify-center py-12">
-      <div className="h-8 w-8 animate-spin rounded-full border-[3px] border-zinc-200 border-t-brand" />
+      <div className="h-6 w-6 animate-spin rounded-full border-2 border-zinc-200 border-t-brand" />
     </div>
   );
 }
@@ -169,7 +153,7 @@ export function Toggle({
     <button
       type="button"
       onClick={() => onChange(!checked)}
-      className="flex w-full items-center justify-between rounded-lg px-1.5 py-2 text-sm transition hover:bg-zinc-50"
+      className="flex w-full cursor-pointer items-center justify-between rounded-md px-1.5 py-2 text-sm transition-colors hover:bg-zinc-50"
     >
       <span className="font-medium text-zinc-700">{label}</span>
       <span
@@ -196,7 +180,7 @@ export function PageHeader({
   return (
     <div className="flex flex-wrap items-end justify-between gap-3">
       <div>
-        <h1 className="text-[26px] font-extrabold tracking-tight text-ink">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-ink">{title}</h1>
         {subtitle && <p className="mt-0.5 text-sm text-zinc-500">{subtitle}</p>}
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

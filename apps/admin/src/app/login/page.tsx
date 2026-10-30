@@ -86,51 +86,20 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen">
-      {/* brand panel */}
-      <section className="relative hidden flex-1 flex-col justify-between overflow-hidden bg-sidebar p-10 lg:flex">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-60"
-          style={{
-            background:
-              "radial-gradient(600px 400px at 20% 15%, rgba(124,58,237,0.32), transparent 65%), radial-gradient(500px 380px at 85% 90%, rgba(91,108,255,0.18), transparent 65%)",
-          }}
-        />
-        <div className="relative flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white shadow-[0_4px_14px_-4px_rgba(124,58,237,0.7)]">
-            D
-          </span>
-          <p className="text-lg font-extrabold tracking-tight text-white">Dukania</p>
+    <main className="flex min-h-screen items-center justify-center bg-canvas p-6">
+      <section className="w-full max-w-sm">
+        <div className="mb-6 flex items-center gap-2.5">
+          <span className="grid h-8 w-8 place-items-center rounded-md bg-brand text-sm font-semibold text-white">D</span>
+          <p className="text-sm font-semibold text-ink">Dukania <span className="font-normal text-zinc-500">Admin</span></p>
         </div>
-        <div className="relative max-w-md">
-          <h2 className="text-[34px] font-extrabold leading-tight tracking-tight text-white">
-            Run your inventory software business from one panel.
-          </h2>
-          <p className="mt-4 text-sm leading-6 text-sidebar-muted">
-            Clients, plans, subscriptions, leads, payments and support — the control
-            room for Dukania.
-          </p>
-        </div>
-        <p className="relative text-xs text-sidebar-muted">
-          © {new Date().getFullYear()} Dukania
-        </p>
-      </section>
-
-      {/* form panel */}
-      <section className="flex flex-1 items-center justify-center bg-canvas p-6">
-        <div className="animate-rise w-full max-w-sm">
-          <div className="mb-8 lg:hidden">
-            <span className="grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-brand to-[#4c1d95] text-lg font-extrabold text-white">
-              D
-            </span>
-          </div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-ink">
-            {step === "code" ? "Enter your code" : "Welcome back"}
+        <div className="rounded-lg border border-zinc-200 bg-white p-6">
+          <h1 className="text-lg font-semibold tracking-tight text-ink">
+            {step === "code" ? "Enter your code" : "Sign in"}
           </h1>
-          <p className="mb-7 mt-1 text-sm text-zinc-500">
+          <p className="mb-5 mt-1 text-sm text-zinc-500">
             {step === "code"
               ? "Open your authenticator app and type the 6-digit code for Dukania admin."
-              : "Sign in to the admin panel"}
+              : "For the Dukania team."}
           </p>
           {step === "code" ? (
             <form onSubmit={verify} className="space-y-4">
@@ -148,7 +117,7 @@ export default function LoginPage() {
                 />
               </div>
               {error && (
-                <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">{error}</p>
+                <p className="rounded-md bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">{error}</p>
               )}
               <Button type="submit" disabled={busy || code.length !== 6} className="w-full justify-center py-2.5">
                 {busy ? "Checking…" : "Continue"}
@@ -180,7 +149,7 @@ export default function LoginPage() {
               />
             </div>
             {error && (
-              <p className="rounded-xl bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
+              <p className="rounded-md bg-red-50 px-3.5 py-2.5 text-sm font-medium text-red-700">
                 {error}
               </p>
             )}
@@ -190,6 +159,7 @@ export default function LoginPage() {
           </form>
           )}
         </div>
+        <p className="mt-4 text-center text-xs text-zinc-500">© {new Date().getFullYear()} Dukania</p>
       </section>
     </main>
   );
