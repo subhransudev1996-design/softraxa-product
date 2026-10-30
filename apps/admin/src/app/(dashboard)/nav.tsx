@@ -27,6 +27,7 @@ import {
   Users,
   X,
 } from "lucide-react";
+import { BrandMark } from "@/components/brand-mark";
 import { MeProvider } from "@/components/me";
 import { AlertsBell } from "@/components/alerts";
 import { Card, CardBody } from "@/components/ui";
@@ -114,7 +115,7 @@ function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void })
   return (
     <>
       <div className="flex h-14 shrink-0 items-center gap-2.5 border-b border-white/10 px-4">
-        <span className="grid h-8 w-8 place-items-center rounded-lg bg-marigold text-sm font-extrabold text-sidebar">D</span>
+        <BrandMark />
         <p className="text-sm font-bold text-white">Dukania <span className="font-medium text-sidebar-muted">Admin</span></p>
         <div className="ml-auto hidden lg:block"><AlertsBell /></div>
       </div>

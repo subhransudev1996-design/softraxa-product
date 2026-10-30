@@ -1,5 +1,6 @@
 "use client";
 
+import { BrandMark } from "@/components/brand-mark";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
@@ -89,7 +90,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen">
       <aside className="dot-grid relative hidden w-[44%] flex-col justify-between bg-sidebar p-12 lg:flex">
         <div className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-lg bg-marigold text-lg font-extrabold text-sidebar">D</span>
+          <BrandMark size={40} />
           <p className="text-lg font-bold text-white">Dukania <span className="font-medium text-sidebar-muted">Admin</span></p>
         </div>
         <div>
@@ -107,7 +108,7 @@ export default function LoginPage() {
       <section className="flex flex-1 items-center justify-center bg-canvas p-6">
         <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center gap-2.5 lg:hidden">
-          <span className="grid h-8 w-8 place-items-center rounded-lg bg-marigold text-sm font-extrabold text-sidebar">D</span>
+          <BrandMark />
           <p className="text-sm font-bold text-ink">Dukania <span className="font-medium text-zinc-500">Admin</span></p>
         </div>
         <div className="rounded-xl border border-zinc-200/80 bg-white p-7 shadow-[0_1px_2px_rgba(23,19,43,0.05)]">
