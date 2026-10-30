@@ -16,9 +16,11 @@ type Stats = {
   clicks: number; signups: number; paid_shops: number; earned: number; held: number; payable: number; paid: number;
   upi_id: string; email: string; on_trial: number; trial_ended: number; code_uses: number; min_payout: number;
   payout_request: { amount: number; upi_id: string; at: string } | null;
+  last_declined: { amount: number; reason: string; at: string } | null;
+  has_pan: boolean; pan_last4: string | null; tds: number;
   purchases: { day: string; kind: string; plan: string; paid: number; commission: number; payable_on: string; status: string }[];
   months: { month: string; clicks: number; signups: number; paid_shops: number; earned: number }[];
-  payouts: { paid_on: string; amount: number; reference: string }[];
+  payouts: { paid_on: string; amount: number; tds: number; reference: string }[];
 };
 
 const money = (n: number) => (n < 0 ? `−${rupees(Math.abs(n))}` : rupees(n));
@@ -30,6 +32,7 @@ export default function PartnerMeClient() {
   const [s, setS] = useState<Stats | null>(null);
   const [upi, setUpi] = useState("");
   const [pass, setPass] = useState("");
+  const [pan, setPan] = useState("");
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [asking, setAsking] = useState(false);
@@ -56,13 +59,23 @@ export default function PartnerMeClient() {
     setNote(error ? { ok: false, text: error.message } : { ok: true, text: "UPI ID saved. Your next payment goes here." });
   }
 
+  async function savePan(e: React.FormEvent) {
+    e.preventDefault();
+    const { data, error } = await supabase.rpc("my_partner_set_pan", { p_pan: pan });
+    if (!error && s) {
+      setS({ ...s, has_pan: true, pan_last4: String(data) });
+      setPan("");
+    }
+    setNote(error ? { ok: false, text: error.message } : { ok: true, text: "PAN saved." });
+  }
+
   async function requestPayout() {
     setAsking(true);
     setPayoutError(null);
     const { data, error } = await supabase.rpc("my_partner_request_payout");
     setAsking(false);
     if (error) return setPayoutError(error.message);
-    if (s) setS({ ...s, payout_request: { ...(data as { amount: number; upi_id: string }), at: new Date().toISOString() } });
+    if (s) setS({ ...s, last_declined: null, payout_request: { ...(data as { amount: number; upi_id: string }), at: new Date().toISOString() } });
   }
 
   async function savePassword(e: React.FormEvent) {
@@ -93,7 +106,7 @@ export default function PartnerMeClient() {
     ["Shops that paid", String(s.paid_shops)],
     ["Earned", money(Number(s.earned))],
     ["To be paid", money(Number(s.payable)), Number(s.held) > 0 ? `+ ${money(Number(s.held))} after the ${s.hold_days}-day wait` : undefined],
-    ["Paid to you", money(Number(s.paid))],
+    ["Paid to you", money(Number(s.paid)), Number(s.tds) > 0 ? `includes ${money(Number(s.tds))} TDS` : undefined],
   ];
   const payable = Number(s.payable);
   const minPayout = Number(s.min_payout ?? 500);
@@ -138,6 +151,11 @@ export default function PartnerMeClient() {
 
       {/* Asking to be paid */}
       <div className="mt-6 rounded-2xl border border-hairline bg-white p-5 shadow-card">
+        {s.last_declined && (
+          <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-800">
+            <b>Your request for {money(Number(s.last_declined.amount))} wasn&apos;t paid:</b> {s.last_declined.reason}. Your money is still here, and you can ask again.
+          </p>
+        )}
         {s.payout_request ? (
           <p className="flex items-start gap-3 text-sm text-paper">
             <Check className="mt-0.5 h-5 w-5 shrink-0 text-emerald-700" />
@@ -222,7 +240,10 @@ export default function PartnerMeClient() {
           {s.payouts.map((o, i) => (
             <li key={i} className="flex justify-between px-4 py-3 text-sm">
               <span>{dayName(o.paid_on)}{o.reference ? <span className="text-dim"> · ref …{o.reference}</span> : null}</span>
-              <b className="tabular-nums">{money(Number(o.amount))}</b>
+              <span className="text-right">
+                <b className="tabular-nums">{money(Number(o.amount) - Number(o.tds ?? 0))}</b>
+                {Number(o.tds) > 0 && <span className="block text-xs text-dim">{money(Number(o.amount))} less {money(Number(o.tds))} TDS</span>}
+              </span>
             </li>
           ))}
         </ul>
@@ -236,6 +257,14 @@ export default function PartnerMeClient() {
           <div className="mt-3 flex gap-2">
             <input value={upi} onChange={(e) => setUpi(e.target.value)} placeholder="name@okaxis" aria-label="UPI ID" className={field} />
             <button type="submit" className="rounded-xl bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-2">Save</button>
+          </div>
+        </form>
+        <form onSubmit={savePan} className="rounded-2xl border border-hairline bg-white p-5 shadow-card">
+          <p className="font-semibold text-paper">PAN</p>
+          <p className="text-xs text-dim">{s.has_pan ? `Saved, ending ${s.pan_last4}. Enter it again to change it.` : "Needed for tax. Without it, more TDS may be held once your earnings are high enough."}</p>
+          <div className="mt-3 flex gap-2">
+            <input value={pan} onChange={(e) => setPan(e.target.value.toUpperCase())} maxLength={10} placeholder="ABCDE1234F" aria-label="PAN" className={`${field} font-mono`} />
+            <button type="submit" disabled={!pan.trim()} className="rounded-xl bg-brand px-4 text-sm font-semibold text-white hover:bg-brand-2 disabled:opacity-50">Save</button>
           </div>
         </form>
         <form onSubmit={savePassword} className="rounded-2xl border border-hairline bg-white p-5 shadow-card">

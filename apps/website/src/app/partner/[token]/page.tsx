@@ -16,7 +16,7 @@ type Stats = {
   name: string; code: string; active: boolean; buyer_off_pct: number; rule: string; hold_days: number;
   clicks: number; signups: number; paid_shops: number; earned: number; held: number; payable: number; paid: number;
   months: { month: string; clicks: number; signups: number; paid_shops: number; earned: number }[];
-  payouts: { paid_on: string; amount: number; reference: string }[];
+  payouts: { paid_on: string; amount: number; tds: number; reference: string }[];
 };
 
 const SITE = process.env.NEXT_PUBLIC_SITE_URL || "https://www.dukania.in";
@@ -93,7 +93,7 @@ export default async function PartnerStatsPage({ params }: { params: Promise<{ t
           {s.payouts.map((o, i) => (
             <li key={i} className="flex justify-between px-4 py-3 text-sm">
               <span>{dayName(o.paid_on)}{o.reference ? <span className="text-dim"> · ref …{o.reference}</span> : null}</span>
-              <b className="tabular-nums">{money(Number(o.amount))}</b>
+              <b className="tabular-nums">{money(Number(o.amount) - Number(o.tds ?? 0))}{Number(o.tds) > 0 ? <span className="font-normal text-dim"> after {money(Number(o.tds))} TDS</span> : null}</b>
             </li>
           ))}
         </ul>

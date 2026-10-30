@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Input, Label, Select, Toggle } from "@/components/ui";
 import { Modal, waLink } from "@/components/ops";
 import { createClient } from "@/lib/supabase/client";
@@ -150,19 +150,29 @@ export function PayDialog({ partner, onClose, onDone }: { partner: any; onClose:
   const [error, setError] = useState<string | null>(null);
   const amount = Number(partner.payable);
   const overTds = Number(partner.paid_this_fy) + amount > TDS_LIMIT;
+  const [pan, setPan] = useState<string | null>(null);
+  const [tds, setTds] = useState("");
+  const held = Number(tds) || 0;
+  const net = amount - held;
+  // 2% with a PAN, 20% without (sections 194H and 206AA): filled in only when asked; the CA decides.
+  const suggested = Math.round(amount * (pan ? 0.02 : 0.2));
+
+  useEffect(() => {
+    createClient().rpc("admin_partner_pan", { p_partner: partner.id }).then(({ data }) => setPan((data as string) ?? null));
+  }, [partner.id]);
 
   async function pay() {
     setBusy(true);
     setError(null);
     const { data, error } = await createClient().rpc("admin_pay_partner", {
-      p_partner: partner.id, p: { mode, reference: reference.trim(), paid_on: paidOn },
+      p_partner: partner.id, p: { mode, reference: reference.trim(), paid_on: paidOn, tds: held },
     });
     setBusy(false);
     if (error) return setError(error.message);
-    onDone(`${inr((data as any).amount)} paid to ${partner.name}, and added to Accounts as a commission expense.`);
+    onDone(`${inr((data as any).net)} paid to ${partner.name}${held > 0 ? `, ${inr(held)} TDS held` : ""}. ${inr((data as any).amount)} added to Accounts as a commission expense.`);
   }
 
-  const msg = `Namaste ${partner.name}! Your Dukania commission of ${inr(amount)} is paid${reference ? ` (ref ${reference})` : ""}. ` +
+  const msg = `Namaste ${partner.name}! Your Dukania commission of ${inr(amount)} is paid: ${inr(net)} to you${held > 0 ? ` after ${inr(held)} TDS` : ""}${reference ? ` (ref ${reference})` : ""}. ` +
     `See your numbers any time: ${statsOf(partner)} — thank you! Dukania`;
 
   return (
@@ -174,9 +184,20 @@ export function PayDialog({ partner, onClose, onDone }: { partner: any; onClose:
         </p>
         {overTds && (
           <p className="rounded-xl bg-amber-50 px-4 py-3 text-amber-800">
-            Commission to {partner.name} this financial year goes over {inr(TDS_LIMIT)}. TDS may apply (section 194H) — check with your CA before paying.
+            Commission to {partner.name} this financial year goes over {inr(TDS_LIMIT)}. TDS may apply (section 194H), possibly on earlier payouts this year too — check with your CA before paying.{" "}
+            <button type="button" onClick={() => setTds(String(suggested))} className="font-semibold underline">Use {inr(suggested)} ({pan ? "2%, PAN on file" : "20%, no PAN"})</button>
           </p>
         )}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <Label>TDS held ₹ (0 if none)</Label>
+            <Input type="number" min={0} step="0.01" value={tds} onChange={(e) => setTds(e.target.value)} placeholder="0" />
+          </div>
+          <div>
+            <Label>PAN</Label>
+            <p className="py-2 font-mono text-sm font-semibold">{pan || "Not on file"}</p>
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <Label>Paid by</Label>
@@ -199,7 +220,7 @@ export function PayDialog({ partner, onClose, onDone }: { partner: any; onClose:
         <div className="flex flex-wrap justify-end gap-2">
           {partner.phone && <a href={waLink(partner.phone, msg)} target="_blank" rel="noreferrer"><Button variant="outline">WhatsApp them</Button></a>}
           <Button variant="ghost" onClick={onClose}>Cancel</Button>
-          <Button onClick={pay} disabled={busy || (mode !== "cash" && !reference.trim())}>{busy ? "Saving…" : `Mark ${inr(amount)} paid`}</Button>
+          <Button onClick={pay} disabled={busy || held < 0 || held >= amount || (mode !== "cash" && !reference.trim())}>{busy ? "Saving…" : `Mark ${inr(net)} paid`}</Button>
         </div>
       </div>
     </Modal>

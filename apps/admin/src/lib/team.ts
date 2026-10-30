@@ -56,7 +56,9 @@ export const roleLabel = (r: TeamRole) =>
   ({ owner: "Owner", sales: "Sales", support: "Support", accounts: "Accounts", custom: "Custom" })[r] ?? r;
 
 /** The area a page belongs to; null = every team member. "owner" = the owner only. */
-export function areaFor(pathname: string): Area | "owner" | null {
+export function areaFor(pathname: string): Area | "owner" | "influencers" | null {
+  // Marketing runs influencers, payments pays them.
+  if (pathname.split("/")[1] === "influencers") return "influencers";
   const first = "/" + (pathname.split("/")[1] ?? "");
   if (pathname.startsWith("/clients/new")) return "clients";
   return (
@@ -67,7 +69,6 @@ export function areaFor(pathname: string): Area | "owner" | null {
       "/support": "support",
       "/leads": "leads",
       "/marketing": "marketing",
-      "/influencers": "marketing",
       "/catalog": "catalog",
       "/products": "catalog",
       "/plans": "plans",
@@ -80,9 +81,10 @@ export function areaFor(pathname: string): Area | "owner" | null {
   )[first] ?? null;
 }
 
-export function canUse(me: Me | null, area: Area | "owner" | null): boolean {
+export function canUse(me: Me | null, area: Area | "owner" | "influencers" | null): boolean {
   if (!area) return true;
   if (!me) return false;
   if (me.is_owner) return true;
+  if (area === "influencers") return me.areas.includes("marketing") || me.areas.includes("payments");
   return area !== "owner" && me.areas.includes(area);
 }

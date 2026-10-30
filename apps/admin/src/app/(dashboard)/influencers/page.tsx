@@ -7,14 +7,10 @@ import { PageHeader, Spinner } from "@/components/ui";
 import { Pipeline } from "./pipeline";
 import { Partners } from "./partners";
 import { PostsAndFees } from "./posts-fees";
+import { Payouts } from "./payouts";
+import { useCan } from "@/components/me";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
-const TABS = [
-  ["pipeline", "Pipeline"],
-  ["partners", "Partners"],
-  ["posts", "Posts and fees"],
-] as const;
 
 function AllPostsAndFees() {
   const [partners, setPartners] = useState<any[] | null>(null);
@@ -27,12 +23,22 @@ function AllPostsAndFees() {
 function Influencers() {
   const router = useRouter();
   const params = useSearchParams();
-  const tab = params.get("tab") ?? "pipeline";
+  const canMarket = useCan("marketing");
+  const canPay = useCan("payments");
+  // The pipeline is marketing's, payouts are payments' (they hold the PAN).
+  const tabs: [string, string][] = [
+    ...(canMarket ? [["pipeline", "Pipeline"] as [string, string]] : []),
+    ["partners", "Partners"],
+    ["posts", "Posts and fees"],
+    ...(canPay ? [["payouts", "Payouts"] as [string, string]] : []),
+  ];
+  const asked = params.get("tab");
+  const tab = tabs.some(([key]) => key === asked) ? asked : canMarket && !asked ? "pipeline" : canPay && !asked ? "payouts" : "partners";
   return (
     <div className="space-y-6">
       <PageHeader title="Influencers" subtitle="Who you're talking to, who's posting, and what each one really brings." />
       <div className="flex flex-wrap gap-2">
-        {TABS.map(([key, label]) => (
+        {tabs.map(([key, label]) => (
           <button
             key={key}
             onClick={() => router.replace(`/influencers?tab=${key}`)}
@@ -46,11 +52,12 @@ function Influencers() {
       {tab === "pipeline" && <Pipeline />}
       {tab === "partners" && <Partners />}
       {tab === "posts" && <AllPostsAndFees />}
+      {tab === "payouts" && <Payouts />}
     </div>
   );
 }
 
-/** Influencers (migrations 0104, 0107, 0108, 0109). */
+/** Influencers (migrations 0104, 0107, 0108, 0109, 0110). */
 export default function InfluencersPage() {
   return (
     <Suspense fallback={<Spinner />}>
