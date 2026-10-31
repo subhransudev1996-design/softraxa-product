@@ -38,3 +38,6 @@ Thumbs.db
 
 # Editor
 .vscode/
+
+# Customer data never goes in this public repo
+*.xlsx
