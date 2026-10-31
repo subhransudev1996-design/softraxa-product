@@ -1,6 +1,7 @@
 "use client";
 
 import { ReactNode, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Badge, Button, Card, CardBody, Input, Label, PageHeader } from "@/components/ui";
 import { Notice } from "@/components/ops";
@@ -53,6 +54,7 @@ function Section({ title, hint, children }: { title: string; hint: string; child
 
 /** A code from an authenticator app (Google Authenticator, Microsoft Authenticator…) after the password. */
 function TwoStepCard() {
+  const router = useRouter();
   const [factors, setFactors] = useState<Factor[] | null>(null);
   const [enrolling, setEnrolling] = useState<Enrolling | null>(null);
   const [code, setCode] = useState("");
@@ -90,6 +92,7 @@ function TwoStepCard() {
     setCode("");
     setNotice({ ok: true, text: "Two-step login is on. From now on you'll type a code from the app after your password." });
     setRefresh((n) => n + 1);
+    router.refresh(); // the panel stops asking for two-step login
   }
 
   async function turnOff(f: Factor) {

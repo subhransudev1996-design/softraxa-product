@@ -2,7 +2,7 @@ import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { sendTeamInviteEmail } from "@/lib/email";
-import { createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
+import { auditAs, createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
 import { roleLabel, type TeamRole } from "@/lib/team";
 
 /**
@@ -86,6 +86,7 @@ export async function POST(req: Request) {
     panelUrl: new URL(req.url).origin,
     setPasswordUrl: link,
   });
+  await auditAs(service, admin.userId, resend ? "team.invite_resent" : "team.invited", "team", userId ?? "", { email, sent: result.sent });
   if (result.sent) return NextResponse.json({ added: true, sent: true, email });
   return NextResponse.json({ added: true, sent: false, email, error: result.error, setPasswordLink: link }, { status: 502 });
 }

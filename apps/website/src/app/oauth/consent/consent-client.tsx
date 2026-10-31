@@ -1,9 +1,10 @@
 "use client";
 
+import { needsTwoStep, verifyTwoStep } from "@/lib/two-step";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { createClient, type OAuthAuthorizationDetails } from "@supabase/supabase-js";
 
-type Step = "loading" | "login" | "consent" | "working" | "error" | "refused";
+type Step = "loading" | "login" | "code" | "consent" | "working" | "error" | "refused";
 
 export default function ConsentClient() {
   // Its own session, kept only for this page (not the CMS's login).
@@ -23,12 +24,18 @@ export default function ConsentClient() {
   const [authorizationId, setAuthorizationId] = useState("");
   // Who is connecting: the Dukania admin (Dukania Admin) or a shop (Dukania).
   const [shopName, setShopName] = useState<string | null>(null);
+  const [code, setCode] = useState("");
 
   async function load(id: string) {
     setStep("loading");
     const { data: user } = await supabase.auth.getUser();
     if (!user.user) {
       setStep("login");
+      return;
+    }
+    // Team members with two-step login enter their code first (0111).
+    if (await needsTwoStep(supabase)) {
+      setStep("code");
       return;
     }
     // Dukania admins connect Dukania Admin; shop users connect Dukania,
@@ -92,6 +99,20 @@ export default function ConsentClient() {
     await load(authorizationId);
   }
 
+  async function submitCode(e: FormEvent) {
+    e.preventDefault();
+    setFormError("");
+    setStep("working");
+    const failed = await verifyTwoStep(supabase, code);
+    setCode("");
+    if (failed) {
+      setFormError(failed);
+      setStep("code");
+      return;
+    }
+    await load(authorizationId);
+  }
+
   async function decide(approve: boolean) {
     setStep("working");
     const { data, error } = approve
@@ -145,6 +166,17 @@ export default function ConsentClient() {
               onChange={(e) => setPassword(e.target.value)} className={input} />
             {formError && <p className="mt-3 text-sm text-red-600" role="alert">{formError}</p>}
             <button type="submit" className={`mt-6 ${primary}`}>Sign in</button>
+          </form>
+        )}
+
+        {step === "code" && (
+          <form onSubmit={submitCode}>
+            <h1 className="mt-3 text-center text-xl font-semibold">Enter your code</h1>
+            <label className="mt-6 block text-sm font-medium" htmlFor="code">Code from your authenticator app</label>
+            <input id="code" required inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code}
+              onChange={(e) => setCode(e.target.value)} className={input} />
+            {formError && <p className="mt-3 text-sm text-red-600" role="alert">{formError}</p>}
+            <button type="submit" className={`mt-6 ${primary}`}>Continue</button>
           </form>
         )}
 

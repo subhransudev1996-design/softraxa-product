@@ -153,7 +153,7 @@ function SidebarContent({ me, onNavigate }: { me: Me; onNavigate?: () => void })
 }
 
 /** Sidebar on large screens; a top bar with a slide-in menu on phones. */
-export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
+export function AppShell({ me, mustSetUpTwoStep = false, children }: { me: Me; mustSetUpTwoStep?: boolean; children: ReactNode }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const allowed = canUse(me, areaFor(pathname));
@@ -201,7 +201,15 @@ export function AppShell({ me, children }: { me: Me; children: ReactNode }) {
       <main className="p-4 sm:p-6 lg:ml-60 print:m-0 print:p-0">
         <div className="animate-rise mx-auto max-w-7xl">
           <MeProvider me={me}>
-            {allowed ? (
+            {mustSetUpTwoStep && !pathname.startsWith("/account") ? (
+              <Card>
+                <CardBody>
+                  <p className="font-semibold text-ink">Turn on two-step login to continue</p>
+                  <p className="mt-1 text-sm text-zinc-500">The panel holds shops&apos; and customers&apos; details, so every team member signs in with a code from an authenticator app too. It takes a minute.</p>
+                  <Link href="/account" className="mt-3 inline-block font-semibold text-brand hover:underline">Set it up on My login</Link>
+                </CardBody>
+              </Card>
+            ) : allowed ? (
               children
             ) : (
               <Card>

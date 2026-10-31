@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { createServiceClient, requireAdmin } from "@/lib/invite";
+import { auditAs, createServiceClient, requireAdmin } from "@/lib/invite";
 
 /**
  * POST /api/partner-login — the team manages an influencer partner's login
@@ -46,6 +46,7 @@ export async function POST(req: Request) {
       await service.auth.admin.deleteUser(created.user.id);
       return NextResponse.json({ error: linkError.message }, { status: 500 });
     }
+    await auditAs(service, admin.userId, "partner.login_created", "partner", partner.id, { email });
     return NextResponse.json({ email, password: pass });
   }
 
@@ -55,6 +56,7 @@ export async function POST(req: Request) {
     const pass = password();
     const { error } = await service.auth.admin.updateUserById(partner.user_id, { password: pass });
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    await auditAs(service, admin.userId, "partner.password_reset", "partner", partner.id);
     return NextResponse.json({ email: partner.login_email, password: pass });
   }
 
@@ -65,6 +67,7 @@ export async function POST(req: Request) {
     if (linkError) return NextResponse.json({ error: linkError.message }, { status: 500 });
     const { error } = await service.auth.admin.deleteUser(partner.user_id);
     if (error) return NextResponse.json({ error: `Unlinked, but the login could not be deleted: ${error.message}` }, { status: 500 });
+    await auditAs(service, admin.userId, "partner.login_removed", "partner", partner.id);
     return NextResponse.json({ ok: true });
   }
 

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
-import { createServiceClient, requireAdmin } from "@/lib/invite";
+import { auditAs, createServiceClient, requireAdmin } from "@/lib/invite";
 
 /**
  * POST /api/clients/toggle-status
@@ -18,10 +18,12 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "businessId and suspend (boolean) are required" }, { status: 400 });
   }
 
-  const { data, error } = await createServiceClient().rpc("admin_set_business_status", {
+  const service = createServiceClient();
+  const { data, error } = await service.rpc("admin_set_business_status", {
     p_business: businessId,
     p_suspend: suspend,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await auditAs(service, admin.userId, suspend ? "client.suspended" : "client.restored", "business", businessId, {}, businessId);
   return NextResponse.json({ success: true, ...data });
 }

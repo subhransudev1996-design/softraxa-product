@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { sendWelcomeEmail } from "@/lib/email";
-import { createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
+import { auditAs, createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
 
 /**
  * POST /api/clients/send-email
  * (Re)sends the welcome email with a fresh one-time set-password link to a
  * client's owner. The business is looked up server-side; the caller only
- * names it. Reports honestly whether the email was sent.
+ * names it. Reports honestly whether the email was sent. Only the owner gets
+ * the link back when it wasn't: it opens the shop's account.
  */
 export async function POST(req: Request) {
   const supabase = await createServerSupabase();
@@ -63,9 +64,11 @@ export async function POST(req: Request) {
     setPasswordUrl: link,
   });
 
+  await auditAs(service, admin.userId, "client.welcome_email", "business", businessId, { email, sent: result.sent }, businessId);
   if (result.sent) return NextResponse.json({ sent: true, email });
+  const isOwner = (await supabase.rpc("admin_is_owner")).data === true;
   return NextResponse.json(
-    { sent: false, email, error: result.error, setPasswordLink: link },
+    { sent: false, email, error: result.error, setPasswordLink: isOwner ? link : null },
     { status: 502 }
   );
 }

@@ -2,7 +2,7 @@ import { randomBytes } from "node:crypto";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { sendWelcomeEmail } from "@/lib/email";
-import { createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
+import { auditAs, createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/invite";
 
 /**
  * POST /api/clients — admin creates a client account (PRD 7.1, 8.2).
@@ -12,8 +12,8 @@ import { createServiceClient, createSetPasswordLink, requireAdmin } from "@/lib/
  *    database transaction (admin_provision_business, migration 0039); on
  *    any failure the login is deleted too, so nothing is left half-made.
  * 3. Emails a one-time set-password link. The admin never chooses or sees
- *    a password. If the email can't be sent, the response says so and
- *    returns the link for the admin to share.
+ *    a password. If the email can't be sent, the response says so; only the
+ *    owner gets the link to share, since it opens the shop's account.
  */
 export async function POST(req: Request) {
   const supabase = await createServerSupabase();
@@ -58,6 +58,8 @@ export async function POST(req: Request) {
     );
   }
 
+  await auditAs(service, admin.userId, "client.created", "business", businessId, { email }, businessId);
+
   // The account exists from here on; email problems are reported, not fatal.
   const { data: sub } = await service
     .from("subscriptions")
@@ -93,6 +95,6 @@ export async function POST(req: Request) {
     emailSent,
     emailError,
     // Only needed when the email didn't go out, so the admin can share it.
-    setPasswordLink: emailSent ? null : setPasswordLink,
+    setPasswordLink: !emailSent && (await supabase.rpc("admin_is_owner")).data === true ? setPasswordLink : null,
   });
 }

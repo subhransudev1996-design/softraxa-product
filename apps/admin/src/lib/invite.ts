@@ -11,6 +11,25 @@ export function createServiceClient(): SupabaseClient {
 }
 
 /**
+ * Audit log entry for work done with the service client, where the database
+ * can't see who is signed in. Never put a password or link in [details].
+ */
+export async function auditAs(
+  service: SupabaseClient,
+  userId: string,
+  action: string,
+  entity: string,
+  entityId: string,
+  details: Record<string, unknown> = {},
+  businessId: string | null = null,
+) {
+  const { error } = await service.from("audit_logs").insert({
+    business_id: businessId, user_id: userId, action, entity, entity_id: entityId, details,
+  });
+  if (error) console.error("audit log", action, error.message);
+}
+
+/**
  * One-time link to the website's set-password page for [email]. Uses the
  * same token_hash recovery flow as "Forgot password", so it works in any
  * browser (apps/website/src/app/auth/callback).

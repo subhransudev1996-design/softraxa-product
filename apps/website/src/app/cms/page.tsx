@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { needsTwoStep, verifyTwoStep } from "@/lib/two-step";
 import { supabase } from "@/lib/supabase-client";
 import {
   Globe,
@@ -122,6 +123,8 @@ export default function CMSPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
+  const [needCode, setNeedCode] = useState(false);
+  const [code, setCode] = useState("");
 
   // Tabs
   const [activeTab, setActiveTab] = useState<"seo" | "content">("seo");
@@ -188,7 +191,9 @@ export default function CMSPage() {
     setAuthLoading(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
+      if (session && await needsTwoStep(supabase)) {
+        setNeedCode(true);
+      } else if (session) {
         const isAdmin = await verifyAdminRole(session.user.id);
         if (isAdmin) {
           setAuthenticated(true);
@@ -223,6 +228,21 @@ export default function CMSPage() {
     }
   };
 
+  const handleCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthError(null);
+    const failed = await verifyTwoStep(supabase, code);
+    setCode("");
+    if (failed) {
+      setAuthError(failed);
+      setAuthLoading(false);
+      return;
+    }
+    setNeedCode(false);
+    await checkSession();
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthLoading(true);
@@ -240,7 +260,9 @@ export default function CMSPage() {
         return;
       }
 
-      if (data.user) {
+      if (data.user && await needsTwoStep(supabase)) {
+        setNeedCode(true);
+      } else if (data.user) {
         const isAdmin = await verifyAdminRole(data.user.id);
         if (isAdmin) {
           setAuthenticated(true);
@@ -593,7 +615,20 @@ export default function CMSPage() {
             <p className="mt-1.5 text-sm text-dim">Sign in to manage page content and SEO</p>
           </div>
 
-          <form onSubmit={handleLogin} className="relative mt-8 space-y-4">
+          {needCode && (
+            <form onSubmit={handleCode} className="relative mt-8 space-y-4">
+              <div className="space-y-1.5">
+                <label htmlFor="cms-code" className="text-xs font-semibold text-dim">Code from your authenticator app</label>
+                <input id="cms-code" required inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-200 bg-white/50 px-3.5 py-2.5 text-center font-mono text-lg tracking-widest text-paper" />
+              </div>
+              {authError && <p className="text-xs font-medium text-red-700" role="alert">{authError}</p>}
+              <button type="submit" className="w-full rounded-xl bg-brand py-2.5 text-sm font-semibold text-white">Continue</button>
+            </form>
+          )}
+
+          {!needCode && <form onSubmit={handleLogin} className="relative mt-8 space-y-4">
             <div className="space-y-1.5">
               <label className="text-xs font-semibold text-dim">Administrator Email</label>
               <div className="relative flex items-center">
@@ -636,7 +671,7 @@ export default function CMSPage() {
             >
               Sign In <ArrowRight size={15} />
             </button>
-          </form>
+          </form>}
         </div>
       </main>
     );

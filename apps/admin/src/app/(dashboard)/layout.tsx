@@ -22,5 +22,6 @@ export default async function DashboardLayout({
   const { data: me } = await supabase.rpc("admin_me");
   if (!me) redirect("/login");
 
-  return <AppShell me={me as Me}>{children}</AppShell>;
+  // Every team member needs two-step login; the panel asks until it is on.
+  return <AppShell me={me as Me} mustSetUpTwoStep={aal?.nextLevel === "aal1"}>{children}</AppShell>;
 }
