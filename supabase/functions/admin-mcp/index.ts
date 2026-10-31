@@ -129,13 +129,74 @@ function changes(a: Args, keys: string[]): string {
   return keys.filter((k) => a[k] !== undefined).map((k) => `${k} = ${JSON.stringify(a[k])}`).join(", ") || "nothing";
 }
 
+const SHOP_TYPES = [
+  "mobile", "garment", "hardware", "other", "mobile_repair", "electrical", "car_workshop", "bike_garage",
+  "grocery", "stationery", "cosmetics", "book_store",
+];
+const SOURCE_HELP = "walk_in, referral, field_visit, phone_call, whatsapp, social, google_maps, other";
+const MAX_BATCH = 50;
+
+/** The same match the database uses: the last 10 digits. */
+const phoneKey = (v: unknown) => str(v).replace(/\D/g, "").slice(-10);
+
+/** Who already has this phone number, as leads and clients. */
+async function whoHasPhone(ctx: Ctx, phone: string) {
+  return must(await ctx.db.rpc("admin_find_duplicates", { p_phone: phone })) as {
+    leads: Array<{ id: string; shop_name: string; status: string }>;
+    clients: Array<{ id: string; name: string }>;
+  };
+}
+
+/** Runs a check for each item, a few at a time. */
+async function inTurn<T, R>(items: T[], work: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  for (let i = 0; i < items.length; i += 10) out.push(...await Promise.all(items.slice(i, i + 10).map(work)));
+  return out;
+}
+
+type BatchRow = Record<string, unknown>;
+
+/** What a batch would do, by the same rules and in the same order as admin_import_leads. */
+async function planBatch(ctx: Ctx, rows: BatchRow[]) {
+  const known = await inTurn(rows, async (r) => phoneKey(r.phone).length === 10 ? await whoHasPhone(ctx, phoneKey(r.phone)) : null);
+  const seen = new Set<string>();
+  const add: Array<{ shop_name: string; phone: string; note?: string }> = [];
+  const skip: Array<{ shop_name: string; phone: string; reason: string }> = [];
+  rows.forEach((r, i) => {
+    const shop_name = str(r.shop_name), phone = str(r.phone), key = phoneKey(r.phone);
+    if (!shop_name) return skip.push({ shop_name: "", phone, reason: "No shop name" });
+    if (key && seen.has(key)) return skip.push({ shop_name, phone, reason: "Same phone number twice in this batch" });
+    const k = known[i];
+    if (k?.leads.length) return skip.push({ shop_name, phone, reason: `Already a lead: ${k.leads[0].shop_name}` });
+    if (k?.clients.length) return skip.push({ shop_name, phone, reason: `Already a client: ${k.clients[0].name}` });
+    if (key) seen.add(key);
+    add.push(key.length === 10 ? { shop_name, phone } : {
+      shop_name, phone, note: "Not checked for duplicates: no full 10-digit phone number",
+    });
+  });
+  return { add, skip };
+}
+
+/** A batch's rows, refused as a whole if it's too long or has an unknown type. */
+function batchRows(a: Args): BatchRow[] {
+  const rows = Array.isArray(a.leads) ? a.leads as BatchRow[] : [];
+  if (rows.length === 0) throw new Error("Give at least one lead");
+  if (rows.length > MAX_BATCH) throw new Error(`Up to ${MAX_BATCH} leads at a time; this has ${rows.length}`);
+  rows.forEach((r, i) => {
+    if (str(r.business_type) && !SHOP_TYPES.includes(str(r.business_type))) {
+      throw new Error(`Lead ${i + 1}: unknown business_type "${str(r.business_type)}"`);
+    }
+  });
+  return rows;
+}
+
 const LEAD_FIELDS = {
   contact_name: { type: "string" },
   phone: { type: "string" },
   email: { type: "string" },
   city: { type: "string" },
-  business_type: { type: "string", enum: ["mobile", "garment", "hardware", "other"] },
-  source: { type: "string", description: "walk_in, referral, field_visit, phone_call, whatsapp, social, other" },
+  business_type: { type: "string", enum: SHOP_TYPES },
+  source: { type: "string", description: SOURCE_HELP },
   temperature: { type: "string", enum: ["hot", "warm", "cold"] },
   campaign: { type: "string" },
   interested_plan_id: { type: "string", description: "From list_plans." },
@@ -765,6 +826,70 @@ const TOOLS: Tool[] = [
     },
   },
   {
+    name: "add_leads_batch",
+    title: "Add many leads at once",
+    description:
+      `Adds up to ${MAX_BATCH} leads with one preview and one yes, through the same import as the panel's CSV upload. The preview lists who will be added and who skipped, with the reason. A row with no full 10-digit phone number can't be checked for duplicates, and the preview says so. This import saves no follow-up date, email or plan; set those afterwards with update_lead.`,
+    write: true,
+    inputSchema: obj({
+      leads: {
+        type: "array",
+        minItems: 1,
+        maxItems: MAX_BATCH,
+        items: obj({
+          shop_name: { type: "string" },
+          contact_name: { type: "string" },
+          phone: { type: "string" },
+          city: { type: "string" },
+          business_type: { type: "string", enum: SHOP_TYPES },
+          source: { type: "string", description: `Overrides the batch's source. ${SOURCE_HELP}` },
+          temperature: { type: "string", enum: ["hot", "warm", "cold"] },
+          campaign: { type: "string" },
+          notes: { type: "string" },
+        }, ["shop_name"]),
+      },
+      source: { type: "string", description: `For every lead in the batch. ${SOURCE_HELP}` },
+      ...confirmProp,
+    }, ["leads"]),
+    preview: async (ctx, a) => {
+      const { add, skip } = await planBatch(ctx, batchRows(a));
+      const line = (r: { shop_name: string; phone: string }) => `- ${r.shop_name || "(no name)"}${r.phone ? `, ${r.phone}` : ""}`;
+      return [
+        `Will add ${add.length} lead${add.length === 1 ? "" : "s"}${str(a.source) ? ` with source ${str(a.source)}` : ""}:`,
+        ...add.map((r) => `${line(r)}${r.note ? ` (${r.note})` : ""}`),
+        `Will skip ${skip.length}:`,
+        ...skip.map((r) => `${line(r)}: ${r.reason}`),
+      ].join("\n");
+    },
+    run: async (ctx, a) => {
+      const rows = batchRows(a).map((r) => ({ ...r, source: str(r.source) || str(a.source) }));
+      return must(await ctx.db.rpc("admin_import_leads", { p_rows: rows }));
+    },
+  },
+  {
+    name: "check_duplicates",
+    title: "Check phone numbers against leads and clients",
+    description: `Checks up to ${MAX_BATCH} phone numbers and says which are already leads or clients, matching on the last 10 digits. Use it before researching a shop in detail. Changes nothing.`,
+    inputSchema: obj({
+      phones: { type: "array", minItems: 1, maxItems: MAX_BATCH, items: { type: "string" } },
+    }, ["phones"]),
+    run: async (ctx, a) => {
+      const phones = Array.isArray(a.phones) ? a.phones.map(str) : [];
+      if (phones.length === 0) throw new Error("Give at least one phone number");
+      if (phones.length > MAX_BATCH) throw new Error(`Up to ${MAX_BATCH} numbers at a time; this has ${phones.length}`);
+      const results = await inTurn(phones, async (phone) => {
+        if (phoneKey(phone).length !== 10) return { phone, checked: false, reason: "Not a full 10-digit number" };
+        const { leads, clients } = await whoHasPhone(ctx, phoneKey(phone));
+        return { phone, checked: true, already_known: leads.length + clients.length > 0, leads, clients };
+      });
+      return {
+        checked: results.filter((r) => r.checked).length,
+        already_known: results.filter((r) => r.already_known).length,
+        results,
+      };
+    },
+  },
+  {
     name: "update_lead",
     title: "Change a lead, or its follow-up date",
     description:
@@ -1248,7 +1373,7 @@ async function handle(ctx: Ctx, msg: { id?: unknown; method?: string; params?: R
       return reply({
         protocolVersion: PROTOCOL_VERSIONS.includes(asked) ? asked : PROTOCOL_VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "dukania-admin", title: "Dukania Admin", version: "1.1.0" },
+        serverInfo: { name: "dukania-admin", title: "Dukania Admin", version: "1.2.0" },
         instructions: INSTRUCTIONS,
       });
     }
